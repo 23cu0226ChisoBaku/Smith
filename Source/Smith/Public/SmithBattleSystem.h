@@ -7,7 +7,7 @@
 /**
  * 
  */
-class SmithBattleSystem
+class SMITH_API SmithBattleSystem
 {
 public:
 	SmithBattleSystem();
