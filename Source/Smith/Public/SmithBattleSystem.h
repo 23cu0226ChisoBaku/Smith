@@ -1,15 +1,134 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
+
+Smith
+
+Author : MAI ZHICONG
+
+Description : 3D Action Battle System (UE5.3.2)
+
+Update History: 2024/11/18 Create
+
+Version : alpha_1.0.0
+
+*/
 
 #pragma once
 
+#ifndef SMITH_BATTLESYSTEM
+#define SMITH_BATTLESYSTEM
+
 #include "CoreMinimal.h"
 
-/**
- * 
- */
-class SMITH_API SmithBattleSystem
+class IAttack;
+class IAttackable;
+
+struct AttackParam
 {
-public:
-	SmithBattleSystem();
-	~SmithBattleSystem();
+	int32 AttackValue;
+	float MotionValue;
 };
+
+namespace Smith
+{
+	inline namespace Battle
+	{
+		class SmithBattleSystem;
+	}
+}
+
+class ICanAccessBattleSystem
+{
+	public:
+		ICanAccessBattleSystem(Smith::Battle::SmithBattleSystem* battleSys)
+			: m_battleSystem(battleSys)
+		{ }
+		virtual ~ICanAccessBattleSystem() = 0 {};
+	 
+	protected:
+		Smith::Battle::SmithBattleSystem* GetBattleSystem() const
+		{
+			return m_battleSystem.Get();
+		}
+	private:
+		TSharedPtr<Smith::Battle::SmithBattleSystem> m_battleSystem;
+};
+
+class IAttack
+{
+	public:
+		IAttack()
+		: m_param({})
+		, m_attackerTag(TEXT("Default_Attacker"))
+	{ }
+		IAttack(const FString& attackerTag, int32 attackValue, float motionValue = 1.0f)
+		: IAttack()
+	{ 
+		m_attackerTag = attackerTag;
+		m_param.AttackValue = attackValue;
+		m_param.MotionValue = motionValue;
+	}
+
+	public:
+		void SetParam(int32 attackValue, float motionValue)
+		{
+			m_param.AttackValue = attackValue;
+			m_param.MotionValue = motionValue;
+		}
+		void SetAttacker(const FString& attackerTag)
+		{
+			m_attackerTag = attackerTag;
+		}
+
+		AttackParam GetParam() const
+		{
+			return m_param;
+		}
+
+		bool IsSelfAttack(const FString& attackerTag)
+		{
+			return m_attackerTag.Equals(attackerTag);
+		}
+
+	public:
+		virtual ~IAttack() = 0 {};
+
+	private:
+		AttackParam m_param;
+		FString m_attackerTag;
+};
+
+class IAttackable
+{
+	public:
+		IAttackable(UObject* target)
+			//: m_attackTarget(target)
+		{ }
+	public:
+		virtual ~IAttackable() = 0 {};
+
+	private:
+		TWeakPtr<UObject> m_attackTarget;
+};
+
+namespace Smith
+{
+	inline namespace Battle
+	{
+		class SMITH_API SmithBattleSystem
+		{
+			public:
+				SmithBattleSystem();
+				~SmithBattleSystem();
+
+			public:
+				void RequestBattle(IAttack*, IAttackable*);
+
+			private:
+				int32 calculateDamage() const;
+
+		};
+	}
+}
+
+#endif
