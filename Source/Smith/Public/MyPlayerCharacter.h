@@ -35,5 +35,5 @@ private:
 	void Pawn_MoveRight(float axisValue);
 
 private:
-	FVector2D m_pawnMoveInput;
+	FVector2f m_pawnMoveInput;
 };

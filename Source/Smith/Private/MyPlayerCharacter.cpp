@@ -20,6 +20,7 @@ void AMyPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UpdatePawn();
 }
 
 // 入力とバインド処理
@@ -27,23 +28,35 @@ void AMyPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	// Pawn
+	// Pawnの移動
+	InputComponent->BindAxis("MoveForward", this, &AMyPlayerCharacter::Pawn_MoveForward);
+	InputComponent->BindAxis("MoveRight", this, &AMyPlayerCharacter::Pawn_MoveRight);
 }
 
 void AMyPlayerCharacter::UpdatePawn()
 {
+	// 移動入力がなかった場合早期return
+	if (m_pawnMoveInput.IsZero())
+	{
+		return;
+	}
+	m_pawnMoveInput = m_pawnMoveInput.GetSafeNormal() * 50.0f;
+	FVector NewLocation = GetActorLocation();
 
+	// Actorが向いている方向ベクトルを取得し、そこに入力値をかける
+	NewLocation += GetActorForwardVector() * m_pawnMoveInput.Y;
+	NewLocation += GetActorRightVector() * m_pawnMoveInput.X;
+	SetActorLocation(NewLocation);
 }
 
+// 前後移動
 void AMyPlayerCharacter::Pawn_MoveForward(float axisValue)
 {
-	m_pawnMoveInput.Y = FMath::Clamp(axisValue, -1.0f, -1.0f);
+	m_pawnMoveInput.Y = FMath::Clamp(axisValue, -1.0f, 1.0f);
 }
 
+// 左右移動
 void AMyPlayerCharacter::Pawn_MoveRight(float axisValue)
 {
-	m_pawnMoveInput.X = FMath::Clamp(axisValue, -1.0f, -1.0f);
+	m_pawnMoveInput.X = FMath::Clamp(axisValue, -1.0f, 1.0f);
 }
-
-
-
