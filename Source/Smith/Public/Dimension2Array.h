@@ -23,10 +23,6 @@ Encoding : UTF-8
 
 #include "Dimension1Array.h"
 
-/**
- * 
- */
-
 namespace UE::MLibrary
 {
 	inline namespace MDataStructure
@@ -131,24 +127,52 @@ namespace UE::MLibrary
 				{
 					return at_impl(row);
 				}
-
-				const ElementType& At_ReadOnly(uint64 row, uint64 column) const &
-				{
-					return at_impl(row,column);
-				}
-				/// @brief 配列の行を返す(読み込み専用)
+				/// @brief 配列の行を返す(書き込み可能)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]の参照
 				ArrayType& At(uint64 row) &
 				{
 					return at_impl(row);
 				}
-				/// @brief 配列の行を返す(読み込み専用)
+				/// @brief 配列の行を返す(書き込み可能)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]の参照
 				ArrayType& At(uint64 row) &&
 				{
 					return at_impl(row);
+				}
+
+				/// @brief 二次元配列の値を返す(読み込み専用)
+				/// @param row 行のインデックス
+				/// @param column 列のインデックス
+				/// @return 配列[行のインデックス][列のインデックス]のコンスト参照
+				const ElementType& At_ReadOnly(uint64 row, uint64 column) const &
+				{
+					return at_impl(row, column);
+				}
+				/// @brief 二次元配列の値を返す(読み込み専用)
+				/// @param row 行のインデックス
+				/// @param column 列のインデックス
+				/// @return 配列[行のインデックス][列のインデックス]のコンスト参照
+				const ElementType& At(uint64 row, uint64 column) const &
+				{
+					return at_impl(row, column);
+				}
+				/// @brief 二次元配列の値を返す(書き込み可能)
+				/// @param row 行のインデックス
+				/// @param column 列のインデックス
+				/// @return 配列[行のインデックス][列のインデックス]の参照
+				ElementType& At(uint64 row, uint64 column) &
+				{
+					return at_impl(row, column);
+				}
+				/// @brief 二次元配列の値を返す(書き込み可能)
+				/// @param row 行のインデックス
+				/// @param column 列のインデックス
+				/// @return 配列[行のインデックス][列のインデックス]の参照
+				ElementType& At(uint64 row, uint64 column) &&
+				{
+					return at_impl(row, column);
 				}
 				/// @brief 配列の行数を返す(読み込み専用)
 				/// @return 配列の行数
@@ -160,12 +184,22 @@ namespace UE::MLibrary
 				/// @return 配列の列数				
 				uint64 Column() const
 				{
+					if (m_elemArr == nullptr)
+					{
+						return 0;
+					}
+
 					return m_elemArr[0]->Length();
 				}
 				/// @brief 配列の長さを返す(読み込み専用)
 				/// @return 配列の長さ
 				uint64 Length() const
 				{
+					if (m_elemArr == nullptr)
+					{
+						return 0;
+					}
+
 					return m_length * m_elemArr[0]->Length();
 				}
 		//---------------------------------------
@@ -215,10 +249,12 @@ namespace UE::MLibrary
 						}
 						delete[] m_elemArr;
 					}
+
 					memset(this, 0, sizeof(this));
 				}
 				ArrayType& at_impl(uint64 row)
 				{
+					check(m_elemArr != nullptr)
 					check(row < m_length)
 
 					return *m_elemArr[row];
@@ -226,6 +262,7 @@ namespace UE::MLibrary
 
 				ElementType& at_impl(uint64 row, uint64 column)
 				{
+					check(m_elemArr != nullptr)
 					check(row < m_length && column < m_elemArr[0]->Length())
 
 					return m_elemArr[row][column];

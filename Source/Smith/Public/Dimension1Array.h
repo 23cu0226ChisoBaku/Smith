@@ -44,12 +44,11 @@ namespace UE::MLibrary
 
 		//---------------------------------------
 		/*
-						エイリアスやアサーション
+						   エイリアスやアサーション
 		*/
 		//---------------------------------------
 			using ElementType = T;
-			static_assert(std::is_integral_v<ElementType> || std::is_floating_point_v<ElementType>, "Can't use type that is not integer or floating point");
-
+			// static_assert(std::is_integral_v<ElementType> || std::is_floating_point_v<ElementType>, "Can't use type that is not integer or floating point");
 
 		//---------------------------------------
 		/*

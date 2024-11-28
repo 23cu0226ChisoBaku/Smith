@@ -44,11 +44,12 @@ class SMITH_API FSmithCommandFormat
 		uint32 GetColumn() const;
 
 	public:
+		UE::MLibrary::TDimension2Array<uint8> SwitchToMapCoord() const;
 		
 	private:
 		UE::MLibrary::TDimension2Array<int8> m_formatArr;
-		uint32 m_row;
-		uint32 m_column;
+		uint64 m_row;
+		uint64 m_column;
 };
 
 #endif
