@@ -37,21 +37,24 @@ namespace Smith
 	}
 }
 
+#define BATTLE_SYSTEM Smith::Battle::SmithBattleSystem
+#define BATTLE_SYSTEM_PTR BATTLE_SYSTEM*
+
 class ICanAccessBattleSystem
 {
 	public:
-		ICanAccessBattleSystem(Smith::Battle::SmithBattleSystem* battleSys)
+		ICanAccessBattleSystem(BATTLE_SYSTEM_PTR battleSys)
 			: m_battleSystem(battleSys)
 		{ }
 		virtual ~ICanAccessBattleSystem() = 0 {};
 	 
 	protected:
-		Smith::Battle::SmithBattleSystem* GetBattleSystem() const
+		BATTLE_SYSTEM_PTR GetBattleSystem() const
 		{
 			return m_battleSystem.Get();
 		}
 	private:
-		TSharedPtr<Smith::Battle::SmithBattleSystem> m_battleSystem;
+		TSharedPtr<BATTLE_SYSTEM> m_battleSystem;
 };
 
 class IAttack
@@ -130,5 +133,8 @@ namespace Smith
 		};
 	}
 }
+
+#undef BATTLE_SYSTEM
+#undef BATTLE_SYSTEM_PTR
 
 #endif
