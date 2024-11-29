@@ -1,13 +1,24 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// MapManager
+// ã–ìŒ’“l
+
 
 #pragma once
 
 #include "CoreMinimal.h"
 
-struct map
+
+struct MapCoord
 {
+	UPROPERTY(EditinstanceOnly, BluePrintReadWrite)
 	uint8 x;
+	UPROPERTY(EditinstanceOnly, BluePrintReadWrite)
 	uint8 y;
+};
+
+// ‰¼’u‚« UŒ‚”ÍˆÍ‚Æ‚©‚Ìî•ñ‚ğ‚ÂH
+struct Format
+{
+
 };
 
 class SMITH_API MapObject
@@ -18,30 +29,18 @@ public:
 
 	bool Mpve();
 	int GetAttack();
+	MapCoord myCoord;
 };
 
-enum TileType
-{
-	floor,
-
-};
-
-struct tileInfo
-{
-
-	MapObject* mapobj;
-};
-
-/**
- * 
- */
 class SMITH_API SmithMapManager
 {
 public:
 	SmithMapManager();
 	virtual ~SmithMapManager();
 
+	//MapCoord 
+
 	
 private:
-	FVector const originWorldCord;
+	FVector const originWorldCoord;
 };
