@@ -1,9 +1,22 @@
 #include "MyPlayerCharacter.h"
+#include "Kismet/KismetSystemLibrary.h" // 追加
+#include "Kismet/GameplayStatics.h" // 追加
+#include "Components/InputComponent.h" // 追加
+#include "EnhancedInputComponent.h" // 追加
+#include "EnhancedInputSubsystems.h" // 追加
 
 // Sets default values
 AMyPlayerCharacter::AMyPlayerCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+
+	// Input Actionを読込
+	ActionInput = LoadObject<UInputAction>(NULL, TEXT("/Game/EnhancedInputTest/Input/Actions/IA_Action"), NULL, LOAD_None, NULL);
+	AxisInput = LoadObject<UInputAction>(NULL, TEXT("/Game/EnhancedInputTest/Input/Actions/IA_Axis"), NULL, LOAD_None, NULL);
+
+	// Input Mapping Contextを読込
+	DefaultMappingContext = LoadObject<UInputMappingContext>(NULL, TEXT("/Game/EnhancedInputTest/Input/IMC_Default"), NULL, LOAD_None, NULL);
+
+ 	// Tickを使う
 	PrimaryActorTick.bCanEverTick = true;
 
 }
@@ -12,7 +25,6 @@ AMyPlayerCharacter::AMyPlayerCharacter()
 void AMyPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -36,27 +48,32 @@ void AMyPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 void AMyPlayerCharacter::UpdatePawn()
 {
 	// 移動入力がなかった場合早期return
-	if (m_pawnMoveInput.IsZero())
-	{
-		return;
-	}
-	m_pawnMoveInput = m_pawnMoveInput.GetSafeNormal() * 50.0f;
-	FVector NewLocation = GetActorLocation();
+	//if (m_pawnMoveInput.IsZero())
+	//{
+	//	//GEngine->AddOnScreenDebugMessage(-1, 60.0f, FColor::Red, TEXT("Return"));
+	//	return;
+	//}
+	GEngine->AddOnScreenDebugMessage(-1, 60.0f, FColor::Red, TEXT("Move"));
 
-	// Actorが向いている方向ベクトルを取得し、そこに入力値をかける
-	NewLocation += GetActorForwardVector() * m_pawnMoveInput.Y;
-	NewLocation += GetActorRightVector() * m_pawnMoveInput.X;
-	SetActorLocation(NewLocation);
+	FVector pos = GetActorLocation();
+
+	SetActorLocation(pos);
 }
 
 // 前後移動
 void AMyPlayerCharacter::Pawn_MoveForward(float axisValue)
 {
-	m_pawnMoveInput.Y = FMath::Clamp(axisValue, -1.0f, 1.0f);
+	if (GEngine != nullptr)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 60.0f, FColor::Red, TEXT("MoveForward"));
+	}
 }
 
 // 左右移動
 void AMyPlayerCharacter::Pawn_MoveRight(float axisValue)
 {
-	m_pawnMoveInput.X = FMath::Clamp(axisValue, -1.0f, 1.0f);
+	if (GEngine != nullptr)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 60.0f, FColor::Red, TEXT("動いてくれええええ"));
+	}
 }
