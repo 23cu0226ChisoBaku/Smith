@@ -17,6 +17,7 @@ ASmithStaticObj::ASmithStaticObj()
 void ASmithStaticObj::BeginPlay()
 {
 	Super::BeginPlay();
+	m_arr[9][9] = 10;
 }
 
 // Called every frame
@@ -24,9 +25,10 @@ void ASmithStaticObj::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
 	if(GEngine != nullptr)
-     GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(m_arr[9][9]));
+	{
+    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(m_arr[9][9]));
+	}
 
 }
 

@@ -76,26 +76,35 @@ namespace UE::MLibrary
 				}
 				TDimension1Array& operator=(const TDimension1Array& other)
 				{
-					this->m_elemArr = new ElementType[other.m_length];
-					this->m_length = other.m_length;
-					size_t cpySize = sizeof(ElementType) * this->m_length;
-					memcpy_s(this->m_elemArr, cpySize, other.m_elemArr, cpySize);
+					if (this != &other)
+					{
+						this->m_elemArr = new ElementType[other.m_length];
+						this->m_length = other.m_length;
+						size_t cpySize = sizeof(ElementType) * this->m_length;
+						memcpy_s(this->m_elemArr, cpySize, other.m_elemArr, cpySize);	
+					}
 
 					return *this;
 				}
 
 				TDimension1Array(TDimension1Array&& other) noexcept
-				{
-					*this = MoveTemp(other);
+				{					
+					this->m_elemArr = ::MoveTemp(other.m_elemArr);
+					this->m_length = ::MoveTemp(other.m_length);
+					
 					other.m_elemArr = nullptr;
 					other.m_length = 0;
 				}
 				TDimension1Array& operator=(TDimension1Array&& other) noexcept
 				{
-					*this = MoveTemp(other);
+					if (this != &other)
+					{
+						this->m_elemArr = ::MoveTemp(other.m_elemArr);
+						this->m_length = ::MoveTemp(other.m_length);
 
-					other.m_elemArr = nullptr;
-					other.m_length = 0;
+						other.m_elemArr = nullptr;
+						other.m_length = 0;
+					}
 
 					return *this;
 				}

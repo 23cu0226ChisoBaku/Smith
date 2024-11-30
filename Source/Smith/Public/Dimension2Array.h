@@ -21,8 +21,6 @@ Encoding : UTF-8
 
 #include "CoreMinimal.h"
 
-#include "Dimension1Array.h"
-
 namespace UE::MLibrary
 {
 	inline namespace MDataStructure
@@ -41,7 +39,69 @@ namespace UE::MLibrary
 		*/
 		//---------------------------------------
 		using ElementType = T;
-		using ArrayType = TDimension1Array<ElementType>;
+		private:
+			class TDimension2ArrayRowArr
+			{
+				friend class TDimension2Array<T>;
+				private:
+					TDimension2ArrayRowArr(ElementType* src, uint64 length)
+						: m_rowArr(src)
+						, m_length(length)
+					{	}
+				public:
+					~TDimension2ArrayRowArr()
+					{
+						memset(this, 0, sizeof(this));
+					}
+				public:
+					const ElementType& At_Readonly(uint64 idx) const&
+					{
+						return at_impl(idx);
+					}
+					const ElementType& At(uint64 idx) const&
+					{
+						return at_impl(idx);
+					}
+					ElementType& At(uint64 idx) &
+					{
+						return at_impl(idx);
+					}
+					ElementType& At(uint64 idx) &&
+					{
+						return at_impl(idx);
+					}
+					uint64 Length() const
+					{
+						return m_length;
+					}
+
+				public:
+					const ElementType& operator[](uint64 idx) const&
+					{
+						return at_impl(idx);
+					}
+					ElementType& operator[](uint64 idx) &
+					{
+						return at_impl(idx);
+					}
+					ElementType& operator[](uint64 idx) &&
+					{
+						return at_impl(idx);
+					}
+				private:
+					ElementType& at_impl(uint64 idx) 
+					{
+						check(m_rowArr != nullptr)
+						check(m_length != 0)
+
+						return m_rowArr[idx];
+					}
+				private:
+					ElementType* m_rowArr;
+					uint64 m_length;
+			};
+
+		using RowArray = TDimension2ArrayRowArr;
 		//---------------------------------------
 		/*
 										ctorとdtor
@@ -50,38 +110,47 @@ namespace UE::MLibrary
 			public:
 				TDimension2Array()
 					: m_elemArr(nullptr)
-					, m_length(0)
+					, m_row(0)
+					, m_column(0)
 				{ }
-				TDimension2Array(uint64 row, uint64 column)
-					: m_elemArr(new ArrayType*[row])
-					, m_length(row)
+				TDimension2Array(const uint64 row, const uint64 column)
+					: m_elemArr(nullptr)
+					, m_row(row)
+					, m_column(column)
 				{
-					for(uint64 i = 0; i < m_length; ++i)
-					{
-						m_elemArr[i] = new ArrayType(column);
-					}
+					check( ((m_row * m_column) > 0) )
+
+					m_elemArr = new ElementType[m_row * m_column];
+				}
+
+				TDimension2Array(const ElementType* src, const size_t srcSize, const uint64 row, const uint64 column)
+					: TDimension2Array(row, column)
+				{
+					check(src != nullptr)
+					// サイズが０じゃない　かつ　サイズが （データのサイズ * 行の数 * 列の数）
+					check(((srcSize != 0) && (srcSize == (sizeof(ElementType) * row * column))))
+
+					memcpy_s(m_elemArr, srcSize, src, srcSize);
+
 				}
 
 				TDimension2Array(const TDimension2Array& other)
 				{
-					this->m_elemArr = new ArrayType*[other.m_length];
-					this->m_length = other.m_length;
-
-					uint64_t columnSize = other.At_ReadOnly(0).Length();
-					for(uint64 i = 0; i < m_length; ++i)
-					{
-						this->m_elemArr[i] = new ArrayType(columnSize);
-					}
+					this->m_elemArr = new ElementType[other.Length()];
+					this->m_row = other.m_row;
+					this->m_column = other.m_column;
+					const size_t memSize = sizeof(ElementType) * other.m_row * other.m_column;
+					memcpy_s(m_elemArr, memSize, other.m_elemArr, memSize);
 				}
 				TDimension2Array& operator=(const TDimension2Array& other)
 				{
-					this->m_elemArr = new ArrayType*[other.m_length];
-					this->m_length = other.m_length;
-
-					uint64_t columnSize = other.At_ReadOnly(0).Length();
-					for(uint64 i = 0; i < m_length; ++i)
+					if (this != &other)
 					{
-						this->m_elemArr[i] = new ArrayType(columnSize);
+						this->m_elemArr = new ElementType[other.Length()];
+						this->m_row = other.m_row;
+						this->m_column = other.m_column;
+						const size_t memSize = sizeof(ElementType) * other.m_row * other.m_column;
+						memcpy_s(m_elemArr, memSize, other.m_elemArr, memSize);
 					}
 
 					return *this;
@@ -89,15 +158,26 @@ namespace UE::MLibrary
 
 				TDimension2Array(TDimension2Array&& other) noexcept
 				{
-					*this = MoveTemp(other);
+					this->m_elemArr = ::MoveTemp(other.m_elemArr);
+					this->m_row = ::MoveTemp(other.m_row);
+					this->m_column = ::MoveTemp(other.m_column);
+
 					other.m_elemArr = nullptr;
-					other.m_length = 0;
+					other.m_row = 0;
+					other.m_column = 0;
 				}
 				TDimension2Array& operator=(TDimension2Array&& other) noexcept
 				{
-					*this = MoveTemp(other);
-					other.m_elemArr = nullptr;
-					other.m_length = 0;
+					if (this != &other)
+					{
+						this->m_elemArr = ::MoveTemp(other.m_elemArr);
+						this->m_row = ::MoveTemp(other.m_row);
+						this->m_column = ::MoveTemp(other.m_column);
+
+						other.m_elemArr = nullptr;
+						other.m_row = 0;
+						other.m_column = 0;
+					}
 
 					return *this;
 				}
@@ -116,28 +196,28 @@ namespace UE::MLibrary
 				/// @brief 配列の行を返す(読み込み専用)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]のコンスト参照
-				const ArrayType& At_ReadOnly(uint64 row) const &
+				const RowArray At_ReadOnly(uint64 row) const &
 				{
 					return at_impl(row);
 				}
 				/// @brief 配列の行を返す(読み込み専用)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]のコンスト参照
-				const ArrayType& At(uint64 row) const &
+				const RowArray At(uint64 row) const &
 				{
 					return at_impl(row);
 				}
 				/// @brief 配列の行を返す(書き込み可能)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]の参照
-				ArrayType& At(uint64 row) &
+				RowArray At(uint64 row) &
 				{
 					return at_impl(row);
 				}
 				/// @brief 配列の行を返す(書き込み可能)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]の参照
-				ArrayType& At(uint64 row) &&
+				RowArray At(uint64 row) &&
 				{
 					return at_impl(row);
 				}
@@ -178,29 +258,19 @@ namespace UE::MLibrary
 				/// @return 配列の行数
 				uint64 Row() const
 				{
-					return m_length;
+					return m_row;
 				}
 				/// @brief 配列の列数を返す(読み込み専用)
 				/// @return 配列の列数				
 				uint64 Column() const
 				{
-					if (m_elemArr == nullptr)
-					{
-						return 0;
-					}
-
-					return m_elemArr[0]->Length();
+					return m_column;
 				}
 				/// @brief 配列の長さを返す(読み込み専用)
 				/// @return 配列の長さ
 				uint64 Length() const
 				{
-					if (m_elemArr == nullptr)
-					{
-						return 0;
-					}
-
-					return m_length * m_elemArr[0]->Length();
+					return m_row * m_column;
 				}
 		//---------------------------------------
 		/*
@@ -218,21 +288,21 @@ namespace UE::MLibrary
 				/// @brief 配列の行を返す(読み込み専用)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]のコンスト参照
-				const ArrayType& operator[](uint64 row) const&
+				const RowArray operator[](uint64 row) const&
 				{
 						return at_impl(row);
 				}
 				/// @brief 配列の行を返す(読み込み専用)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]の参照
-				ArrayType& operator[](uint64 row) &
+				RowArray operator[](uint64 row) &
 				{
 						return at_impl(row);
 				}
 				/// @brief 配列の行を返す(読み込み専用)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]の参照
-				ArrayType& operator[](uint64 row) &&
+				RowArray operator[](uint64 row) &&
 				{
 						return at_impl(row);
 				}
@@ -243,39 +313,53 @@ namespace UE::MLibrary
 				{
 					if (m_elemArr != nullptr)
 					{
-						for(uint64 i = 0; i < m_length; ++i)
-						{
-							delete m_elemArr[i];
-						}
 						delete[] m_elemArr;
 					}
 
 					memset(this, 0, sizeof(this));
 				}
-				ArrayType& at_impl(uint64 row)
+				RowArray at_impl(uint64 row)
 				{
 					check(m_elemArr != nullptr)
-					check(row < m_length)
+					check(row < m_row)
 
-					return *m_elemArr[row];
+					return RowArray(m_elemArr + row * m_column, m_column);
 				}
 
 				ElementType& at_impl(uint64 row, uint64 column)
 				{
 					check(m_elemArr != nullptr)
-					check(row < m_length && column < m_elemArr[0]->Length())
+					check(row < m_row && column < m_column)
 
-					return m_elemArr[row][column];
+					return m_elemArr[row * m_column + column];
 
 				}
-
+		//---------------------------------------
+		/*
+						 スタティック変数(private)
+		*/
+		//---------------------------------------
 			private:
-				ArrayType** m_elemArr;
-				uint64 m_length;
+
+		//---------------------------------------
+		/*
+						 スタティック変数(public)
+		*/
+		//---------------------------------------
+			public:
+				static const TDimension2Array<ElementType> EmptyArray;
+			
+			private:
+				ElementType* m_elemArr;
+				uint64 m_row;
+				uint64 m_column;
 
 		#pragma endregion
 		// Private
 		};
+
+		template<typename T>
+		const TDimension2Array<T> TDimension2Array<T>::EmptyArray = TDimension2Array<T>();
 	}
 }
 
