@@ -3,13 +3,25 @@
 
 #include "SmithCommandFormat.h"
 
+using namespace UE::MLibrary::MDataStructure;
+
 namespace UE::Smith
 {
   inline namespace Battle
   {
-    FSmithCommandFormat::FSmithCommandFormat(const int8* srcData, const size_t dataCnt, const uint64 row, const uint64 column)
-      : m_formatArr(UE::MLibrary::MDataStructure::TDimension2Array<int8>(srcData, dataCnt, row, column))
-    { }
+    FSmithCommandFormat::FSmithCommandFormat()
+      : m_formatArr()
+      , m_cnCoord({})
+    {
+
+    }
+
+    FSmithCommandFormat::FSmithCommandFormat(const ESmithFormatType* srcData, const size_t dataCnt, const uint64 row, const uint64 column)
+      : m_formatArr(TDimension2Array<ESmithFormatType>(srcData, dataCnt, row, column))
+      , m_cnCoord({})
+    { 
+      setCNCoord();
+    }
 
     FSmithCommandFormat::~FSmithCommandFormat()
     { }
@@ -17,11 +29,16 @@ namespace UE::Smith
     FSmithCommandFormat::FSmithCommandFormat(const FSmithCommandFormat& other)
     {
       this->m_formatArr = other.m_formatArr;
+      this->m_cnCoord = other.m_cnCoord;
     }
 
     FSmithCommandFormat& FSmithCommandFormat::operator=(const FSmithCommandFormat& other)
     {
-      this->m_formatArr = other.m_formatArr;
+      if (this != &other)
+      {
+        this->m_formatArr = other.m_formatArr;
+        this->m_cnCoord = other.m_cnCoord;
+      }
 
       return *this;
     }
@@ -29,16 +46,41 @@ namespace UE::Smith
     FSmithCommandFormat::FSmithCommandFormat(FSmithCommandFormat&& other) noexcept
     {
       this->m_formatArr = ::MoveTemp(other.m_formatArr);
-      other.m_formatArr = UE::MLibrary::MDataStructure::TDimension2Array<int8>::EmptyArray;
+      this->m_cnCoord = other.m_cnCoord;
+
+      other.m_formatArr = TDimension2Array<ESmithFormatType>::EmptyArray;
     }
 
     FSmithCommandFormat& FSmithCommandFormat::operator=(FSmithCommandFormat&& other) noexcept
     {
-      this->m_formatArr = ::MoveTemp(other.m_formatArr);
-      other.m_formatArr = UE::MLibrary::MDataStructure::TDimension2Array<int8>::EmptyArray;
+      if (this != &other)
+      {
+        this->m_formatArr = ::MoveTemp(other.m_formatArr);
+        this->m_cnCoord = other.m_cnCoord;
+
+        other.m_formatArr = TDimension2Array<ESmithFormatType>::EmptyArray;
+      }
 
       return *this;
     }
+    void FSmithCommandFormat::SetupFormat(const ESmithFormatType* srcData, const size_t srcSize, const uint64 row, const uint64 column)
+    {
+      check(srcData != nullptr)
+      check(srcSize == sizeof(ESmithFormatType) * row * column)
+
+      m_formatArr = TDimension2Array<ESmithFormatType>(srcData, srcSize, row, column);
+      setCNCoord();
+    }
+
+    TDimension2Array<ESmithFormatType> FSmithCommandFormat::GetFormatArray() const
+    {
+      return m_formatArr;
+    }
+
+    FMapCoord FSmithCommandFormat::GetCNCoord() const
+    {
+      return m_cnCoord;
+    } 
 
     uint64 FSmithCommandFormat::GetRow() const
     {
@@ -50,18 +92,20 @@ namespace UE::Smith
       return m_formatArr.Column();
     }
 
-    UE::MLibrary::MDataStructure::TDimension2Array<int8> FSmithCommandFormat::GetFormatArray() const
-    {
-      return m_formatArr;
-    }
-
     void FSmithCommandFormat::setCNCoord()
     {
       for (uint64 y = 0; y < GetRow(); ++y)
       {
         for (uint64 x = 0; x < GetColumn(); ++x)
         {
-          
+          auto formatType = m_formatArr[y][x];
+          if ((formatType == CENTER_NO_EFFECT) || (formatType == CENTER_EFFECT))
+          {
+            m_cnCoord.x = StaticCast<uint8>(x);
+            m_cnCoord.y = StaticCast<uint8>(y);
+
+            return;
+          }
         }
       }
     }

@@ -19,7 +19,7 @@ Encoding : UTF-8
 #ifndef M_DIMENSION_ONE_ARRAY
 #define M_DIMENSION_ONE_ARRAY
 
-#include "CoreMinimal.h"
+#include "ArrayIterator.h"
 
 #define ThrowWhenTrue(expression) \
 if (!!(expression))								\
@@ -39,7 +39,7 @@ namespace UE::MLibrary
 		/// @param T データの型
 		///
 		template<typename T>
-		class SMITH_API TDimension1Array
+		class TDimension1Array
 		{
 
 		//---------------------------------------
@@ -47,7 +47,10 @@ namespace UE::MLibrary
 						   エイリアスやアサーション
 		*/
 		//---------------------------------------
+		public:
 			using ElementType = T;
+			using Iterator = ArrayIterator<TDimension1Array<ElementType>>;\
+			using ConstIterator = const Iterator;
 			// static_assert(std::is_integral_v<ElementType> || std::is_floating_point_v<ElementType>, "Can't use type that is not integer or floating point");
 
 		//---------------------------------------
@@ -78,6 +81,10 @@ namespace UE::MLibrary
 				{
 					if (this != &other)
 					{
+						if (this->m_elemArr != nullptr)
+						{
+							delete[] m_elemArr;
+						}
 						this->m_elemArr = new ElementType[other.m_length];
 						this->m_length = other.m_length;
 						size_t cpySize = sizeof(ElementType) * this->m_length;
@@ -89,9 +96,9 @@ namespace UE::MLibrary
 
 				TDimension1Array(TDimension1Array&& other) noexcept
 				{					
-					this->m_elemArr = ::MoveTemp(other.m_elemArr);
-					this->m_length = ::MoveTemp(other.m_length);
-					
+					this->m_elemArr = other.m_elemArr;
+					this->m_length = other.m_length;
+
 					other.m_elemArr = nullptr;
 					other.m_length = 0;
 				}
@@ -99,8 +106,13 @@ namespace UE::MLibrary
 				{
 					if (this != &other)
 					{
-						this->m_elemArr = ::MoveTemp(other.m_elemArr);
-						this->m_length = ::MoveTemp(other.m_length);
+						if (this->m_elemArr != nullptr)
+						{
+							delete[] m_elemArr;
+						}
+
+						this->m_elemArr = other.m_elemArr;
+						this->m_length = other.m_length;
 
 						other.m_elemArr = nullptr;
 						other.m_length = 0;
@@ -153,6 +165,24 @@ namespace UE::MLibrary
 				uint64 Length() const
 				{
 					return m_length;
+				}
+
+		// イテレータ
+				Iterator begin()
+				{
+					return Iterator(m_elemArr);
+				}
+				ConstIterator begin() const
+				{
+					return ConstIterator(m_elemArr);
+				}
+				Iterator end()
+				{
+					return Iterator(m_elemArr + m_length);
+				}
+				ConstIterator end() const
+				{
+					return ConstIterator(m_elemArr + m_length);
 				}
 		//---------------------------------------
 		/*

@@ -19,12 +19,12 @@ Encoding : UTF-8
 #include "CoreMinimal.h"
 #include "MapCoord.generated.h"
 
-
 USTRUCT(BlueprintType)
 struct SMITH_API FMapCoord
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditInstanceOnly,BlueprintReadWrite)
 	uint8 x;
 	UPROPERTY(EditInstanceOnly,BlueprintReadWrite)

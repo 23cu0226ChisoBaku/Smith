@@ -19,7 +19,7 @@ Encoding : UTF-8
 #ifndef M_DIMENSION_TWO_ARRAY
 #define M_DIMENSION_TWO_ARRAY
 
-#include "CoreMinimal.h"
+#include "ArrayIterator.h"
 
 namespace UE::MLibrary
 {
@@ -30,7 +30,7 @@ namespace UE::MLibrary
 		/// @param T データの型
 		///
 		template<typename T>
-		class SMITH_API TDimension2Array
+		class TDimension2Array
 		{
 
 		//---------------------------------------
@@ -38,11 +38,14 @@ namespace UE::MLibrary
 							エイリアスやアサーション
 		*/
 		//---------------------------------------
-		using ElementType = T;
+		public:
+			using ElementType = T;
+			using Iterator = ArrayIterator<TDimension2Array<ElementType>>;
+			using ConstIterator = const Iterator;
 		private:
 			class TDimension2ArrayRowArr
 			{
-				friend class TDimension2Array<T>;
+				friend class TDimension2Array<ElementType>;
 				private:
 					TDimension2ArrayRowArr(ElementType* src, uint64 length)
 						: m_rowArr(src)
@@ -101,7 +104,7 @@ namespace UE::MLibrary
 					uint64 m_length;
 			};
 
-		using RowArray = TDimension2ArrayRowArr;
+		using RowArray = typename TDimension2ArrayRowArr;
 		//---------------------------------------
 		/*
 										ctorとdtor
@@ -121,17 +124,18 @@ namespace UE::MLibrary
 					check( ((m_row * m_column) > 0) )
 
 					m_elemArr = new ElementType[m_row * m_column];
+
+					memset(m_elemArr, 0, sizeof(ElementType) * m_row * m_column);
 				}
 
 				TDimension2Array(const ElementType* src, const size_t srcSize, const uint64 row, const uint64 column)
 					: TDimension2Array(row, column)
 				{
 					check(src != nullptr)
-					// サイズが０じゃない　かつ　サイズが （データのサイズ * 行の数 * 列の数）
+					// サイズが０じゃない　かつ　サイズが （データのサイズ * 行の数 * 列の数）と等しい時に通過する
 					check(((srcSize != 0) && (srcSize == (sizeof(ElementType) * row * column))))
 
 					memcpy_s(m_elemArr, srcSize, src, srcSize);
-
 				}
 
 				TDimension2Array(const TDimension2Array& other)
@@ -139,18 +143,26 @@ namespace UE::MLibrary
 					this->m_elemArr = new ElementType[other.Length()];
 					this->m_row = other.m_row;
 					this->m_column = other.m_column;
-					const size_t memSize = sizeof(ElementType) * other.m_row * other.m_column;
-					memcpy_s(m_elemArr, memSize, other.m_elemArr, memSize);
+					
+					const size_t memSize = sizeof(ElementType) * Length();
+					memcpy_s(this->m_elemArr, memSize, other.m_elemArr, memSize);
 				}
 				TDimension2Array& operator=(const TDimension2Array& other)
 				{
 					if (this != &other)
 					{
+						if (this->m_elemArr != nullptr)
+						{
+							// TODO something wrong here????
+							delete[] this->m_elemArr;
+						}
+
 						this->m_elemArr = new ElementType[other.Length()];
 						this->m_row = other.m_row;
 						this->m_column = other.m_column;
-						const size_t memSize = sizeof(ElementType) * other.m_row * other.m_column;
-						memcpy_s(m_elemArr, memSize, other.m_elemArr, memSize);
+						
+						const size_t memSize = sizeof(ElementType) * Length();
+						memcpy_s(this->m_elemArr, memSize, other.m_elemArr, memSize);
 					}
 
 					return *this;
@@ -158,9 +170,9 @@ namespace UE::MLibrary
 
 				TDimension2Array(TDimension2Array&& other) noexcept
 				{
-					this->m_elemArr = ::MoveTemp(other.m_elemArr);
-					this->m_row = ::MoveTemp(other.m_row);
-					this->m_column = ::MoveTemp(other.m_column);
+					this->m_elemArr = other.m_elemArr;
+					this->m_row = other.m_row;
+					this->m_column = other.m_column;
 
 					other.m_elemArr = nullptr;
 					other.m_row = 0;
@@ -170,9 +182,14 @@ namespace UE::MLibrary
 				{
 					if (this != &other)
 					{
-						this->m_elemArr = ::MoveTemp(other.m_elemArr);
-						this->m_row = ::MoveTemp(other.m_row);
-						this->m_column = ::MoveTemp(other.m_column);
+						if (this->m_elemArr != nullptr)
+						{
+							delete[] this->m_elemArr;
+						}
+
+						this->m_elemArr = other.m_elemArr;
+						this->m_row = other.m_row;
+						this->m_column = other.m_column;
 
 						other.m_elemArr = nullptr;
 						other.m_row = 0;
@@ -184,7 +201,7 @@ namespace UE::MLibrary
 
 				~TDimension2Array()
 				{
-					dispose();
+					//dispose();
 				}
 
 		//---------------------------------------
@@ -196,14 +213,14 @@ namespace UE::MLibrary
 				/// @brief 配列の行を返す(読み込み専用)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]のコンスト参照
-				const RowArray At_ReadOnly(uint64 row) const &
+				const RowArray At_ReadOnly(uint64 row) const&
 				{
 					return at_impl(row);
 				}
 				/// @brief 配列の行を返す(読み込み専用)
 				/// @param row 行のインデックス
 				/// @return 配列[行のインデックス]のコンスト参照
-				const RowArray At(uint64 row) const &
+				const RowArray At(uint64 row) const&
 				{
 					return at_impl(row);
 				}
@@ -272,6 +289,23 @@ namespace UE::MLibrary
 				{
 					return m_row * m_column;
 				}
+		// イテレータ
+				Iterator begin()
+				{
+					return Iterator(m_elemArr);
+				}
+				ConstIterator begin() const
+				{
+					return ConstIterator(m_elemArr);
+				}
+				Iterator end()
+				{
+					return Iterator(m_elemArr + m_row * m_column);
+				}
+				ConstIterator end() const
+				{
+					return ConstIterator(m_elemArr + m_row * m_column);
+				}
 		//---------------------------------------
 		/*
 						パブリック関数(インターフェース)
@@ -319,6 +353,14 @@ namespace UE::MLibrary
 					memset(this, 0, sizeof(this));
 				}
 				RowArray at_impl(uint64 row)
+				{
+					check(m_elemArr != nullptr)
+					check(row < m_row)
+
+					return RowArray(m_elemArr + row * m_column, m_column);
+				}
+
+				const	RowArray at_impl(uint64 row) const
 				{
 					check(m_elemArr != nullptr)
 					check(row < m_row)

@@ -19,7 +19,6 @@ Encoding : UTF-8
 #ifndef SMITH_CMD_FORMAT
 #define SMITH_CMD_FORMAT
 
-#include "CoreMinimal.h"
 #include "Dimension2Array.h"
 #include "MapCoord.h"
 
@@ -27,10 +26,19 @@ namespace UE::Smith
 {
 	inline namespace Battle
 	{
-		class SMITH_API FSmithCommandFormat
+		enum ESmithFormatType : int8
+		{
+			NO_EFFECT = -1,
+			CENTER_NO_EFFECT = 0,
+			EFFECT = 1,
+			CENTER_EFFECT = 2,
+		};
+
+		class FSmithCommandFormat
 		{
 			public:
-				FSmithCommandFormat(const int8* srcData, const size_t dataCnt, const uint64 row, const uint64 column);
+				FSmithCommandFormat();
+				FSmithCommandFormat(const ESmithFormatType* srcData, const size_t dataCnt, const uint64 row, const uint64 column);
 				~FSmithCommandFormat();
 
 				FSmithCommandFormat(const FSmithCommandFormat&);
@@ -40,14 +48,16 @@ namespace UE::Smith
 				FSmithCommandFormat& operator=(FSmithCommandFormat&&) noexcept;
 
 			public:
-				UE::MLibrary::MDataStructure::TDimension2Array<int8> GetFormatArray() const;
+				void SetupFormat(const ESmithFormatType* srcData, const size_t srcSize, const uint64 row, const uint64 column);
+				UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> GetFormatArray() const;
+				FMapCoord GetCNCoord() const;
 				uint64 GetRow() const;
 				uint64 GetColumn() const;
 
 			private:
 				void setCNCoord();
 			private:
-				UE::MLibrary::TDimension2Array<int8> m_formatArr;
+				UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> m_formatArr;
 				FMapCoord m_cnCoord;
 		};
 	}

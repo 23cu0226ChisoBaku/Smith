@@ -25,10 +25,23 @@ namespace UE::Smith
   {
     TDimension2Array<FMapCoord> FFormatTransformer::FormatToMapCoord(
                                                                       FSmithCommandFormat format, 
-                                                                      FMapCoord centerCoord
+                                                                      FMapCoord cnMapCoord
                                                                     )
     {
-      
+      TDimension2Array<FMapCoord> mapCoords(format.GetRow(), format.GetColumn());
+      const FMapCoord& cnCoord = format.GetCNCoord();
+      mapCoords[cnCoord.y][cnCoord.x] = cnMapCoord;
+
+      for (uint16 y = 0; y < format.GetRow(); ++y)
+      {
+        for (uint64 x = 0; x < format.GetColumn(); ++x)
+        {
+          mapCoords[y][x].x = cnMapCoord.x - cnCoord.x + StaticCast<uint8>(x);
+          mapCoords[y][x].y = cnMapCoord.y - cnCoord.y + StaticCast<uint8>(y);
+        }
+      }
+
+      return mapCoords;
     }
   }
 }

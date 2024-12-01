@@ -31,7 +31,7 @@ namespace UE::Smith
 		class SMITH_API FFormatTransformer
 		{
 			public:
-				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(FSmithCommandFormat format, FMapCoord centerCoord);
+				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(FSmithCommandFormat format, FMapCoord cnMapCoord);
 		};
 
 	}

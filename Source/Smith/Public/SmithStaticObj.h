@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Dimension2Array.h"
-#include "MapCoord.h"
+#include "SmithCommandFormat.h"
 
 // Should always be the last include
 #include "SmithStaticObj.generated.h"
@@ -50,9 +49,9 @@ private:
 
 //---------------------------------------
 /*
-							UProperty変数
+							　　変数
 */
 //---------------------------------------
 private:
-	UE::MLibrary::TDimension2Array<int32> m_arr;
+	UE::Smith::Battle::FSmithCommandFormat m_format;
 };
