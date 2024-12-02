@@ -21,19 +21,12 @@ Encoding : UTF-8
 
 #include "Dimension2Array.h"
 #include "MapCoord.h"
+#include "FormatType.h"
 
 namespace UE::Smith
 {
 	inline namespace Battle
 	{
-		enum ESmithFormatType : int8
-		{
-			NO_EFFECT = -1,
-			CENTER_NO_EFFECT = 0,
-			EFFECT = 1,
-			CENTER_EFFECT = 2,
-		};
-
 		class FSmithCommandFormat
 		{
 			public:

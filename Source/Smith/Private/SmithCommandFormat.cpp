@@ -99,7 +99,7 @@ namespace UE::Smith
         for (uint64 x = 0; x < GetColumn(); ++x)
         {
           auto formatType = m_formatArr[y][x];
-          if ((formatType == CENTER_NO_EFFECT) || (formatType == CENTER_EFFECT))
+          if ((formatType == ESmithFormatType::CENTER_NO_EFFECT) || (formatType == ESmithFormatType::CENTER_EFFECT))
           {
             m_cnCoord.x = StaticCast<uint8>(x);
             m_cnCoord.y = StaticCast<uint8>(y);

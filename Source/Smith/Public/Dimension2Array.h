@@ -124,7 +124,6 @@ namespace UE::MLibrary
 					check( ((m_row * m_column) > 0) )
 
 					m_elemArr = new ElementType[m_row * m_column];
-
 					memset(m_elemArr, 0, sizeof(ElementType) * m_row * m_column);
 				}
 
@@ -139,13 +138,9 @@ namespace UE::MLibrary
 				}
 
 				TDimension2Array(const TDimension2Array& other)
+					: TDimension2Array()
 				{
-					this->m_elemArr = new ElementType[other.Length()];
-					this->m_row = other.m_row;
-					this->m_column = other.m_column;
-					
-					const size_t memSize = sizeof(ElementType) * Length();
-					memcpy_s(this->m_elemArr, memSize, other.m_elemArr, memSize);
+					*this = other;
 				}
 				TDimension2Array& operator=(const TDimension2Array& other)
 				{
@@ -154,6 +149,7 @@ namespace UE::MLibrary
 						if (this->m_elemArr != nullptr)
 						{
 							// TODO something wrong here????
+							// Comment: should initialize in copy ctor
 							delete[] this->m_elemArr;
 						}
 
@@ -169,14 +165,9 @@ namespace UE::MLibrary
 				}
 
 				TDimension2Array(TDimension2Array&& other) noexcept
+					: TDimension2Array()
 				{
-					this->m_elemArr = other.m_elemArr;
-					this->m_row = other.m_row;
-					this->m_column = other.m_column;
-
-					other.m_elemArr = nullptr;
-					other.m_row = 0;
-					other.m_column = 0;
+					*this = ::MoveTemp(other);
 				}
 				TDimension2Array& operator=(TDimension2Array&& other) noexcept
 				{
@@ -201,7 +192,7 @@ namespace UE::MLibrary
 
 				~TDimension2Array()
 				{
-					//dispose();
+					dispose();
 				}
 
 		//---------------------------------------

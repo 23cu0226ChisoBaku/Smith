@@ -33,7 +33,6 @@ namespace UE::Smith
 			public:
 				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(FSmithCommandFormat format, FMapCoord cnMapCoord);
 		};
-
 	}
 }
 

@@ -25,8 +25,8 @@ struct SMITH_API FMapCoord
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditInstanceOnly,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 x;
-	UPROPERTY(EditInstanceOnly,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 y;
 };
