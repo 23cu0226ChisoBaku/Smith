@@ -3,6 +3,7 @@
 
 #include "SmithStaticObj.h"
 #include "FormatTransformer.h"
+#include "FormatInfo_Import.h"
 using namespace UE::Smith::Battle;
 using namespace UE::MLibrary::MDataStructure;
 
@@ -34,7 +35,7 @@ void ASmithStaticObj::BeginPlay()
 	const auto& test = m_format.GetFormatArray();
 	if (GEngine)
 	{
-		for (auto ENUM : test)
+		for (ESmithFormatType ENUM : test)
 		{
 			FString x = FString::FromInt(StaticCast<uint8>(ENUM));
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, x);
@@ -59,6 +60,34 @@ void ASmithStaticObj::BeginPlay()
 		if (GEngine)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, rowString);
+		}
+	}
+
+	if (!m_dataTable.IsValid())
+	{
+		m_dataTable.LoadSynchronous();
+	}
+
+	m_dataRef = m_dataTable.Get();
+
+	if (!m_dataTableDiagonal.IsValid())
+	{
+		m_dataTableDiagonal.LoadSynchronous();
+	}
+
+	m_dataDiagonalRef = m_dataTableDiagonal.Get();
+
+	if (::IsValid(m_dataRef))
+	{
+		TArray<FFormatInfo_Import*> arr;
+		arr.Reserve(9);
+		m_dataRef->GetAllRows<FFormatInfo_Import>("", arr);
+		for(auto b : arr)
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, );
+			}
 		}
 	}
 

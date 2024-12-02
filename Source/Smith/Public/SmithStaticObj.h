@@ -38,6 +38,13 @@ public:
 
 //---------------------------------------
 /*
+						Privateメソッド
+*/
+//---------------------------------------
+private:
+
+//---------------------------------------
+/*
 							UProperty変数
 */
 //---------------------------------------
@@ -47,6 +54,17 @@ private:
 	UPROPERTY(EditInstanceOnly)
 	FMapCoord m_mapCoord;
 
+	UPROPERTY(EditInstanceOnly)
+	TSoftObjectPtr<UDataTable> m_dataTable;
+
+	UPROPERTY(EditInstanceOnly)
+	TSoftObjectPtr<UDataTable> m_dataTableDiagonal;
+
+	UPROPERTY()
+	UDataTable* m_dataRef;
+
+	UPROPERTY()
+	UDataTable* m_dataDiagonalRef;
 //---------------------------------------
 /*
 							　　変数
