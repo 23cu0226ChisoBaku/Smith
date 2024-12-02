@@ -6,6 +6,11 @@
 
 #include "CoreMinimal.h"
 
+// 仮置き 攻撃範囲とかの情報を持つ？
+struct Format
+{
+
+};
 
 struct MapCoord
 {
@@ -15,21 +20,20 @@ struct MapCoord
 	uint8 y;
 };
 
-// 仮置き 攻撃範囲とかの情報を持つ？
-struct Format
-{
-
-};
-
 class SMITH_API MapObject
 {
 public:
-	MapObject();
+	MapObject(AActor* actor);
 	virtual ~MapObject();
 
-	bool Mpve();
-	int GetAttack();
+	AActor* GetActor()const;
+
+	MapCoord GetCoord()const;
+	void SetCoord(MapCoord setterCoord);
+
+private:
 	MapCoord myCoord;
+	TWeakObjectPtr<AActor> p_actor;
 };
 
 class SMITH_API SmithMapManager
@@ -38,9 +42,11 @@ public:
 	SmithMapManager();
 	virtual ~SmithMapManager();
 
-	//MapCoord 
+	MapCoord GetObjectCorrd(MapObject* searchObj);
 
-	
+
 private:
 	FVector const originWorldCoord;
+	MapCoord mapTile{ 64,64 };
+	TArray<MapObject*>Actors;
 };
