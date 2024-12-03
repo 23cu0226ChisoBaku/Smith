@@ -1,0 +1,62 @@
+[
+	{
+		"Name": "FormatInfo",
+		"Row": 3,
+		"Column": 3,
+		"Type": "NO_EFFECT"
+	},
+	{
+		"Name": "1",
+		"Row": 0,
+		"Column": 0,
+		"Type": "EFFECT"
+	},
+	{
+		"Name": "2",
+		"Row": 0,
+		"Column": 1,
+		"Type": "EFFECT"
+	},
+	{
+		"Name": "3",
+		"Row": 0,
+		"Column": 2,
+		"Type": "EFFECT"
+	},
+	{
+		"Name": "4",
+		"Row": 1,
+		"Column": 0,
+		"Type": "EFFECT"
+	},
+	{
+		"Name": "5",
+		"Row": 1,
+		"Column": 1,
+		"Type": "EFFECT"
+	},
+	{
+		"Name": "6",
+		"Row": 1,
+		"Column": 2,
+		"Type": "EFFECT"
+	},
+	{
+		"Name": "7",
+		"Row": 2,
+		"Column": 0,
+		"Type": "NO_EFFECT"
+	},
+	{
+		"Name": "8",
+		"Row": 2,
+		"Column": 1,
+		"Type": "CENTER_NO_EFFECT"
+	},
+	{
+		"Name": "9",
+		"Row": 2,
+		"Column": 2,
+		"Type": "NO_EFFECT"
+	}
+]

@@ -80,13 +80,13 @@ void ASmithStaticObj::BeginPlay()
 	if (::IsValid(m_dataRef))
 	{
 		TArray<FFormatInfo_Import*> arr;
-		arr.Reserve(9);
+		arr.Reserve(10);
 		m_dataRef->GetAllRows<FFormatInfo_Import>("", arr);
 		for(auto b : arr)
 		{
 			if (GEngine)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, );
+				GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, FString::FromInt(StaticCast<uint8>(b->Type)));
 			}
 		}
 	}
