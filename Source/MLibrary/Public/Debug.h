@@ -33,20 +33,20 @@ namespace UE::MLibrary
 	public:
 		static void Log(const char*);
 		static void Log(const wchar_t*);
-		static void Log(std::string);
-		static void Log(std::wstring);
+		static void Log(const std::string&);
+		static void Log(const std::wstring&);
 		static void Log(const FString&);
 
 		static void LogWarning(const char*);
 		static void LogWarning(const wchar_t*);
-		static void LogWarning(std::string);
-		static void LogWarning(std::wstring);
+		static void LogWarning(const std::string&);
+		static void LogWarning(const std::wstring&);
 		static void LogWarning(const FString&);
 
 		static void LogError(const char*);
 		static void LogError(const wchar_t*);
-		static void LogError(std::string);
-		static void LogError(std::wstring);
+		static void LogError(const std::string&);
+		static void LogError(const std::wstring&);
 		static void LogError(const FString&);
 
 	public:
@@ -66,7 +66,6 @@ namespace UE::MLibrary
 		static const DebugFormat LOG_FORMAT;
 		static const DebugFormat LOG_WARNING_FORMAT;
 		static const DebugFormat LOG_ERROR_FORMAT;
-
 	};
 }
 

@@ -142,6 +142,7 @@ namespace UE::MLibrary
 				{
 					*this = other;
 				}
+
 				TDimension2Array& operator=(const TDimension2Array& other)
 				{
 					if (this != &other)
@@ -392,7 +393,7 @@ namespace UE::MLibrary
 		};
 
 		template<typename T>
-		const TDimension2Array<T> TDimension2Array<T>::EmptyArray = TDimension2Array<T>();
+		const TDimension2Array<T> TDimension2Array<T>::EmptyArray = TDimension2Array<T>{};
 	}
 }
 
