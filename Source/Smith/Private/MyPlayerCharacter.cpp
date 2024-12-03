@@ -82,9 +82,9 @@ void AMyPlayerCharacter::UpdatePawn()
 	//現在の座標
 	FVector pos = GetActorLocation();
 	pos += m_pos;
-	// 座標をセット
-	SetActorLocation(pos);
-	// ０に戻す
+	// 座標と回転セット
+	SetActorLocationAndRotation(pos, m_dir);
+	// 移動量を０に戻す
 	m_pos = FVector::ZeroVector;
 }
 
