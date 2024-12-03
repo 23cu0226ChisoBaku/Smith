@@ -1,0 +1,13 @@
+◆こちらの対応について
+VS2022でビルド問題を起こしたUEのソースファイルを修正しました。
+UE5.3が入っているフォルダに上書きしてください。
+
+設定を変えていなければ、
+「C:\Program Files\Epic Games\」の中に「UE_5.3」フォルダがあります。
+それが確認できたら、この配布フォルダの「UE_5.3」を上書きし、
+2つのファイル（BgScriptReader.cs、CheckForHacks.cs）が上書きできたか確認してください。
+
+
+◆修正されたファイル
+C:\Program Files\Epic Games\UE_5.3\Engine\Source\Programs\AutomationTool\BuildGraph\BgScriptReader.cs
+C:\Program Files\Epic Games\UE_5.3\Engine\Source\Programs\AutomationTool\Scripts\CheckForHacks.cs

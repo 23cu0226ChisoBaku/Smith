@@ -1,8 +1,6 @@
 /.git
-/.github
-/.vs
 /.vscode
 /Content
-/DerivedDataCache
 /Intermediate
 /Saved
+/UE5.3_VS2022ビルド対応パッチ
