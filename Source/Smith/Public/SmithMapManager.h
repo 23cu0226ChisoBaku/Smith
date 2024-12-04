@@ -13,18 +13,14 @@ struct map
 class SMITH_API MapObject
 {
 public:
-	MapObject();
-	virtual ~MapObject();
+	MapObject(){}
+	virtual ~MapObject()
+	{}
 
-	bool Mpve();
-	int GetAttack();
+	bool Mpve(){return true;}
+	int GetAttack() {return 0;}
 };
 
-enum TileType
-{
-	floor,
-
-};
 
 struct tileInfo
 {
