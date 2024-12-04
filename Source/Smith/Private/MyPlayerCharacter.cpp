@@ -92,12 +92,12 @@ void AMyPlayerCharacter::UpdatePawn()
 void AMyPlayerCharacter::Pawn_MoveForward(float axisValue)
 {
 	m_pos.X += (axisValue * 5.0f);
-	m_dir.Roll = (axisValue == 1.0f ? 0.0f : 180.0f);
+	m_dir.Pitch = (axisValue == 1.0f ? 0.0f : 180.0f);
 }
 
 // ç∂âEà⁄ìÆ
 void AMyPlayerCharacter::Pawn_MoveRight(float axisValue)
 {
 	m_pos.Y += (axisValue * 5.0f);
-	m_dir.Roll = 90.0f * axisValue;
+	m_dir.Pitch= 90.0f * axisValue;
 }
