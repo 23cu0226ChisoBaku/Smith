@@ -22,18 +22,18 @@ void AMyEnemy::BeginPlay()
 void AMyEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	Attack();
 }
 
 // 攻撃
 void AMyEnemy::Attack()
 {
 	// 開始位置と終了位置を定義
-	float rayLenth = 10.0f;
-	FVector StartLocation = GetActorLocation();
+	const float rayLenth = 100.0f;
+	const FVector StartLocation = GetActorLocation();
 
 	// 左右上下の終点
-	FVector EndLocation[4] = {
+	const FVector EndLocation[4] = {
 		StartLocation + FVector::ForwardVector * rayLenth,
 		StartLocation + FVector::BackwardVector * rayLenth,
 		StartLocation + FVector::RightVector * rayLenth,
@@ -44,37 +44,53 @@ void AMyEnemy::Attack()
 	FHitResult HitResult;  // ヒット情報
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);  // 自分自身を無視
+	AActor* HitActor = nullptr;
+	bool bHit = false;
 
-	bool bHit;
-	for (int i = 0; i < EndLocation->Length(); ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		// LineTraceを実行
 		bHit = GetWorld()->LineTraceSingleByChannel(
 			HitResult,       // ヒット結果
 			StartLocation,   // 開始位置
 			EndLocation[i],  // 終了位置
-			ECC_Visibility,  // 使用するコリジョンチャネル（ここでは視覚的なコリジョン）
+			ECC_PhysicsBody,  // 使用するコリジョンチャネル（ここでは物理的なコリジョン）
 			CollisionParams  // コリジョンパラメータ
 		);
-		//if (bHit && HitResult.GetActor() == AMyPlayerCharacter::StaticClass())
-		//{
 
-		//}
-	}
-
-
-	// ヒットした場合の処理
-	if (bHit)
-	{
-		// ヒットしたオブジェクトの情報を取得
-		AActor* HitActor = HitResult.GetActor();
-		if (HitActor)
+		if (!bHit)
 		{
+			continue;
+		}
+
+		HitActor = HitResult.GetActor();
+
+		// プレイヤーにヒットした場合の処理
+		if (::IsValid(HitActor) && HitActor->IsA(AMyPlayerCharacter::StaticClass()))
+		{
+			// ヒットした位置に赤色の点を表示
+			DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Red, false, 1.0f);
+
+			// レイキャストの線を青色で表示
+			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
+
 			if (GEngine != nullptr)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 60.0f, FColor::Red, TEXT("Player to Damage"), *HitActor->GetName());
+				// ここでプレイヤーに攻撃！！！
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "Player to Attack");
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, HitActor->GetName());
 			}
+			return;
 		}
+	}
+
+	for (int i = 0; i < 4; ++i)
+	{
+		// ヒットしなかった場合、レイキャストが終了した位置に緑色の点を表示
+		DrawDebugPoint(GetWorld(), EndLocation[i], 10.0f, FColor::Green, false, 1.0f);
+
+		// レイキャストの線を緑色で表示
+		DrawDebugLine(GetWorld(), StartLocation, EndLocation[i], FColor::Green, false, 1.0f, 0, 1.0f);
 	}
 }
 
