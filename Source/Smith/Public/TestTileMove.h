@@ -6,8 +6,12 @@
 #include "GameFramework/Pawn.h"
 #include "TestTileMove.generated.h"
 
+class UCapsuleComponent;
 class UCameraComponent;
 class USpringArmComponent;
+class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
 
 UCLASS()
 class SMITH_API ATestTileMove : public APawn
@@ -43,18 +47,45 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	UFUNCTION(BlueprintCallable, Category = "TestTileMove_Func")
+	void SetCameraPos(const FVector& pos);
+	UFUNCTION(BlueprintCallable, Category = "TestTileMove_Func")
+	void SetCameraAngle(const FRotator& rotate);
+
 private:
 	bool moveTile_test();
 	bool attack_test();
+	void updateCam_test();
 
+private:
+	void Move(const FInputActionValue& Value);
+	void Attack(const FInputActionValue& Value);
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	USpringArmComponent* m_springArm;
+	TObjectPtr<UCapsuleComponent> m_capsuleCol;
 	UPROPERTY(VisibleAnywhere)
-	UCameraComponent* m_cam;
+	TObjectPtr<USpringArmComponent> m_springArm;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCameraComponent> m_cam;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputMappingContext> m_mappingCtx;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> m_moveAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> m_attackAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FVector CamPos;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FRotator CamAngle;
 
 private:
 	FVector m_InputDir;
-	bool m_isInAction;
+	uint8 m_hasMoveInput : 1;
+	uint8 m_hasAttackInput : 1;
+	uint8 m_isInAction : 1;
+	
 };

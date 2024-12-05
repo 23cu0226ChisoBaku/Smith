@@ -27,8 +27,17 @@ namespace UE::Smith
 {
 	inline namespace Battle
 	{
+		///
+		/// @brief コマンドフォーマット
+		///
 		class FSmithCommandFormat
 		{
+			
+			//---------------------------------------
+			/*
+								エイリアスやアサーション
+			*/
+			//---------------------------------------
 			public:
 				FSmithCommandFormat();
 				FSmithCommandFormat(const ESmithFormatType* srcData, const size_t dataCnt, const uint64 row, const uint64 column);

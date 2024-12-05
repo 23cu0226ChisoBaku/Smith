@@ -104,7 +104,7 @@ namespace UE::MLibrary
 					uint64 m_length;
 			};
 
-		using RowArray = typename TDimension2ArrayRowArr;
+			using RowArray = typename TDimension2ArrayRowArr;
 		//---------------------------------------
 		/*
 										ctorとdtor
@@ -370,19 +370,12 @@ namespace UE::MLibrary
 				}
 		//---------------------------------------
 		/*
-						 スタティック変数(private)
-		*/
-		//---------------------------------------
-			private:
-
-		//---------------------------------------
-		/*
 						 スタティック変数(public)
 		*/
 		//---------------------------------------
 			public:
 				static const TDimension2Array<ElementType> EmptyArray;
-			
+
 			private:
 				ElementType* m_elemArr;
 				uint64 m_row;
