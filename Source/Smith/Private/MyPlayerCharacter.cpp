@@ -83,7 +83,7 @@ void AMyPlayerCharacter::UpdatePawn()
 	FVector pos = GetActorLocation();
 	pos += m_pos;
 	// 座標と回転セット
-	SetActorLocationAndRotation(pos, m_dir);
+	SetActorLocation(pos);
 	// 移動量を０に戻す
 	m_pos = FVector::ZeroVector;
 }
@@ -92,12 +92,10 @@ void AMyPlayerCharacter::UpdatePawn()
 void AMyPlayerCharacter::Pawn_MoveForward(float axisValue)
 {
 	m_pos.X += (axisValue * 5.0f);
-	m_dir.Roll = (axisValue == 1.0f ? 0.0f : 180.0f);
 }
 
 // 左右移動
 void AMyPlayerCharacter::Pawn_MoveRight(float axisValue)
 {
 	m_pos.Y += (axisValue * 5.0f);
-	m_dir.Roll = 90.0f * axisValue;
 }
