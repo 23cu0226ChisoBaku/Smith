@@ -1,6 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// これからやること
+// 攻撃（内部的にはイケてる）
+// 攻撃したときエフェクトなりわかりやすい演出を入れる
+// ダメージを受ける
+// ターン制で攻撃（つまりプレイヤーが移動したら攻撃）<-参照設定とかめんどいから仲介クラスを経由してやろうかな
+// プレイヤーに対して移動（マス目）
+// 
 #include "MyEnemy.h"
+#include "Kismet/KismetSystemLibrary.h"
+
 
 
 // Sets default values
@@ -77,8 +84,10 @@ void AMyEnemy::Attack()
 			if (GEngine != nullptr)
 			{
 				// ここでプレイヤーに攻撃！！！
-				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "Player to Attack");
 				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, HitActor->GetName());
+				// PrintStringノードと同じ処理
+				// UKismetSystemLibraryクラスのPrintString関数を呼び出す
+				UKismetSystemLibrary::PrintString(this, "Player to Attack!", true, true, FColor::Cyan, 2.f, TEXT("None"));
 			}
 			return;
 		}
