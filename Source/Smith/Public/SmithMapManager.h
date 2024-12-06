@@ -12,11 +12,13 @@ struct Format
 
 };
 
-struct MapCoord
+//USTRUCT(BlueprintType)
+struct  MapCoord
 {
-	UPROPERTY(EditinstanceOnly, BluePrintReadWrite)
+	//GENERATED_BODY()
+	//UPROPERTY(EditinstanceOnly, BluePrintReadWrite)
 	uint8 x;
-	UPROPERTY(EditinstanceOnly, BluePrintReadWrite)
+	//UPROPERTY(EditinstanceOnly, BluePrintReadWrite)
 	uint8 y;
 };
 
@@ -42,11 +44,16 @@ public:
 	SmithMapManager();
 	virtual ~SmithMapManager();
 
-	MapCoord GetObjectCorrd(MapObject* searchObj);
+	MapCoord GetObjectCorrd(MapObject* Obj);
+	void RegistraitonObject(MapObject* Obj);
+	void ReleaseObject(MapObject* Obj);
+	void UpdateObject(MapObject* Obj, MapCoord);
 
 
 private:
 	FVector const originWorldCoord;
-	MapCoord mapTile{ 64,64 };
-	TArray<MapObject*>Actors;
+	TArray<MapObject*>Objects;
+
+	MapObject* GetObject(MapObject* Obj);
+
 };
