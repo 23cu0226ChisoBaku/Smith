@@ -19,18 +19,18 @@ class SMITH_API ATestTileMove : public APawn
 	GENERATED_BODY()
 
 private:
-	enum EPlayerMoveDir_test : uint8
+	enum EDir_Test : uint8
 	{
-		None = 0,							// 入力なし
+		North = 0,						// 上方向
+		NorthEast = 1,				// 右上
+		East = 2,							// 右
+		SouthEast = 3,				// 右下
+		South = 4,						// 下
+		SouthWest = 5,				// 左下
+		West = 6,							// 左
+		NorthWest = 7,				// 左上
 
-		North = 1,						// 上方向
-		NorthEast = 2,				// 右上
-		East = 3,							// 右
-		SouthEast = 4,				// 右下
-		South = 5,						// 下
-		SouthWest = 6,				// 左下
-		West = 7,							// 左
-		NorthWest = 8,				// 左上
+		DirectionCnt,					// 選べられる方向の数
 	};
 
 public:
@@ -56,11 +56,18 @@ public:
 private:
 	bool moveTile_test();
 	bool attack_test();
-	void updateCam_test();
+	bool updateCam_test();
+	bool changeForward_test(const FVector2D& inputValue);
+	void setupInputMappingCtx_test();
 
 private:
-	void Move(const FInputActionValue& Value);
-	void Attack(const FInputActionValue& Value);
+	// TODO
+	EDir_Test vectorToEDir(const FVector& direction);
+
+private:
+	void Move(const FInputActionValue& value);
+	void Attack(const FInputActionValue& value);
+	void Look(const FInputActionValue& value);
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -76,6 +83,8 @@ private:
 	TObjectPtr<UInputAction> m_moveAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> m_attackAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> m_cameraAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FVector CamPos;
@@ -83,9 +92,12 @@ private:
 	FRotator CamAngle;
 
 private:
-	FVector m_InputDir;
+	FVector m_nextDir;
+	EDir_Test m_camDir;
+	EDir_Test m_actorFaceDir;
 	uint8 m_hasMoveInput : 1;
 	uint8 m_hasAttackInput : 1;
+	uint8 m_hasLookInput :1;
 	uint8 m_isInAction : 1;
 	
 };

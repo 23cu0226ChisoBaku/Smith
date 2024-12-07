@@ -101,19 +101,6 @@ class IAttack
 		FString m_attackerTag;
 };
 
-class IAttackable
-{
-	public:
-		IAttackable(UObject* target)
-			//: m_attackTarget(target)
-		{ }
-	public:
-		virtual ~IAttackable() = 0 {};
-
-	private:
-		TWeakPtr<UObject> m_attackTarget;
-};
-
 namespace Smith
 {
 	inline namespace Battle
