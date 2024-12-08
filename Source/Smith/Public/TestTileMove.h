@@ -18,6 +18,7 @@ Encoding : UTF-8
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "IAttackable.h"
 #include "TestTileMove.generated.h"
 
 class UCapsuleComponent;
@@ -28,7 +29,7 @@ class UInputAction;
 struct FInputActionValue;
 
 UCLASS()
-class SMITH_API ATestTileMove : public APawn
+class SMITH_API ATestTileMove : public APawn, public IAttackable
 {
 	GENERATED_BODY()
 
@@ -70,6 +71,17 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+//---------------------------------------
+/*
+       パブリック関数(インターフェース)
+*/
+//---------------------------------------
+
+public:
+// IAttackable(UInterface)
+#pragma region IAttackable
+	void OnAttack(const AttackHandle& attack) override;
+#pragma endregion
 
 //---------------------------------------
 /*

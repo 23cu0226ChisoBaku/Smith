@@ -10,7 +10,6 @@
 #include "InputActionValue.h"
 #include "Kismet\KismetSystemLibrary.h"
 
-#include "IAttackable.h"
 
 namespace Smith_NS_Mapinfo
 {
@@ -47,7 +46,8 @@ ATestTileMove::ATestTileMove()
 	m_capsuleCol->SetupAttachment(RootComponent);
 	m_capsuleCol->InitCapsuleSize(
 																Smith_NS_PlayerColliderInfo::CAPSULE_RADIUS,
-																Smith_NS_PlayerColliderInfo::CAPSULE_HALF_HEIGHT);
+																Smith_NS_PlayerColliderInfo::CAPSULE_HALF_HEIGHT
+															 );
 
 	m_capsuleHalfHeight = Smith_NS_PlayerColliderInfo::CAPSULE_HALF_HEIGHT;
 
@@ -118,20 +118,27 @@ void ATestTileMove::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
+void ATestTileMove::OnAttack(const AttackHandle& attack)
+{
+	if (GEngine != nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, attack.AttackName);
+	}
+}
+
 bool ATestTileMove::moveTile_test()
 {
 	if (!m_hasMoveInput)
 	{
 		return false;
 	}
-
 	FHitResult hit = {};
 	bool isHit = false;
 
 	FCollisionShape sphereShape {};
 	FCollisionQueryParams hitParam;
 	hitParam.AddIgnoredActor(this);
-	const float sphereRadius = m_capsuleHalfHeight * 2.0f;
+	const float sphereRadius = m_capsuleHalfHeight * 0.5f;
 	sphereShape.SetSphere(sphereRadius);
 	
 	isHit = GetWorld()->SweepSingleByChannel(
@@ -147,6 +154,13 @@ bool ATestTileMove::moveTile_test()
 	{
 		SetActorLocation(m_nextDir);
 	}
+	else
+	{
+		if (GEngine != nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Black, hit.GetActor()->GetName());
+		}
+	}
 
 	m_nextDir = FVector::ZeroVector;
 	m_hasMoveInput = false;
@@ -156,7 +170,11 @@ bool ATestTileMove::moveTile_test()
 
 bool ATestTileMove::attack_test()
 {
-	const FRotator playerRotator = GetActorRotation();
+
+	if (!m_hasAttackInput)
+	{
+		return false;
+	}
 
 	FHitResult hit = {};
 	bool isHit = false;
@@ -164,13 +182,20 @@ bool ATestTileMove::attack_test()
 	FCollisionShape sphereShape {};
 	FCollisionQueryParams hitParam;
 	hitParam.AddIgnoredActor(this);
-	const float sphereRadius = m_capsuleHalfHeight * 2.0f;
+	const float sphereRadius = m_capsuleHalfHeight * 0.5f;
 	sphereShape.SetSphere(sphereRadius);
-	
+
+	FVector attackPos = GetActorForwardVector();
+	attackPos *= Smith_NS_Mapinfo::TILE_SIZE;
+	attackPos += GetActorLocation();
+
+	UE_LOG(LogTemp, Warning, TEXT("Direction:%u"), m_actorFaceDir);
+	UE_LOG(LogTemp, Warning, TEXT("X:%lf,Y:%lf,Z:%lf"), attackPos.X, attackPos.Y, attackPos.Z);
+
 	isHit = GetWorld()->SweepSingleByChannel(
 																						hit, 
 																						GetActorLocation(),
-																						m_nextDir,
+																						attackPos,
 																						FQuat::Identity,
 																						ECollisionChannel::ECC_MAX,
 																						sphereShape,
@@ -194,7 +219,14 @@ bool ATestTileMove::attack_test()
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, hitLog);
 			}
 		}	
-
+		else
+		{
+			if (GEngine != nullptr)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Hit unattackable"));
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, hit.GetActor()->GetName());
+			}
+		}
 	}
 	else
 	{
@@ -252,6 +284,7 @@ bool ATestTileMove::changeForward_test(const FVector2D& inputValue)
 
 	const FVector DirectionVec = FVector(directionX, directionY, 0.0);
 	EDir_Test newDir = vectorToEDir(DirectionVec);
+	m_actorFaceDir = newDir;
 
 	const double newYaw = StaticCast<double>(newDir) * 45.0;
 	SetActorRelativeRotation(FRotator(0.0, newYaw, 0.0));
@@ -346,10 +379,6 @@ void ATestTileMove::Attack(const FInputActionValue& value)
 	}
 
 	m_hasAttackInput = true;
-	if (GEngine != nullptr)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Attack"));
-	}
 }
 
 void ATestTileMove::Look(const FInputActionValue& value)
