@@ -90,9 +90,7 @@ void ATestTileMove::Tick(float DeltaTime)
 
 	moveTile_test();
 	attack_test();
-
 	updateCam_test();
-
 }
 
 // Called to bind functionality to input
@@ -124,6 +122,11 @@ void ATestTileMove::OnAttack(const AttackHandle& attack)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, attack.AttackName);
 	}
+}
+
+UTurnControlComponent *ATestTileMove::GetTurnControl() const
+{
+  return nullptr;
 }
 
 bool ATestTileMove::moveTile_test()
@@ -209,15 +212,6 @@ bool ATestTileMove::attack_test()
 		{
 			AttackHandle attackHnd {GetName(), 10};
 			attackable->OnAttack(attackHnd);
-			
-			if (GEngine != nullptr)
-			{
-				FString hitLog = hit.GetActor()->GetName();
-
-				hitLog.AppendChars(TEXT(" got attack by "), 16);
-				hitLog.Append(GetName());
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, hitLog);
-			}
 		}	
 		else
 		{
@@ -237,7 +231,6 @@ bool ATestTileMove::attack_test()
 	}
 
 	m_hasAttackInput = false;
-
 	return true;
 }
 

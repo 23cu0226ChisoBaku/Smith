@@ -59,7 +59,7 @@ void ASmithStaticObj::BeginPlay()
 		}
 		if (GEngine)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, rowString);
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, rowString);
 		}
 	}
 
@@ -86,7 +86,7 @@ void ASmithStaticObj::BeginPlay()
 		{
 			if (GEngine)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, FString::FromInt(StaticCast<uint8>(b->Type)));
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::FromInt(StaticCast<uint8>(b->Type)));
 			}
 		}
 	}
@@ -97,6 +97,30 @@ void ASmithStaticObj::BeginPlay()
 void ASmithStaticObj::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	EnableInput(nullptr);
+}
 
+void ASmithStaticObj::OnAttack(const AttackHandle& attack)
+{
+	if (attack.AttackName.IsEmpty())
+	{
+		return;
+	}
+	else
+	{
+		if (GEngine != nullptr)
+		{
+			FString msg = GetName();
+			msg.Append(TEXT(" attacked by "));
+			msg.Append(attack.AttackName);
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, msg);
+		}
+
+	}
+}
+
+UTurnControlComponent* ASmithStaticObj::GetTurnControl() const
+{
+	return nullptr;
 }
 

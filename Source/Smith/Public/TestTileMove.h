@@ -19,6 +19,7 @@ Encoding : UTF-8
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "IAttackable.h"
+#include "ITurnManageable.h"
 #include "TestTileMove.generated.h"
 
 class UCapsuleComponent;
@@ -29,7 +30,7 @@ class UInputAction;
 struct FInputActionValue;
 
 UCLASS()
-class SMITH_API ATestTileMove : public APawn, public IAttackable
+class SMITH_API ATestTileMove : public APawn, public IAttackable, public ITurnManageable
 {
 	GENERATED_BODY()
 
@@ -81,6 +82,11 @@ public:
 // IAttackable(UInterface)
 #pragma region IAttackable
 	void OnAttack(const AttackHandle& attack) override;
+#pragma endregion
+
+// ITurnManageable
+#pragma region ITurnManageable
+	UTurnControlComponent* GetTurnControl() const override;
 #pragma endregion
 
 //---------------------------------------

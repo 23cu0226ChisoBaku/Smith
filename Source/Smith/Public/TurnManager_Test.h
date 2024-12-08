@@ -8,7 +8,7 @@
 class ITurnManageable;
 enum class ETurnPriority : uint8;
 
-USTRUCT(FITurnManageableWrapper)
+USTRUCT(BlueprintType)
 struct SMITH_API FITurnManageableWrapper
 {
 	GENERATED_BODY()

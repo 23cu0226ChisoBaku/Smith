@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SmithCommandFormat.h"
-
+#include "IAttackable.h"
+#include "ITurnManageable.h"
 // Should always be the last include
 #include "SmithStaticObj.generated.h"
 
 
 UCLASS()
-class SMITH_API ASmithStaticObj : public AActor
+class SMITH_API ASmithStaticObj : public AActor, public IAttackable, public ITurnManageable
 {
 	GENERATED_BODY()
 //---------------------------------------
@@ -36,6 +37,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+public:
+	void OnAttack(const AttackHandle& attack) override;
+	UTurnControlComponent* GetTurnControl() const override;
 //---------------------------------------
 /*
 						Privateメソッド
