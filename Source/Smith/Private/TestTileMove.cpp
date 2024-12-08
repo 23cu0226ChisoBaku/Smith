@@ -8,11 +8,19 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Kismet\KismetSystemLibrary.h"
+
+#include "IAttackable.h"
 
 namespace Smith_NS_Mapinfo
 {
 	constexpr float TILE_SIZE = 250.0f;
-	
+}
+
+namespace Smith_NS_PlayerColliderInfo
+{
+	constexpr float CAPSULE_RADIUS = 90.0f;
+	constexpr float CAPSULE_HALF_HEIGHT = 240.0f;
 }
 
 // Sets default values
@@ -22,6 +30,8 @@ ATestTileMove::ATestTileMove()
 	, m_cam(nullptr)
 	, m_nextDir(FVector::ZeroVector)
 	, m_camDir(North)
+	, m_actorFaceDir(North)
+	, m_capsuleHalfHeight(0.0f)
 	, m_hasMoveInput(false)
 	, m_hasAttackInput(false)
 	, m_hasLookInput(false)
@@ -35,7 +45,11 @@ ATestTileMove::ATestTileMove()
 	check((m_capsuleCol != nullptr))
 
 	m_capsuleCol->SetupAttachment(RootComponent);
-	m_capsuleCol->InitCapsuleSize(90.0f, 240.0f);
+	m_capsuleCol->InitCapsuleSize(
+																Smith_NS_PlayerColliderInfo::CAPSULE_RADIUS,
+																Smith_NS_PlayerColliderInfo::CAPSULE_HALF_HEIGHT);
+
+	m_capsuleHalfHeight = Smith_NS_PlayerColliderInfo::CAPSULE_HALF_HEIGHT;
 
 	m_springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("testCameraBoom"));
 
@@ -66,20 +80,7 @@ void ATestTileMove::BeginPlay()
 	Super::BeginPlay();
 
 	setupInputMappingCtx_test();
-	
-	const FVector playerForward = GetActorForwardVector();
 
-	FString forwardStr;
-	forwardStr.AppendChars(TEXT("X:"),3 );
-	forwardStr.Append(FString::SanitizeFloat(playerForward.X));
-	forwardStr.AppendChars(TEXT("Y:"),3 );
-	forwardStr.Append(FString::SanitizeFloat(playerForward.Y));
-	forwardStr.AppendChars(TEXT("Z:"),3 );
-	forwardStr.Append(FString::SanitizeFloat(playerForward.Z));
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, forwardStr);
-	}
 }
 
 // Called every frame
@@ -124,9 +125,32 @@ bool ATestTileMove::moveTile_test()
 		return false;
 	}
 
-	SetActorLocation(m_nextDir);
+	FHitResult hit = {};
+	bool isHit = false;
+
+	FCollisionShape sphereShape {};
+	FCollisionQueryParams hitParam;
+	hitParam.AddIgnoredActor(this);
+	const float sphereRadius = m_capsuleHalfHeight * 2.0f;
+	sphereShape.SetSphere(sphereRadius);
+	
+	isHit = GetWorld()->SweepSingleByChannel(
+																						hit, 
+																						GetActorLocation(),
+																						m_nextDir,
+																						FQuat::Identity,
+																						ECollisionChannel::ECC_MAX,
+																						sphereShape,
+																						hitParam
+																					);
+	if (!isHit)
+	{
+		SetActorLocation(m_nextDir);
+	}
+
 	m_nextDir = FVector::ZeroVector;
 	m_hasMoveInput = false;
+
 	return true;
 }
 
@@ -134,7 +158,55 @@ bool ATestTileMove::attack_test()
 {
 	const FRotator playerRotator = GetActorRotation();
 
-	return false;
+	FHitResult hit = {};
+	bool isHit = false;
+
+	FCollisionShape sphereShape {};
+	FCollisionQueryParams hitParam;
+	hitParam.AddIgnoredActor(this);
+	const float sphereRadius = m_capsuleHalfHeight * 2.0f;
+	sphereShape.SetSphere(sphereRadius);
+	
+	isHit = GetWorld()->SweepSingleByChannel(
+																						hit, 
+																						GetActorLocation(),
+																						m_nextDir,
+																						FQuat::Identity,
+																						ECollisionChannel::ECC_MAX,
+																						sphereShape,
+																						hitParam
+																					);
+
+	if (isHit)
+	{
+		IAttackable* attackable = Cast<IAttackable>(hit.GetActor());
+		if (attackable != nullptr)
+		{
+			AttackHandle attackHnd {GetName(), 10};
+			attackable->OnAttack(attackHnd);
+			
+			if (GEngine != nullptr)
+			{
+				FString hitLog = hit.GetActor()->GetName();
+
+				hitLog.AppendChars(TEXT(" got attack by "), 16);
+				hitLog.Append(GetName());
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, hitLog);
+			}
+		}	
+
+	}
+	else
+	{
+		if (GEngine != nullptr)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Hit Nothing"));
+		}
+	}
+
+	m_hasAttackInput = false;
+
+	return true;
 }
 
 bool ATestTileMove::updateCam_test()
@@ -159,6 +231,11 @@ bool ATestTileMove::updateCam_test()
 
 bool ATestTileMove::changeForward_test(const FVector2D& inputValue)
 {
+	if (inputValue == FVector2D::ZeroVector)
+	{
+		return false;
+	}
+
 	const double cameraAngle = FMath::DegreesToRadians(StaticCast<double>(m_camDir * 45));
 	double directionX = inputValue.Y * cos(cameraAngle) - inputValue.X * sin(cameraAngle);
 	double directionY = inputValue.Y * sin(cameraAngle) + inputValue.X * cos(cameraAngle);
@@ -176,8 +253,9 @@ bool ATestTileMove::changeForward_test(const FVector2D& inputValue)
 	const FVector DirectionVec = FVector(directionX, directionY, 0.0);
 	EDir_Test newDir = vectorToEDir(DirectionVec);
 
-	SetActorRelativeRotation(FRotator(0.0, newDir * 45.0, 0.0));
-
+	const double newYaw = StaticCast<double>(newDir) * 45.0;
+	SetActorRelativeRotation(FRotator(0.0, newYaw, 0.0));
+	
 	return true;
 }
 
@@ -257,6 +335,7 @@ void ATestTileMove::Move(const FInputActionValue& value)
 
 	m_nextDir = startPos + direction * Smith_NS_Mapinfo::TILE_SIZE;
 
+
 }
 
 void ATestTileMove::Attack(const FInputActionValue& value)
@@ -306,6 +385,3 @@ ATestTileMove::EDir_Test ATestTileMove::vectorToEDir(const FVector& direction)
 	const double anglePerDirection = 360.0 / StaticCast<double>(DirectionCnt);
 	return StaticCast<EDir_Test>(round(newAngle / anglePerDirection));
 }
-
-
-
