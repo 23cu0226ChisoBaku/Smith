@@ -6,7 +6,7 @@
 #include "GameFramework/Character.h"
 #include "MyPlayerCharacter.generated.h"
 
-// ‘O•ûéŒ¾
+// ï¿½Oï¿½ï¿½ï¿½éŒ¾
 class USpringArmComponent;
 class UCameraComponent;
 
@@ -30,12 +30,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// ƒXƒvƒŠƒ“ƒOƒA[ƒ€
+	// ï¿½Xï¿½vï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½Aï¿½[ï¿½ï¿½
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* m_pSpringArm;
-	// ƒJƒƒ‰
+	// ï¿½Jï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* m_pCamera;
+
 private:
 	void UpdatePawn();
 	void Pawn_MoveForward(float axisValue);

@@ -1,0 +1,11 @@
+---,Row,Column,Type
+FormatInfo,"3","3","NO_EFFECT"
+1,"0","0","NO_EFFECT"
+2,"0","1","NO_EFFECT"
+3,"0","2","EFFECT"
+4,"1","0","NO_EFFECT"
+5,"1","1","EFFECT"
+6,"1","2","NO_EFFECT"
+7,"2","0","CENTER_NO_EFFECT"
+8,"2","1","NO_EFFECT"
+9,"2","2","NO_EFFECT"
