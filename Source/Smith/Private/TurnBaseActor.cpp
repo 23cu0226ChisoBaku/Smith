@@ -48,7 +48,7 @@ FDelegateHandle ATurnBaseActor::Subscribe(FRequestCommandEvent::FDelegate& deleg
 		return m_event.Add(delegate);
 	}
 
-	return FDelegateHandle{};
+	return delegate.GetHandle();
 }
 
 bool ATurnBaseActor::Unsubscribe(UObject* objPtr, FDelegateHandle handle)
