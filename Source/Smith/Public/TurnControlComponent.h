@@ -28,10 +28,9 @@ public:
 public:
 	void SetCommandSendable(bool);
 	void SetTurnPriority(ETurnPriority);
-	void RequestCommand();
 
 private:
-	uint8 m_cmdSendable : 1 = false;
 	ETurnPriority m_priority = ETurnPriority::PlayerSelf;
+	uint8 m_isCMDSendable : 1 = false;
 		
 };

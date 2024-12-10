@@ -119,8 +119,3 @@ void ASmithStaticObj::OnAttack(const AttackHandle& attack)
 	}
 }
 
-UTurnControlComponent* ASmithStaticObj::GetTurnControl() const
-{
-	return nullptr;
-}
-

@@ -9,7 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Kismet\KismetSystemLibrary.h"
-
+#include "TurnControlComponent.h"
 
 namespace Smith_NS_Mapinfo
 {
@@ -124,10 +124,6 @@ void ATestTileMove::OnAttack(const AttackHandle& attack)
 	}
 }
 
-UTurnControlComponent *ATestTileMove::GetTurnControl() const
-{
-  return nullptr;
-}
 
 bool ATestTileMove::moveTile_test()
 {

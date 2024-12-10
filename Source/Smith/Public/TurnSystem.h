@@ -7,9 +7,9 @@
 /**
  * 
  */
-class SMITH_API Testtestttt
+class SMITH_API TurnSystem
 {
 public:
-	Testtestttt();
-	~Testtestttt();
+	TurnSystem();
+	~TurnSystem();
 };

@@ -12,7 +12,7 @@
 
 
 UCLASS()
-class SMITH_API ASmithStaticObj : public AActor, public IAttackable, public ITurnManageable
+class SMITH_API ASmithStaticObj : public AActor, public IAttackable
 {
 	GENERATED_BODY()
 //---------------------------------------
@@ -39,7 +39,6 @@ public:
 
 public:
 	void OnAttack(const AttackHandle& attack) override;
-	UTurnControlComponent* GetTurnControl() const override;
 //---------------------------------------
 /*
 						Privateメソッド

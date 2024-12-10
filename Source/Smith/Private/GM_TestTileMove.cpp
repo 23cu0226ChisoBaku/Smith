@@ -15,11 +15,5 @@ AGM_TestTileMove::AGM_TestTileMove()
   {
     DefaultPawnClass = TileMoveBPClass.Class;
   }
-  else
-  {
-    if(GEngine)
-    {
-      GEngine->AddOnScreenDebugMessage(-1, 10.f,FColor::Red, TEXT("ajsdiajflkasjdlkasd"));
-    }
-  }
+
 }

@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Testtestttt.h"
+#include "AttackCommand.h"
 
-Testtestttt::Testtestttt()
+AttackCommand::AttackCommand()
 {
 }
 
-Testtestttt::~Testtestttt()
+AttackCommand::~AttackCommand()
 {
 }

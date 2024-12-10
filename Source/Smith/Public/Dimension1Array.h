@@ -49,7 +49,7 @@ namespace UE::MLibrary
 		//---------------------------------------
 		public:
 			using ElementType = T;
-			using Iterator = ArrayIterator<TDimension1Array<ElementType>>;\
+			using Iterator = ArrayIterator<TDimension1Array<ElementType>>;
 			using ConstIterator = const Iterator;
 			// static_assert(std::is_integral_v<ElementType> || std::is_floating_point_v<ElementType>, "Can't use type that is not integer or floating point");
 
