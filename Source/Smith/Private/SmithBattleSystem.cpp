@@ -3,10 +3,16 @@
 
 #include "SmithBattleSystem.h"
 
-SmithBattleSystem::SmithBattleSystem()
+namespace Smith
 {
-}
+  inline namespace Battle
+  {
+    SmithBattleSystem::SmithBattleSystem()
+    {
+    }
 
-SmithBattleSystem::~SmithBattleSystem()
-{
+    SmithBattleSystem::~SmithBattleSystem()
+    {
+    }  
+  }
 }

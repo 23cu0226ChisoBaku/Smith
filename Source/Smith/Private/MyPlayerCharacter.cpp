@@ -5,7 +5,7 @@
 // Sets default values
 AMyPlayerCharacter::AMyPlayerCharacter()
 {
- 	// Tick‚ğg‚¤
+ 	// Tickï¿½ï½½ï¿½ï½½ï¿½ï½½gï¿½ï½½ï¿½ï½½
 	PrimaryActorTick.bCanEverTick = true;
 
 	m_pSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("m_pSpringArm"));
@@ -13,12 +13,12 @@ AMyPlayerCharacter::AMyPlayerCharacter()
 	{
 		m_pSpringArm->SetupAttachment(RootComponent);
 
-		// ƒA[ƒ€‚Ì’·‚³İ’è
-		// ƒJƒƒ‰‚ÌƒRƒŠƒWƒ‡ƒ“ƒeƒXƒg‚ğs‚¤‚©İ’è
+		// ï¿½ï½½Aï¿½ï½½[ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾ŒæŠµï½¿ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾æŠµï½¿ï½½
+		// ï¿½ï½½Jï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾Œã‚³ï¿½ï½½ï¿½ï½½ï¿½ï½½Wï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½eï¿½ï½½Xï¿½ï½½gï¿½ï½½ï¿½ï½½ï¿½ï½½sï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾æŠµï½¿ï½½
 		m_pSpringArm->bDoCollisionTest = false;
-		// ƒJƒƒ‰‚Ì’Ç]ƒ‰ƒO‚ğg‚¤‚©‚ğİ’è
+		// ï¿½ï½½Jï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾Œè¿½å¾“ï¿½ï½½ï¿½ï½½ï¿½ï½½Oï¿½ï½½ï¿½ï½½ï¿½ï½½gï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾æŠµï½¿ï½½
 		m_pSpringArm->bEnableCameraLag = false;
-		// ƒJƒƒ‰‰ñ“]ƒ‰ƒO‚ğg‚¤‚©‚ğİ’è
+		// ï¿½ï½½Jï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½]ï¿½ï½½ï¿½ï½½ï¿½ï½½Oï¿½ï½½ï¿½ï½½ï¿½ï½½gï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾æŠµï½¿ï½½
 		m_pSpringArm->bEnableCameraRotationLag = false;
 	}
 	else
@@ -29,11 +29,11 @@ AMyPlayerCharacter::AMyPlayerCharacter()
 		}
 	}
 
-	// ƒJƒƒ‰‚ÌƒIƒuƒWƒFƒNƒg‚ğİ’è
+	// ï¿½ï½½Jï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾Œã‚ªï¿½ï½½uï¿½ï½½Wï¿½ï½½Fï¿½ï½½Nï¿½ï½½gï¿½ï½½ï¿½ï½½ï¾æŠµï½¿ï½½
 	m_pCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("m_pCamera"));
 	if ((m_pCamera != nullptr) && (m_pSpringArm != NULL))
 	{
-		// ƒJƒƒ‰‚ğƒXƒvƒŠƒ“ƒOƒA[ƒ€‚ÉƒAƒ^ƒbƒ`‚É‚³‚¹‚é
+		// ï¿½ï½½Jï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½Xï¿½ï½½vï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½Oï¿½ï½½Aï¿½ï½½[ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾‰ã‚¢ï¿½ï½½^ï¿½ï½½bï¿½ï½½`ï¿½ï½½ï¾‰ã‚‘ï½¿ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½
 		m_pCamera->SetupAttachment(m_pSpringArm, USpringArmComponent::SocketName);
 	}
 
@@ -51,6 +51,7 @@ AMyPlayerCharacter::AMyPlayerCharacter()
 void AMyPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 // Called every frame
@@ -61,40 +62,41 @@ void AMyPlayerCharacter::Tick(float DeltaTime)
 	UpdatePawn();
 }
 
-// “ü—Í‚ÆƒoƒCƒ“ƒhˆ—
+// ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾ã¨ãƒï¿½ï½½Cï¿½ï½½ï¿½ï½½ï¿½ï½½hï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½
 void AMyPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	// Pawn‚ÌˆÚ“®
+	// Pawnï¿½ï½½ï¾Œç§»é›£ï½¿ï½½
 	InputComponent->BindAxis("MoveForward", this, &AMyPlayerCharacter::Pawn_MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &AMyPlayerCharacter::Pawn_MoveRight);
 }
 
 void AMyPlayerCharacter::UpdatePawn()
 {
-	 //ˆÚ“®“ü—Í‚ª‚È‚©‚Á‚½ê‡‘Šúreturn
+	 //ï¿½ï½½ï¾šé›£ï½¿ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾ã‚‘ï½¿ï½½ï¿½ï½½ï¾ˆã‚‘ï½¿ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½é¼¾ï¿½ï½¿ï½½ï¿½ï½½ï¿½ï½½ï¿½ï½½return
 	if (m_pos.IsZero())
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 60.0f, FColor::Red, TEXT("Return"));
 		return;
 	}
-	//Œ»İ‚ÌÀ•W
+	//ï¿½ï½½ï¿½ï½½ï¿½ï½½ï¾ã®æ¾ï½¿ï½½ï¿½ï½½W
 	FVector pos = GetActorLocation();
 	pos += m_pos;
-	// À•W‚Æ‰ñ“]ƒZƒbƒg
+
+	// åº§æ¨™ã¨å›è»¢ã‚»ãƒƒãƒˆ
 	SetActorLocation(pos);
-	// ˆÚ“®—Ê‚ğ‚O‚É–ß‚·
+	// ç§»å‹•é‡ã‚’ï¼ã«æˆ»ã™
 	m_pos = FVector::ZeroVector;
 }
 
-// ‘OŒãˆÚ“®
+// ï¿½ï½½Oï¿½ï½½ï¿½ï½½ï¾šé›£ï½¿ï½½
 void AMyPlayerCharacter::Pawn_MoveForward(float axisValue)
 {
 	m_pos.X += (axisValue * 5.0f);
 }
 
-// ¶‰EˆÚ“®
+// ï¿½ï½½ï¿½ï½½ï¿½ï½½Eï¿½ï½½ï¾šé›£ï½¿ï½½
 void AMyPlayerCharacter::Pawn_MoveRight(float axisValue)
 {
 	m_pos.Y += (axisValue * 5.0f);
