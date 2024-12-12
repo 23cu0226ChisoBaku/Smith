@@ -16,5 +16,6 @@ class SMITH_API ASpawnActorGameMode_Test : public AGameModeBase
 
 public:
 	ASpawnActorGameMode_Test();
+	virtual void StartPlay() override;
 
 };

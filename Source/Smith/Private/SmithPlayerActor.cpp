@@ -38,6 +38,8 @@ ASmithPlayerActor::ASmithPlayerActor()
 
 	m_turnComponent = CreateDefaultSubobject<UTurnControlComponent>(TEXT("TurnComponent"));
 	check((m_turnComponent != nullptr));
+
+	m_turnComponent->SetTurnPriority(ETurnPriority::PlayerSelf);
 }
 
 // Called when the game starts or when spawned
@@ -64,12 +66,13 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 		UE_LOG(LogTemp, Warning, TEXT("Roll: %lf, Pitch: %lf, Yaw: %lf"), rotator.Roll, rotator.Pitch, rotator.Yaw);
 	}
 
-	// TODO TestCode
-	USmithBattleSubsystem* subsys = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
-	if (subsys)
+	USmithBattleSubsystem* sub = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
+
+	if (sub != nullptr)
 	{
-		//subsys->YAYA();
+		sub->YAYA();
 	}
+
 }
 
 // Called to bind functionality to input
@@ -107,5 +110,38 @@ bool ASmithPlayerActor::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle
 	{
 		return false;
 	}
+}
+
+void ASmithPlayerActor::Move(const FInputActionValue& value)
+{
+	FVector2D movementInput = value.Get<FVector2D>();
+	// TODO
+	// changeForward_test(movementInput);
+
+	// if (m_hasMoveInput || m_isInAction)
+	// {
+	// 	return;
+	// }
+
+	//m_hasMoveInput = true;
+	const FVector startPos = GetActorLocation();
+	// const double cameraAngle = FMath::DegreesToRadians(StaticCast<double>(m_camDir * 45));
+	// double directionX = movementInput.Y * cos(cameraAngle) - movementInput.X * sin(cameraAngle);
+	// double directionY = movementInput.Y * sin(cameraAngle) + movementInput.X * cos(cameraAngle);
+
+	// if (FMath::IsNearlyZero(directionX))
+	// {
+	// 	directionX = 0.0;
+	// }
+
+	// if (FMath::IsNearlyZero(directionY))
+	// {
+	// 	directionY = 0.0;
+	// }
+	
+	// const FVector direction = FVector(directionX, directionY, 0.0);
+
+	// m_nextDir = startPos + direction * Smith_NS_Mapinfo::TILE_SIZE;
+
 }
 

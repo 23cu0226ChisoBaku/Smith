@@ -10,6 +10,10 @@
 class USpringArmComponent;
 class UCameraComponent;
 
+class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
+
 UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable
 {
@@ -39,10 +43,26 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UTurnControlComponent> m_turnComponent;
 
+	// Enhanced Input
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputMappingContext> m_mappingCtx;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> m_moveAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> m_attackAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> m_cameraAction;
+
 public:
 	UTurnControlComponent* GetTurnControl() const override final;
 	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
 	bool Unsubscribe(UObject*,FDelegateHandle) override final;
+
+private:
+	// input bind method
+	void Move(const FInputActionValue& value);
+	void Attack(const FInputActionValue& value);
+	void Look(const FInputActionValue& value);
 
 private:
 	FRequestCommandEvent m_event;
