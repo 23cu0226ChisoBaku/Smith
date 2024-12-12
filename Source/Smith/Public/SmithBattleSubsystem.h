@@ -8,8 +8,8 @@
 #include "TurnPriority.h"
 #include "SmithBattleSubsystem.generated.h"
 
+class IBattleCommand;
 enum class ETurnPriority : uint8;
-
 
 UCLASS()
 class SMITH_API USmithBattleSubsystem final : public UWorldSubsystem
@@ -51,6 +51,9 @@ public:
 			}
 		}
 	}
+
+private:
+	void executeCommand(IBattleCommand*);
 
 private:
 	UPROPERTY()

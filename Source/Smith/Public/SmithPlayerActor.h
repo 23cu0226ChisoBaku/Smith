@@ -14,6 +14,8 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+class IBattleCommand;
+
 UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable
 {
@@ -57,6 +59,9 @@ public:
 	UTurnControlComponent* GetTurnControl() const override final;
 	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
 	bool Unsubscribe(UObject*,FDelegateHandle) override final;
+
+private:
+	void sendCommand(IBattleCommand*);
 
 private:
 	// input bind method

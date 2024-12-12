@@ -7,7 +7,11 @@
 
 ASpawnActorGameMode_Test::ASpawnActorGameMode_Test()
 {
-  DefaultPawnClass = ASmithPlayerActor::StaticClass();
+  static ConstructorHelpers::FClassFinder<APawn> PlayerBP(TEXT("/Game/BP/BP_SmithPlayerActor"));
+  if (PlayerBP.Class != nullptr)
+  {
+    DefaultPawnClass = PlayerBP.Class;
+  }
 }
 
 void ASpawnActorGameMode_Test::StartPlay()

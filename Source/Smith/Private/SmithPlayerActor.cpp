@@ -10,6 +10,9 @@
 #include "SmithBattleSubsystem.h"
 #include "TurnControlComponent.h"
 
+#include "AttackCommand.h"
+#include "MoveCommand.h"
+
 
 // Sets default values
 ASmithPlayerActor::ASmithPlayerActor()
@@ -46,6 +49,16 @@ ASmithPlayerActor::ASmithPlayerActor()
 void ASmithPlayerActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	APlayerController* playerCtrl = Cast<APlayerController>(Controller);
+
+	check((playerCtrl != nullptr));
+
+	UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerCtrl->GetLocalPlayer());
+
+	check((enhancedInputSubsystem != nullptr));
+
+	enhancedInputSubsystem->AddMappingContext(m_mappingCtx, 0);
 	
 }
 
@@ -68,10 +81,10 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 
 	USmithBattleSubsystem* sub = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
 
-	if (sub != nullptr)
-	{
-		sub->YAYA();
-	}
+	// if (sub != nullptr)
+	// {
+	// 	sub->YAYA();
+	// }
 
 }
 
@@ -79,6 +92,12 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+
+	inputComp->BindAction(m_moveAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Move);
+	inputComp->BindAction(m_attackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack);
+	inputComp->BindAction(m_cameraAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Look);
 
 }
 
@@ -115,33 +134,31 @@ bool ASmithPlayerActor::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle
 void ASmithPlayerActor::Move(const FInputActionValue& value)
 {
 	FVector2D movementInput = value.Get<FVector2D>();
-	// TODO
-	// changeForward_test(movementInput);
 
-	// if (m_hasMoveInput || m_isInAction)
-	// {
-	// 	return;
-	// }
+	MoveCommand moveCmd(this);
 
-	//m_hasMoveInput = true;
-	const FVector startPos = GetActorLocation();
-	// const double cameraAngle = FMath::DegreesToRadians(StaticCast<double>(m_camDir * 45));
-	// double directionX = movementInput.Y * cos(cameraAngle) - movementInput.X * sin(cameraAngle);
-	// double directionY = movementInput.Y * sin(cameraAngle) + movementInput.X * cos(cameraAngle);
+	sendCommand(&moveCmd);
+}
 
-	// if (FMath::IsNearlyZero(directionX))
-	// {
-	// 	directionX = 0.0;
-	// }
+void ASmithPlayerActor::Attack(const FInputActionValue& value)
+{
+	AttackCommand atkCmd(this);
 
-	// if (FMath::IsNearlyZero(directionY))
-	// {
-	// 	directionY = 0.0;
-	// }
-	
-	// const FVector direction = FVector(directionX, directionY, 0.0);
+	sendCommand(&atkCmd);
+}
 
-	// m_nextDir = startPos + direction * Smith_NS_Mapinfo::TILE_SIZE;
+void ASmithPlayerActor::Look(const FInputActionValue& value)
+{
 
+}
+
+void ASmithPlayerActor::sendCommand(IBattleCommand* command)
+{
+	if (!m_event.IsBound())
+	{
+		return;
+	}
+
+	m_event.Broadcast(command);
 }
 

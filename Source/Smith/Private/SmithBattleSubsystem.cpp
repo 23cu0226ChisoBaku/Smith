@@ -5,6 +5,9 @@
 #include "ITurnManageable.h"
 #include "TurnControlComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "IBattleCommand.h"
+
+#include "TurnActor_Test.h"
 
 bool USmithBattleSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -22,6 +25,7 @@ void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
   // TODO  
   //GetWorld()->SpawnActor<ASmithPlayerActor>(ASmithPlayerActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+  GetWorld()->SpawnActor<ATurnActor_Test>(ATurnActor_Test::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
 }
 
 void USmithBattleSubsystem::Deinitialize()
@@ -36,10 +40,13 @@ void USmithBattleSubsystem::StartBattle()
 
   if (turnManageable.Num() > 0)
   {
+    FRequestCommandEvent::FDelegate requestDelegate;
+    requestDelegate.BindUObject(this, &USmithBattleSubsystem::executeCommand);
     for (const auto manageable : turnManageable)
     {
       // TODO componentをInterfaceに変換
       UTurnControlComponent* turnCtrl = Cast<ITurnManageable>(manageable)->GetTurnControl();
+      Cast<ITurnManageable>(manageable)->Subscribe(requestDelegate);
       if (turnCtrl != nullptr)
       {
         turnCtrl->SetCommandSendable(true);
@@ -53,9 +60,15 @@ void USmithBattleSubsystem::StartBattle()
         m_priorityLists[actorPriority].Elements.Add(Cast<ITurnManageable>(manageable));
       }
     }
-    if (GEngine)
-    {
-      GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Cyan, TEXT("YEAADASFSA"));
-    }
   }
+}
+
+void USmithBattleSubsystem::executeCommand(IBattleCommand* battleCommand)
+{
+  if (battleCommand == nullptr)
+  {
+    return;
+  }
+
+  battleCommand->Execute();
 }

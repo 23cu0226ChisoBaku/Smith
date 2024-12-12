@@ -5,12 +5,19 @@
 #include "CoreMinimal.h"
 #include "IBattleCommand.h"
 
+class ASmithPlayerActor;
 /**
  * 
  */
 class SMITH_API MoveCommand : public IBattleCommand
 {
 public:
-	MoveCommand();
+	MoveCommand(ASmithPlayerActor*);
 	~MoveCommand();
+
+public:
+	void Execute() override final;
+
+private:
+	TWeakObjectPtr<ASmithPlayerActor> m_actor;
 };
