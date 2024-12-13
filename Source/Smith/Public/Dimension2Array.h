@@ -46,6 +46,8 @@ namespace UE::MLibrary
 			class TDimension2ArrayRowArr
 			{
 				friend class TDimension2Array<ElementType>;
+				using Iterator = ArrayIterator<TDimension2ArrayRowArr>;
+				using ConstIterator = const Iterator;
 				private:
 					TDimension2ArrayRowArr(ElementType* src, uint64 length)
 						: m_rowArr(src)
@@ -57,19 +59,15 @@ namespace UE::MLibrary
 						memset(this, 0, sizeof(this));
 					}
 				public:
-					const ElementType& At_Readonly(uint64 idx) const&
+					const ElementType& At_Readonly(uint64 idx) const
 					{
-						return at_impl(idx);
+						return at_impl_copy(idx);
 					}
-					const ElementType& At(uint64 idx) const&
+					const ElementType& At(uint64 idx) const
 					{
-						return at_impl(idx);
+						return at_impl_copy(idx);
 					}
-					ElementType& At(uint64 idx) &
-					{
-						return at_impl(idx);
-					}
-					ElementType& At(uint64 idx) &&
+					ElementType& At(uint64 idx)
 					{
 						return at_impl(idx);
 					}
@@ -79,15 +77,11 @@ namespace UE::MLibrary
 					}
 
 				public:
-					const ElementType& operator[](uint64 idx) const&
+					const ElementType& operator[](uint64 idx) const
 					{
-						return at_impl(idx);
+						return at_impl_copy(idx);
 					}
-					ElementType& operator[](uint64 idx) &
-					{
-						return at_impl(idx);
-					}
-					ElementType& operator[](uint64 idx) &&
+					ElementType& operator[](uint64 idx)
 					{
 						return at_impl(idx);
 					}
@@ -99,6 +93,32 @@ namespace UE::MLibrary
 
 						return m_rowArr[idx];
 					}
+					ElementType at_impl_copy(uint64 idx)
+					{
+						check(m_rowArr != nullptr)
+						check(m_length != 0)
+
+						return m_rowArr[idx];
+					}
+
+					// イテレータ
+				Iterator begin()
+				{
+					return Iterator(m_rowArr);
+				}
+				ConstIterator begin() const
+				{
+					return ConstIterator(m_rowArr);
+				}
+				Iterator end()
+				{
+					return Iterator(m_rowArr + m_length);
+				}
+				ConstIterator end() const
+				{
+					return ConstIterator(m_rowArr + m_length);
+				}
+				
 				private:
 					ElementType* m_rowArr;
 					uint64 m_length;
@@ -149,8 +169,6 @@ namespace UE::MLibrary
 					{
 						if (this->m_elemArr != nullptr)
 						{
-							// TODO something wrong here????
-							// Comment: should initialize in copy ctor
 							delete[] this->m_elemArr;
 						}
 
@@ -237,7 +255,7 @@ namespace UE::MLibrary
 				/// @return 配列[行のインデックス][列のインデックス]のコンスト参照
 				const ElementType& At_ReadOnly(uint64 row, uint64 column) const &
 				{
-					return at_impl(row, column);
+					return at_impl_copy(row, column);
 				}
 				/// @brief 二次元配列の値を返す(読み込み専用)
 				/// @param row 行のインデックス
@@ -245,7 +263,7 @@ namespace UE::MLibrary
 				/// @return 配列[行のインデックス][列のインデックス]のコンスト参照
 				const ElementType& At(uint64 row, uint64 column) const &
 				{
-					return at_impl(row, column);
+					return at_impl_copy(row, column);
 				}
 				/// @brief 二次元配列の値を返す(書き込み可能)
 				/// @param row 行のインデックス
@@ -259,9 +277,9 @@ namespace UE::MLibrary
 				/// @param row 行のインデックス
 				/// @param column 列のインデックス
 				/// @return 配列[行のインデックス][列のインデックス]の参照
-				ElementType& At(uint64 row, uint64 column) &&
+				ElementType At(uint64 row, uint64 column) &&
 				{
-					return at_impl(row, column);
+					return at_impl_copy(row, column);
 				}
 				/// @brief 配列の行数を返す(読み込み専用)
 				/// @return 配列の行数
@@ -368,6 +386,16 @@ namespace UE::MLibrary
 					return m_elemArr[row * m_column + column];
 
 				}
+
+				ElementType at_impl_copy(uint64 row, uint64 column) const
+				{
+					check(m_elemArr != nullptr)
+					check(row < m_row && column < m_column)
+
+					return m_elemArr[row * m_column + column];
+
+				}
+
 		//---------------------------------------
 		/*
 						 スタティック変数(public)

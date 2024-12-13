@@ -152,9 +152,9 @@ namespace UE::MLibrary
 				/// @brief 配列の値を返す(書き換え可能)
 				/// @param idx インデックス
 				/// @return 配列[インデックス]の参照
-				ElementType& At(uint64 idx) &&
+				ElementType At(uint64 idx) &&
 				{
-					return at_impl(idx);
+					return at_impl_copy(idx);
 				}
 				/// @brief 配列の長さを返す(読み込み専用)
 				/// @return 配列の長さ
@@ -210,9 +210,9 @@ namespace UE::MLibrary
 				/// @brief 配列の値を返す(書き換え可能)
 				/// @param idx インデックス
 				/// @return 配列[インデックス]の参照
-				ElementType& operator[](uint64 idx) &&
+				ElementType operator[](uint64 idx) &&
 				{
-						return at_impl(idx);
+						return at_impl_copy(idx);
 				}
 		// Private
 		#pragma region Private
@@ -224,6 +224,13 @@ namespace UE::MLibrary
 					m_length = 0;
 				}
 				ElementType& at_impl(uint64 idx)
+				{
+					check(idx < m_length)
+
+					return m_elemArr[idx];
+				}
+
+				ElementType at_impl_copy(uint64 idx)
 				{
 					check(idx < m_length)
 

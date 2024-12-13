@@ -5,12 +5,19 @@
 #include "CoreMinimal.h"
 #include "IBattleCommand.h"
 
+class ASmithPlayerActor;
 /**
  * 
  */
 class SMITH_API AttackCommand : public IBattleCommand
 {
 public:
-	AttackCommand();
+	AttackCommand(ASmithPlayerActor*);
 	~AttackCommand();
+
+public:
+	void Execute() override final;
+
+private:
+	TWeakObjectPtr<ASmithPlayerActor> m_actor;
 };

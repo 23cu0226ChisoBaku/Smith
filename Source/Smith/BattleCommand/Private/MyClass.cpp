@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AttackCommand.h"
+#include "MyClass.h"
 
-AttackCommand::AttackCommand()
+MyClass::MyClass()
 {
 }
 
-AttackCommand::~AttackCommand()
+MyClass::~MyClass()
 {
 }

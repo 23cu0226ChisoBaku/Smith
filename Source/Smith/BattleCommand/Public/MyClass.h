@@ -7,9 +7,9 @@
 /**
  * 
  */
-class SMITH_API TurnSystem
+class SMITH_API MyClass
 {
 public:
-	TurnSystem();
-	~TurnSystem();
+	MyClass();
+	~MyClass();
 };

@@ -4,31 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "TurnBaseActor.h"
-#include "SmithPlayer_Turn.generated.h"
+#include "TurnActor_Test.generated.h"
 
-class USpringArmComponent;
-class UCameraComponent;
 /**
  * 
  */
 UCLASS()
-class SMITH_API ASmithPlayer_Turn : public ATurnBaseActor
+class SMITH_API ATurnActor_Test : public ATurnBaseActor
 {
 	GENERATED_BODY()
-	
+
 public:
-	ASmithPlayer_Turn();
+	ATurnActor_Test();
 
 protected:
 	void BeginPlay() override final;
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
-
+	
 public:
 	void Tick(float DeltaTime) override final;
 
 private:
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USpringArmComponent> m_springArm;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCameraComponent> m_cam;
+	float m_TimeCnt;
 };
