@@ -3,12 +3,13 @@
 
 #include "AttackCommand.h"
 #include "SmithPlayerActor.h"
+#include "SmithMoveComponent.h"
 #include "Debug.h"
 
 namespace UE::Smith::Command
 {
-  AttackCommand::AttackCommand(ASmithPlayerActor* actor)
-    : m_actor(actor)
+  AttackCommand::AttackCommand(USmithMoveComponent* moveComp)
+    : m_moveComp(moveComp)
   {}
 
   AttackCommand::~AttackCommand()
@@ -18,23 +19,18 @@ namespace UE::Smith::Command
 
   void AttackCommand::Execute()
   {
-    if (GEngine != nullptr)
+    FString attackStr{};
+    if (m_moveComp.IsValid())
     {
-      FString attackStr;
-      if (m_actor.IsValid())
-      {
-        attackStr.Append(m_actor->GetName());
-      }
-      else
-      {
-        attackStr.Append(TEXT("EMPTY OBJECT"));
-      }
-
-      attackStr.AppendChars(TEXT(" Attack Command"), 16);
-
-      GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, attackStr);
-
-      UE::MLibrary::Debug::Log("test");
+      attackStr.Append(m_moveComp->GetName());
     }
+    else
+    {
+      attackStr.Append(TEXT("EMPTY OBJECT"));
+    }
+
+    attackStr.AppendChars(TEXT(" Attack Command"), 16);
+
+    UE::MLibrary::Debug::Log(attackStr);
   }
 }

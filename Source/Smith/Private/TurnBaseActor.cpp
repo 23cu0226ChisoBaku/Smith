@@ -64,8 +64,18 @@ bool ATurnBaseActor::Unsubscribe(UObject* objPtr, FDelegateHandle handle)
 	}
 }
 
-void ATurnBaseActor::SendCommand(IBattleCommand* command)
+void ATurnBaseActor::SendCommand(TSharedPtr<IBattleCommand> command)
 {
+	if (!::IsValid(TurnComponent))
+	{
+		return;
+	}
+
+	if (!TurnComponent->IsCommandSendable())
+	{
+		return;
+	}
+
 	if (m_event.IsBound())
 	{
 		m_event.Broadcast(command);

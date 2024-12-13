@@ -53,15 +53,16 @@ namespace UE::MLibrary
 		static float gLogTime;
 
 	private:
-		enum ELogFatalLevel : uint8
-		{
-			Display = 0,
-			Warning = 1,
-			Error = 2,
-		};
+		static void log_impl(const FString&);
+		static void log_warning_impl(const FString&);
+		static void log_error_impl(const FString&);
 
-	private:
-		static void log_impl(ELogFatalLevel, const FString&);
+		static FString append_impl(const FString&, const char*);
+		static FString append_impl(const FString&, const wchar_t*);
+		static FString append_impl(const FString&, const std::string&);
+		static FString append_impl(const FString&, const std::wstring&);
+		static FString append_impl(const FString&, const FString&);
+		
 	private:
 		static const DebugFormat LOG_FORMAT;
 		static const DebugFormat LOG_WARNING_FORMAT;

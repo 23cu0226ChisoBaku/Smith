@@ -10,5 +10,7 @@ enum class ETurnPriority : uint8
 	PlayerSelf = 0,
 	Rival = 1,
 	Alliance = 2,
+
+	PriorityTypeCnt,
 };
 

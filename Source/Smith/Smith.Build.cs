@@ -17,6 +17,8 @@ public class Smith : ModuleRules
 																							"Smith/TurnSystem",
 																							"Smith/BattleCommand/Public",
 																							"Smith/BattleCommand",
+																							"Smith/Player/Public",
+																							"Smith/Player",
 																							"Smith",	  
 																						});
 

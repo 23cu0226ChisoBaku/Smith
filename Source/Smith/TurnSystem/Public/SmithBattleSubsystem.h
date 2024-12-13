@@ -53,9 +53,17 @@ public:
 	}
 
 private:
-	void executeCommand(IBattleCommand*);
+	void executeCommand();
+	void registerCommand(TSharedPtr<IBattleCommand>);
+	void registerNextTurnObjs();
 
 private:
 	UPROPERTY()
 	TMap<ETurnPriority, FITurnManageableWrapper> m_priorityLists;
+	UPROPERTY()
+	TArray<ITurnManageable*> m_requestCmdWaitList;
+
+private:
+	TQueue<TSharedPtr<IBattleCommand>> m_cmdExecuteQueue;
+	ETurnPriority m_curtTurn;
 };

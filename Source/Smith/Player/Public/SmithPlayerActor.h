@@ -61,7 +61,7 @@ public:
 	bool Unsubscribe(UObject*,FDelegateHandle) override final;
 
 private:
-	void sendCommand(IBattleCommand*);
+	void sendCommand(TSharedPtr<IBattleCommand>);
 
 private:
 	// input bind method

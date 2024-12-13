@@ -135,18 +135,14 @@ void ASmithPlayerActor::Move(const FInputActionValue& value)
 {
 	FVector2D movementInput = value.Get<FVector2D>();
 
-	// TODO
-	UE::Smith::Command::MoveCommand moveCmd(nullptr);
-
-	sendCommand(&moveCmd);
+	sendCommand(MakeShared<UE::Smith::Command::MoveCommand>(nullptr));
 }
 
 void ASmithPlayerActor::Attack(const FInputActionValue& value)
 {
-	UE::Smith::Command::AttackCommand atkCmd(this);
+	UE::Smith::Command::AttackCommand atkCmd(nullptr);
 
-	sendCommand(&atkCmd);
-
+	sendCommand(MakeShared<UE::Smith::Command::AttackCommand>(nullptr));
 }
 
 void ASmithPlayerActor::Look(const FInputActionValue& value)
@@ -154,7 +150,7 @@ void ASmithPlayerActor::Look(const FInputActionValue& value)
 
 }
 
-void ASmithPlayerActor::sendCommand(IBattleCommand* command)
+void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)
 {
 	if (!m_event.IsBound())
 	{
