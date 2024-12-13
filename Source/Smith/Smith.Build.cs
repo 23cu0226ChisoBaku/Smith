@@ -13,7 +13,9 @@ public class Smith : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
 		PrivateIncludePaths.AddRange(new string[] 
-																						{ "Smith/BattleCommand/Public",
+																						{ "Smith/TurnSystem/Public",
+																							"Smith/TurnSystem",
+																							"Smith/BattleCommand/Public",
 																							"Smith/BattleCommand",
 																							"Smith",	  
 																						});

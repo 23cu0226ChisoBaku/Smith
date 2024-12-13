@@ -21,8 +21,6 @@ Encoding : UTF-8
 #ifndef M_DEBUG_FORMAT_PRIVATE
 #define M_DEBUG_FORMAT_PRIVATE
 
-#include "CoreMinimal.h"
-
 struct DebugFormat
 {
 	FString logHeaderString;

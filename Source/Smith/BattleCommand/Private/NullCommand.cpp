@@ -3,18 +3,21 @@
 
 #include "NullCommand.h"
 
-NullCommand::NullCommand()
+namespace UE::Smith::Command
 {
-}
-
-NullCommand::~NullCommand()
-{
-}
-
-void NullCommand::Execute()
-{
-  if (GEngine != nullptr)
+  NullCommand::NullCommand()
   {
-    GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("NULL COMMAND"));
+  }
+
+  NullCommand::~NullCommand()
+  {
+  }
+
+  void NullCommand::Execute()
+  {
+    if (GEngine != nullptr)
+    {
+      GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("NULL COMMAND"));
+    }
   }
 }
