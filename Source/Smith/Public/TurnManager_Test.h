@@ -3,19 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "TurnManager_Test.generated.h"
 
 class ITurnManageable;
 enum class ETurnPriority : uint8;
 
-USTRUCT(BlueprintType)
-struct SMITH_API FITurnManageableWrapper
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	TArray<ITurnManageable*> Elements;
-};
 
 UCLASS()
 class SMITH_API UTurnManager_Test : public UObject
@@ -33,6 +26,5 @@ private:
 	void onExecuteCommand(ITurnManageable*);
 
 private:
-	UPROPERTY()
-	TMap<ETurnPriority,FITurnManageableWrapper> m_manageableContainer;
+	// 
 };

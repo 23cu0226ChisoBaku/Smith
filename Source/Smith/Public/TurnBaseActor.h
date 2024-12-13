@@ -27,16 +27,16 @@ public:
 	virtual void Tick(float DeltaTime);
 
 public:
-	UTurnControlComponent* GetTurnControl() const override;
-	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override;
-	bool Unsubscribe(UObject*, FDelegateHandle) override;
+	UTurnControlComponent* GetTurnControl() const override final;
+	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
+	bool Unsubscribe(UObject*, FDelegateHandle) override final;
 
 protected:
 	void SendCommand(IBattleCommand*);
 
-private:
+protected:
 	UPROPERTY()
-	TObjectPtr<UTurnControlComponent> m_turnComponent;
+	TObjectPtr<UTurnControlComponent> TurnComponent;
 private:
 	FRequestCommandEvent m_event;
 	

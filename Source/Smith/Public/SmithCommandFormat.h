@@ -40,7 +40,7 @@ namespace UE::Smith
 			//---------------------------------------
 			public:
 				FSmithCommandFormat();
-				FSmithCommandFormat(const ESmithFormatType* srcData, const size_t dataCnt, const uint64 row, const uint64 column);
+				FSmithCommandFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
 				~FSmithCommandFormat();
 
 				FSmithCommandFormat(const FSmithCommandFormat&);
@@ -50,7 +50,7 @@ namespace UE::Smith
 				FSmithCommandFormat& operator=(FSmithCommandFormat&&) noexcept;
 
 			public:
-				void SetupFormat(const ESmithFormatType* srcData, const size_t srcSize, const uint64 row, const uint64 column);
+				void SetupFormat(const ESmithFormatType* srcData, size_t srcSize, uint64 row, uint64 column);
 				UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> GetFormatArray() const;
 				FMapCoord GetCNCoord() const;
 				uint64 GetRow() const;
@@ -62,6 +62,28 @@ namespace UE::Smith
 				UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> m_formatArr;
 				FMapCoord m_cnCoord;
 		};
+
+		
+    __forceinline UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> FSmithCommandFormat::GetFormatArray() const
+    {
+      return m_formatArr;
+    }
+
+    __forceinline FMapCoord FSmithCommandFormat::GetCNCoord() const
+    {
+      return m_cnCoord;
+    } 
+
+    __forceinline uint64 FSmithCommandFormat::GetRow() const
+    {
+      return m_formatArr.Row();
+    }
+
+    __forceinline uint64 FSmithCommandFormat::GetColumn() const
+    {
+      return m_formatArr.Column();
+    }
+
 	}
 }
 

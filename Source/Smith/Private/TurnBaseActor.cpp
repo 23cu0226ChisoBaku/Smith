@@ -6,6 +6,8 @@
 
 // Sets default values
 ATurnBaseActor::ATurnBaseActor()
+	: TurnComponent(nullptr)
+	, m_event({})
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -17,28 +19,26 @@ ATurnBaseActor::ATurnBaseActor()
 		AddInstanceComponent(turnComp);
 	}
 
-	m_turnComponent = turnComp;
+	TurnComponent = turnComp;
 }
 
 // Called when the game starts or when spawned
 void ATurnBaseActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ATurnBaseActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 UTurnControlComponent *ATurnBaseActor::GetTurnControl() const
 {
-	check(m_turnComponent != nullptr);
+	check(TurnComponent != nullptr);
 
-  return m_turnComponent;
+  return TurnComponent;
 }
 
 FDelegateHandle ATurnBaseActor::Subscribe(FRequestCommandEvent::FDelegate& delegate)
@@ -48,7 +48,7 @@ FDelegateHandle ATurnBaseActor::Subscribe(FRequestCommandEvent::FDelegate& deleg
 		return m_event.Add(delegate);
 	}
 
-	return FDelegateHandle{};
+	return delegate.GetHandle();
 }
 
 bool ATurnBaseActor::Unsubscribe(UObject* objPtr, FDelegateHandle handle)

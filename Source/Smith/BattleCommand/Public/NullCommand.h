@@ -8,9 +8,12 @@
 /**
  * 
  */
-class SMITH_API MoveCommand : public IBattleCommand
+class SMITH_API NullCommand : public IBattleCommand
 {
 public:
-	MoveCommand();
-	~MoveCommand();
+	NullCommand();
+	~NullCommand();
+
+public:
+	void Execute() override;
 };

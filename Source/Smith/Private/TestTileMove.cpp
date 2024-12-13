@@ -11,6 +11,12 @@
 #include "Kismet\KismetSystemLibrary.h"
 #include "TurnControlComponent.h"
 
+// ************************************
+// WARNING!!!!!!!!!!!!!!!!!!!!!
+// This class is OBSOLETE
+// DO NOT USE IT!!!!!!!!!!!!!!!
+// ************************************
+
 namespace Smith_NS_Mapinfo
 {
 	constexpr float TILE_SIZE = 250.0f;

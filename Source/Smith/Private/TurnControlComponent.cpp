@@ -15,7 +15,6 @@ UTurnControlComponent::UTurnControlComponent()
 	// ...
 }
 
-
 // Called when the game starts
 void UTurnControlComponent::BeginPlay()
 {
@@ -29,12 +28,32 @@ void UTurnControlComponent::BeginPlay()
 	
 }
 
-
-// Called every frame
-void UTurnControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UTurnControlComponent::SetCommandSendable(bool value)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	m_isCMDSendable = value;
 
-	// ...
+	if (GEngine != nullptr)
+	{
+		FString str {TEXT("Turn ")};
+		str.Append(GetOwner()->GetName());
+		str.Append(" ");
+		str.Append(m_isCMDSendable ? "On" : "Off");
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, str);
+	}
+}
+
+void UTurnControlComponent::SetTurnPriority(ETurnPriority priority)
+{
+	m_priority = priority;
+}
+
+bool UTurnControlComponent::IsCommandSendable() const
+{
+	return m_isCMDSendable;
+}
+
+ETurnPriority UTurnControlComponent::GetPriority() const
+{
+	return m_priority;
 }
 
