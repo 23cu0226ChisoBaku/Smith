@@ -3,32 +3,38 @@
 
 #include "AttackCommand.h"
 #include "SmithPlayerActor.h"
+#include "Debug.h"
 
-AttackCommand::AttackCommand(ASmithPlayerActor* actor)
-  : m_actor(actor)
-{}
-
-AttackCommand::~AttackCommand()
+namespace UE::Smith::Command
 {
-  memset(this, 0 , sizeof(this));
-}
+  AttackCommand::AttackCommand(ASmithPlayerActor* actor)
+    : m_actor(actor)
+  {}
 
-void AttackCommand::Execute()
-{
-  if (GEngine != nullptr)
+  AttackCommand::~AttackCommand()
   {
-    FString attackStr;
-    if (m_actor.IsValid())
-    {
-      attackStr.Append(m_actor->GetName());
-    }
-    else
-    {
-      attackStr.Append(TEXT("EMPTY OBJECT"));
-    }
+    memset(this, 0 , sizeof(this));
+  }
 
-    attackStr.AppendChars(TEXT(" Attack Command"), 16);
+  void AttackCommand::Execute()
+  {
+    if (GEngine != nullptr)
+    {
+      FString attackStr;
+      if (m_actor.IsValid())
+      {
+        attackStr.Append(m_actor->GetName());
+      }
+      else
+      {
+        attackStr.Append(TEXT("EMPTY OBJECT"));
+      }
 
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, attackStr);
+      attackStr.AppendChars(TEXT(" Attack Command"), 16);
+
+      GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, attackStr);
+
+      UE::MLibrary::Debug::Log("test");
+    }
   }
 }

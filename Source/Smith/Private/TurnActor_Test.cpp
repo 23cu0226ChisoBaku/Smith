@@ -37,7 +37,7 @@ void ATurnActor_Test::Tick(float DeltaTime)
   if (m_TimeCnt >= TEST_NS::SEND_INTERVAL)
   {
     m_TimeCnt = 0.0f;
-    NullCommand nullCmd;
+    UE::Smith::Command::NullCommand nullCmd;
     SendCommand(&nullCmd);
   }
 }

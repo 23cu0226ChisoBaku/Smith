@@ -9,15 +9,19 @@ class ASmithPlayerActor;
 /**
  * 
  */
-class SMITH_API AttackCommand : public IBattleCommand
+
+namespace UE::Smith::Command
 {
-public:
-	AttackCommand(ASmithPlayerActor*);
-	~AttackCommand();
+	class SMITH_API AttackCommand : public IBattleCommand
+	{
+	public:
+		AttackCommand(ASmithPlayerActor*);
+		~AttackCommand();
 
-public:
-	void Execute() override final;
+	public:
+		void Execute() override final;
 
-private:
-	TWeakObjectPtr<ASmithPlayerActor> m_actor;
-};
+	private:
+		TWeakObjectPtr<ASmithPlayerActor> m_actor;
+	};
+}

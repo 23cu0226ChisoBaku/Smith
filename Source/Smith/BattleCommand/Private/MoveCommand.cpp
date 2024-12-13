@@ -4,31 +4,35 @@
 #include "MoveCommand.h"
 #include "SmithPlayerActor.h"
 
-MoveCommand::MoveCommand(ASmithPlayerActor* actor)
-  : m_actor(actor)
-{}
-
-MoveCommand::~MoveCommand()
+namespace UE::Smith::Command
 {
-  memset(this, 0, sizeof(this));
-}
+  MoveCommand::MoveCommand(USmithMoveComponent* moveComp)
+    //: m_moveComp(moveComp)
+  {}
 
-void MoveCommand::Execute()
-{
-  if (GEngine != nullptr)
+  MoveCommand::~MoveCommand()
   {
-    FString moveStr;
-    if (m_actor.IsValid())
-    {
-      moveStr.Append(m_actor->GetName());
-    }
-    else
-    {
-      moveStr.Append(TEXT("EMPTY OBJECT"));
-    }
+    memset(this, 0, sizeof(this));
+  }
 
-    moveStr.AppendChars(TEXT(" Move Command"), 16);
+  void MoveCommand::Execute()
+  {
+    if (GEngine != nullptr)
+    {
+      FString moveStr;
+      // if (m_moveComp.IsValid())
+      // {
+      //   // moveStr.Append(m_moveComp->GetName());
+      //   moveStr.Append(TEXT("Move Comp"));
+      // }
+      // else
+      {
+        moveStr.Append(TEXT("EMPTY OBJECT"));
+      }
 
-    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, moveStr);
+      moveStr.AppendChars(TEXT(" Move Command"), 16);
+
+      GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, moveStr);
+    }
   }
 }
