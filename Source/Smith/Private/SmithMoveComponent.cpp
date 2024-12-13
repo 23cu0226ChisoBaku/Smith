@@ -20,7 +20,7 @@ void USmithMoveComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	]
+	
 	if (GEngine)
 	{ }
 	
