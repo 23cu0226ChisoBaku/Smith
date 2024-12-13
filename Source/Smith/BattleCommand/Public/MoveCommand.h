@@ -23,6 +23,6 @@ namespace UE::Smith::Command
 		void Execute() override final;
 
 	private:
-		TWeakObjectPtr<USmithMoveComponent> m_moveComp;
+		//TWeakObjectPtr<USmithMoveComponent> m_moveComp;
 	};
 }
