@@ -29,7 +29,7 @@ public:
 	ETurnPriority GetPriority() const;
 
 private:
-	ETurnPriority m_priority = ETurnPriority::PlayerSelf;
-	uint8 m_isCMDSendable : 1 = false;
+	ETurnPriority m_priority;
+	uint8 m_isCMDSendable : 1;
 		
 };

@@ -14,6 +14,7 @@ public class Smith : ModuleRules
 
 		PrivateIncludePaths.AddRange(new string[] 
 																						{ "Smith/BattleCommand/Public",
+																							"Smith/BattleCommand",
 																							"Smith",	  
 																						});
 
