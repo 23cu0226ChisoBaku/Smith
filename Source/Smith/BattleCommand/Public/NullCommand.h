@@ -8,12 +8,16 @@
 /**
  * 
  */
-class SMITH_API NullCommand : public IBattleCommand
-{
-public:
-	NullCommand();
-	~NullCommand();
 
-public:
-	void Execute() override;
-};
+namespace UE::Smith::Command
+{
+	class SMITH_API NullCommand : public IBattleCommand
+	{
+	public:
+		NullCommand();
+		~NullCommand();
+
+	public:
+		void Execute() override;
+	};
+}

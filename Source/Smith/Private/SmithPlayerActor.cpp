@@ -135,16 +135,18 @@ void ASmithPlayerActor::Move(const FInputActionValue& value)
 {
 	FVector2D movementInput = value.Get<FVector2D>();
 
-	MoveCommand moveCmd(this);
+	// TODO
+	UE::Smith::Command::MoveCommand moveCmd(nullptr);
 
 	sendCommand(&moveCmd);
 }
 
 void ASmithPlayerActor::Attack(const FInputActionValue& value)
 {
-	AttackCommand atkCmd(this);
+	UE::Smith::Command::AttackCommand atkCmd(this);
 
 	sendCommand(&atkCmd);
+
 }
 
 void ASmithPlayerActor::Look(const FInputActionValue& value)
