@@ -1,0 +1,17 @@
+@startuml agai
+class Enemy{
+
+}
+
+Interface IComannd{
+
+}
+
+class MoveCommand{
+
+}
+
+class AttackCommand{
+    
+}
+@enduml
