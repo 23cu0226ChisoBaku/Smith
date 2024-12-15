@@ -8,9 +8,10 @@
 
 class UTurnControlComponent;
 class IBattleCommand;
+class ITurnManageable;
 
 // コマンドを出す専用デリゲート
-DECLARE_MULTICAST_DELEGATE_OneParam(FRequestCommandEvent,TSharedPtr<IBattleCommand>);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FRequestCommandEvent, ITurnManageable*, TSharedPtr<IBattleCommand>);
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)

@@ -6,6 +6,7 @@
 #include "TurnControlComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "IBattleCommand.h"
+#include "BattleCommandManager.h"
 
 #include "Debug.h"
 #include "TurnActor_Test.h"
@@ -17,21 +18,24 @@ bool USmithBattleSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 
 void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-  m_priorityLists.Empty();
-  m_requestCmdWaitList.Empty();
-  m_cmdExecuteQueue.Empty();
+  emptyContainers();
 
   // TODO  
   //GetWorld()->SpawnActor<ASmithPlayerActor>(ASmithPlayerActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-  GetWorld()->SpawnActor<ATurnActor_Test>(ATurnActor_Test::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+  for (int i = 0; i < 2; ++i)
+  {
+    GetWorld()->SpawnActor<ATurnActor_Test>(ATurnActor_Test::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+  }
+
+  
 }
 
 void USmithBattleSubsystem::Deinitialize()
 {
-  m_priorityLists.Reset();
+  emptyContainers();
 }
 
-void USmithBattleSubsystem::StartBattle()
+void USmithBattleSubsystem::RegisterTurnObj()
 {
   TArray<AActor*> turnManageable;
   UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UTurnManageable::StaticClass(),turnManageable);
@@ -40,17 +44,21 @@ void USmithBattleSubsystem::StartBattle()
   {
     FRequestCommandEvent::FDelegate requestDelegate;
     requestDelegate.BindUObject(this, &USmithBattleSubsystem::registerCommand);
+
     for (const auto manageable : turnManageable)
     {
       // TODO componentをInterfaceに変換
-      UTurnControlComponent* turnCtrl = Cast<ITurnManageable>(manageable)->GetTurnControl();
-      Cast<ITurnManageable>(manageable)->Subscribe(requestDelegate);
+      ITurnManageable* iManageable = Cast<ITurnManageable>(manageable);
+      UTurnControlComponent* turnCtrl = iManageable->GetTurnControl();
+      iManageable->Subscribe(requestDelegate);
+
       if (turnCtrl != nullptr)
       {
         const ETurnPriority actorPriority = turnCtrl->GetPriority();
         if (actorPriority == ETurnPriority::PlayerSelf)
         {
           turnCtrl->SetCommandSendable(true);
+          m_requestCmdWaitList.Emplace(iManageable);
         }
         else
         {
@@ -70,19 +78,23 @@ void USmithBattleSubsystem::StartBattle()
   }
 }
 
-void USmithBattleSubsystem::registerCommand(TSharedPtr<IBattleCommand> battleCommand)
+void USmithBattleSubsystem::registerCommand(ITurnManageable* requester, TSharedPtr<IBattleCommand> battleCommand)
 {
   if (battleCommand == nullptr)
   {
     return;
   }
 
-  m_cmdExecuteQueue.Enqueue(battleCommand);
+  if (m_requestCmdWaitList.Contains(requester))
+  {
+    m_requestCmdWaitList.Remove(requester);
+    m_cmdExecuteQueue.Enqueue(battleCommand);
+  }
 
-  // if (m_requestCmdWaitList.Num() == 0)
-  // {
+  if (m_requestCmdWaitList.Num() == 0)
+  {
     executeCommand();
-  // }
+  }
 }
 
 void USmithBattleSubsystem::executeCommand()
@@ -90,19 +102,27 @@ void USmithBattleSubsystem::executeCommand()
   TSharedPtr<IBattleCommand> cmd;
   while(m_cmdExecuteQueue.Dequeue(cmd))
   {
-    cmd->Execute();
+    if (cmd != nullptr)
+    {
+      cmd->Execute();
+    }
+    else
+    {
+      UE::MLibrary::Debug::LogError("command nullptr");
+    }
   }
-
-  m_cmdExecuteQueue.Empty();
 
   if (m_priorityLists.Contains(m_curtTurn))
   {
-    for(ITurnManageable* prevTurnObj :m_priorityLists[m_curtTurn].Elements)
+    for(const auto& prevTurnObj :m_priorityLists[m_curtTurn].Elements)
     {
-      UTurnControlComponent* turnCtrl = prevTurnObj->GetTurnControl();
-      if (::IsValid(turnCtrl))
+      if (prevTurnObj.IsValid())
       {
-        turnCtrl->SetCommandSendable(false);
+        UTurnControlComponent* turnCtrl = prevTurnObj->GetTurnControl();
+        if (::IsValid(turnCtrl))
+        {
+          turnCtrl->SetCommandSendable(false);
+        }
       }
     }
   }
@@ -129,14 +149,25 @@ void USmithBattleSubsystem::registerNextTurnObjs()
 
   m_requestCmdWaitList.Empty();
 
-  for(ITurnManageable* prevTurnObj : m_priorityLists[m_curtTurn].Elements)
+  for(const auto& prevTurnObj : m_priorityLists[m_curtTurn].Elements)
   {
-    UTurnControlComponent* turnCtrl = prevTurnObj->GetTurnControl();
-    if (::IsValid(turnCtrl))
+    if (prevTurnObj.IsValid())
     {
-      turnCtrl->SetCommandSendable(true);
+      UTurnControlComponent* turnCtrl = prevTurnObj->GetTurnControl();
+      if (::IsValid(turnCtrl))
+      {
+        turnCtrl->SetCommandSendable(true);
+      }
+
+      m_requestCmdWaitList.Add(prevTurnObj.Get());
     }
-    m_requestCmdWaitList.Add(prevTurnObj);
   }
   
+}
+
+void USmithBattleSubsystem::emptyContainers()
+{
+  m_priorityLists.Empty();
+  m_requestCmdWaitList.Empty();
+  m_cmdExecuteQueue.Empty();
 }

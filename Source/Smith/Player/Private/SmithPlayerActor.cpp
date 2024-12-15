@@ -157,6 +157,7 @@ void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)
 		return;
 	}
 
-	m_event.Broadcast(command);
+	m_event.Broadcast(this, command);
+
 }
 

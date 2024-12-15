@@ -7,9 +7,10 @@
 /**
  * 
  */
-class SMITH_API MyClass
+class SMITH_API ITickExecutable
 {
 public:
-	MyClass();
-	~MyClass();
+	virtual void Execute(float DeltaTime) = 0;
+
+	virtual ~ITickExecutable() = 0 {};
 };

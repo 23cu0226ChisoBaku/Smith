@@ -17,6 +17,7 @@ ATurnActor_Test::ATurnActor_Test()
   {
     TurnComponent->SetTurnPriority(ETurnPriority::Rival);
   }
+
 }
 
 void ATurnActor_Test::BeginPlay()

@@ -9,7 +9,7 @@
 #include "SmithBattleSubsystem.generated.h"
 
 class IBattleCommand;
-enum class ETurnPriority : uint8;
+class UBattleCommandManager;
 
 UCLASS()
 class SMITH_API USmithBattleSubsystem final : public UWorldSubsystem
@@ -24,9 +24,12 @@ public:
 
 	/** Implement this for deinitialization of instances of the system */
 	void Deinitialize() override final;
+
+	/// @brief ITurnManageableを継承したActorを登録
+	/// 新しいマップが読み込まれたら一回呼ばれる
+	void RegisterTurnObj();
 	
-	void StartBattle();
-	
+	// Test Func
 	void YAYA()
 	{
 		FString str{};
@@ -37,15 +40,13 @@ public:
 				for (const auto& actor : pair.Value.Elements)
 				{
 					str.Reset();
-					FString enumName {}; 
 					const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("ETurnPriority"), true);
 					if (EnumPtr != nullptr)
 					{
-						enumName.Append(EnumPtr->GetNameByValue(StaticCast<int64>(pair.Key)).ToString());
+						str.Append(EnumPtr->GetNameByValue(StaticCast<int64>(pair.Key)).ToString());
 					}
 
-					str.Append(enumName);
-					str.Append(Cast<AActor>(actor)->GetName());
+					str.Append(Cast<AActor>(actor.Get())->GetName());
 					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, str);
 				}
 			}
@@ -54,14 +55,17 @@ public:
 
 private:
 	void executeCommand();
-	void registerCommand(TSharedPtr<IBattleCommand>);
+	void registerCommand(ITurnManageable*, TSharedPtr<IBattleCommand>);
 	void registerNextTurnObjs();
+	void emptyContainers();
 
 private:
 	UPROPERTY()
 	TMap<ETurnPriority, FITurnManageableWrapper> m_priorityLists;
 	UPROPERTY()
 	TArray<ITurnManageable*> m_requestCmdWaitList;
+	UPROPERTY()
+	TObjectPtr<UBattleCommandManager> m_battleCmdMgr;
 
 private:
 	TQueue<TSharedPtr<IBattleCommand>> m_cmdExecuteQueue;

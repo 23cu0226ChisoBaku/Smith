@@ -78,6 +78,6 @@ void ATurnBaseActor::SendCommand(TSharedPtr<IBattleCommand> command)
 
 	if (m_event.IsBound())
 	{
-		m_event.Broadcast(command);
+		m_event.Broadcast(this, command);
 	}
 }

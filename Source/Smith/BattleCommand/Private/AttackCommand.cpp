@@ -32,5 +32,6 @@ namespace UE::Smith::Command
     attackStr.AppendChars(TEXT(" Attack Command"), 16);
 
     UE::MLibrary::Debug::Log(attackStr);
+
   }
 }
