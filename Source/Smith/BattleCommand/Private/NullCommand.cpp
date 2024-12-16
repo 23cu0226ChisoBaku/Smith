@@ -29,4 +29,9 @@ namespace UE::Smith::Command
   {
     
   }
+
+  bool NullCommand::IsFinish() const
+  {
+    return true;
+  }
 }

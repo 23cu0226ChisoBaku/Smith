@@ -43,4 +43,10 @@ namespace UE::Smith::Command
   {
     
   }
+
+  bool MoveCommand::IsFinish() const
+  {
+    return true;
+  }
+
 }

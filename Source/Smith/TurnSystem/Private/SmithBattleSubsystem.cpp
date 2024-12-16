@@ -55,6 +55,9 @@ void USmithBattleSubsystem::RegisterTurnObj()
     FRequestCommandEvent::FDelegate requestDelegate;
     requestDelegate.BindUObject(this, &USmithBattleSubsystem::registerCommand);
 
+    TArray<TWeakInterfacePtr<ITurnManageable>> registerWaitList;
+    registerWaitList.Reserve(turnManageable.Num());
+
     for (const auto manageable : turnManageable)
     {
       // TODO componentをInterfaceに変換
@@ -68,7 +71,7 @@ void USmithBattleSubsystem::RegisterTurnObj()
         if (actorPriority == ETurnPriority::PlayerSelf)
         {
           turnCtrl->SetCommandSendable(true);
-          m_requestCmdWaitList.Emplace(iManageable);
+          registerWaitList.Emplace(iManageable);
         }
         else
         {
@@ -84,65 +87,35 @@ void USmithBattleSubsystem::RegisterTurnObj()
       }
     }
 
+    if (m_battleCmdMgr != nullptr)
+    {
+      m_battleCmdMgr->RegisterWaitList(registerWaitList);
+    }
+
     m_curtTurn = ETurnPriority::PlayerSelf;
   }
 }
 
 void USmithBattleSubsystem::registerCommand(ITurnManageable* requester, TSharedPtr<IBattleCommand> battleCommand)
 {
-  if (battleCommand == nullptr)
+  if (requester == nullptr || battleCommand == nullptr)
   {
     return;
   }
 
-  if (m_requestCmdWaitList.Contains(requester))
-  {
-    m_requestCmdWaitList.Remove(requester);
-    m_cmdExecuteQueue.Enqueue(battleCommand);
-  }
+  check(m_battleCmdMgr != nullptr);
 
-  if (m_requestCmdWaitList.Num() == 0)
+  if (m_battleCmdMgr == nullptr)
   {
-    executeCommand();
+    return;
   }
-}
+  m_battleCmdMgr->RegisterCommand(requester, ::MoveTemp(battleCommand));
 
-void USmithBattleSubsystem::executeCommand()
-{
-  TSharedPtr<IBattleCommand> cmd;
-  while(m_cmdExecuteQueue.Dequeue(cmd))
-  {
-    if (cmd != nullptr)
-    {
-      // TODO change it to tick 
-      cmd->Execute(0.0f);
-    }
-    else
-    {
-      UE::MLibrary::Debug::LogError("command nullptr");
-    }
-  }
-
-  if (m_priorityLists.Contains(m_curtTurn))
-  {
-    for(const auto& prevTurnObj :m_priorityLists[m_curtTurn].Elements)
-    {
-      if (prevTurnObj.IsValid())
-      {
-        UTurnControlComponent* turnCtrl = prevTurnObj->GetTurnControl();
-        if (::IsValid(turnCtrl))
-        {
-          turnCtrl->SetCommandSendable(false);
-        }
-      }
-    }
-  }
-
-  registerNextTurnObjs();
 }
 
 void USmithBattleSubsystem::registerNextTurnObjs()
 {
+  // TODO Strange Design
   uint8 errorCnt = 0;
   do
   {
@@ -150,28 +123,29 @@ void USmithBattleSubsystem::registerNextTurnObjs()
       ++errorCnt;
       if (errorCnt > StaticCast<uint8>(ETurnPriority::PriorityTypeCnt))
       {
-        UE::MLibrary::Debug::LogError(TEXT("registerNextTurnObject Error!!!"));
-        //check(false);
+        MDebug::LogError(TEXT("registerNextTurnObject Error!!!"));
+        check(false);
       }
     #endif
     m_curtTurn = StaticCast<ETurnPriority>((StaticCast<uint8>(m_curtTurn) + 1u) % StaticCast<uint8>(ETurnPriority::PriorityTypeCnt));
   
   } while (!m_priorityLists.Contains(m_curtTurn));
 
-  m_requestCmdWaitList.Empty();
-
-  for(const auto& prevTurnObj : m_priorityLists[m_curtTurn].Elements)
+  if (m_battleCmdMgr != nullptr)
   {
-    if (prevTurnObj.IsValid())
+    for(auto prevTurnObj : m_priorityLists[m_curtTurn].Elements)
     {
-      UTurnControlComponent* turnCtrl = prevTurnObj->GetTurnControl();
-      if (::IsValid(turnCtrl))
+      if (prevTurnObj.IsValid())
       {
-        turnCtrl->SetCommandSendable(true);
+        auto turnCtrl = prevTurnObj->GetTurnControl();
+        if (::IsValid(turnCtrl))
+        {
+          turnCtrl->SetCommandSendable(true);
+        }
       }
-
-      m_requestCmdWaitList.Add(prevTurnObj.Get());
     }
+
+    m_battleCmdMgr->RegisterWaitList(m_priorityLists[m_curtTurn].Elements);
   }
   
 }
@@ -179,8 +153,6 @@ void USmithBattleSubsystem::registerNextTurnObjs()
 void USmithBattleSubsystem::emptyContainers()
 {
   m_priorityLists.Empty();
-  m_requestCmdWaitList.Empty();
-  m_cmdExecuteQueue.Empty();
 }
 
 void USmithBattleSubsystem::startExecute()
@@ -193,6 +165,7 @@ void USmithBattleSubsystem::endExecute()
 {
   check(((m_battleCmdMgr != nullptr) && (m_bCanExecuteCmd)))
   m_bCanExecuteCmd = false;
+  registerNextTurnObjs();
 }
 
 void USmithBattleSubsystem::Tick(float DeltaTime)
@@ -200,20 +173,12 @@ void USmithBattleSubsystem::Tick(float DeltaTime)
   UTickableWorldSubsystem::Tick(DeltaTime);
 
   cnt += DeltaTime;
-  // if (m_bCanExecuteCmd) 
-  // {
+  if (m_bCanExecuteCmd) 
+  {
     if (m_battleCmdMgr != nullptr)
     {
-      if (cnt >= 3.0f)
-      {
-        cnt = 0.0f;
-        m_battleCmdMgr->Test();
-      }
+      m_battleCmdMgr->ExecuteCommands(DeltaTime);
     }
-  // }
-  else
-  {
-    UE::MLibrary::Debug::LogError("battle cmd mgr null!!!");
   }
 }
 

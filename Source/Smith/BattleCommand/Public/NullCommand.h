@@ -21,5 +21,6 @@ namespace UE::Smith::Command
 		void Start() override final;
 		void Execute(float deltaTime) override final;
 		void End() override final;
+		bool IsFinish() const override final;
 	};
 }

@@ -44,4 +44,10 @@ namespace UE::Smith::Command
   {
     
   }
+
+  bool AttackCommand::IsFinish() const
+  {
+    return true;
+  }
+
 }

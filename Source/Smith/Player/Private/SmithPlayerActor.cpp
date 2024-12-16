@@ -152,6 +152,17 @@ void ASmithPlayerActor::Look(const FInputActionValue& value)
 
 void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)
 {
+	if (command == nullptr)
+	{
+		return;
+	}
+
+	auto turnComp = GetTurnControl();
+	if (turnComp == nullptr || !turnComp->IsCommandSendable())
+	{
+		return;
+	}
+
 	if (!m_event.IsBound())
 	{
 		return;

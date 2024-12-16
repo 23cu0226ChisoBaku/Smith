@@ -7,7 +7,7 @@
 
 namespace TEST_NS
 {
-  constexpr float SEND_INTERVAL = 3.0f;
+  constexpr float SEND_INTERVAL = 0.5f;
 }
 
 ATurnActor_Test::ATurnActor_Test()

@@ -16,6 +16,7 @@ public:
 	virtual void Start() = 0;
 	virtual void Execute(float deltaTime) = 0;
 	virtual void End() = 0;
+	virtual bool IsFinish() const = 0;
 
 	virtual ~IBattleCommand() = 0 {};
 };

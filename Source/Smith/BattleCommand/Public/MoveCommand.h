@@ -23,6 +23,7 @@ namespace UE::Smith::Command
 		virtual void Start() override;
 		virtual void Execute(float deltaTime) override;
 		virtual void End() override;
+		virtual bool IsFinish() const override;
 
 	private:
 		TWeakObjectPtr<USmithMoveComponent> m_moveComp;

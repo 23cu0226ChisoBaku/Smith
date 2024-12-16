@@ -70,4 +70,5 @@ namespace UE::MLibrary
 	};
 }
 
+using MDebug = typename UE::MLibrary::Debug;
 #endif

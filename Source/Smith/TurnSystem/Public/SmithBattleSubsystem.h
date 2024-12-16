@@ -26,6 +26,7 @@ public:
 	/** Implement this for deinitialization of instances of the system */
 	void Deinitialize() override final;
 
+	// TODO Change name
 	/// @brief ITurnManageableを継承したActorを登録
 	/// 新しいマップが読み込まれたら一回呼ばれる
 	void RegisterTurnObj();
@@ -71,7 +72,6 @@ public:
 
 
 private:
-	void executeCommand();
 	void registerCommand(ITurnManageable*, TSharedPtr<IBattleCommand>);
 	void registerNextTurnObjs();
 	void emptyContainers();
@@ -84,12 +84,9 @@ private:
 	UPROPERTY()
 	TMap<ETurnPriority, FITurnManageableWrapper> m_priorityLists;
 	UPROPERTY()
-	TArray<ITurnManageable*> m_requestCmdWaitList;
-	UPROPERTY()
 	TObjectPtr<UBattleCommandManager> m_battleCmdMgr;
 
 private:
-	TQueue<TSharedPtr<IBattleCommand>> m_cmdExecuteQueue;
 	ETurnPriority m_curtTurn;
 	uint8 m_bCanExecuteCmd : 1;
 	float cnt;
