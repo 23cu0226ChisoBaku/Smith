@@ -11,13 +11,15 @@
 
 namespace UE::Smith::Command
 {
-	class SMITH_API NullCommand : public IBattleCommand
+	class SMITH_API NullCommand final: public IBattleCommand
 	{
 	public:
 		NullCommand();
 		~NullCommand();
 
 	public:
-		void Execute() override;
+		void Start() override final;
+		void Execute(float deltaTime) override final;
+		void End() override final;
 	};
 }

@@ -13,7 +13,9 @@ class SMITH_API IBattleCommand
 {
 public:
 	// コマンドを執行する
-	virtual void Execute() = 0;
+	virtual void Start() = 0;
+	virtual void Execute(float deltaTime) = 0;
+	virtual void End() = 0;
 
 	virtual ~IBattleCommand() = 0 {};
 };

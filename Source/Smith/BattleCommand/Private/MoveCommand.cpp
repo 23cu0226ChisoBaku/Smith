@@ -18,7 +18,12 @@ namespace UE::Smith::Command
     memset(this, 0, sizeof(this));
   }
 
-  void MoveCommand::Execute()
+  void MoveCommand::Start()
+  {
+
+  }
+
+  void MoveCommand::Execute(float deltaTime)
   {
     FString moveStr{};
     if (m_moveComp.IsValid())
@@ -32,5 +37,10 @@ namespace UE::Smith::Command
 
     moveStr.AppendChars(TEXT(" Move Command"), 16);
     UE::MLibrary::Debug::Log(moveStr);
+  }
+
+  void MoveCommand::End()
+  {
+    
   }
 }

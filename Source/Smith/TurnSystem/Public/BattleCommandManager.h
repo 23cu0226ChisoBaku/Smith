@@ -8,50 +8,44 @@
 #include "BattleCommandManager.generated.h"
 
 class IBattleCommand;
+class ITurnManageable;
+class UBattleCommandManager;
+
+DECLARE_EVENT(UBattleCommandManager, FStartEndEvent)
+
 
 UCLASS()
-class SMITH_API UBattleCommandManager final: public UObject, public FTickableGameObject
+class SMITH_API UBattleCommandManager final: public UObject
 {
 	GENERATED_BODY()
 
 public:
 	UBattleCommandManager(const FObjectInitializer& ObjectInitializer);
-
-// start of FTickableObjectBase Interface
-#pragma region FTickableObjectBase Interface
-	void Tick(float DeltaTime) override final;
-	bool IsTickable() const override final;
-	TStatId GetStatId() const override final;
-#pragma endregion
-// end of FTickableObjectBase Interface
-
-// start of FTickableObject Interface
-#pragma region FTickableObject Interface
-	bool IsTickableWhenPaused() const override final;
-	bool IsTickableInEditor() const override final;
-	UWorld* GetTickableGameObjectWorld() const override final;
-#pragma endregion
-// end of FTickableObject Interface
-
-// start of UObject Interface
-#pragma region UObject Interface
-	class UWorld* GetWorld() const override final;
-#pragma endregion
-// end of UObject Interface
+	
+	void BeginDestroy() override final;
+	void FinishDestroy() override final;
 
 // start of UBattleCommandManager Interface
 #pragma region UBattleCommandManager Interface
 public:
 	void RegisterCommand(IBattleCommand*);
-	void StartCommands();
+	void ExecuteCommands(float deltaTime);
 #pragma endregion
 // end of UBattleCommandManager Interface
 
-private:
-	void executeCommands();
-	void resetCommands();
+// start of Test Code
+#pragma region Test Code
+public:
+	void Test();
+#pragma endregion
+// end of Test Code
 
+public:
+	FStartEndEvent OnStartExecuteEvent;
+	FStartEndEvent OnEndExecuteEvent;
 private:
+	TArray<ITurnManageable*> m_requestCmdWaitList;
 	TArray<IBattleCommand*> m_commandLists;
 	uint8 m_bIsExecutingCommand : 1;
+
 };

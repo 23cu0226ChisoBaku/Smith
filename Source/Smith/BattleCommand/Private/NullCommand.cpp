@@ -12,10 +12,21 @@ namespace UE::Smith::Command
 
   NullCommand::~NullCommand()
   {
+    memset(this, 0, sizeof(this));
   }
 
-  void NullCommand::Execute()
+  void NullCommand::Start()
+  {
+
+  }
+
+  void NullCommand::Execute(float deltaTime)
   {
     UE::MLibrary::Debug::Log("NULL COMMAND");  
+  }
+
+  void NullCommand::End()
+  {
+    
   }
 }

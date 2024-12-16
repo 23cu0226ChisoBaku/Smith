@@ -21,7 +21,9 @@ namespace UE::Smith::Command
 		~AttackCommand();
 
 	public:
-		void Execute() override final;
+		virtual void Start() override;
+		virtual void Execute(float deltaTime) override;
+		virtual void End() override;
 
 	private:
 		TWeakObjectPtr<USmithMoveComponent> m_moveComp;

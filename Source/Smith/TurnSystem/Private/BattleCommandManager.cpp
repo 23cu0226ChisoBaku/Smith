@@ -2,74 +2,35 @@
 
 
 #include "BattleCommandManager.h"
+
 #include "IBattleCommand.h"
 #include "SmithBattleSubsystem.h"
 #include "Debug.h"
+#include "ZeroMem.h"
 
 UBattleCommandManager::UBattleCommandManager(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
 {}
 
-void UBattleCommandManager::Tick(float DeltaTime)
+void UBattleCommandManager::BeginDestroy()
 {
-  if (m_bIsExecutingCommand)
-  {
-    UE::MLibrary::Debug::LogWarning(FString::SanitizeFloat(DeltaTime));
-    executeCommands();
-    resetCommands();
-  }
+  Super::BeginDestroy();
+
+  OnStartExecuteEvent.Clear();
+  OnEndExecuteEvent.Clear();
+
+  m_requestCmdWaitList.Empty();
+  m_commandLists.Empty();
+
+  m_bIsExecutingCommand = false;
+
 }
 
-bool UBattleCommandManager::IsTickable() const
+void UBattleCommandManager::FinishDestroy()
 {
-  if (GetWorld() != nullptr)
-  {
-    USmithBattleSubsystem* battleSub = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
-    if (battleSub != nullptr)
-    {
-      return true;
-    }
-    // return m_commandLists.Num() > 0;
+  Super::FinishDestroy();
 
-  }
-  return false;
-}
-
-TStatId UBattleCommandManager::GetStatId() const
-{
-  RETURN_QUICK_DECLARE_CYCLE_STAT(UBattleCommandManager, STATGROUP_Tickables);
-}
-
-bool UBattleCommandManager::IsTickableWhenPaused() const
-{
-  return false;
-}
-
-bool UBattleCommandManager::IsTickableInEditor() const
-{
-  return false;
-}
-
-UWorld* UBattleCommandManager::GetTickableGameObjectWorld() const
-{
-  return GetWorld();
-}
-
-UWorld* UBattleCommandManager::GetWorld() const
-{
-  UWorld* world = nullptr;
-  if(GetOuter() != nullptr)
-  {
-    world = GetOuter()->GetWorld();
-  }
-
-  if (world == nullptr)
-  {
-    world = GWorld;
-  }
-
-  return world;
-
+  //ZeroMemory_Class();
 }
 
 void UBattleCommandManager::RegisterCommand(IBattleCommand* command)
@@ -83,32 +44,22 @@ void UBattleCommandManager::RegisterCommand(IBattleCommand* command)
   m_commandLists.Add(command);
 }
 
-void UBattleCommandManager::StartCommands()
-{
-  // コマンドがないと開始しない
-  if (m_commandLists.Num() == 0)
-  {
-    return;
-  }
-
-  m_bIsExecutingCommand = true;
-}
-
-void UBattleCommandManager::executeCommands()
+void UBattleCommandManager::ExecuteCommands(float deltaTime)
 {
   for(auto command : m_commandLists)
   {
     if (command != nullptr)
     {
-      command->Execute();
+      command->Execute(deltaTime);
     }
   }
-
-
 }
 
-void UBattleCommandManager::resetCommands()
+void UBattleCommandManager::Test()
 {
-  m_bIsExecutingCommand = false;
-  m_commandLists.Empty();
+  UE::MLibrary::Debug::LogError("test tick battle command manager");
+  if (OnEndExecuteEvent.IsBound())
+  {
+    OnEndExecuteEvent.Broadcast();
+  }
 }

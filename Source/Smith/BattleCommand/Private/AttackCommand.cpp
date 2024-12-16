@@ -17,7 +17,12 @@ namespace UE::Smith::Command
     memset(this, 0 , sizeof(this));
   }
 
-  void AttackCommand::Execute()
+  void AttackCommand::Start()
+  {
+
+  }
+
+  void AttackCommand::Execute(float deltaTime)
   {
     FString attackStr{};
     if (m_moveComp.IsValid())
@@ -33,5 +38,10 @@ namespace UE::Smith::Command
 
     UE::MLibrary::Debug::Log(attackStr);
 
+  }
+
+  void AttackCommand::End()
+  {
+    
   }
 }

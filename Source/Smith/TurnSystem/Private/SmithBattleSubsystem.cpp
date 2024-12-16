@@ -18,21 +18,31 @@ bool USmithBattleSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 
 void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-  emptyContainers();
+  Super::Initialize(Collection);
+  m_bCanExecuteCmd = false;
+  cnt = 0.0f;
 
-  // TODO  
-  //GetWorld()->SpawnActor<ASmithPlayerActor>(ASmithPlayerActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-  for (int i = 0; i < 2; ++i)
+  emptyContainers();
+  if (m_battleCmdMgr == nullptr)
   {
-    GetWorld()->SpawnActor<ATurnActor_Test>(ATurnActor_Test::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+    m_battleCmdMgr = NewObject<UBattleCommandManager>(GetWorld());
   }
 
+  check(m_battleCmdMgr != nullptr)
+
+  m_battleCmdMgr->OnStartExecuteEvent.AddUObject(this, &USmithBattleSubsystem::startExecute);
+  m_battleCmdMgr->OnEndExecuteEvent.AddUObject(this, &USmithBattleSubsystem::endExecute);
   
 }
 
 void USmithBattleSubsystem::Deinitialize()
 {
+  Super::Deinitialize();
   emptyContainers();
+  if (m_battleCmdMgr != nullptr)
+  {
+    m_battleCmdMgr->MarkAsGarbage();
+  }
 }
 
 void USmithBattleSubsystem::RegisterTurnObj()
@@ -104,7 +114,8 @@ void USmithBattleSubsystem::executeCommand()
   {
     if (cmd != nullptr)
     {
-      cmd->Execute();
+      // TODO change it to tick 
+      cmd->Execute(0.0f);
     }
     else
     {
@@ -170,4 +181,63 @@ void USmithBattleSubsystem::emptyContainers()
   m_priorityLists.Empty();
   m_requestCmdWaitList.Empty();
   m_cmdExecuteQueue.Empty();
+}
+
+void USmithBattleSubsystem::startExecute()
+{
+  check(((m_battleCmdMgr != nullptr) && (!m_bCanExecuteCmd)))
+  m_bCanExecuteCmd = true;
+}
+
+void USmithBattleSubsystem::endExecute()
+{
+  check(((m_battleCmdMgr != nullptr) && (m_bCanExecuteCmd)))
+  m_bCanExecuteCmd = false;
+}
+
+void USmithBattleSubsystem::Tick(float DeltaTime)
+{
+  UTickableWorldSubsystem::Tick(DeltaTime);
+
+  cnt += DeltaTime;
+  // if (m_bCanExecuteCmd) 
+  // {
+    if (m_battleCmdMgr != nullptr)
+    {
+      if (cnt >= 3.0f)
+      {
+        cnt = 0.0f;
+        m_battleCmdMgr->Test();
+      }
+    }
+  // }
+  else
+  {
+    UE::MLibrary::Debug::LogError("battle cmd mgr null!!!");
+  }
+}
+
+bool USmithBattleSubsystem::IsTickable() const
+{
+  return true;
+}
+
+TStatId USmithBattleSubsystem::GetStatId() const
+{
+  RETURN_QUICK_DECLARE_CYCLE_STAT(USmithBattleSubsystem, STATGROUP_Tickables);
+}
+
+bool USmithBattleSubsystem::IsTickableWhenPaused() const
+{
+  return false;
+}
+
+bool USmithBattleSubsystem::IsTickableInEditor() const
+{
+  return false;
+}
+
+UWorld* USmithBattleSubsystem::GetTickableGameObjectWorld() const
+{
+  return GetWorld();
 }
