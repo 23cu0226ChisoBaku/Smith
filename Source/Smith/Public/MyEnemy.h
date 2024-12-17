@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "Engine/World.h" // ’Ç‰Á
+#include "Engine/World.h" // ï¿½Ç‰ï¿½
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MyPlayerCharacter.h"// ’Ç‰Á
-#include "DrawDebugHelpers.h"  // DrawDebugLine‚âDrawDebugPoint‚È‚Ç‚ðŽg—p‚·‚é‚½‚ß‚É•K—v
+#include "MyPlayerCharacter.h"// ï¿½Ç‰ï¿½
+#include "DrawDebugHelpers.h"  // DrawDebugLineï¿½ï¿½DrawDebugPointï¿½È‚Ç‚ï¿½ï¿½gï¿½pï¿½ï¿½ï¿½é‚½ï¿½ß‚É•Kï¿½v
 
 
 #include "MyEnemy.generated.h"
@@ -30,9 +30,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	//UPROPERTY(EditAnywhere)
-	//AActor Player;
+	UPROPERTY(EditAnywhere)
+	int32 HP;
+	UPROPERTY(EditAnywhere)
+	int32 ATK;
 
 private:
-	void Attack();
+	void PlayerCheck();
+
+	UActorComponent* m_moveComp;
+	UActorComponent* m_attackComp;
+
+	float m_timer;
 };

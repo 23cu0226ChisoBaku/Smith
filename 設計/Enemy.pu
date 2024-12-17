@@ -1,17 +1,74 @@
-@startuml agai
-class Enemy{
+@startuml  Enemyの設計
+hide empty members
+' パターン１
+class System
+{
+
 
 }
 
-Interface IComannd{
+class Enemy
+{
+    - HP
+    - ATK
 
 }
 
-class MoveCommand{
+Interface ICommand
+{
+    + Execution()
 
 }
 
-class AttackCommand{
-    
+class MoveCommand
+{
+    + Execution()
+
 }
+
+class AttackCommand
+{
+    + Execution()
+
+}
+System o- Map
+ICommand <|.. MoveCommand
+ICommand <|.. AttackCommand
+
+System <-- Enemy
+System --> ICommand
+
+
+
+' ' パターン２
+' class System
+' {
+
+    '
+}
+
+' class Enemy
+' {
+    '     - HP
+    '     - ATK
+    '
+}
+
+' class MoveComponent
+' {
+    '     + Execution()
+    '
+}
+
+' class AttackComponent
+' {
+    '     + Execution()
+    '
+}
+' System o- Map
+' System <-- Enemy
+' System --> MoveComponent
+' System --> AttackComponent
+
+
 @enduml
