@@ -48,6 +48,11 @@ public:
 	UPROPERTY(EditAnyWhere)
 	float MOVE_DISTANCE;
 
+	UPROPERTY(EditAnywhere)
+	int32 HP;
+	UPROPERTY(EditAnywhere)
+	int32 ATK;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent *m_pSpringArm;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
