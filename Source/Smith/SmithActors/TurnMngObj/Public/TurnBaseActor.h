@@ -32,7 +32,7 @@ public:
 	bool Unsubscribe(UObject*, FDelegateHandle) override final;
 
 protected:
-	void SendCommand(IBattleCommand*);
+	void SendCommand(TSharedPtr<IBattleCommand>);
 
 protected:
 	UPROPERTY()

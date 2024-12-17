@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 
-/**
- * 
- */
-class SMITH_API MyClass
+UENUM(Blueprintable)
+enum class ETurnPriority : uint8
 {
-public:
-	MyClass();
-	~MyClass();
+	PlayerSelf = 0,
+	Rival = 1,
+	Alliance = 2,
+
+	PriorityTypeCnt,
 };
+

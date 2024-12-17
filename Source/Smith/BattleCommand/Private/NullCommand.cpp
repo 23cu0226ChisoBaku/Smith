@@ -2,6 +2,7 @@
 
 
 #include "NullCommand.h"
+#include "Debug.h"
 
 namespace UE::Smith::Command
 {
@@ -11,13 +12,26 @@ namespace UE::Smith::Command
 
   NullCommand::~NullCommand()
   {
+    memset(this, 0, sizeof(this));
   }
 
-  void NullCommand::Execute()
+  void NullCommand::Start()
   {
-    if (GEngine != nullptr)
-    {
-      GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("NULL COMMAND"));
-    }
+
+  }
+
+  void NullCommand::Execute(float deltaTime)
+  {
+    UE::MLibrary::Debug::Log("NULL COMMAND");  
+  }
+
+  void NullCommand::End()
+  {
+    
+  }
+
+  bool NullCommand::IsFinish() const
+  {
+    return true;
   }
 }

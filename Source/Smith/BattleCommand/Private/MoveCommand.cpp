@@ -3,11 +3,15 @@
 
 #include "MoveCommand.h"
 #include "SmithPlayerActor.h"
+#include "SmithMoveComponent.h"
+#include "IMoveable.h"
+
+#include "Debug.h"
 
 namespace UE::Smith::Command
 {
-  MoveCommand::MoveCommand(USmithMoveComponent* moveComp)
-    //: m_moveComp(moveComp)
+  MoveCommand::MoveCommand(IMoveable* move)
+    : m_move(move)
   {}
 
   MoveCommand::~MoveCommand()
@@ -15,24 +19,36 @@ namespace UE::Smith::Command
     memset(this, 0, sizeof(this));
   }
 
-  void MoveCommand::Execute()
+  void MoveCommand::Start()
   {
-    if (GEngine != nullptr)
-    {
-      FString moveStr;
-      // if (m_moveComp.IsValid())
-      // {
-      //   // moveStr.Append(m_moveComp->GetName());
-      //   moveStr.Append(TEXT("Move Comp"));
-      // }
-      // else
-      {
-        moveStr.Append(TEXT("EMPTY OBJECT"));
-      }
 
-      moveStr.AppendChars(TEXT(" Move Command"), 16);
-
-      GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, moveStr);
-    }
   }
+
+  void MoveCommand::Execute(float deltaTime)
+  {
+    FString moveStr{};
+    if (m_move.IsValid())
+    {
+      moveStr.Append(m_move->_getUObject()->GetName());
+      m_move->Move();
+    }
+    else
+    {
+      moveStr.Append(TEXT("EMPTY OBJECT"));
+    }
+
+    moveStr.AppendChars(TEXT(" Move Command"), 16);
+    UE::MLibrary::Debug::Log(moveStr);
+  }
+
+  void MoveCommand::End()
+  {
+    
+  }
+
+  bool MoveCommand::IsFinish() const
+  {
+    return true;
+  }
+
 }
