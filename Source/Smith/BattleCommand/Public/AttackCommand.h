@@ -6,6 +6,8 @@
 #include "IBattleCommand.h"
 
 class ASmithPlayerActor;
+
+class USmithMoveComponent;
 /**
  * 
  */
@@ -15,13 +17,16 @@ namespace UE::Smith::Command
 	class SMITH_API AttackCommand : public IBattleCommand
 	{
 	public:
-		AttackCommand(ASmithPlayerActor*);
+		AttackCommand(USmithMoveComponent*);
 		~AttackCommand();
 
 	public:
-		void Execute() override final;
+		virtual void Start() override;
+		virtual void Execute(float deltaTime) override;
+		virtual void End() override;
+		virtual bool IsFinish() const override;
 
 	private:
-		TWeakObjectPtr<ASmithPlayerActor> m_actor;
+		TWeakObjectPtr<USmithMoveComponent> m_moveComp;
 	};
 }

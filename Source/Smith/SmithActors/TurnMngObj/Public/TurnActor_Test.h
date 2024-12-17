@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class SMITH_API ATurnActor_Test : public ATurnBaseActor
+class SMITH_API ATurnActor_Test final: public ATurnBaseActor
 {
 	GENERATED_BODY()
 

@@ -6,13 +6,14 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "ITurnManageableWrapper.h"
 #include "TurnPriority.h"
+#include "Debug.h"
 #include "SmithBattleSubsystem.generated.h"
 
 class IBattleCommand;
-enum class ETurnPriority : uint8;
+class UBattleCommandManager;
 
 UCLASS()
-class SMITH_API USmithBattleSubsystem final : public UWorldSubsystem
+class SMITH_API USmithBattleSubsystem final : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -24,38 +25,69 @@ public:
 
 	/** Implement this for deinitialization of instances of the system */
 	void Deinitialize() override final;
+
+	// TODO Change name
+	/// @brief ITurnManageableを継承したActorを登録
+	/// 新しいマップが読み込まれたら一回呼ばれる
+	void RegisterTurnObj();
 	
-	void StartBattle();
-	
+	// Test Func
 	void YAYA()
 	{
 		FString str{};
-		if (GEngine != nullptr)
-		{
-			for (const auto& pair : m_priorityLists)
-			{
-				for (const auto& actor : pair.Value.Elements)
-				{
-					str.Reset();
-					FString enumName {}; 
-					const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("ETurnPriority"), true);
-					if (EnumPtr != nullptr)
-					{
-						enumName.Append(EnumPtr->GetNameByValue(StaticCast<int64>(pair.Key)).ToString());
-					}
 
-					str.Append(enumName);
-					str.Append(Cast<AActor>(actor)->GetName());
-					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, str);
-				}
+		for (const auto& pair : m_priorityLists)
+		{
+			for (const auto& actor : pair.Value.Elements)
+			{
+				str.Reset();
+				// const UEnum* EnumPtr = FindObject<UEnum>(nullptr, TEXT("/Script/Smith.ETurnPriority"));
+				// if (EnumPtr != nullptr)
+				// {
+				// 	str.Append(EnumPtr->GetNameByValue(StaticCast<int64>(pair.Key)).ToString());
+				// }
+
+				str.Append(Cast<AActor>(actor.Get())->GetName());
+				UE::MLibrary::Debug::LogWarning(str);
 			}
 		}
 	}
 
+// start of FTickableObjectBase Interface
+#pragma region FTickableObjectBase Interface
+	void Tick(float DeltaTime) override final;
+	bool IsTickable() const override final;
+	TStatId GetStatId() const override final;
+#pragma endregion
+// end of FTickableObjectBase Interface
+
+// start of FTickableObject Interface
+#pragma region FTickableObject Interface
+	bool IsTickableWhenPaused() const override final;
+	bool IsTickableInEditor() const override final;
+	UWorld* GetTickableGameObjectWorld() const override final;
+#pragma endregion
+// end of FTickableObject Interface
+
+
+
 private:
-	void executeCommand(IBattleCommand*);
+	void registerCommand(ITurnManageable*, TSharedPtr<IBattleCommand>);
+	void registerNextTurnObjs();
+	void emptyContainers();
+
+private:
+	void startExecute();
+	void endExecute();
 
 private:
 	UPROPERTY()
 	TMap<ETurnPriority, FITurnManageableWrapper> m_priorityLists;
+	UPROPERTY()
+	TObjectPtr<UBattleCommandManager> m_battleCmdMgr;
+
+private:
+	ETurnPriority m_curtTurn;
+	uint8 m_bCanExecuteCmd : 1;
+	float cnt;
 };

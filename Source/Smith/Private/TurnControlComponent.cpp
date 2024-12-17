@@ -2,6 +2,7 @@
 
 
 #include "TurnControlComponent.h"
+#include "Debug.h"
 
 // Sets default values for this component's properties
 UTurnControlComponent::UTurnControlComponent()
@@ -32,14 +33,11 @@ void UTurnControlComponent::SetCommandSendable(bool value)
 {
 	m_isCMDSendable = value;
 
-	if (GEngine != nullptr)
-	{
-		FString str {TEXT("Turn ")};
-		str.Append(GetOwner()->GetName());
-		str.Append(" ");
-		str.Append(m_isCMDSendable ? "On" : "Off");
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, str);
-	}
+	FString str {TEXT("Turn ")};
+	str.Append(GetOwner()->GetName());
+	str.Append(" ");
+	str.Append(m_isCMDSendable ? "On" : "Off");
+	UE::MLibrary::Debug::LogWarning(str);
 }
 
 void UTurnControlComponent::SetTurnPriority(ETurnPriority priority)
