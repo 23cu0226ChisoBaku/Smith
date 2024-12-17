@@ -41,11 +41,11 @@ public:
 			for (const auto& actor : pair.Value.Elements)
 			{
 				str.Reset();
-				const UEnum* EnumPtr = FindObject<UEnum>(nullptr, TEXT("/Script/Smith.ETurnPriority"));
-				if (EnumPtr != nullptr)
-				{
-					str.Append(EnumPtr->GetNameByValue(StaticCast<int64>(pair.Key)).ToString());
-				}
+				// const UEnum* EnumPtr = FindObject<UEnum>(nullptr, TEXT("/Script/Smith.ETurnPriority"));
+				// if (EnumPtr != nullptr)
+				// {
+				// 	str.Append(EnumPtr->GetNameByValue(StaticCast<int64>(pair.Key)).ToString());
+				// }
 
 				str.Append(Cast<AActor>(actor.Get())->GetName());
 				UE::MLibrary::Debug::LogWarning(str);
