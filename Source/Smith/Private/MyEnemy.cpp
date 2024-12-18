@@ -1,13 +1,39 @@
+#include "MyEnemy.h"
 #include "SmithMoveComponent.h"
 #include "SmithAttackComponent.h"
-#include "MyEnemy.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "TurnControlComponent.h"
+#include "MoveCommand.h"
+
+#include "Debug.h"
 
 // Sets default values
 AMyEnemy::AMyEnemy()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	UTurnControlComponent* turnComp = CreateDefaultSubobject<UTurnControlComponent>(TEXT("Konno Enemy Turn CTRL"));
+
+	if (turnComp != nullptr)
+	{
+		AddInstanceComponent(turnComp);
+	}
+
+	m_turnCtrl = turnComp;
+
+	m_turnCtrl->SetTurnPriority(ETurnPriority::Rival);
+
+	USmithMoveComponent* moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno asdhsaidhsaid"));
+
+	if (moveComp)
+	{
+		AddInstanceComponent(moveComp);
+	}
+
+	m_moveComp = moveComp;
+
+	m_moveComp->SetMoveSpeed(250.0f);
 }
 
 // Called when the game starts or when spawned
@@ -15,8 +41,8 @@ void AMyEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	// コンポーネントの取得
-	m_attackComp = this->GetComponentByClass(USmithAttackComponent::StaticClass());
-	m_moveComp = this->GetComponentByClass(USmithMoveComponent::StaticClass());
+	//m_attackComp = this->GetComponentByClass(USmithAttackComponent::StaticClass());
+	//m_moveComp = Cast<USmithMoveComponent>(this->GetComponentByClass(USmithMoveComponent::StaticClass()));
 }
 
 // Called every frame
@@ -87,6 +113,41 @@ void AMyEnemy::PlayerCheck()
 	}
 
 	// 移動の処理
-	USmithMoveComponent *comp = Cast<USmithMoveComponent>(m_moveComp);
-	comp->Move();
+
+	if (m_event.IsBound())
+	{
+		m_event.Broadcast(Cast<ITurnManageable>(this), MakeShared<UE::Smith::Command::MoveCommand>(Cast<IMoveable>(m_moveComp)));
+	}
+	// USmithMoveComponent *comp = Cast<USmithMoveComponent>(m_moveComp);
+	// comp->Move();
 }
+
+UTurnControlComponent* AMyEnemy::GetTurnControl() const
+{
+	return m_turnCtrl;
+}
+
+FDelegateHandle AMyEnemy::Subscribe(FRequestCommandEvent::FDelegate& delegate)
+{
+	if (delegate.IsBound())
+	{
+		return m_event.Add(delegate);
+	}
+
+	return FDelegateHandle{};
+}
+
+bool AMyEnemy::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle)
+{
+	if (obj != nullptr && m_event.IsBoundToObject(obj))
+	{
+		m_event.Remove(delegateHandle);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+

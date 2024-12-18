@@ -3,11 +3,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "IMoveable.h"
 #include "SmithMoveComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 
-class SMITH_API USmithMoveComponent : public UActorComponent
+class SMITH_API USmithMoveComponent : public UActorComponent , public IMoveable
 {
 	GENERATED_BODY()
 
@@ -18,7 +19,11 @@ public:
 	USmithMoveComponent();
 
 public:
-	void Move();
+	virtual void Move() override;
+	void SetMoveSpeed(float speed)
+	{
+		MOVE_DISTANCE = speed;
+	}
 public:
 	UPROPERTY(EditAnywhere)
 	float MOVE_DISTANCE;

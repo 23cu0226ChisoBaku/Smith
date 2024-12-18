@@ -1,6 +1,7 @@
 
 #include "SmithMoveComponent.h"
 #include "MyPlayerCharacter.h"
+#include "SmithPlayerActor.h"
 #include "Kismet/GameplayStatics.h"
 
 USmithMoveComponent::USmithMoveComponent()
@@ -9,11 +10,12 @@ USmithMoveComponent::USmithMoveComponent()
 
 void USmithMoveComponent::BeginPlay()
 {
+	Super::BeginPlay();
 	// 親Actorを取得
 	m_enemyObj = GetOwner();
 	// 指定したクラスのアクターを取得
 	TArray<TObjectPtr<AActor>> aActorList;
-	UGameplayStatics::GetAllActorsOfClass(this, AMyPlayerCharacter::StaticClass(), aActorList);
+	UGameplayStatics::GetAllActorsOfClass(this, ASmithPlayerActor::StaticClass(), aActorList);
 	for (TObjectPtr<AActor> aActor : aActorList)
 	{
 		m_target = aActor;

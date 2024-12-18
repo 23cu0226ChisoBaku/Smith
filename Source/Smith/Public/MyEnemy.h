@@ -2,19 +2,20 @@
 
 #pragma once
 
-#include "Engine/World.h" // �ǉ�
 #include "CoreMinimal.h"
+#include "Engine/World.h" // �ǉ�
 #include "GameFramework/Actor.h"
 #include "MyPlayerCharacter.h"// �ǉ�
 #include "DrawDebugHelpers.h"  // DrawDebugLine��DrawDebugPoint�Ȃǂ��g�p���邽�߂ɕK�v
-
+#include "ITurnManageable.h"
 
 #include "MyEnemy.generated.h"
 
-
+class UTurnControlComponent;
+class USmithMoveComponent;
 
 UCLASS()
-class SMITH_API AMyEnemy : public AActor
+class SMITH_API AMyEnemy : public AActor , public ITurnManageable
 {
 	GENERATED_BODY()
 	
@@ -35,10 +36,27 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 ATK;
 
+// TODO Create by Mai
+#pragma region ITurnManageable Interface
+public:
+	UTurnControlComponent* GetTurnControl() const override final;
+	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
+	bool Unsubscribe(UObject*,FDelegateHandle) override final;
+
+private:
+	UPROPERTY()
+	TObjectPtr<UTurnControlComponent> m_turnCtrl;
+
+private:
+	FRequestCommandEvent m_event;
+#pragma endregion
+
 private:
 	void PlayerCheck();
-
-	UActorComponent* m_moveComp;
+	
+	UPROPERTY()
+	USmithMoveComponent* m_moveComp;
+	UPROPERTY()
 	UActorComponent* m_attackComp;
 
 	float m_timer;

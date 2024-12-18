@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "SmithAttackComponent.generated.h"
 
+class AMyPlayerCharacter;
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SMITH_API USmithAttackComponent : public UActorComponent
 {
