@@ -363,7 +363,6 @@ void ATestTileMove::Move(const FInputActionValue& value)
 
 	m_nextDir = startPos + direction * Smith_NS_Mapinfo::TILE_SIZE;
 
-
 }
 
 void ATestTileMove::Attack(const FInputActionValue& value)

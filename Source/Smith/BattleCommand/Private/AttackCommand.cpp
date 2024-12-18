@@ -35,13 +35,14 @@ namespace UE::Smith::Command
     if (m_atkComp.IsValid())
     {
       attackStr.Append(m_atkComp->GetName());
+      m_atkComp->Attack_Temp();
     }
     else
     {
       attackStr.Append(TEXT("EMPTY OBJECT"));
     }
 
-    attackStr.AppendChars(TEXT(" Attack Command"), 16);
+    attackStr.Append(TEXT(" Attack Command"));
 
     UE::MLibrary::Debug::Log(attackStr);
 

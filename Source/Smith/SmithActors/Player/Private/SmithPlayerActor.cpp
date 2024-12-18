@@ -10,6 +10,7 @@
 #include "SmithBattleSubsystem.h"
 #include "TurnControlComponent.h"
 #include "SmithMoveComponent.h"
+#include "SmithAttackComponent.h"
 
 #include "AttackCommand.h"
 #include "MoveCommand.h"
@@ -61,6 +62,10 @@ ASmithPlayerActor::ASmithPlayerActor()
 	check((m_moveComponent != nullptr));
 
 	m_hp = Temp_Player_HP;
+
+	m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Smith AttackComponent"));
+
+	check((m_atkComponent != nullptr));
 
 }
 
@@ -158,8 +163,6 @@ void ASmithPlayerActor::Move(const FInputActionValue& value)
 
 void ASmithPlayerActor::Attack(const FInputActionValue& value)
 {
-	UE::Smith::Command::AttackCommand atkCmd(nullptr);
-
 	sendCommand(MakeShared<UE::Smith::Command::AttackCommand>(nullptr));
 }
 

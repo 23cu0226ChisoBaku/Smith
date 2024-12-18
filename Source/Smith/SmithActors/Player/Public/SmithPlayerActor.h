@@ -11,6 +11,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class USmithMoveComponent;
+class USmithAttackComponent;
 
 class UInputMappingContext;
 class UInputAction;
@@ -49,6 +50,8 @@ private:
 	TObjectPtr<UTurnControlComponent> m_turnComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USmithMoveComponent> m_moveComponent;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USmithAttackComponent> m_atkComponent;
 
 	// Enhanced Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
