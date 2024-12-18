@@ -6,6 +6,8 @@
 #include "SmithBattleSubsystem.h"
 #include "TurnActor_Test.h"
 
+#include "MyEnemy.h"
+
 ASpawnActorGameMode_Test::ASpawnActorGameMode_Test()
 {
   static ConstructorHelpers::FClassFinder<APawn> PlayerBP(TEXT("/Game/BP/BP_SmithPlayerActor"));
@@ -23,6 +25,8 @@ void ASpawnActorGameMode_Test::StartPlay()
   {
     GetWorld()->SpawnActor<ATurnActor_Test>(ATurnActor_Test::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
   }
+
+  //GetWorld()->SpawnActor<AMyEnemy>(AMyEnemy::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
 
 
   USmithBattleSubsystem* subsys = GetWorld()->GetSubsystem<USmithBattleSubsystem>();

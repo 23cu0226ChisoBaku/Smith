@@ -1,14 +1,11 @@
-// ‚±‚ê‚©‚ç‚â‚é‚±‚Æ
-// UŒ‚i“à•”“I‚É‚ÍƒCƒP‚Ä‚éj
-// UŒ‚‚µ‚½‚Æ‚«ƒGƒtƒFƒNƒg‚È‚è‚í‚©‚è‚â‚·‚¢‰‰o‚ğ“ü‚ê‚é
-// ƒ_ƒ[ƒW‚ğó‚¯‚é
-// ƒ^[ƒ“§‚ÅUŒ‚i‚Â‚Ü‚èƒvƒŒƒCƒ„[‚ªˆÚ“®‚µ‚½‚çUŒ‚j<-QÆİ’è‚Æ‚©‚ß‚ñ‚Ç‚¢‚©‚ç’‡‰îƒNƒ‰ƒX‚ğŒo—R‚µ‚Ä‚â‚ë‚¤‚©‚È
-// ƒvƒŒƒCƒ„[‚É‘Î‚µ‚ÄˆÚ“®iƒ}ƒX–Új
-// 
 #include "MyEnemy.h"
+#include "SmithMoveComponent.h"
+#include "SmithAttackComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "TurnControlComponent.h"
+#include "MoveCommand.h"
 
-
+#include "Debug.h"
 
 // Sets default values
 AMyEnemy::AMyEnemy()
@@ -16,54 +13,76 @@ AMyEnemy::AMyEnemy()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	UTurnControlComponent* turnComp = CreateDefaultSubobject<UTurnControlComponent>(TEXT("Konno Enemy Turn CTRL"));
+
+	if (turnComp != nullptr)
+	{
+		AddInstanceComponent(turnComp);
+	}
+
+	m_turnCtrl = turnComp;
+
+	m_turnCtrl->SetTurnPriority(ETurnPriority::Rival);
+
+	USmithMoveComponent* moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno asdhsaidhsaid"));
+
+	if (moveComp)
+	{
+		AddInstanceComponent(moveComp);
+	}
+
+	m_moveComp = moveComp;
+
+	m_moveComp->SetMoveSpeed(250.0f);
 }
 
 // Called when the game starts or when spawned
 void AMyEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-
+	// ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã®å–å¾—
+	//m_attackComp = this->GetComponentByClass(USmithAttackComponent::StaticClass());
+	//m_moveComp = Cast<USmithMoveComponent>(this->GetComponentByClass(USmithMoveComponent::StaticClass()));
 }
 
 // Called every frame
 void AMyEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	Attack();
+	m_timer += DeltaTime;
+	if (m_timer > 5.0f)
+	{
+		PlayerCheck();
+		m_timer = 0.0f;
+	}
 }
 
-// UŒ‚
-void AMyEnemy::Attack()
+void AMyEnemy::PlayerCheck()
 {
-	// ŠJnˆÊ’u‚ÆI—¹ˆÊ’u‚ğ’è‹`
 	const float rayLenth = 100.0f;
 	const FVector StartLocation = GetActorLocation();
 
-	// ¶‰Eã‰º‚ÌI“_
 	const FVector EndLocation[4] = {
 		StartLocation + FVector::ForwardVector * rayLenth,
 		StartLocation + FVector::BackwardVector * rayLenth,
 		StartLocation + FVector::RightVector * rayLenth,
-		StartLocation + FVector::LeftVector * rayLenth
-	};
+		StartLocation + FVector::LeftVector * rayLenth};
 
-	// Trace‚É•K—v‚Èƒpƒ‰ƒ[ƒ^
-	FHitResult HitResult;  // ƒqƒbƒgî•ñ
+	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);  // ©•ª©g‚ğ–³‹
-	AActor* HitActor = nullptr;
+	CollisionParams.AddIgnoredActor(this);
+	AActor *HitActor = nullptr;
 	bool bHit = false;
 
 	for (int i = 0; i < 4; ++i)
 	{
-		// LineTrace‚ğÀs
+		// ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆ
 		bHit = GetWorld()->LineTraceSingleByChannel(
-			HitResult,       // ƒqƒbƒgŒ‹‰Ê
-			StartLocation,   // ŠJnˆÊ’u
-			EndLocation[i],  // I—¹ˆÊ’u
-			ECC_PhysicsBody,  // g—p‚·‚éƒRƒŠƒWƒ‡ƒ“ƒ`ƒƒƒlƒ‹i‚±‚±‚Å‚Í•¨—“I‚ÈƒRƒŠƒWƒ‡ƒ“j
-			CollisionParams  // ƒRƒŠƒWƒ‡ƒ“ƒpƒ‰ƒ[ƒ^
-		);
+			HitResult,
+			StartLocation,
+			EndLocation[i],
+			ECC_PhysicsBody,
+			CollisionParams);
 
 		if (!bHit)
 		{
@@ -72,34 +91,63 @@ void AMyEnemy::Attack()
 
 		HitActor = HitResult.GetActor();
 
-		// ƒvƒŒƒCƒ„[‚Éƒqƒbƒg‚µ‚½ê‡‚Ìˆ—
+		// Playerã«ãƒ’ãƒƒãƒˆã—ã¦ã„ãŸã‚‰æ”»æ’ƒ
 		if (::IsValid(HitActor) && HitActor->IsA(AMyPlayerCharacter::StaticClass()))
 		{
-			// ƒqƒbƒg‚µ‚½ˆÊ’u‚ÉÔF‚Ì“_‚ğ•\¦
 			DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Red, false, 1.0f);
-
-			// ƒŒƒCƒLƒƒƒXƒg‚Ìü‚ğÂF‚Å•\¦
 			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
 
-			if (GEngine != nullptr)
-			{
-				// ‚±‚±‚ÅƒvƒŒƒCƒ„[‚ÉUŒ‚III
-				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, HitActor->GetName());
-				// PrintStringƒm[ƒh‚Æ“¯‚¶ˆ—
-				// UKismetSystemLibraryƒNƒ‰ƒX‚ÌPrintStringŠÖ”‚ğŒÄ‚Ño‚·
-				UKismetSystemLibrary::PrintString(this, "Player to Attack!", true, true, FColor::Cyan, 2.f, TEXT("None"));
-			}
+			AMyPlayerCharacter *player = Cast<AMyPlayerCharacter>(HitActor);
+			USmithAttackComponent *comp = Cast<USmithAttackComponent>(m_attackComp);
+			comp->Attack(player, 1);
 			return;
 		}
 	}
 
+	// ãƒ¬ã‚¤ã®ãƒ‡ãƒãƒƒã‚°
 	for (int i = 0; i < 4; ++i)
 	{
-		// ƒqƒbƒg‚µ‚È‚©‚Á‚½ê‡AƒŒƒCƒLƒƒƒXƒg‚ªI—¹‚µ‚½ˆÊ’u‚É—ÎF‚Ì“_‚ğ•\¦
 		DrawDebugPoint(GetWorld(), EndLocation[i], 10.0f, FColor::Green, false, 1.0f);
 
-		// ƒŒƒCƒLƒƒƒXƒg‚Ìü‚ğ—ÎF‚Å•\¦
 		DrawDebugLine(GetWorld(), StartLocation, EndLocation[i], FColor::Green, false, 1.0f, 0, 1.0f);
 	}
+
+	// ç§»å‹•ã®å‡¦ç†
+
+	if (m_event.IsBound())
+	{
+		m_event.Broadcast(Cast<ITurnManageable>(this), MakeShared<UE::Smith::Command::MoveCommand>(Cast<IMoveable>(m_moveComp)));
+	}
+	// USmithMoveComponent *comp = Cast<USmithMoveComponent>(m_moveComp);
+	// comp->Move();
 }
+
+UTurnControlComponent* AMyEnemy::GetTurnControl() const
+{
+	return m_turnCtrl;
+}
+
+FDelegateHandle AMyEnemy::Subscribe(FRequestCommandEvent::FDelegate& delegate)
+{
+	if (delegate.IsBound())
+	{
+		return m_event.Add(delegate);
+	}
+
+	return FDelegateHandle{};
+}
+
+bool AMyEnemy::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle)
+{
+	if (obj != nullptr && m_event.IsBoundToObject(obj))
+	{
+		m_event.Remove(delegateHandle);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 

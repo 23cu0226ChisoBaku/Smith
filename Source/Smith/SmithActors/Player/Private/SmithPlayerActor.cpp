@@ -80,12 +80,6 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 	}
 
 	USmithBattleSubsystem* sub = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
-
-	// if (sub != nullptr)
-	// {
-	// 	sub->YAYA();
-	// }
-
 }
 
 // Called to bind functionality to input

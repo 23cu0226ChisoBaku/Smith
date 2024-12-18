@@ -2,19 +2,20 @@
 
 #pragma once
 
-#include "Engine/World.h" // ’Ç‰Á
 #include "CoreMinimal.h"
+#include "Engine/World.h" // ï¿½Ç‰ï¿½
 #include "GameFramework/Actor.h"
-#include "MyPlayerCharacter.h"// ’Ç‰Á
-#include "DrawDebugHelpers.h"  // DrawDebugLine‚âDrawDebugPoint‚È‚Ç‚ðŽg—p‚·‚é‚½‚ß‚É•K—v
-
+#include "MyPlayerCharacter.h"// ï¿½Ç‰ï¿½
+#include "DrawDebugHelpers.h"  // DrawDebugLineï¿½ï¿½DrawDebugPointï¿½È‚Ç‚ï¿½ï¿½gï¿½pï¿½ï¿½ï¿½é‚½ï¿½ß‚É•Kï¿½v
+#include "ITurnManageable.h"
 
 #include "MyEnemy.generated.h"
 
-
+class UTurnControlComponent;
+class USmithMoveComponent;
 
 UCLASS()
-class SMITH_API AMyEnemy : public AActor
+class SMITH_API AMyEnemy : public AActor , public ITurnManageable
 {
 	GENERATED_BODY()
 	
@@ -30,9 +31,33 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	//UPROPERTY(EditAnywhere)
-	//AActor Player;
+	UPROPERTY(EditAnywhere)
+	int32 HP;
+	UPROPERTY(EditAnywhere)
+	int32 ATK;
+
+// TODO Create by Mai
+#pragma region ITurnManageable Interface
+public:
+	UTurnControlComponent* GetTurnControl() const override final;
+	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
+	bool Unsubscribe(UObject*,FDelegateHandle) override final;
 
 private:
-	void Attack();
+	UPROPERTY()
+	TObjectPtr<UTurnControlComponent> m_turnCtrl;
+
+private:
+	FRequestCommandEvent m_event;
+#pragma endregion
+
+private:
+	void PlayerCheck();
+	
+	UPROPERTY()
+	USmithMoveComponent* m_moveComp;
+	UPROPERTY()
+	UActorComponent* m_attackComp;
+
+	float m_timer;
 };
