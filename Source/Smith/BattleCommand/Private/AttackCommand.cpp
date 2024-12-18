@@ -2,15 +2,22 @@
 
 
 #include "AttackCommand.h"
-#include "SmithPlayerActor.h"
-#include "SmithMoveComponent.h"
+#include "SmithAttackComponent.h"
+#include "IAttackable.h"
+#include "AttackHandle.h"
 #include "Debug.h"
 
 namespace UE::Smith::Command
 {
-  AttackCommand::AttackCommand(USmithMoveComponent* moveComp)
-    : m_moveComp(moveComp)
-  {}
+  AttackCommand::AttackCommand(USmithAttackComponent* atkComp, IAttackable* target, AttackHandle&& handle)
+    : m_atkComp(atkComp)
+  {
+    if (m_atkComp.IsValid())
+    {
+      m_atkComp->SetAttackTarget(target);
+      m_atkComp->SetAttackHandle(::MoveTemp(handle));
+    }
+  }
 
   AttackCommand::~AttackCommand()
   {
@@ -25,9 +32,9 @@ namespace UE::Smith::Command
   void AttackCommand::Execute(float deltaTime)
   {
     FString attackStr{};
-    if (m_moveComp.IsValid())
+    if (m_atkComp.IsValid())
     {
-      attackStr.Append(m_moveComp->GetName());
+      attackStr.Append(m_atkComp->GetName());
     }
     else
     {

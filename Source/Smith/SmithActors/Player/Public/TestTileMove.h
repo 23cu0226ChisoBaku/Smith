@@ -81,7 +81,7 @@ public:
 public:
 // IAttackable(UInterface)
 #pragma region IAttackable
-	void OnAttack(const AttackHandle& attack) override;
+	void OnAttack(AttackHandle&& attack) override;
 #pragma endregion
 
 //---------------------------------------

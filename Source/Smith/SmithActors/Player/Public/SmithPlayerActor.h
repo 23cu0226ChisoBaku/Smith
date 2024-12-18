@@ -5,19 +5,22 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "ITurnManageable.h"
+#include "IAttackable.h"
 #include "SmithPlayerActor.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
+class USmithMoveComponent;
 
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
 class IBattleCommand;
+struct AttackHandle;
 
 UCLASS()
-class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable
+class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable , public IAttackable
 {
 	GENERATED_BODY()
 
@@ -44,6 +47,8 @@ private:
 	TObjectPtr<UCameraComponent> m_cam;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UTurnControlComponent> m_turnComponent;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USmithMoveComponent> m_moveComponent;
 
 	// Enhanced Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -60,6 +65,8 @@ public:
 	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
 	bool Unsubscribe(UObject*,FDelegateHandle) override final;
 
+public:
+	void OnAttack(AttackHandle&&) override final;
 private:
 	void sendCommand(TSharedPtr<IBattleCommand>);
 
@@ -71,4 +78,5 @@ private:
 
 private:
 	FRequestCommandEvent m_event;
+	int32 m_hp;
 };

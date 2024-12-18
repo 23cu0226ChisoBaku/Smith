@@ -9,14 +9,27 @@
 #include "InputActionValue.h"
 #include "SmithBattleSubsystem.h"
 #include "TurnControlComponent.h"
+#include "SmithMoveComponent.h"
 
 #include "AttackCommand.h"
 #include "MoveCommand.h"
 
+#include "AttackHandle.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+
+namespace SmithPlayerActor::Private
+{
+	constexpr int32 Temp_Player_HP = 30;
+}
 
 // Sets default values
 ASmithPlayerActor::ASmithPlayerActor()
+	: m_event({})
+	, m_hp(0)
 {
+	using namespace SmithPlayerActor::Private;
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -43,6 +56,12 @@ ASmithPlayerActor::ASmithPlayerActor()
 	check((m_turnComponent != nullptr));
 
 	m_turnComponent->SetTurnPriority(ETurnPriority::PlayerSelf);
+
+	m_moveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
+	check((m_moveComponent != nullptr));
+
+	m_hp = Temp_Player_HP;
+
 }
 
 // Called when the game starts or when spawned
@@ -71,6 +90,12 @@ void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ASmithPlayerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (m_hp <= 0)
+	{
+		MDebug::LogError(TEXT("Player is dead"));
+		return;
+	}
 	
 	if (APlayerController* playerController = Cast<APlayerController>(Controller))
 	{
@@ -79,7 +104,6 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 		UE_LOG(LogTemp, Warning, TEXT("Roll: %lf, Pitch: %lf, Yaw: %lf"), rotator.Roll, rotator.Pitch, rotator.Yaw);
 	}
 
-	USmithBattleSubsystem* sub = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
 }
 
 // Called to bind functionality to input
@@ -129,7 +153,7 @@ void ASmithPlayerActor::Move(const FInputActionValue& value)
 {
 	FVector2D movementInput = value.Get<FVector2D>();
 
-	sendCommand(MakeShared<UE::Smith::Command::MoveCommand>(nullptr));
+	sendCommand(MakeShared<UE::Smith::Command::MoveCommand>(m_moveComponent));
 }
 
 void ASmithPlayerActor::Attack(const FInputActionValue& value)
@@ -141,7 +165,12 @@ void ASmithPlayerActor::Attack(const FInputActionValue& value)
 
 void ASmithPlayerActor::Look(const FInputActionValue& value)
 {
-
+	OnAttack(
+						{ 
+							TEXT("God"),		// Attack
+						  10,							// Damage
+						}
+					);
 }
 
 void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)
@@ -164,5 +193,28 @@ void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)
 
 	m_event.Broadcast(this, command);
 
+}
+
+void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
+{
+	FString msg{GetName()};
+	msg.Append(attack.AttackName);
+	MDebug::LogWarning(msg);
+
+	m_hp -= attack.AttackPower;
+
+	msg.Empty();
+
+	msg.Append(GetName());
+	msg.Append(TEXT(" left HP:"));
+	msg.Append(FString::FromInt(m_hp));
+	MDebug::LogWarning(msg);
+
+	if (m_hp <= 0)
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		
+		DisableInput(Cast<APlayerController>(Controller));
+	}
 }
 

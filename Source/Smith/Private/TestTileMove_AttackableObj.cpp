@@ -26,7 +26,7 @@ void ATestTileMove_AttackableObj::Tick(float DeltaTime)
 
 }
 
-void ATestTileMove_AttackableObj::OnAttack(const AttackHandle& attack)
+void ATestTileMove_AttackableObj::OnAttack(AttackHandle&& attack)
 {
 	if (GEngine != nullptr)
 	{

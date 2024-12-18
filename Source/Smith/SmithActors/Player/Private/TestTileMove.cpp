@@ -122,7 +122,7 @@ void ATestTileMove::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
-void ATestTileMove::OnAttack(const AttackHandle& attack)
+void ATestTileMove::OnAttack(AttackHandle&& attack)
 {
 	if (GEngine != nullptr)
 	{
@@ -213,7 +213,7 @@ bool ATestTileMove::attack_test()
 		if (attackable != nullptr)
 		{
 			AttackHandle attackHnd {GetName(), 10};
-			attackable->OnAttack(attackHnd);
+			attackable->OnAttack(::MoveTemp(attackHnd));
 		}	
 		else
 		{

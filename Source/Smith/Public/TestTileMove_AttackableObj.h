@@ -25,6 +25,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	void OnAttack(const AttackHandle& attack) override;
+	void OnAttack(AttackHandle&& attack) override;
 
 };

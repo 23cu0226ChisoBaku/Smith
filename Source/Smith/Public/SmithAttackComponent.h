@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "UObject/WeakInterfacePtr.h"
+#include "AttackHandle.h"
 #include "SmithAttackComponent.generated.h"
 
 class AMyPlayerCharacter;
+class IAttackable;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SMITH_API USmithAttackComponent : public UActorComponent
@@ -22,6 +25,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void Attack(AMyPlayerCharacter *player,int32 damage);
+	void Attack(AMyPlayerCharacter *player, int32 damage);
 
+	void SetAttackTarget(IAttackable*);
+	void SetAttackHandle(AttackHandle&&);
+
+	void Attack_Temp();
+
+private:
+	TWeakInterfacePtr<IAttackable> m_attackTarget;
+	AttackHandle m_attackHandle;
 };
