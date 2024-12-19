@@ -23,12 +23,31 @@
 namespace SmithPlayerActor::Private
 {
 	constexpr int32 Temp_Player_HP = 30;
+	constexpr float TILE_SIZE = 250.0f;
+
+	// Temp Capsule Size
+	// TODO obsolete when map is done
+	constexpr float CAPSULE_RADIUS = 90.0f;
+	constexpr float CAPSULE_HALF_HEIGHT = 240.0f;
+
+	ASmithPlayerActor::EDir_Test VectorToEDir(const FVector& direction)
+	{
+		const double dot = direction.Dot(FVector::ForwardVector);
+		const FVector dir = direction.Cross(FVector::ForwardVector);
+		const double newAngle = FMath::RadiansToDegrees(acos(dot)) + (dir.Z > 0.0 ? 180.0 : 0.0); 
+
+		const double anglePerDirection = 360.0 / StaticCast<double>(ASmithPlayerActor::DirectionCnt);
+		return StaticCast<ASmithPlayerActor::EDir_Test>(round(newAngle / anglePerDirection));
+	}
 }
 
 // Sets default values
 ASmithPlayerActor::ASmithPlayerActor()
 	: m_event({})
 	, m_hp(0)
+	, m_camDir(North)
+	, m_bCanMove(true)
+	, m_bCanAttack(true)
 {
 	using namespace SmithPlayerActor::Private;
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -53,6 +72,13 @@ ASmithPlayerActor::ASmithPlayerActor()
 	m_springArm->SetWorldRotation(FRotator::ZeroRotator);
 	m_springArm->TargetArmLength = 1500.0f;
 
+	const FVector actorFwd = GetActorLocation().GetUnsafeNormal();
+
+	if (actorFwd != FVector::ZeroVector)
+	{
+		m_camDir = VectorToEDir(actorFwd);
+	}
+
 	m_turnComponent = CreateDefaultSubobject<UTurnControlComponent>(TEXT("TurnComponent"));
 	check((m_turnComponent != nullptr));
 
@@ -60,6 +86,8 @@ ASmithPlayerActor::ASmithPlayerActor()
 
 	m_moveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
 	check((m_moveComponent != nullptr));
+
+	m_moveComponent->SetMoveSpeed(TILE_SIZE);
 
 	m_hp = Temp_Player_HP;
 
@@ -118,8 +146,8 @@ void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
-	inputComp->BindAction(m_moveAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Move);
-	inputComp->BindAction(m_attackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack);
+	inputComp->BindAction(m_moveAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Move_Input);
+	inputComp->BindAction(m_attackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack_Input);
 	inputComp->BindAction(m_cameraAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Look);
 
 }
@@ -154,16 +182,37 @@ bool ASmithPlayerActor::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle
 	}
 }
 
-void ASmithPlayerActor::Move(const FInputActionValue& value)
+void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
 {
 	FVector2D movementInput = value.Get<FVector2D>();
+
+	if (movementInput == FVector2D::ZeroVector)
+	{
+		return;
+	}
+
+	
+	const double cameraAngle = FMath::DegreesToRadians(StaticCast<double>(m_camDir * 45));
+	double directionX = movementInput.Y * cos(cameraAngle) - movementInput.X * sin(cameraAngle);
+	double directionY = movementInput.Y * sin(cameraAngle) + movementInput.X * cos(cameraAngle);
+
+	if (FMath::IsNearlyZero(directionX))
+	{
+		directionX = 0.0;
+	}
+
+	if (FMath::IsNearlyZero(directionY))
+	{
+		directionY = 0.0;
+	}
+
 
 	sendCommand(MakeShared<UE::Smith::Command::MoveCommand>(m_moveComponent));
 }
 
-void ASmithPlayerActor::Attack(const FInputActionValue& value)
+void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
 {
-	sendCommand(MakeShared<UE::Smith::Command::AttackCommand>(nullptr));
+	sendCommand(MakeShared<UE::Smith::Command::AttackCommand>(m_atkComponent, nullptr, AttackHandle{GetName(),1}));
 }
 
 void ASmithPlayerActor::Look(const FInputActionValue& value)
@@ -196,6 +245,44 @@ void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)
 
 	m_event.Broadcast(this, command);
 
+}
+
+void ASmithPlayerActor::moveImpl()
+{
+	using namespace SmithPlayerActor::Private;
+
+	FHitResult hit = {};
+	bool isHit = false;
+
+	FCollisionShape sphereShape {};
+	FCollisionQueryParams hitParam;
+	hitParam.AddIgnoredActor(this);
+	const float sphereRadius = CAPSULE_HALF_HEIGHT * 0.5f;
+	sphereShape.SetSphere(sphereRadius);
+	
+	isHit = GetWorld()->SweepSingleByChannel(
+																						hit, 
+																						GetActorLocation(),
+																						m_nextDir,
+																						FQuat::Identity,
+																						ECollisionChannel::ECC_MAX,
+																						sphereShape,
+																						hitParam
+																					);
+	if (!isHit)
+	{
+		SetActorLocation(m_nextDir);
+	}
+}
+
+void ASmithPlayerActor::attackImpl()
+{
+	
+}
+
+void ASmithPlayerActor::changeFwdImpl()
+{
+	
 }
 
 void ASmithPlayerActor::OnAttack(AttackHandle&& attack)

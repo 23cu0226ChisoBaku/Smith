@@ -7,7 +7,7 @@
 
 namespace TEST_NS
 {
-  constexpr float SEND_INTERVAL = 0.5f;
+  constexpr float SEND_INTERVAL = 2.0f;
 }
 
 ATurnActor_Test::ATurnActor_Test()
@@ -34,10 +34,17 @@ void ATurnActor_Test::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
 
-  m_TimeCnt += DeltaTime;
   if (m_TimeCnt >= TEST_NS::SEND_INTERVAL)
   {
     m_TimeCnt = 0.0f;
     SendCommand(MakeShared<UE::Smith::Command::NullCommand>());
+  }
+  
+  if(TurnComponent != nullptr)
+  {
+    if (TurnComponent->IsCommandSendable())
+    {
+      m_TimeCnt += DeltaTime;
+    }
   }
 }

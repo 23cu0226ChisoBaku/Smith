@@ -15,5 +15,3 @@ struct SMITH_API AttackHandle
 	FString AttackName;
 	int32 AttackPower;
 };
-
-const AttackHandle AttackHandle::NullHandle{};
