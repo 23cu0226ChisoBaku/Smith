@@ -50,7 +50,6 @@ void USmithBattleSubsystem::RegisterTurnObj()
   TArray<AActor*> turnManageable;
   UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UTurnManageable::StaticClass(),turnManageable);
 
-  MDebug::LogError(FString::FromInt(turnManageable.Num()));
   if (turnManageable.Num() > 0)
   {
     FRequestCommandEvent::FDelegate requestDelegate;
@@ -85,10 +84,6 @@ void USmithBattleSubsystem::RegisterTurnObj()
         }
         
         m_priorityLists[actorPriority].Elements.Add(Cast<ITurnManageable>(manageable));
-      }
-      else
-      {
-        MDebug::LogError("sahadi");
       }
     }
 
