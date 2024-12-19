@@ -5,6 +5,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "TurnControlComponent.h"
 #include "MoveCommand.h"
+#include "AttackCommand.h"
 #include "SmithPlayerActor.h"
 
 #include "Debug.h"
@@ -108,8 +109,9 @@ void AMyEnemy::PlayerCheck()
 			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
 
 			AMyPlayerCharacter *player = Cast<AMyPlayerCharacter>(HitActor);
-			USmithAttackComponent *comp = Cast<USmithAttackComponent>(m_attackComp);
-			comp->Attack(player, 1);
+
+			// TODO麦くんが直す
+			m_event.Broadcast(this, MakeShared<UE::Smith::Command::AttackCommand>(nullptr));
 			return;
 		}
 	}
