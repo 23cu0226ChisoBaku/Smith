@@ -42,9 +42,9 @@ namespace UE::Smith::Command
       attackStr.Append(TEXT("EMPTY OBJECT"));
     }
 
-    attackStr.Append(TEXT(" Attack Command"));
+    attackStr.Append(TEXT(" Attack"));
 
-    UE::MLibrary::Debug::Log(attackStr);
+    //UE::MLibrary::Debug::Log(attackStr);
 
   }
 

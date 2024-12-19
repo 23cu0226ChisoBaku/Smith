@@ -33,11 +33,11 @@ void UTurnControlComponent::SetCommandSendable(bool value)
 {
 	m_isCMDSendable = value;
 
-	FString str {TEXT("Turn ")};
-	str.Append(GetOwner()->GetName());
-	str.Append(" ");
-	str.Append(m_isCMDSendable ? "On" : "Off");
-	UE::MLibrary::Debug::LogWarning(str);
+	// FString str {TEXT("Turn ")};
+	// str.Append(GetOwner()->GetName());
+	// str.Append(" ");
+	// str.Append(m_isCMDSendable ? "On" : "Off");
+	// UE::MLibrary::Debug::LogWarning(str);
 }
 
 void UTurnControlComponent::SetTurnPriority(ETurnPriority priority)

@@ -20,6 +20,7 @@ struct FInputActionValue;
 class IBattleCommand;
 struct AttackHandle;
 
+
 UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable , public IAttackable
 {
@@ -39,7 +40,6 @@ public:
 
 		DirectionCnt,					// 選べられる方向の数
 	};
-
 
 public:
 	// Sets default values for this pawn's properties
@@ -86,8 +86,15 @@ public:
 
 public:
 	void OnAttack(AttackHandle&&) override final;
+
 private:
 	void sendCommand(TSharedPtr<IBattleCommand>);
+	void moveImpl(FVector2D);
+	void attackImpl();
+	void changeFwdImpl(EDir_Test);
+
+	// TODO
+	bool searchActorsInDirection(FVector, TArray<AActor*>&);
 
 private:
 	// input bind method
@@ -98,4 +105,10 @@ private:
 private:
 	FRequestCommandEvent m_event;
 	int32 m_hp;
+
+	EDir_Test m_camDir;
+	EDir_Test m_actorFaceDir;
+	
+	uint8 m_bCanMove : 1;
+	uint8 m_bCanAttack : 1;
 };
