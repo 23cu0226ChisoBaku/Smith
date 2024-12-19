@@ -1,9 +1,11 @@
 #include "MyEnemy.h"
 #include "SmithMoveComponent.h"
 #include "SmithAttackComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "TurnControlComponent.h"
 #include "MoveCommand.h"
+#include "SmithPlayerActor.h"
 
 #include "Debug.h"
 
@@ -13,7 +15,7 @@ AMyEnemy::AMyEnemy()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	UTurnControlComponent* turnComp = CreateDefaultSubobject<UTurnControlComponent>(TEXT("Konno Enemy Turn CTRL"));
+	UTurnControlComponent *turnComp = CreateDefaultSubobject<UTurnControlComponent>(TEXT("Konno Enemy Turn CTRL"));
 
 	if (turnComp != nullptr)
 	{
@@ -24,7 +26,7 @@ AMyEnemy::AMyEnemy()
 
 	m_turnCtrl->SetTurnPriority(ETurnPriority::Rival);
 
-	USmithMoveComponent* moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno asdhsaidhsaid"));
+	USmithMoveComponent *moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno Enemy Move Component"));
 
 	if (moveComp)
 	{
@@ -32,17 +34,25 @@ AMyEnemy::AMyEnemy()
 	}
 
 	m_moveComp = moveComp;
-
 	m_moveComp->SetMoveSpeed(250.0f);
+	MOVE_DISTANCE = 250.0f;
 }
 
 // Called when the game starts or when spawned
 void AMyEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	// コンポーネントの取得
-	//m_attackComp = this->GetComponentByClass(USmithAttackComponent::StaticClass());
-	//m_moveComp = Cast<USmithMoveComponent>(this->GetComponentByClass(USmithMoveComponent::StaticClass()));
+
+	// 指定したクラスのアクターを取得
+	TArray<TObjectPtr<AActor>> aActorList;
+	UGameplayStatics::GetAllActorsOfClass(this, ASmithPlayerActor::StaticClass(), aActorList);
+
+	for (TObjectPtr<AActor> aActor : aActorList)
+	{
+		// 取得したクラスにキャスト
+		m_target = Cast<ASmithPlayerActor>(aActor);
+		break;
+	}
 }
 
 // Called every frame
@@ -92,7 +102,7 @@ void AMyEnemy::PlayerCheck()
 		HitActor = HitResult.GetActor();
 
 		// Playerにヒットしていたら攻撃
-		if (::IsValid(HitActor) && HitActor->IsA(AMyPlayerCharacter::StaticClass()))
+		if (::IsValid(HitActor) && HitActor->IsA(ASmithPlayerActor::StaticClass()))
 		{
 			DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Red, false, 1.0f);
 			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
@@ -108,26 +118,28 @@ void AMyEnemy::PlayerCheck()
 	for (int i = 0; i < 4; ++i)
 	{
 		DrawDebugPoint(GetWorld(), EndLocation[i], 10.0f, FColor::Green, false, 1.0f);
-
 		DrawDebugLine(GetWorld(), StartLocation, EndLocation[i], FColor::Green, false, 1.0f, 0, 1.0f);
 	}
 
-	// 移動の処理
-
-	if (m_event.IsBound())
+	UTurnControlComponent *turnCtrl = GetTurnControl();
+	if (turnCtrl != nullptr && turnCtrl->IsCommandSendable())
 	{
-		m_event.Broadcast(Cast<ITurnManageable>(this), MakeShared<UE::Smith::Command::MoveCommand>(Cast<IMoveable>(m_moveComp)));
+		// 移動の処理
+		if (m_event.IsBound())
+		{
+			m_moveComp->SetTerminusPos(MoveDirection());
+			m_event.Broadcast(this, MakeShared<UE::Smith::Command::MoveCommand>(m_moveComp));
+			MDebug::LogWarning(GetName() + TEXT("send move Command"));
+		}
 	}
-	// USmithMoveComponent *comp = Cast<USmithMoveComponent>(m_moveComp);
-	// comp->Move();
 }
 
-UTurnControlComponent* AMyEnemy::GetTurnControl() const
+UTurnControlComponent *AMyEnemy::GetTurnControl() const
 {
 	return m_turnCtrl;
 }
 
-FDelegateHandle AMyEnemy::Subscribe(FRequestCommandEvent::FDelegate& delegate)
+FDelegateHandle AMyEnemy::Subscribe(FRequestCommandEvent::FDelegate &delegate)
 {
 	if (delegate.IsBound())
 	{
@@ -137,7 +149,7 @@ FDelegateHandle AMyEnemy::Subscribe(FRequestCommandEvent::FDelegate& delegate)
 	return FDelegateHandle{};
 }
 
-bool AMyEnemy::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle)
+bool AMyEnemy::Unsubscribe(UObject *obj, FDelegateHandle delegateHandle)
 {
 	if (obj != nullptr && m_event.IsBoundToObject(obj))
 	{
@@ -150,4 +162,35 @@ bool AMyEnemy::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle)
 	}
 }
 
+FVector AMyEnemy::MoveDirection()
+{
+	FVector myPos = GetActorLocation();
+	FVector targetPos;
+	FVector retPos = FVector::ZeroVector;
+	if (m_target != nullptr)
+	{
+		targetPos = m_target->GetActorLocation();
+	}
 
+	if (targetPos.X > myPos.X)
+	{
+		myPos += MOVE_DISTANCE * FVector::ForwardVector;
+	}
+	else if (targetPos.X < myPos.X)
+	{
+		myPos += MOVE_DISTANCE * FVector::BackwardVector;
+	}
+	else if (targetPos.Y > myPos.Y)
+	{
+		myPos += MOVE_DISTANCE * FVector::RightVector;
+	}
+	else if (targetPos.Y < myPos.Y)
+	{
+		myPos += MOVE_DISTANCE * FVector::LeftVector;
+	}
+
+	MDebug::Log(myPos.ToString());
+	retPos = myPos;
+
+	return retPos;
+}

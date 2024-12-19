@@ -5,10 +5,8 @@
 #include "CoreMinimal.h"
 #include "Engine/World.h" // �ǉ�
 #include "GameFramework/Actor.h"
-#include "MyPlayerCharacter.h"// �ǉ�
 #include "DrawDebugHelpers.h"  // DrawDebugLine��DrawDebugPoint�Ȃǂ��g�p���邽�߂ɕK�v
 #include "ITurnManageable.h"
-
 #include "MyEnemy.generated.h"
 
 class UTurnControlComponent;
@@ -53,11 +51,16 @@ private:
 
 private:
 	void PlayerCheck();
+	FVector MoveDirection();
 	
 	UPROPERTY()
 	USmithMoveComponent* m_moveComp;
 	UPROPERTY()
 	UActorComponent* m_attackComp;
+
+	AActor* m_target;
+
+	float MOVE_DISTANCE;
 
 	float m_timer;
 };

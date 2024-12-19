@@ -20,6 +20,7 @@ public:
 
 public:
 	virtual void Move() override;
+	void SetTerminusPos(FVector pos) ;
 	void SetMoveSpeed(float speed)
 	{
 		MOVE_DISTANCE = speed;
@@ -29,13 +30,5 @@ public:
 	float MOVE_DISTANCE;
 
 private:
-
-
-	AActor *m_target;
-	AActor *m_enemyObj;
-	FVector m_myPos;
-	FVector m_targetPos;
-
-	// 仮のタイマー
-	float m_temporaryTimer;
+	FVector m_terminus;
 };
