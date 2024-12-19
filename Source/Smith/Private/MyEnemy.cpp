@@ -5,6 +5,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "TurnControlComponent.h"
 #include "MoveCommand.h"
+#include "AttackCommand.h"
+#include "IAttackable.h"
 #include "SmithPlayerActor.h"
 
 #include "Debug.h"
@@ -59,10 +61,15 @@ void AMyEnemy::BeginPlay()
 void AMyEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	m_timer += DeltaTime;
-	if (m_timer > 5.0f)
+	if(m_turnCtrl->IsCommandSendable())
+	{
+			m_timer += DeltaTime;
+	}
+
+	if (m_timer > 2.0f)
 	{
 		PlayerCheck();
+
 		m_timer = 0.0f;
 	}
 }
@@ -102,14 +109,15 @@ void AMyEnemy::PlayerCheck()
 		HitActor = HitResult.GetActor();
 
 		// Playerにヒットしていたら攻撃
-		if (::IsValid(HitActor) && HitActor->IsA(ASmithPlayerActor::StaticClass()))
+		if (::IsValid(HitActor))
 		{
 			DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Red, false, 1.0f);
 			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
 
-			AMyPlayerCharacter *player = Cast<AMyPlayerCharacter>(HitActor);
-			USmithAttackComponent *comp = Cast<USmithAttackComponent>(m_attackComp);
-			comp->Attack(player, 1);
+			IAttackable* attackable = Cast<IAttackable>(HitActor);
+
+			// TODO麦くんが直す
+			m_event.Broadcast(this, MakeShared<UE::Smith::Command::AttackCommand>(nullptr));
 			return;
 		}
 	}
