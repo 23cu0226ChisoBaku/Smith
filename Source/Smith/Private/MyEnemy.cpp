@@ -6,6 +6,7 @@
 #include "TurnControlComponent.h"
 #include "MoveCommand.h"
 #include "AttackCommand.h"
+#include "IAttackable.h"
 #include "SmithPlayerActor.h"
 
 #include "Debug.h"
@@ -103,12 +104,12 @@ void AMyEnemy::PlayerCheck()
 		HitActor = HitResult.GetActor();
 
 		// Playerにヒットしていたら攻撃
-		if (::IsValid(HitActor) && HitActor->IsA(ASmithPlayerActor::StaticClass()))
+		if (::IsValid(HitActor))
 		{
 			DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Red, false, 1.0f);
 			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
 
-			AMyPlayerCharacter *player = Cast<AMyPlayerCharacter>(HitActor);
+			IAttackable* attackable = Cast<IAttackable>(HitActor);
 
 			// TODO麦くんが直す
 			m_event.Broadcast(this, MakeShared<UE::Smith::Command::AttackCommand>(nullptr));
