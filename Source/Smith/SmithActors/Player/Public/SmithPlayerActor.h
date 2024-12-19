@@ -26,6 +26,22 @@ class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable ,
 	GENERATED_BODY()
 
 public:
+	enum EDir_Test : uint8
+	{
+		North = 0,						// 上方向
+		NorthEast = 1,				// 右上
+		East = 2,							// 右
+		SouthEast = 3,				// 右下
+		South = 4,						// 下
+		SouthWest = 5,				// 左下
+		West = 6,							// 左
+		NorthWest = 7,				// 左上
+
+		DirectionCnt,					// 選べられる方向の数
+	};
+
+
+public:
 	// Sets default values for this pawn's properties
 	ASmithPlayerActor();
 
@@ -75,8 +91,8 @@ private:
 
 private:
 	// input bind method
-	void Move(const FInputActionValue& value);
-	void Attack(const FInputActionValue& value);
+	void Move_Input(const FInputActionValue& value);
+	void Attack_Input(const FInputActionValue& value);
 	void Look(const FInputActionValue& value);
 
 private:

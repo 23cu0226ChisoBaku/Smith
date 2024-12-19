@@ -120,8 +120,8 @@ void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
-	inputComp->BindAction(m_moveAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Move);
-	inputComp->BindAction(m_attackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack);
+	inputComp->BindAction(m_moveAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Move_Input);
+	inputComp->BindAction(m_attackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack_Input);
 	inputComp->BindAction(m_cameraAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Look);
 
 }
@@ -156,14 +156,14 @@ bool ASmithPlayerActor::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle
 	}
 }
 
-void ASmithPlayerActor::Move(const FInputActionValue& value)
+void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
 {
 	FVector2D movementInput = value.Get<FVector2D>();
 
 	sendCommand(SmithCommandGenerator::MakeMoveCommand(m_moveComponent));
 }
 
-void ASmithPlayerActor::Attack(const FInputActionValue& value)
+void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
 {
 
 	sendCommand(SmithCommandGenerator::MakeAttackCommand(m_atkComponent, nullptr, AttackHandle{GetName(),1}));
