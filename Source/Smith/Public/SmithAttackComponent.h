@@ -6,13 +6,14 @@
 #include "Components/ActorComponent.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "AttackHandle.h"
+#include "ICanMakeAttack.h"
 #include "SmithAttackComponent.generated.h"
 
 class AMyPlayerCharacter;
 class IAttackable;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class SMITH_API USmithAttackComponent : public UActorComponent
+class SMITH_API USmithAttackComponent : public UActorComponent , public ICanMakeAttack
 {
 	GENERATED_BODY()
 
@@ -27,10 +28,11 @@ protected:
 public:
 	void Attack(AMyPlayerCharacter *player, int32 damage);
 
-	void SetAttackTarget(IAttackable*);
-	void SetAttackHandle(AttackHandle&&);
+	virtual void Attack() override;
+	
+	virtual void SetAttackTarget(IAttackable*) override;
+	virtual void SetAttackHandle(AttackHandle&&) override;
 
-	void Attack_Temp();
 
 private:
 	TWeakInterfacePtr<IAttackable> m_attackTarget;

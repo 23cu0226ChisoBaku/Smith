@@ -9,13 +9,13 @@
 
 namespace UE::Smith::Command
 {
-  AttackCommand::AttackCommand(USmithAttackComponent* atkComp, IAttackable* target, AttackHandle&& handle)
-    : m_atkComp(atkComp)
+  AttackCommand::AttackCommand(ICanMakeAttack* attacker, IAttackable* target, AttackHandle&& handle)
+    : m_attacker(attacker)
   {
-    if (m_atkComp.IsValid())
+    if (m_attacker.IsValid())
     {
-      m_atkComp->SetAttackTarget(target);
-      m_atkComp->SetAttackHandle(::MoveTemp(handle));
+      m_attacker->SetAttackTarget(target);
+      m_attacker->SetAttackHandle(::MoveTemp(handle));
     }
   }
 
@@ -32,10 +32,10 @@ namespace UE::Smith::Command
   void AttackCommand::Execute(float deltaTime)
   {
     FString attackStr{};
-    if (m_atkComp.IsValid())
+    if (m_attacker.IsValid())
     {
-      attackStr.Append(m_atkComp->GetName());
-      m_atkComp->Attack_Temp();
+      attackStr.Append(m_attacker->_getUObject()->GetName());
+      m_attacker->Attack();
     }
     else
     {

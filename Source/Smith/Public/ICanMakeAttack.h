@@ -4,24 +4,29 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "AttackHandle.h"
-#include "IAttackable.generated.h"
+#include "ICanMakeAttack.generated.h"
+
+class IAttackable;
+struct AttackHandle;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UAttackable : public UInterface
+class UCanMakeAttack : public UInterface
 {
 	GENERATED_BODY()
 };
 
-///
-/// @brief 攻撃できる
-///
-class SMITH_API IAttackable
+/**
+ * 
+ */
+class SMITH_API ICanMakeAttack
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void OnAttack(AttackHandle&&) = 0;
+	virtual void Attack() = 0;
+
+	virtual void SetAttackTarget(IAttackable*) = 0;
+	virtual void SetAttackHandle(AttackHandle&&) = 0;
 };

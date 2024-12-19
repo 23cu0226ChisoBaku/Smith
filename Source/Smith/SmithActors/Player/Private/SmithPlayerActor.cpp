@@ -20,6 +20,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+#include "SmithCommandGenerator.h"
+
 namespace SmithPlayerActor::Private
 {
 	constexpr int32 Temp_Player_HP = 30;
@@ -158,12 +160,13 @@ void ASmithPlayerActor::Move(const FInputActionValue& value)
 {
 	FVector2D movementInput = value.Get<FVector2D>();
 
-	sendCommand(MakeShared<UE::Smith::Command::MoveCommand>(m_moveComponent));
+	sendCommand(SmithCommandGenerator::MakeMoveCommand(m_moveComponent));
 }
 
 void ASmithPlayerActor::Attack(const FInputActionValue& value)
 {
-	sendCommand(MakeShared<UE::Smith::Command::AttackCommand>(nullptr));
+
+	sendCommand(SmithCommandGenerator::MakeAttackCommand(m_atkComponent, nullptr, AttackHandle{GetName(),1}));
 }
 
 void ASmithPlayerActor::Look(const FInputActionValue& value)
@@ -171,9 +174,9 @@ void ASmithPlayerActor::Look(const FInputActionValue& value)
 	OnAttack(
 						{ 
 							TEXT("God"),		// Attack
-						  10,							// Damage
+							10,							// Damage
 						}
-					);
+				  );
 }
 
 void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)

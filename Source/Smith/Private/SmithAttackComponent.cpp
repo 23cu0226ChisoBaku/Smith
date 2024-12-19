@@ -39,7 +39,7 @@ void USmithAttackComponent::SetAttackHandle(AttackHandle&& handle)
 	m_attackHandle = ::MoveTemp(handle);
 }
 
-void USmithAttackComponent::Attack_Temp()
+void USmithAttackComponent::Attack()
 {
 	if (m_attackTarget.IsValid())
 	{

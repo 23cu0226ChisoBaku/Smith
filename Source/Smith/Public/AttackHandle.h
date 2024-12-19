@@ -8,6 +8,10 @@
 /**
  * 
  */
+
+#ifndef SMITH_ATKHDL
+#define SMITH_ATKHDL
+
 struct SMITH_API AttackHandle
 {
 	static const AttackHandle NullHandle;
@@ -16,4 +20,5 @@ struct SMITH_API AttackHandle
 	int32 AttackPower;
 };
 
-const AttackHandle AttackHandle::NullHandle{};
+#endif
+
