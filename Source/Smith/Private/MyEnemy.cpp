@@ -61,10 +61,15 @@ void AMyEnemy::BeginPlay()
 void AMyEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	m_timer += DeltaTime;
-	if (m_timer > 5.0f)
+	if(m_turnCtrl->IsCommandSendable())
+	{
+			m_timer += DeltaTime;
+	}
+
+	if (m_timer > 2.0f)
 	{
 		PlayerCheck();
+
 		m_timer = 0.0f;
 	}
 }
