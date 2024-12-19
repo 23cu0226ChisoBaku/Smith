@@ -7,13 +7,15 @@
 #include "GameFramework/Actor.h"
 #include "DrawDebugHelpers.h"  // DrawDebugLine��DrawDebugPoint�Ȃǂ��g�p���邽�߂ɕK�v
 #include "ITurnManageable.h"
+#include "IAttackable.h"
 #include "MyEnemy.generated.h"
+
 
 class UTurnControlComponent;
 class USmithMoveComponent;
 
 UCLASS()
-class SMITH_API AMyEnemy : public AActor , public ITurnManageable
+class SMITH_API AMyEnemy : public AActor , public ITurnManageable, public IAttackable
 {
 	GENERATED_BODY()
 	
@@ -41,6 +43,7 @@ public:
 	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
 	bool Unsubscribe(UObject*,FDelegateHandle) override final;
 
+	void OnAttack(const AttackHandle&) override;
 private:
 	UPROPERTY()
 	TObjectPtr<UTurnControlComponent> m_turnCtrl;

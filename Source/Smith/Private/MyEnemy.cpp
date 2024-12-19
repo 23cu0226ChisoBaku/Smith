@@ -170,6 +170,11 @@ bool AMyEnemy::Unsubscribe(UObject *obj, FDelegateHandle delegateHandle)
 	}
 }
 
+void AMyEnemy::OnAttack(const AttackHandle&)
+{
+
+}
+
 FVector AMyEnemy::MoveDirection()
 {
 	FVector myPos = GetActorLocation();
