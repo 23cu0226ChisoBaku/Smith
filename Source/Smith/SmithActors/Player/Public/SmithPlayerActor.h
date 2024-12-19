@@ -89,9 +89,12 @@ public:
 
 private:
 	void sendCommand(TSharedPtr<IBattleCommand>);
-	void moveImpl();
+	void moveImpl(FVector2D);
 	void attackImpl();
-	void changeFwdImpl();
+	void changeFwdImpl(EDir_Test);
+
+	// TODO
+	bool searchActorsInDirection(FVector, TArray<AActor*>&);
 
 private:
 	// input bind method
@@ -104,6 +107,7 @@ private:
 	int32 m_hp;
 
 	EDir_Test m_camDir;
+	EDir_Test m_actorFaceDir;
 	
 	uint8 m_bCanMove : 1;
 	uint8 m_bCanAttack : 1;
