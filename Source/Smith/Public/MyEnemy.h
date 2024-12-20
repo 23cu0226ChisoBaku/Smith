@@ -13,6 +13,7 @@
 
 class UTurnControlComponent;
 class USmithMoveComponent;
+class USmithAttackComponent;
 
 UCLASS()
 class SMITH_API AMyEnemy : public AActor , public ITurnManageable, public IAttackable
@@ -43,10 +44,14 @@ public:
 	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
 	bool Unsubscribe(UObject*,FDelegateHandle) override final;
 
-	void OnAttack(const AttackHandle&) override;
+	void OnAttack(AttackHandle&&) override;
 private:
 	UPROPERTY()
 	TObjectPtr<UTurnControlComponent> m_turnCtrl;
+	UPROPERTY()
+	TObjectPtr<USmithMoveComponent> m_moveComp;
+	UPROPERTY()
+	TObjectPtr<USmithAttackComponent> m_attackComp;
 
 private:
 	FRequestCommandEvent m_event;
@@ -56,14 +61,12 @@ private:
 	void PlayerCheck();
 	FVector MoveDirection();
 	
-	UPROPERTY()
-	USmithMoveComponent* m_moveComp;
-	UPROPERTY()
-	UActorComponent* m_attackComp;
-
 	AActor* m_target;
 
 	float MOVE_DISTANCE;
 
 	float m_timer;
+
+	// TODO
+	float m_hp;
 };

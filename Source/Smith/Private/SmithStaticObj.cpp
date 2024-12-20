@@ -100,7 +100,7 @@ void ASmithStaticObj::Tick(float DeltaTime)
 	EnableInput(nullptr);
 }
 
-void ASmithStaticObj::OnAttack(const AttackHandle& attack)
+void ASmithStaticObj::OnAttack(AttackHandle&& attack)
 {
 	if (attack.AttackName.IsEmpty())
 	{

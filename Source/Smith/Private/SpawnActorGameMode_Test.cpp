@@ -23,7 +23,7 @@ void ASpawnActorGameMode_Test::StartPlay()
 
   for (int i = 0; i < 2; ++i)
   {
-    GetWorld()->SpawnActor<ATurnActor_Test>(ATurnActor_Test::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+    //GetWorld()->SpawnActor<ATurnActor_Test>(ATurnActor_Test::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
   }
 
   //GetWorld()->SpawnActor<AMyEnemy>(AMyEnemy::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);

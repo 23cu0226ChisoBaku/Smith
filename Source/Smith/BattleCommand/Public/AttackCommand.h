@@ -3,11 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "IBattleCommand.h"
 
-class ASmithPlayerActor;
-
-class USmithMoveComponent;
+class ICanMakeAttack;
+class IAttackable;
+struct AttackHandle;
 /**
  * 
  */
@@ -17,7 +18,7 @@ namespace UE::Smith::Command
 	class SMITH_API AttackCommand : public IBattleCommand
 	{
 	public:
-		AttackCommand(USmithMoveComponent*);
+		AttackCommand(ICanMakeAttack*, IAttackable*, AttackHandle&&);
 		~AttackCommand();
 
 	public:
@@ -27,6 +28,6 @@ namespace UE::Smith::Command
 		virtual bool IsFinish() const override;
 
 	private:
-		TWeakObjectPtr<USmithMoveComponent> m_moveComp;
+		TWeakInterfacePtr<ICanMakeAttack> m_attacker;
 	};
 }

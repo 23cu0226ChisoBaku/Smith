@@ -13,31 +13,23 @@
 
 // Sets default values
 AMyEnemy::AMyEnemy()
+	: m_hp(5.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	UTurnControlComponent *turnComp = CreateDefaultSubobject<UTurnControlComponent>(TEXT("Konno Enemy Turn CTRL"));
-
-	if (turnComp != nullptr)
-	{
-		AddInstanceComponent(turnComp);
-	}
-
-	m_turnCtrl = turnComp;
+	m_turnCtrl = CreateDefaultSubobject<UTurnControlComponent>(TEXT("Konno Enemy Turn CTRL"));
+	check((m_turnCtrl != nullptr));
 
 	m_turnCtrl->SetTurnPriority(ETurnPriority::Rival);
 
-	USmithMoveComponent *moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno Enemy Move Component"));
+	m_moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno Enemy Move Component"));
+	check((m_moveComp != nullptr));
 
-	if (moveComp)
-	{
-		AddInstanceComponent(moveComp);
-	}
-
-	m_moveComp = moveComp;
 	m_moveComp->SetMoveSpeed(250.0f);
 	MOVE_DISTANCE = 250.0f;
+
+	m_attackComp = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Konno Enemy Attack Component"));
 }
 
 // Called when the game starts or when spawned
@@ -66,17 +58,16 @@ void AMyEnemy::Tick(float DeltaTime)
 			m_timer += DeltaTime;
 	}
 
-	if (m_timer > 2.0f)
+	if (m_timer > 0.5f)
 	{
-		PlayerCheck();
-
 		m_timer = 0.0f;
+		PlayerCheck();
 	}
 }
 
 void AMyEnemy::PlayerCheck()
 {
-	const float rayLenth = 100.0f;
+	const float rayLenth = MOVE_DISTANCE;
 	const FVector StartLocation = GetActorLocation();
 
 	const FVector EndLocation[4] = {
@@ -98,7 +89,7 @@ void AMyEnemy::PlayerCheck()
 			HitResult,
 			StartLocation,
 			EndLocation[i],
-			ECC_PhysicsBody,
+			ECC_MAX,
 			CollisionParams);
 
 		if (!bHit)
@@ -115,10 +106,12 @@ void AMyEnemy::PlayerCheck()
 			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
 
 			IAttackable* attackable = Cast<IAttackable>(HitActor);
-
-			// TODO麦くんが直す
-			m_event.Broadcast(this, MakeShared<UE::Smith::Command::AttackCommand>(nullptr));
-			return;
+			if (attackable != nullptr)
+			{
+				// TODO麦くんが直す
+				m_event.Broadcast(this, MakeShared<UE::Smith::Command::AttackCommand>(m_attackComp, attackable, AttackHandle{GetName(), 4}));
+				return;
+			}
 		}
 	}
 
@@ -137,7 +130,6 @@ void AMyEnemy::PlayerCheck()
 		{
 			m_moveComp->SetTerminusPos(MoveDirection());
 			m_event.Broadcast(this, MakeShared<UE::Smith::Command::MoveCommand>(m_moveComp));
-			MDebug::LogWarning(GetName() + TEXT("send move Command"));
 		}
 	}
 }
@@ -170,9 +162,16 @@ bool AMyEnemy::Unsubscribe(UObject *obj, FDelegateHandle delegateHandle)
 	}
 }
 
-void AMyEnemy::OnAttack(const AttackHandle&)
+void AMyEnemy::OnAttack(AttackHandle&& handle)
 {
+	m_hp -= handle.AttackPower;
 
+	MDebug::LogError(GetName() + TEXT(" left HP:") + FString::FromInt(m_hp));
+
+	if (m_hp <= 0)
+	{
+		Destroy();
+	}
 }
 
 FVector AMyEnemy::MoveDirection()

@@ -8,8 +8,17 @@
 /**
  * 
  */
+
+#ifndef SMITH_ATKHDL
+#define SMITH_ATKHDL
+
 struct SMITH_API AttackHandle
 {
+	static const AttackHandle NullHandle;
+
 	FString AttackName;
 	int32 AttackPower;
 };
+
+#endif
+

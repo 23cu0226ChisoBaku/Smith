@@ -122,7 +122,7 @@ void ATestTileMove::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
-void ATestTileMove::OnAttack(const AttackHandle& attack)
+void ATestTileMove::OnAttack(AttackHandle&& attack)
 {
 	if (GEngine != nullptr)
 	{
@@ -213,7 +213,7 @@ bool ATestTileMove::attack_test()
 		if (attackable != nullptr)
 		{
 			AttackHandle attackHnd {GetName(), 10};
-			attackable->OnAttack(attackHnd);
+			attackable->OnAttack(::MoveTemp(attackHnd));
 		}	
 		else
 		{
@@ -362,7 +362,6 @@ void ATestTileMove::Move(const FInputActionValue& value)
 	const FVector direction = FVector(directionX, directionY, 0.0);
 
 	m_nextDir = startPos + direction * Smith_NS_Mapinfo::TILE_SIZE;
-
 
 }
 

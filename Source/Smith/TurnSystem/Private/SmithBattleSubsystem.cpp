@@ -20,7 +20,6 @@ void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
   Super::Initialize(Collection);
   m_bCanExecuteCmd = false;
-  cnt = 0.0f;
 
   emptyContainers();
   if (m_battleCmdMgr == nullptr)
@@ -117,34 +116,51 @@ void USmithBattleSubsystem::registerNextTurnObjs()
 {
   // TODO Strange Design
   uint8 errorCnt = 0;
+
+  const ETurnPriority prevTurn = m_curtTurn;
   do
   {
-    #ifdef WITH_EDITOR
-      ++errorCnt;
-      if (errorCnt > StaticCast<uint8>(ETurnPriority::PriorityTypeCnt))
-      {
-        MDebug::LogError(TEXT("registerNextTurnObject Error!!!"));
-        check(false);
-      }
-    #endif
     m_curtTurn = StaticCast<ETurnPriority>((StaticCast<uint8>(m_curtTurn) + 1u) % StaticCast<uint8>(ETurnPriority::PriorityTypeCnt));
-  
+
+    if (m_curtTurn == prevTurn)
+    {
+      break;
+    }
+
   } while (!m_priorityLists.Contains(m_curtTurn));
 
   if (m_battleCmdMgr != nullptr)
   {
-    for(auto prevTurnObj : m_priorityLists[m_curtTurn].Elements)
+    int32 idx = 0;
+    while (idx < m_priorityLists[m_curtTurn].Elements.Num())
     {
-      if (prevTurnObj.IsValid())
+      auto nextTurnObj = m_priorityLists[m_curtTurn].Elements[idx];
+      bool invalid = false;
+      if (nextTurnObj.IsValid())
       {
-        auto turnCtrl = prevTurnObj->GetTurnControl();
+        auto turnCtrl = nextTurnObj->GetTurnControl();
         if (::IsValid(turnCtrl))
         {
           turnCtrl->SetCommandSendable(true);
         }
+        else
+        {
+          invalid = true;
+        }
       }
-    }
+      else
+      {
+        invalid = true;
+      }
 
+      if (invalid)
+      {
+        m_priorityLists[m_curtTurn].Elements.RemoveAt(idx);
+        continue;
+      }
+
+      ++idx;
+    }
     m_battleCmdMgr->RegisterWaitList(m_priorityLists[m_curtTurn].Elements);
   }
   
@@ -172,13 +188,19 @@ void USmithBattleSubsystem::Tick(float DeltaTime)
 {
   UTickableWorldSubsystem::Tick(DeltaTime);
 
-  cnt += DeltaTime;
   if (m_bCanExecuteCmd) 
   {
     if (m_battleCmdMgr != nullptr)
     {
       m_battleCmdMgr->ExecuteCommands(DeltaTime);
     }
+  }
+
+
+  if (m_priorityLists.Contains(ETurnPriority::Rival) && m_priorityLists[ETurnPriority::Rival].Elements.Num() == 0)
+  {
+   
+    UGameplayStatics::OpenLevel(GetWorld(), FName(*GetWorld()->GetName()), false);
   }
 }
 

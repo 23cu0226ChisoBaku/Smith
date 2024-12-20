@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SmithAttackComponent.h"
+#include "IAttackable.h"
 
 // Sets default values for this component's properties
 USmithAttackComponent::USmithAttackComponent()
@@ -25,5 +26,24 @@ void USmithAttackComponent::Attack(AMyPlayerCharacter *player, int32 damage)
 	if (GEngine != nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "Player to Attack");
+	}
+}
+
+void USmithAttackComponent::SetAttackTarget(IAttackable* target)
+{
+	m_attackTarget = target;
+}
+
+void USmithAttackComponent::SetAttackHandle(AttackHandle&& handle)
+{
+	m_attackHandle = ::MoveTemp(handle);
+}
+
+void USmithAttackComponent::Attack()
+{
+	if (m_attackTarget.IsValid())
+	{
+		m_attackTarget->OnAttack(::MoveTemp(m_attackHandle));
+		m_attackHandle = AttackHandle::NullHandle;
 	}
 }

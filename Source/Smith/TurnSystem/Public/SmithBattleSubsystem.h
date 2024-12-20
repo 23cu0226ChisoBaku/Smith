@@ -89,5 +89,4 @@ private:
 private:
 	ETurnPriority m_curtTurn;
 	uint8 m_bCanExecuteCmd : 1;
-	float cnt;
 };
