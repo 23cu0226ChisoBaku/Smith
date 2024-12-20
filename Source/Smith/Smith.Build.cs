@@ -8,10 +8,24 @@ public class Smith : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "MLibrary" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
+		PrivateIncludePaths.AddRange(new string[] 
+																						{ "Smith/TurnSystem/Public",
+																							"Smith/TurnSystem/Classes",
+																							"Smith/TurnSystem",
+																							"Smith/BattleCommand/Public",
+																							"Smith/BattleCommand",
+																							"Smith/SmithActors/Player/Public",
+																							"Smith/SmithActors/TurnMngObj/Public",
+																							"Smith/SmithActors",
+																							"Smith",
+																							"Smith/Models/Public",	  
+																						});
+
+		CppStandard = CppStandardVersion.Latest;
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		
