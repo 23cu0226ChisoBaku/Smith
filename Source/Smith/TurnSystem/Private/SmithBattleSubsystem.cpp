@@ -44,7 +44,7 @@ void USmithBattleSubsystem::Deinitialize()
   }
 }
 
-void USmithBattleSubsystem::RegisterTurnObj()
+void USmithBattleSubsystem::StartBattle()
 {
   TArray<AActor*> turnManageable;
   UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UTurnManageable::StaticClass(),turnManageable);
@@ -77,12 +77,12 @@ void USmithBattleSubsystem::RegisterTurnObj()
           turnCtrl->SetCommandSendable(false);
         }
 
-        if (!m_priorityLists.Contains(actorPriority))
+        if (!m_priorityManageableLists.Contains(actorPriority))
         {
-          m_priorityLists.Emplace(actorPriority, {});
+          m_priorityManageableLists.Emplace(actorPriority, {});
         }
         
-        m_priorityLists[actorPriority].Elements.Add(Cast<ITurnManageable>(manageable));
+        m_priorityManageableLists[actorPriority].Elements.Add(Cast<ITurnManageable>(manageable));
       }
     }
 
@@ -127,14 +127,14 @@ void USmithBattleSubsystem::registerNextTurnObjs()
       break;
     }
 
-  } while (!m_priorityLists.Contains(m_curtTurn));
+  } while (!m_priorityManageableLists.Contains(m_curtTurn));
 
   if (m_battleCmdMgr != nullptr)
   {
     int32 idx = 0;
-    while (idx < m_priorityLists[m_curtTurn].Elements.Num())
+    while (idx < m_priorityManageableLists[m_curtTurn].Elements.Num())
     {
-      auto nextTurnObj = m_priorityLists[m_curtTurn].Elements[idx];
+      auto nextTurnObj = m_priorityManageableLists[m_curtTurn].Elements[idx];
       bool invalid = false;
       if (nextTurnObj.IsValid())
       {
@@ -155,20 +155,20 @@ void USmithBattleSubsystem::registerNextTurnObjs()
 
       if (invalid)
       {
-        m_priorityLists[m_curtTurn].Elements.RemoveAt(idx);
+        m_priorityManageableLists[m_curtTurn].Elements.RemoveAt(idx);
         continue;
       }
 
       ++idx;
     }
-    m_battleCmdMgr->RegisterWaitList(m_priorityLists[m_curtTurn].Elements);
+    m_battleCmdMgr->RegisterWaitList(m_priorityManageableLists[m_curtTurn].Elements);
   }
   
 }
 
 void USmithBattleSubsystem::emptyContainers()
 {
-  m_priorityLists.Empty();
+  m_priorityManageableLists.Empty();
 }
 
 void USmithBattleSubsystem::startExecute()
@@ -197,7 +197,7 @@ void USmithBattleSubsystem::Tick(float DeltaTime)
   }
 
 
-  if (m_priorityLists.Contains(ETurnPriority::Rival) && m_priorityLists[ETurnPriority::Rival].Elements.Num() == 0)
+  if (m_priorityManageableLists.Contains(ETurnPriority::Rival) && m_priorityManageableLists[ETurnPriority::Rival].Elements.Num() == 0)
   {
    
     UGameplayStatics::OpenLevel(GetWorld(), FName(*GetWorld()->GetName()), false);

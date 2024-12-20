@@ -29,29 +29,8 @@ public:
 	// TODO Change name
 	/// @brief ITurnManageableを継承したActorを登録
 	/// 新しいマップが読み込まれたら一回呼ばれる
-	void RegisterTurnObj();
+	void StartBattle();
 	
-	// Test Func
-	void YAYA()
-	{
-		FString str{};
-
-		for (const auto& pair : m_priorityLists)
-		{
-			for (const auto& actor : pair.Value.Elements)
-			{
-				str.Reset();
-				// const UEnum* EnumPtr = FindObject<UEnum>(nullptr, TEXT("/Script/Smith.ETurnPriority"));
-				// if (EnumPtr != nullptr)
-				// {
-				// 	str.Append(EnumPtr->GetNameByValue(StaticCast<int64>(pair.Key)).ToString());
-				// }
-
-				str.Append(Cast<AActor>(actor.Get())->GetName());
-				UE::MLibrary::Debug::LogWarning(str);
-			}
-		}
-	}
 
 // start of FTickableObjectBase Interface
 #pragma region FTickableObjectBase Interface
@@ -69,8 +48,6 @@ public:
 #pragma endregion
 // end of FTickableObject Interface
 
-
-
 private:
 	void registerCommand(ITurnManageable*, TSharedPtr<IBattleCommand>);
 	void registerNextTurnObjs();
@@ -82,7 +59,7 @@ private:
 
 private:
 	UPROPERTY()
-	TMap<ETurnPriority, FITurnManageableWrapper> m_priorityLists;
+	TMap<ETurnPriority, FITurnManageableWrapper> m_priorityManageableLists;
 	UPROPERTY()
 	TObjectPtr<UBattleCommandManager> m_battleCmdMgr;
 

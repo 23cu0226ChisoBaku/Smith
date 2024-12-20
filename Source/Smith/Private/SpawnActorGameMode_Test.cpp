@@ -32,6 +32,6 @@ void ASpawnActorGameMode_Test::StartPlay()
   USmithBattleSubsystem* subsys = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
   if (subsys != nullptr)
   {
-    subsys->RegisterTurnObj();
+    subsys->StartBattle();
   }
 }
