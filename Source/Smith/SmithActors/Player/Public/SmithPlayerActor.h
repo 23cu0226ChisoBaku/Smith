@@ -23,24 +23,41 @@ Encoding : UTF-8
 #include "IAttackable.h"
 #include "SmithPlayerActor.generated.h"
 
+//---------------------------------------
+/*
+                  前方宣言
+*/
+//---------------------------------------
+// Forward Declaration
+#pragma region Forward Declaration
+// Unreal Component
 class USpringArmComponent;
 class UCameraComponent;
 class USmithMoveComponent;
 class USmithAttackComponent;
 
+// Unreal Enhanced Input
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+// TurnSystem Module
 class IBattleCommand;
-struct AttackHandle;
 
+// SmithActor Module
+struct AttackHandle;
+#pragma endregion Forward Declaration
+// end of Forward Declaration
+
+///
+/// @brief プレイヤークラス
+///
 UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable , public IAttackable
 {
 	GENERATED_BODY()
 
-// TODO Test用
+// TODO Test用方向列挙
 public:
 	enum EDir_Test : uint8
 	{
@@ -56,23 +73,88 @@ public:
 		DirectionCnt,					// 選べられる方向の数
 	};
 
+//---------------------------------------
+/*
+                  ctor
+*/
+//---------------------------------------
 public:
-	// Sets default values for this pawn's properties
 	ASmithPlayerActor();
 
+//---------------------------------------
+/*
+           アクター ライフサイクル
+*/
+//---------------------------------------
+// Lifecycle
+#pragma region Lifecycle
 protected:
-	// Called when the game starts or when spawned
 	void BeginPlay() override final;
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
 public:	
-	// Called every frame
 	void Tick(float DeltaTime) override final;
-
-	// Called to bind functionality to input
 	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override final;
+#pragma endregion Lifecycle
+// end of Lifecycle
+
+//---------------------------------------
+/*
+        パブリック関数(インターフェース)
+*/
+//---------------------------------------
+// Interfaces Override
+#pragma region Interfaces Override
+
+	// ITurnManageable (TurnSystem Module)
+	#pragma region ITurnManageable
+	public:
+		UTurnControlComponent* GetTurnControl() const override final;
+		FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
+		bool Unsubscribe(UObject*,FDelegateHandle) override final;
+	#pragma endregion ITurnManageable
+	// end of ITurnManageable (TurnSystem Module)
+
+	// IAttackable (SmithActor Module)
+	#pragma region IAttackable
+	public:
+		void OnAttack(AttackHandle&&) override final;
+	#pragma endregion IAttackable
+	// end of IAttackable
+
+#pragma endregion Interfaces Override
+// end of Interfaces Override
+
+// Private Functions
+#pragma region Private Functions
+private:
+	void sendCommand(TSharedPtr<IBattleCommand>);
+	void moveImpl(FVector);
+	void attackImpl();
+	void changeFwdImpl(EDir_Test);
+	void updateCamImpl(EDir_Test);
+
+	// TODO Temp function
+	bool searchActorsInDirection(FVector, TArray<AActor*>&);
 
 private:
+	// Input bind Functions
+	void Move_Input(const FInputActionValue&);
+	void Attack_Input(const FInputActionValue&);
+	void Look_Input(const FInputActionValue&);
+	void Debug_SelfDamage_Input(const FInputActionValue&);
+#pragma endregion Private Functions
+// end of Private Functions
+
+//---------------------------------------
+/*
+              uproperty 宣言
+*/
+//---------------------------------------
+// UProperties
+#pragma region UProperties
+private:
+	// Components
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> m_springArm;
 	UPROPERTY(VisibleAnywhere)
@@ -93,30 +175,17 @@ private:
 	TObjectPtr<UInputAction> m_attackAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> m_cameraAction;
-
-public:
-	UTurnControlComponent* GetTurnControl() const override final;
-	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
-	bool Unsubscribe(UObject*,FDelegateHandle) override final;
-
-public:
-	void OnAttack(AttackHandle&&) override final;
-
-private:
-	void sendCommand(TSharedPtr<IBattleCommand>);
-	void moveImpl(FVector2D);
-	void attackImpl();
-	void changeFwdImpl(EDir_Test);
-
-	// TODO
-	bool searchActorsInDirection(FVector, TArray<AActor*>&);
-
-private:
-	// input bind method
-	void Move_Input(const FInputActionValue& value);
-	void Attack_Input(const FInputActionValue& value);
-	void Look(const FInputActionValue& value);
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> m_debugAction;
+#pragma endregion UProperties
+// end of UProperties
+//---------------------------------------
+/*
+            プライベートプロパティ
+*/
+//---------------------------------------
+// Private Properties
+#pragma region Private Properties
 private:
 	FRequestCommandEvent m_event;
 	int32 m_hp;
@@ -126,4 +195,7 @@ private:
 	
 	uint8 m_bCanMove : 1;
 	uint8 m_bCanAttack : 1;
+
+#pragma endregion Private Properties
+// end of Private Properties
 };
