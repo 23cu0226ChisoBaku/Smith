@@ -37,8 +37,8 @@ namespace UE::Smith::Command
       moveStr.Append(TEXT("EMPTY OBJECT"));
     }
 
-    moveStr.AppendChars(TEXT(" Move Command"), 16);
-    UE::MLibrary::Debug::Log(moveStr);
+    moveStr.Append(TEXT(" Move Command"));
+    //UE::MLibrary::Debug::Log(moveStr);
   }
 
   void MoveCommand::End()

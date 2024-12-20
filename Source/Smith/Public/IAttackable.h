@@ -7,7 +7,6 @@
 #include "AttackHandle.h"
 #include "IAttackable.generated.h"
 
-
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UAttackable : public UInterface
@@ -24,5 +23,5 @@ class SMITH_API IAttackable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void OnAttack(const AttackHandle&) = 0;
+	virtual void OnAttack(AttackHandle&&) = 0;
 };
