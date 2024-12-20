@@ -383,7 +383,9 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 		MDebug::LogError(TEXT("Player is dead"));
 
 		UGameplayStatics::SetGamePaused(GetWorld(), true);
-		
+		UGameplayStatics::OpenLevel(GetWorld(), FName(*(GetWorld()->GetName())), false);
 		DisableInput(Cast<APlayerController>(Controller));
+
+
 	}
 }

@@ -1,5 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithPlayerActor.h
+
+Author : MAI ZHICONG
+
+Description : プレイヤークラス（Pawn）
+
+Update History: 2024/12/12 開始日
+								..../12/20 アルファ完成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,12 +35,12 @@ struct FInputActionValue;
 class IBattleCommand;
 struct AttackHandle;
 
-
 UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable , public IAttackable
 {
 	GENERATED_BODY()
 
+// TODO Test用
 public:
 	enum EDir_Test : uint8
 	{
