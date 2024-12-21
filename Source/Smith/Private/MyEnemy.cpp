@@ -53,7 +53,7 @@ void AMyEnemy::BeginPlay()
 void AMyEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if(m_turnCtrl->IsCommandSendable())
+	if(::IsValid(m_turnCtrl) && m_turnCtrl->IsCommandSendable())
 	{
 			m_timer += DeltaTime;
 	}

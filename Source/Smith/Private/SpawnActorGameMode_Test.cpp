@@ -21,17 +21,14 @@ void ASpawnActorGameMode_Test::StartPlay()
 {
   Super::StartPlay();
 
-  for (int i = 0; i < 2; ++i)
-  {
-    //GetWorld()->SpawnActor<ATurnActor_Test>(ATurnActor_Test::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-  }
-
-  //GetWorld()->SpawnActor<AMyEnemy>(AMyEnemy::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-
-
+  // バトルシステム初期化
   USmithBattleSubsystem* subsys = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
   if (subsys != nullptr)
   {
     subsys->StartBattle();
+  }
+  else
+  {
+    UE_LOG(LogTemp, Warning, TEXT("Can not init Battle System"));
   }
 }

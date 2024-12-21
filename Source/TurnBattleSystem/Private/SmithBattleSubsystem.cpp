@@ -9,7 +9,6 @@
 #include "BattleCommandManager.h"
 
 #include "Debug.h"
-#include "TurnActor_Test.h"
 
 bool USmithBattleSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -195,7 +194,6 @@ void USmithBattleSubsystem::Tick(float DeltaTime)
       m_battleCmdMgr->ExecuteCommands(DeltaTime);
     }
   }
-
 
   if (m_priorityManageableLists.Contains(ETurnPriority::Rival) && m_priorityManageableLists[ETurnPriority::Rival].Elements.Num() == 0)
   {

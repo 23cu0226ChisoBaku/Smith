@@ -36,9 +36,7 @@ void ATurnBaseActor::Tick(float DeltaTime)
 
 UTurnControlComponent *ATurnBaseActor::GetTurnControl() const
 {
-	check(TurnComponent != nullptr);
-
-  return TurnComponent;
+  return nullptr;
 }
 
 FDelegateHandle ATurnBaseActor::Subscribe(FRequestCommandEvent::FDelegate& delegate)

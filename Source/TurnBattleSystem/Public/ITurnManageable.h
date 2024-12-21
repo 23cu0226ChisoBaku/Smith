@@ -42,7 +42,7 @@ class UTurnManageable : public UInterface
 /// 
 /// @brief ターン管理ができる
 ///
-class SMITH_API ITurnManageable
+class TURNBATTLESYSTEM_API ITurnManageable
 {
 	GENERATED_BODY()
 

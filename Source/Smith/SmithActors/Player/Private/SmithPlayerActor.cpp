@@ -58,7 +58,7 @@ ASmithPlayerActor::ASmithPlayerActor()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultRootComponent"));
 
 	m_springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	check((m_springArm != nullptr))
@@ -133,6 +133,7 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 		PrimaryActorTick.bCanEverTick = false;
 		return;
 	}
+
 }
 
 // Called to bind functionality to input
@@ -276,8 +277,7 @@ void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)
 		return;
 	}
 
-	auto turnComp = GetTurnControl();
-	if (turnComp == nullptr || !turnComp->IsCommandSendable())
+	if (m_turnComponent == nullptr || !m_turnComponent->IsCommandSendable())
 	{
 		return;
 	}

@@ -9,7 +9,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SMITH_API UTurnControlComponent : public UActorComponent
+class TURNBATTLESYSTEM_API UTurnControlComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

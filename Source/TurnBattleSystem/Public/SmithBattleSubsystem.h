@@ -13,7 +13,7 @@ class IBattleCommand;
 class UBattleCommandManager;
 
 UCLASS()
-class SMITH_API USmithBattleSubsystem final : public UTickableWorldSubsystem
+class TURNBATTLESYSTEM_API USmithBattleSubsystem final : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 

@@ -2,8 +2,8 @@
 
 
 #include "BattleCommandManager.h"
-#include "TurnControlComponent.h"
 #include "IBattleCommand.h"
+#include "TurnControlComponent.h"
 #include "SmithBattleSubsystem.h"
 #include "Debug.h"
 

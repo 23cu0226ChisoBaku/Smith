@@ -9,7 +9,7 @@
  */
 
 /// @brief バトルコマンド
-class SMITH_API IBattleCommand 
+class TURNBATTLESYSTEM_API IBattleCommand 
 {
 public:
 	// コマンドを執行する

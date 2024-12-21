@@ -16,7 +16,7 @@ DECLARE_EVENT(UBattleCommandManager, FStartEndEvent)
 
 
 UCLASS()
-class SMITH_API UBattleCommandManager final: public UObject
+class TURNBATTLESYSTEM_API UBattleCommandManager final: public UObject
 {
 	GENERATED_BODY()
 

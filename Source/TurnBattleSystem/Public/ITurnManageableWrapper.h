@@ -10,7 +10,7 @@
 /// @brief ITurnManageableへのポインターの配列のラッパ
 /// TMapに入れるため、USTRUCTでラップする必要がある
 USTRUCT(BlueprintType)
-struct SMITH_API FITurnManageableWrapper
+struct TURNBATTLESYSTEM_API FITurnManageableWrapper
 {
 	GENERATED_BODY()
 
