@@ -39,7 +39,7 @@ namespace UE::MLibrary
 		/// @param T データの型
 		///
 		template<typename T>
-		class TDimension1Array
+		class TDimension1Array final
 		{
 
 		//---------------------------------------
@@ -67,48 +67,55 @@ namespace UE::MLibrary
 					: m_elemArr(nullptr)
 					, m_length(length)
 				{
-					this->m_elemArr = new ElementType[m_length];
+					m_elemArr = new ElementType[m_length];
 					memset(m_elemArr, 0, sizeof(ElementType) * m_length);
 				}
 
 				TDimension1Array(const TDimension1Array& other)
-					: TDimension1Array()
+					: m_elemArr(nullptr)
+					, m_length(other.m_length)
 				{
-					*this = other;
+					m_elemArr = new ElementType[m_length];
+
+					const size_t cpySize = sizeof(ElementType) * m_length;
+					memcpy_s(m_elemArr, cpySize, other.m_elemArr, cpySize);	
 				}
 				TDimension1Array& operator=(const TDimension1Array& other)
 				{
 					if (this != &other)
 					{
-						if (this->m_elemArr != nullptr)
+						if (m_elemArr != nullptr)
 						{
 							delete[] m_elemArr;
 						}
-						this->m_elemArr = new ElementType[other.m_length];
-						this->m_length = other.m_length;
-						size_t cpySize = sizeof(ElementType) * this->m_length;
-						memcpy_s(this->m_elemArr, cpySize, other.m_elemArr, cpySize);	
+						m_elemArr = new ElementType[other.m_length];
+						m_length = other.m_length;
+						
+						const size_t cpySize = sizeof(ElementType) * m_length;
+						memcpy_s(m_elemArr, cpySize, other.m_elemArr, cpySize);	
 					}
 
 					return *this;
 				}
 
 				TDimension1Array(TDimension1Array&& other) noexcept
-					:TDimension1Array()
+					: m_elemArr(other.m_elemArr)
+					, m_length(other.m_length)
 				{					
-					*this = ::MoveTemp(other);
+					other.m_elemArr = nullptr;
+					other.m_length = 0;
 				}
 				TDimension1Array& operator=(TDimension1Array&& other) noexcept
 				{
 					if (this != &other)
 					{
-						if (this->m_elemArr != nullptr)
+						if (m_elemArr != nullptr)
 						{
 							delete[] m_elemArr;
 						}
 
-						this->m_elemArr = other.m_elemArr;
-						this->m_length = other.m_length;
+						m_elemArr = other.m_elemArr;
+						m_length = other.m_length;
 
 						other.m_elemArr = nullptr;
 						other.m_length = 0;
@@ -219,7 +226,12 @@ namespace UE::MLibrary
 			private:
 				void dispose() noexcept
 				{
-					delete[] m_elemArr;
+					if (m_elemArr != nullptr)
+					{
+						delete[] m_elemArr;
+
+					}
+
 					m_elemArr = nullptr;
 					m_length = 0;
 				}

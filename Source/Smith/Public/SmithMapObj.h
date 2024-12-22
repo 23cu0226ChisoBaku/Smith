@@ -23,7 +23,7 @@ Encoding : UTF-8
 
 */
 
-namespace Smith
+namespace Smith::Map
 {
 	class SMITH_API FSmithMapObj
 	{

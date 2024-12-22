@@ -50,5 +50,4 @@ namespace UE::Smith::Command
   {
     return true;
   }
-
 }

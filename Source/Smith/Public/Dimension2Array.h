@@ -30,7 +30,7 @@ namespace UE::MLibrary
 		/// @param T データの型
 		///
 		template<typename T>
-		class TDimension2Array
+		class TDimension2Array final
 		{
 
 		//---------------------------------------
@@ -40,8 +40,10 @@ namespace UE::MLibrary
 		//---------------------------------------
 		public:
 			using ElementType = T;
+			using ElementTypePtr = ElementType*;
 			using Iterator = ArrayIterator<TDimension2Array<ElementType>>;
 			using ConstIterator = const Iterator;
+
 		private:
 			class TDimension2ArrayRowArr
 			{
@@ -136,15 +138,16 @@ namespace UE::MLibrary
 					, m_row(0)
 					, m_column(0)
 				{ }
-				TDimension2Array(const uint64 row, const uint64 column)
+				TDimension2Array(uint64 row, uint64 column)
 					: m_elemArr(nullptr)
 					, m_row(row)
 					, m_column(column)
 				{
 					check( ((m_row * m_column) > 0) )
 
-					m_elemArr = new ElementType[m_row * m_column];
-					memset(m_elemArr, 0, sizeof(ElementType) * m_row * m_column);
+					const uint64 arrSize = m_row * m_column;
+					m_elemArr = new ElementType[arrSize];
+					memset(m_elemArr, 0, sizeof(ElementType) * arrSize);
 				}
 
 				TDimension2Array(const ElementType* src, const size_t srcSize, const uint64 row, const uint64 column)
@@ -158,48 +161,55 @@ namespace UE::MLibrary
 				}
 
 				TDimension2Array(const TDimension2Array& other)
-					: TDimension2Array()
+					: m_elemArr(nullptr)
+					, m_row(other.m_row)
+					, m_column(other.m_column)
 				{
-					*this = other;
+					const uint64 arrSize = m_row * m_column;
+					const size_t memSize = sizeof(ElementType) * arrSize;
+
+					m_elemArr = new ElementType[arrSize];
+					memcpy_s(m_elemArr, memSize, other.m_elemArr, memSize);
 				}
 
 				TDimension2Array& operator=(const TDimension2Array& other)
 				{
 					if (this != &other)
 					{
-						if (this->m_elemArr != nullptr)
-						{
-							delete[] this->m_elemArr;
-						}
+						ElementTypePtr tempPtr = m_elemArr;
 
-						this->m_elemArr = new ElementType[other.Length()];
-						this->m_row = other.m_row;
-						this->m_column = other.m_column;
-						
-						const size_t memSize = sizeof(ElementType) * Length();
-						memcpy_s(this->m_elemArr, memSize, other.m_elemArr, memSize);
+						m_elemArr = new ElementType[other.Length()];
+						m_row = other.m_row;
+						m_column = other.m_column;
+
+						const uint64 arrSize = m_row * m_column;
+						const size_t memSize = sizeof(ElementType) * arrSize;
+						memcpy_s(m_elemArr, memSize, other.m_elemArr, memSize);
+
+						delete[] tempPtr;
 					}
 
 					return *this;
 				}
 
 				TDimension2Array(TDimension2Array&& other) noexcept
-					: TDimension2Array()
+					: m_elemArr(other.m_elemArr)
+					, m_row(other.m_row)
+					, m_column(other.m_column)
 				{
-					*this = ::MoveTemp(other);
+					other.m_elemArr = nullptr;
+					other.m_row = 0;
+					other.m_column = 0;
 				}
 				TDimension2Array& operator=(TDimension2Array&& other) noexcept
 				{
 					if (this != &other)
 					{
-						if (this->m_elemArr != nullptr)
-						{
-							delete[] this->m_elemArr;
-						}
+						delete[] m_elemArr;
 
-						this->m_elemArr = other.m_elemArr;
-						this->m_row = other.m_row;
-						this->m_column = other.m_column;
+						m_elemArr = other.m_elemArr;
+						m_row = other.m_row;
+						m_column = other.m_column;
 
 						other.m_elemArr = nullptr;
 						other.m_row = 0;
