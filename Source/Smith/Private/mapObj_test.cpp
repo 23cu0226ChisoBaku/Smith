@@ -2,6 +2,7 @@
 
 
 #include "mapObj_test.h"
+#include "Debug.h"
 
 // Sets default values
 AmapObj_test::AmapObj_test()
@@ -22,6 +23,8 @@ void AmapObj_test::BeginPlay()
 void AmapObj_test::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	MDebug::LogWarning("test");
 
 }
 
