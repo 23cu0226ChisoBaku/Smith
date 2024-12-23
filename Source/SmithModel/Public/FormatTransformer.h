@@ -28,7 +28,7 @@ namespace UE::Smith
 {
 	inline namespace Battle
 	{
-		class SMITH_API FFormatTransformer
+		class SMITHMODEL_API FFormatTransformer
 		{
 			public:
 				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(FSmithCommandFormat format, FMapCoord cnMapCoord);

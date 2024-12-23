@@ -8,7 +8,10 @@ public class Smith : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "MLibrary", "TurnBattleSystem" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", 
+																												"InputCore", "EnhancedInput", "MLibrary", 
+																												"TurnBattleSystem" , "MapManagement", "SmithModel",
+																												"SmithGod"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
@@ -21,7 +24,6 @@ public class Smith : ModuleRules
 																							"Smith/SmithActors/Interfaces",
 																							"Smith/SmithActors",
 																							"Smith",
-																							"Smith/Models/Public",	  
 																						});
 
 		CppStandard = CppStandardVersion.Latest;

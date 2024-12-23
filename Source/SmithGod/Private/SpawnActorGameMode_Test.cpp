@@ -2,11 +2,7 @@
 
 
 #include "SpawnActorGameMode_Test.h"
-#include "SmithPlayerActor.h"
 #include "SmithBattleSubsystem.h"
-#include "TurnActor_Test.h"
-
-#include "MyEnemy.h"
 
 ASpawnActorGameMode_Test::ASpawnActorGameMode_Test()
 {

@@ -9,7 +9,7 @@
 #include "FormatInfo_Import.generated.h"
 
 USTRUCT(Blueprintable, DisplayName = "FormatArrayInfo")
-struct SMITH_API FFormatInfo_Import : public FTableRowBase
+struct SMITHMODEL_API FFormatInfo_Import : public FTableRowBase
 {
 
 	GENERATED_BODY()

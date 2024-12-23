@@ -6,6 +6,7 @@
 #define SMITH_MAPOBJ
 
 #include "CoreMinimal.h"
+#include "MapCoord.h"
 
 /*
 
@@ -25,10 +26,10 @@ Encoding : UTF-8
 
 namespace Smith::Map
 {
-	class SMITH_API FSmithMapObj
+	class MAPMANAGEMENT_API FSmithMapObj
 	{
 	public:
-		FSmithMapObj(AActor* const);
+		explicit FSmithMapObj(AActor*);
 		virtual ~FSmithMapObj();
 
 	public:
@@ -45,9 +46,14 @@ namespace Smith::Map
 		/// @return 同じだったらtrue, 引数が無効もしくは同じじゃなかったらfalse
 		bool ReferenceEquals(AActor* const) const;
 
+		FMapCoord GetCoord() const;
+
+		void SetCoord(const FMapCoord&);
+
 	private:
-		FGuid m_uniqueID;
 		TWeakObjectPtr<AActor> m_actor;
+		FGuid m_uniqueID;
+		FMapCoord m_coord;
 	};
 }
 

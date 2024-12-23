@@ -4,18 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "SpawnActorGameMode_Test.generated.h"
+#include "GM_TestTileMove.generated.h"
 
-/**
- * 
- */
 UCLASS()
-class SMITH_API ASpawnActorGameMode_Test : public AGameModeBase
+class SMITHGOD_API AGM_TestTileMove : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-	ASpawnActorGameMode_Test();
-	virtual void StartPlay() override;
-
+	AGM_TestTileMove();
 };

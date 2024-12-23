@@ -19,7 +19,7 @@ Encoding : UTF-8
 #ifndef SMITH_CMD_FORMAT
 #define SMITH_CMD_FORMAT
 
-#include "Dimension2Array.h"
+#include "DataStructure/Dimension2Array.h"
 #include "MapCoord.h"
 #include "FormatType.h"
 
@@ -30,7 +30,7 @@ namespace UE::Smith
 		///
 		/// @brief コマンドフォーマット
 		///
-		class FSmithCommandFormat
+		class SMITHMODEL_API FSmithCommandFormat
 		{
 			
 			//---------------------------------------

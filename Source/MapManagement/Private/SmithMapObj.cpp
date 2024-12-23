@@ -17,17 +17,17 @@ Encoding : UTF-8
 
 #include "SmithMapObj.h"
 
-namespace Smith
+namespace Smith::Map
 {
-  FSmithMapObj::FSmithMapObj(AActor* const actor)
-    : m_uniqueID()
-    , m_actor(actor)
+  FSmithMapObj::FSmithMapObj(AActor* actor)
+    : m_actor(actor)
+    , m_uniqueID({})
+    , m_coord({})
   { 
     if (::IsValid(actor))
     {
       const FString uniqueStr = actor->GetName() + FString::FromInt(actor->GetUniqueID());
-      const auto guid = FGuid(uniqueStr);
-      m_uniqueID = guid;
+      m_uniqueID = FGuid{uniqueStr};
     }
   }
 
@@ -72,5 +72,15 @@ namespace Smith
     }
 
     return m_actor.Get() == actor;
+  }
+
+  FMapCoord FSmithMapObj::GetCoord() const
+  {
+    return m_coord;
+  }
+
+  void FSmithMapObj::SetCoord(const FMapCoord& newCoord)
+  {
+    m_coord = newCoord;
   }
 }

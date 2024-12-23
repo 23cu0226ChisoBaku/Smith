@@ -20,7 +20,7 @@ Encoding : UTF-8
 #include "MapCoord.generated.h"
 
 USTRUCT(BlueprintType)
-struct SMITH_API FMapCoord
+struct SMITHMODEL_API FMapCoord
 {
 	GENERATED_BODY()
 
