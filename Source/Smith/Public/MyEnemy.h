@@ -5,22 +5,22 @@
 #include "CoreMinimal.h"
 #include "Engine/World.h" // �ǉ�
 #include "GameFramework/Actor.h"
-#include "DrawDebugHelpers.h"  // DrawDebugLine��DrawDebugPoint�Ȃǂ��g�p���邽�߂ɕK�v
+#include "DrawDebugHelpers.h" // DrawDebugLine��DrawDebugPoint�Ȃǂ��g�p���邽�߂ɕK�v
 #include "ITurnManageable.h"
 #include "IAttackable.h"
 #include "MyEnemy.generated.h"
 
-
 class UTurnControlComponent;
 class USmithMoveComponent;
 class USmithAttackComponent;
+class UWidget;
 
 UCLASS()
-class SMITH_API AMyEnemy : public AActor , public ITurnManageable, public IAttackable
+class SMITH_API AMyEnemy : public AActor, public ITurnManageable, public IAttackable
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AMyEnemy();
 
@@ -28,23 +28,31 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+public:
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "SmithUI")
+	void UIInvoke();
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "SmithEnemy")
 	int32 HP;
-	UPROPERTY(EditAnywhere)
-	int32 ATK;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "SmithEnemy")
+	int32 MaxHP;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "SmithEnemy")
+	int ATK;
 
 // TODO Create by Mai
 #pragma region ITurnManageable Interface
 public:
-	UTurnControlComponent* GetTurnControl() const override final;
-	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
-	bool Unsubscribe(UObject*,FDelegateHandle) override final;
+	UTurnControlComponent *GetTurnControl() const override final;
+	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate &) override final;
+	bool Unsubscribe(UObject *, FDelegateHandle) override final;
 
-	void OnAttack(AttackHandle&&) override;
+	void OnAttack(AttackHandle &&) override;
+
 private:
 	UPROPERTY()
 	TObjectPtr<UTurnControlComponent> m_turnCtrl;
@@ -52,6 +60,8 @@ private:
 	TObjectPtr<USmithMoveComponent> m_moveComp;
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_attackComp;
+	UPROPERTY()
+	TObjectPtr<class UWidget> m_widget;
 
 private:
 	FRequestCommandEvent m_event;
@@ -60,8 +70,8 @@ private:
 private:
 	void PlayerCheck();
 	FVector MoveDirection();
-	
-	AActor* m_target;
+
+	AActor *m_target;
 
 	float MOVE_DISTANCE;
 
@@ -69,4 +79,6 @@ private:
 
 	// TODO
 	float m_hp;
+
+	float m_maxHp;
 };

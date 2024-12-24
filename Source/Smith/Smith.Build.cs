@@ -27,8 +27,8 @@ public class Smith : ModuleRules
 
 		CppStandard = CppStandardVersion.Latest;
 		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-		
+		 PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" ,"UMG","UnrealEd"});
+
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
 

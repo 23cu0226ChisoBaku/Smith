@@ -12,7 +12,7 @@ Update History: 2024/12/12 開始日
 
 Version : alpha_1.0.0
 
-Encoding : UTF-8 
+Encoding : UTF-8
 
 */
 #pragma once
@@ -36,24 +36,24 @@ class IBattleCommand;
 struct AttackHandle;
 
 UCLASS()
-class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable , public IAttackable
+class SMITH_API ASmithPlayerActor final : public APawn, public ITurnManageable, public IAttackable
 {
 	GENERATED_BODY()
 
-// TODO Test用
+	// TODO Test用
 public:
 	enum EDir_Test : uint8
 	{
-		North = 0,						// 上方向
-		NorthEast = 1,				// 右上
-		East = 2,							// 右
-		SouthEast = 3,				// 右下
-		South = 4,						// 下
-		SouthWest = 5,				// 左下
-		West = 6,							// 左
-		NorthWest = 7,				// 左上
+		North = 0,		 // 上方向
+		NorthEast = 1, // 右上
+		East = 2,			 // 右
+		SouthEast = 3, // 右下
+		South = 4,		 // 下
+		SouthWest = 5, // 左下
+		West = 6,			 // 左
+		NorthWest = 7, // 左上
 
-		DirectionCnt,					// 選べられる方向の数
+		DirectionCnt, // 選べられる方向の数
 	};
 
 public:
@@ -65,12 +65,12 @@ protected:
 	void BeginPlay() override final;
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
-public:	
+public:
 	// Called every frame
 	void Tick(float DeltaTime) override final;
 
 	// Called to bind functionality to input
-	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override final;
+	void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override final;
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -95,12 +95,12 @@ private:
 	TObjectPtr<UInputAction> m_cameraAction;
 
 public:
-	UTurnControlComponent* GetTurnControl() const override final;
-	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
-	bool Unsubscribe(UObject*,FDelegateHandle) override final;
+	UTurnControlComponent *GetTurnControl() const override final;
+	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate &) override final;
+	bool Unsubscribe(UObject *, FDelegateHandle) override final;
 
 public:
-	void OnAttack(AttackHandle&&) override final;
+	void OnAttack(AttackHandle &&) override final;
 
 private:
 	void sendCommand(TSharedPtr<IBattleCommand>);
@@ -109,13 +109,13 @@ private:
 	void changeFwdImpl(EDir_Test);
 
 	// TODO
-	bool searchActorsInDirection(FVector, TArray<AActor*>&);
+	bool searchActorsInDirection(FVector, TArray<AActor *> &);
 
 private:
 	// input bind method
-	void Move_Input(const FInputActionValue& value);
-	void Attack_Input(const FInputActionValue& value);
-	void Look(const FInputActionValue& value);
+	void Move_Input(const FInputActionValue &value);
+	void Attack_Input(const FInputActionValue &value);
+	void Look(const FInputActionValue &value);
 
 private:
 	FRequestCommandEvent m_event;
@@ -123,7 +123,7 @@ private:
 
 	EDir_Test m_camDir;
 	EDir_Test m_actorFaceDir;
-	
+
 	uint8 m_bCanMove : 1;
 	uint8 m_bCanAttack : 1;
 };

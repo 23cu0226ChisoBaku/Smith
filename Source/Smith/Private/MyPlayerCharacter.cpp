@@ -133,6 +133,7 @@ void AMyPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindKey(EKeys::A, IE_Pressed, this, &AMyPlayerCharacter::Pawn_MoveLeft);
 	PlayerInputComponent->BindKey(EKeys::D, IE_Pressed, this, &AMyPlayerCharacter::Pawn_MoveRight);
 }
+
 // Called every frame
 void AMyPlayerCharacter::Tick(float DeltaTime)
 {
