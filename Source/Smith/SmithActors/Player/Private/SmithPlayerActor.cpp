@@ -16,6 +16,10 @@
 #include "MoveCommand.h"
 #include "AttackHandle.h"
 
+#include "ICommandMediator.h"
+
+#include "MLibrary.h"
+
 namespace SmithPlayerActor::Private
 {
 	constexpr int32 PlayerHP_Temp = 30;
@@ -47,6 +51,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, m_turnComponent(nullptr)
 	, m_moveComponent(nullptr)
 	, m_atkComponent(nullptr)
+	, m_commandMediator(nullptr)
 	, m_event({})
 	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
 	, m_camDir(North)
@@ -113,7 +118,6 @@ void ASmithPlayerActor::BeginPlay()
 	check((enhancedInputSubsystem != nullptr));
 
 	enhancedInputSubsystem->AddMappingContext(m_mappingCtx, 0);
-	
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -178,6 +182,11 @@ bool ASmithPlayerActor::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle
 	{
 		return false;
 	}
+}
+
+void ASmithPlayerActor::SetCommandMediator(ICommandMediator* mediator)
+{
+	m_commandMediator = mediator;
 }
 
 void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
@@ -270,27 +279,6 @@ void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 					);
 }
 
-void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)
-{
-	if (command == nullptr)
-	{
-		return;
-	}
-
-	if (m_turnComponent == nullptr || !m_turnComponent->IsCommandSendable())
-	{
-		return;
-	}
-
-	if (!m_event.IsBound())
-	{
-		return;
-	}
-
-	m_event.Broadcast(this, command);
-
-}
-
 void ASmithPlayerActor::moveImpl(FVector moveDir)
 {
 	using namespace SmithPlayerActor::Private;
@@ -316,10 +304,11 @@ void ASmithPlayerActor::moveImpl(FVector moveDir)
 																										 );
 
 	// TODO 何もヒットしない場合移動コマンドを出す
-	if (!isHit && ::IsValid(m_moveComponent))
+	if (!isHit && ::IsValid(m_moveComponent) && m_commandMediator.IsValid())
 	{
 		m_moveComponent->SetTerminusPos(endPos);
-		sendCommand(MakeShared<UE::Smith::Command::MoveCommand>(m_moveComponent));
+		
+		m_commandMediator->SendMoveCommand(this, m_moveComponent);
 	}
 }
 
@@ -337,13 +326,16 @@ void ASmithPlayerActor::attackImpl()
 		for(auto actorPtr : hitActors)
 		{
 			IAttackable* attackable = Cast<IAttackable>(actorPtr);
-			sendCommand(MakeShared<UE::Smith::Command::AttackCommand>(m_atkComponent, attackable, AttackHandle{GetName(), 3}));
+			if (m_commandMediator.IsValid())
+			{
+				m_commandMediator->SendAttackCommand(this, m_atkComponent, attackable, AttackHandle{GetName(), 3});
+			}
 		}
 	}
 	// なかったら空振りする
 	else
 	{
-		sendCommand(MakeShared<UE::Smith::Command::AttackCommand>(nullptr, nullptr, AttackHandle{}));
+		m_commandMediator->SendAttackCommand(this, nullptr, nullptr, AttackHandle{});
 	}
 }
 

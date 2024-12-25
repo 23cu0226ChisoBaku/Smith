@@ -7,8 +7,13 @@ public class SmithGod: ModuleRules
   public SmithGod(ReadOnlyTargetRules Target) : base(Target)
   {
 
-    PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", "MLibrary", "TurnBattleSystem", "MapManagement", "SmithModel"});
+    PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", 
+                                                       "MLibrary", "TurnBattleSystem", "MapManagement", 
+                                                       "SmithModel", "Smith"});
 
+    PrivateIncludePaths.AddRange(new string[] {"Smith/SmithActors/Interfaces",
+                                               "Smith/BattleCommand/Public",
+                                               "Smith/SmithActors/TurnMngObj/Public"});
   }
 
 }

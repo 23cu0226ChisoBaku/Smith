@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "ICommandMediator.h"
 #include "SmithBattleMediator.generated.h"
 
 class USmithBattleSubsystem;
@@ -15,7 +16,7 @@ namespace Smith::Map
  * 
  */
 UCLASS()
-class SMITHGOD_API USmithBattleMediator final: public UObject
+class SMITHGOD_API USmithBattleMediator final: public UObject, public ICommandMediator
 {
 	GENERATED_BODY()
 
@@ -29,11 +30,14 @@ public:
 	void BeginDestroy() override final;
 	void SetupMediator(USmithBattleSubsystem*, TSharedPtr<MapManager>);
 
+public:
+	void SendMoveCommand(AActor*, IMoveable*) override final;
+	void SendAttackCommand(AActor*, ICanMakeAttack*, IAttackable*, AttackHandle&&) override final;
+
 private:
 	UPROPERTY()
 	TWeakObjectPtr<USmithBattleSubsystem> m_battleSys;
 
 private:
 	TWeakPtr<MapManager> m_mapMgr;
-	
 };

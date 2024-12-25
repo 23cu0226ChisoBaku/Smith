@@ -3,23 +3,20 @@
 
 #include "TurnBaseActor.h"
 #include "TurnControlComponent.h"
+#include "IMoveable.h"
+#include "ICommandMediator.h"
 
 // Sets default values
 ATurnBaseActor::ATurnBaseActor()
 	: TurnComponent(nullptr)
-	, m_event({})
+	, m_commandMediator(nullptr)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	UTurnControlComponent* turnComp = CreateDefaultSubobject<UTurnControlComponent>(TEXT("TurnComponent"));
+	TurnComponent = CreateDefaultSubobject<UTurnControlComponent>(TEXT("TurnComponent"));
+	check((TurnComponent != nullptr))
 
-	if (turnComp != nullptr)
-	{
-		AddInstanceComponent(turnComp);
-	}
-
-	TurnComponent = turnComp;
 }
 
 // Called when the game starts or when spawned
@@ -36,46 +33,46 @@ void ATurnBaseActor::Tick(float DeltaTime)
 
 UTurnControlComponent *ATurnBaseActor::GetTurnControl() const
 {
-  return nullptr;
+  return TurnComponent;
 }
 
 FDelegateHandle ATurnBaseActor::Subscribe(FRequestCommandEvent::FDelegate& delegate)
 {
-	if (delegate.IsBound())
-	{
-		return m_event.Add(delegate);
-	}
-
 	return delegate.GetHandle();
 }
 
 bool ATurnBaseActor::Unsubscribe(UObject* objPtr, FDelegateHandle handle)
 {
-	if (m_event.IsBoundToObject(objPtr))
+	return false;
+}
+
+void ATurnBaseActor::SetCommandMediator(ICommandMediator* mediator)
+{
+	m_commandMediator = mediator;
+}
+
+void ATurnBaseActor::SendMoveCommand(IMoveable* moveable)
+{
+	if (!::IsValid(TurnComponent) || !TurnComponent->IsCommandSendable())
 	{
-		m_event.Remove(handle);
-		return true;
+		return;
 	}
-	else
+
+	if (m_commandMediator.IsValid())
 	{
-		return false;
+		m_commandMediator->SendMoveCommand(this, moveable);
 	}
 }
 
-void ATurnBaseActor::SendCommand(TSharedPtr<IBattleCommand> command)
+void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, IAttackable* target, AttackHandle&& handle)
 {
-	if (!::IsValid(TurnComponent))
+	if (!::IsValid(TurnComponent) || !TurnComponent->IsCommandSendable())
 	{
 		return;
 	}
 
-	if (!TurnComponent->IsCommandSendable())
+	if (m_commandMediator.IsValid())
 	{
-		return;
-	}
-
-	if (m_event.IsBound())
-	{
-		m_event.Broadcast(this, command);
+		m_commandMediator->SendAttackCommand(this, attacker, target, ::MoveTemp(handle));
 	}
 }

@@ -3,15 +3,8 @@
 
 #include "TurnActor_Test.h"
 #include "TurnControlComponent.h"
-#include "NullCommand.h"
-
-namespace TEST_NS
-{
-  constexpr float SEND_INTERVAL = 0.5f;
-}
 
 ATurnActor_Test::ATurnActor_Test()
-  : m_TimeCnt(0.0f)
 {
   if (TurnComponent != nullptr)
   {
@@ -33,11 +26,5 @@ void ATurnActor_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ATurnActor_Test::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
-
-  m_TimeCnt += DeltaTime;
-  if (m_TimeCnt >= TEST_NS::SEND_INTERVAL)
-  {
-    m_TimeCnt = 0.0f;
-    SendCommand(MakeShared<UE::Smith::Command::NullCommand>());
-  }
+  SendMoveCommand(nullptr);
 }

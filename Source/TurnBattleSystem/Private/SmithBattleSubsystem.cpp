@@ -2,9 +2,10 @@
 
 
 #include "SmithBattleSubsystem.h"
+#include "Kismet/GameplayStatics.h"
+
 #include "ITurnManageable.h"
 #include "TurnControlComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "IBattleCommand.h"
 #include "BattleCommandManager.h"
 

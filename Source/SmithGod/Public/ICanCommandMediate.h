@@ -4,25 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "IAttackable.generated.h"
+#include "ICanCommandMediate.generated.h"
 
-struct AttackHandle;
+class ICommandMediator;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UAttackable : public UInterface
+class UCanCommandMediate : public UInterface
 {
 	GENERATED_BODY()
 };
 
-///
-/// @brief 攻撃できる
-///
-class SMITH_API IAttackable
+class SMITHGOD_API ICanCommandMediate
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void OnAttack(AttackHandle&&) = 0;
+	virtual void SetCommandMediator(ICommandMediator*) = 0;
 };

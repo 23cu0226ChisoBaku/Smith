@@ -2,40 +2,82 @@
 
 #pragma once
 
+#ifndef MLIB_GETADDCOMP
+#define MLIB_GETADDCOMP
+
 #include "CoreMinimal.h"
 
 #include <cassert>
 #include <type_traits>
 
-/**
- * 
- */
-class MLIBRARY_API GetAddComponent
+MLIBRARY_API DECLARE_LOG_CATEGORY_EXTERN(MLibrary_GetAddComp_Error, Log, All);
+
+namespace MLibrary
 {
-public:
-	template<typename UnrealComponent>
-	UnrealComponent* GetComponent(AActor*);
-
-	template<typename UnrealComponent>
-	UnrealComponent* AddComponent(AActor*);
-
-	template<typename UnrealComponent>
-	UnrealComponent* GetOrAddComponent(AActor*);
-
-};
-
-template<typename UnrealComponent>
-UnrealComponent* GetComponent(AActor* actor)
-{
-	static_assert(sizeof(UnrealComponent) > 0, "Can't use incomplete Type");
-	static_assert(std::is_convertible<UnrealComponent, UActorComponent>::value, "Can't convert to UActorComponent");
-
-	if (::IsValid(actor))
+	class MLIBRARY_API GetAddComponent
 	{
-		
-	}
+	public:
+		template<typename UnrealComponent>
+		static UnrealComponent* GetComponent(AActor* actor)
+		{
+			checkTypeValidToUActorComponent<UnrealComponent>();
+
+			if (::IsValid(actor))
+			{
+				return actor->FindComponentByClass<UnrealComponent>();
+			}
+			else
+			{
+				UE_LOG(MLibrary_GetAddComp_Error, Error, TEXT("Actor is Invalid"));
+				return nullptr;
+			}
+		}
+
+		template<typename UnrealComponent>
+		static UnrealComponent* AddComponent(AActor* actor, FName CompName = TEXT(""))
+		{
+			checkTypeValidToUActorComponent<UnrealComponent>();
+
+			if (::IsValid(actor))
+			{
+				return actor->CreateDefaultSubobject<UnrealComponent>(CompName);
+			}
+			else
+			{
+				UE_LOG(MLibrary_GetAddComp_Error, Error, TEXT("Actor is Invalid"));
+				return nullptr;
+			}
+		}
+
+		template<typename UnrealComponent>
+		static UnrealComponent* GetOrAddComponent(AActor* actor)
+		{
+			checkTypeValidToUActorComponent<UnrealComponent>();
+
+			UnrealComponent* comp = GetComponent(actor);
+
+			if (comp == nullptr)
+			{
+				comp = AddComponent(actor);
+			}
+
+			return comp;
+		}
+
+	private:
+		template<typename UnrealComponent>
+		static void checkTypeValidToUActorComponent()
+		{
+			static_assert(sizeof(UnrealComponent) > 0, "Can't use incomplete Type");
+			static_assert(std::is_convertible<UnrealComponent*, UActorComponent*>::value, "Can't convert to UActorComponent");
+		}
+
+	};
 }
 
-#define GetComponent(ActorPtr, ComponentType) 			GetAddComponent::GetComponent<decltype(ComponentType)>(ActorPtr);
-#define AddComponent(ActorPtr, ComponentType) 			GetAddComponent::AddComponent<decltype(ComponentType)>(ActorPtr);
-#define GetOrAddComponent(ActorPtr, ComponentType) 	GetAddComponent::GetOrAddComponent<decltype(ComponentType)>(ActorPtr);
+#define GetComponent(ActorPtr, ComponentType) 			MLibrary::GetAddComponent::GetComponent<ComponentType>(ActorPtr);
+#define AddComponent(ActorPtr, ComponentType) 			MLibrary::GetAddComponent::AddComponent<ComponentType>(ActorPtr);
+#define AddComponent_Name(ActorPtr, ComponentType, Name) MLibrary::GetAddComponent::AddComponent<ComponentType>(ActorPtr, Name);
+#define GetOrAddComponent(ActorPtr, ComponentType) 	MLibrary::GetAddComponent::GetOrAddComponent<ComponentType>(ActorPtr);
+
+#endif

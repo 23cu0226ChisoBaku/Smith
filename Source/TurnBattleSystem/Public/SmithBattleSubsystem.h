@@ -6,7 +6,6 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "ITurnManageableWrapper.h"
 #include "TurnPriority.h"
-#include "Debug.h"
 #include "SmithBattleSubsystem.generated.h"
 
 class IBattleCommand;
@@ -31,7 +30,6 @@ public:
 	/// 新しいマップが読み込まれたら一回呼ばれる
 	void StartBattle();
 	
-
 // start of FTickableObjectBase Interface
 #pragma region FTickableObjectBase Interface
 	void Tick(float DeltaTime) override final;
@@ -47,9 +45,9 @@ public:
 	UWorld* GetTickableGameObjectWorld() const override final;
 #pragma endregion
 // end of FTickableObject Interface
-
-private:
+public:
 	void registerCommand(ITurnManageable*, TSharedPtr<IBattleCommand>);
+private:
 	void registerNextTurnObjs();
 	void emptyContainers();
 
@@ -59,9 +57,9 @@ private:
 
 private:
 	UPROPERTY()
-	TMap<ETurnPriority, FITurnManageableWrapper> m_priorityManageableLists;
-	UPROPERTY()
 	TObjectPtr<UBattleCommandManager> m_battleCmdMgr;
+	UPROPERTY()
+	TMap<ETurnPriority, FITurnManageableWrapper> m_priorityManageableLists;
 
 private:
 	ETurnPriority m_curtTurn;
