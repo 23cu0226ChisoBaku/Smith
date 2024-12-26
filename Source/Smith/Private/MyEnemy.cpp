@@ -202,10 +202,11 @@ void AMyEnemy::OnAttack(AttackHandle &&handle)
 		Destroy();
 		return;
 	}
-		// BPの処理（されないきもいBPきらい）
+		// BPで処理
 	UIInvoke();
 
 }
+
 
 FVector AMyEnemy::MoveDirection()
 {

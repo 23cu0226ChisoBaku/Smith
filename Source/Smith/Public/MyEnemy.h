@@ -33,10 +33,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-
+	// BP側で処理をするC++は呼び出すだけ（TODO c++のみで実装する）
 	UFUNCTION(BlueprintImplementableEvent, Category = "SmithUI")
 	void UIInvoke();
 
+	// TODO BPでHPを参照するためだけいらなくなったら消す
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "SmithEnemy")
 	int32 HP;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "SmithEnemy")

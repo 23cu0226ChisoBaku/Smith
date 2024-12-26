@@ -385,7 +385,5 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 		UGameplayStatics::SetGamePaused(GetWorld(), true);
 		UGameplayStatics::OpenLevel(GetWorld(), FName(*(GetWorld()->GetName())), false);
 		DisableInput(Cast<APlayerController>(Controller));
-
-
 	}
 }

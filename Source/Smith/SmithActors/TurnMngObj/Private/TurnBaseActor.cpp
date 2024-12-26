@@ -43,6 +43,7 @@ UTurnControlComponent *ATurnBaseActor::GetTurnControl() const
 
 FDelegateHandle ATurnBaseActor::Subscribe(FRequestCommandEvent::FDelegate& delegate)
 {
+	// デリゲートが登録されているか確認する
 	if (delegate.IsBound())
 	{
 		return m_event.Add(delegate);
