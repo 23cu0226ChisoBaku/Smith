@@ -43,7 +43,7 @@ namespace UE::Smith::Command
         }
 
         moveStr.Append(TEXT(" Move Command"));
-        UE::MLibrary::Debug::Log(moveStr);
+        // UE::MLibrary::Debug::Log(moveStr);
       }
       void End()
       {

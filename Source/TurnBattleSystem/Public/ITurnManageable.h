@@ -21,6 +21,7 @@ Encoding : UTF-8
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "TurnPriority.h"
 #include "ITurnManageable.generated.h"
 
 class UTurnControlComponent;
@@ -46,6 +47,8 @@ class TURNBATTLESYSTEM_API ITurnManageable
 {
 	GENERATED_BODY()
 
+public: 
+	ITurnManageable();
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	/// TODO 後で直す
@@ -55,4 +58,18 @@ public:
 	virtual FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) = 0;
 	/// @brief コマンド発送イベントを解読
 	virtual bool Unsubscribe(UObject*,FDelegateHandle) = 0;
+
+public:
+	void SetCommandSendable(bool);
+	void SetTurnPriority(ETurnPriority);
+
+	bool IsCommandSendable() const;
+	ETurnPriority GetPriority() const;
+
+public:
+	virtual bool IsValid() const = 0;
+
+private:
+	class TurnManageImpl;
+	TurnManageImpl* m_pImpl;
 };
