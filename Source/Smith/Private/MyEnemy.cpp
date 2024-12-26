@@ -3,27 +3,21 @@
 #include "SmithAttackComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "TurnControlComponent.h"
 #include "MoveCommand.h"
 #include "AttackCommand.h"
 #include "IAttackable.h"
 #include "SmithPlayerActor.h"
-#include "Components/ProgressBar.h"
-#include "Blueprint/UserWidget.h"
 
 #include "Debug.h"
 
 // Sets default values
 AMyEnemy::AMyEnemy()
-		: m_hp(5.0f)
+	: m_hp(5.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	m_turnCtrl = CreateDefaultSubobject<UTurnControlComponent>(TEXT("Konno Enemy Turn CTRL"));
-	check((m_turnCtrl != nullptr));
-
-	m_turnCtrl->SetTurnPriority(ETurnPriority::Rival);
+	SetTurnPriority(ETurnPriority::Rival);
 
 	m_moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno Enemy Move Component"));
 	check((m_moveComp != nullptr));
@@ -32,12 +26,6 @@ AMyEnemy::AMyEnemy()
 	MOVE_DISTANCE = 250.0f;
 
 	m_attackComp = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Konno Enemy Attack Component"));
-
-	m_maxHp = m_hp;
-
-	// BPでHPを取得するため仮の処理
-	HP = m_hp;
-	MaxHP = m_hp;
 }
 
 // Called when the game starts or when spawned
@@ -61,9 +49,9 @@ void AMyEnemy::BeginPlay()
 void AMyEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (m_turnCtrl->IsCommandSendable())
+	if(IsCommandSendable())
 	{
-		m_timer += DeltaTime;
+			m_timer += DeltaTime;
 	}
 
 	if (m_timer > 0.5f)
@@ -79,10 +67,10 @@ void AMyEnemy::PlayerCheck()
 	const FVector StartLocation = GetActorLocation();
 
 	const FVector EndLocation[4] = {
-			StartLocation + FVector::ForwardVector * rayLenth,
-			StartLocation + FVector::BackwardVector * rayLenth,
-			StartLocation + FVector::RightVector * rayLenth,
-			StartLocation + FVector::LeftVector * rayLenth};
+		StartLocation + FVector::ForwardVector * rayLenth,
+		StartLocation + FVector::BackwardVector * rayLenth,
+		StartLocation + FVector::RightVector * rayLenth,
+		StartLocation + FVector::LeftVector * rayLenth};
 
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
@@ -94,11 +82,11 @@ void AMyEnemy::PlayerCheck()
 	{
 		// レイキャスト
 		bHit = GetWorld()->LineTraceSingleByChannel(
-				HitResult,
-				StartLocation,
-				EndLocation[i],
-				ECC_MAX,
-				CollisionParams);
+			HitResult,
+			StartLocation,
+			EndLocation[i],
+			ECC_MAX,
+			CollisionParams);
 
 		if (!bHit)
 		{
@@ -113,11 +101,10 @@ void AMyEnemy::PlayerCheck()
 			DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Red, false, 1.0f);
 			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
 
-			IAttackable *attackable = Cast<IAttackable>(HitActor);
+			IAttackable* attackable = Cast<IAttackable>(HitActor);
 			if (attackable != nullptr)
 			{
 				// TODO麦くんが直す
-				m_event.Broadcast(this, MakeShared<UE::Smith::Command::AttackCommand>(m_attackComp, attackable, AttackHandle{GetName(), 4}));
 				return;
 			}
 		}
@@ -130,83 +117,25 @@ void AMyEnemy::PlayerCheck()
 		DrawDebugLine(GetWorld(), StartLocation, EndLocation[i], FColor::Green, false, 1.0f, 0, 1.0f);
 	}
 
-	UTurnControlComponent *turnCtrl = GetTurnControl();
-	if (turnCtrl != nullptr && turnCtrl->IsCommandSendable())
+	if (IsCommandSendable())
 	{
 		// 移動の処理
-		if (m_event.IsBound())
-		{
-			m_moveComp->SetTerminusPos(MoveDirection());
-			m_event.Broadcast(this, MakeShared<UE::Smith::Command::MoveCommand>(m_moveComp));
-		}
+		m_moveComp->SetTerminusPos(MoveDirection());
+
 	}
 }
 
-UTurnControlComponent *AMyEnemy::GetTurnControl() const
+void AMyEnemy::OnAttack(AttackHandle&& handle)
 {
-	return m_turnCtrl;
-}
-
-FDelegateHandle AMyEnemy::Subscribe(FRequestCommandEvent::FDelegate &delegate)
-{
-	if (delegate.IsBound())
-	{
-		return m_event.Add(delegate);
-	}
-
-	return FDelegateHandle{};
-}
-
-bool AMyEnemy::Unsubscribe(UObject *obj, FDelegateHandle delegateHandle)
-{
-	if (obj != nullptr && m_event.IsBoundToObject(obj))
-	{
-		m_event.Remove(delegateHandle);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-void AMyEnemy::OnAttack(AttackHandle &&handle)
-{
-	// TODO C++でProgressBarをいじる
-
-	// UProgressBar *ProgBar = nullptr;
-	// if (m_widget != nullptr)
-	// {
-	// 	ProgBar = Cast<UProgressBar>(m_widget);
-	// }
-	// else
-	// {
-	// 	MDebug::Log("No ProgBar");
-	// }
-
-	// TODO ProgBarの設定
-	// if (ProgBar != nullptr)
-	// {
-	// 	float rate = m_hp / m_maxHp;
-	// 	ProgBar->SetPercent(rate);
-	// }
-
 	m_hp -= handle.AttackPower;
-	MDebug::LogError(GetName() + TEXT(" left HP:") + FString::FromInt(m_hp));
 
-	// 仮の処理
-	HP = m_hp;
+	MDebug::LogError(GetName() + TEXT(" left HP:") + FString::FromInt(m_hp));
 
 	if (m_hp <= 0)
 	{
 		Destroy();
-		return;
 	}
-		// BPで処理
-	UIInvoke();
-
 }
-
 
 FVector AMyEnemy::MoveDirection()
 {
@@ -235,6 +164,7 @@ FVector AMyEnemy::MoveDirection()
 		myPos += MOVE_DISTANCE * FVector::LeftVector;
 	}
 
+	MDebug::Log(myPos.ToString());
 	retPos = myPos;
 
 	return retPos;

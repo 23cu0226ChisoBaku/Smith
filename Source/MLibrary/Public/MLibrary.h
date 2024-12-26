@@ -29,6 +29,7 @@ Encoding : UTF-8
 #include "Debug.h"
 #include "ZeroMem.h"
 #include "UInterfaceValidCheck.h"
+#include "GetAddComponent.h"
 
 #pragma endregion
 // end of Debug Tool Include

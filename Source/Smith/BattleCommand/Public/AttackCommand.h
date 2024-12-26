@@ -9,9 +9,6 @@
 class ICanMakeAttack;
 class IAttackable;
 struct AttackHandle;
-/**
- * 
- */
 
 namespace UE::Smith::Command
 {
@@ -28,6 +25,7 @@ namespace UE::Smith::Command
 		virtual bool IsFinish() const override;
 
 	private:
-		TWeakInterfacePtr<ICanMakeAttack> m_attacker;
+		class AttackImpl;
+		TUniquePtr<AttackImpl> m_attackImpl;
 	};
 }
