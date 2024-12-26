@@ -9,12 +9,15 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "SmithBattleSubsystem.h"
-#include "TurnControlComponent.h"
 #include "SmithMoveComponent.h"
 #include "SmithAttackComponent.h"
 #include "AttackCommand.h"
 #include "MoveCommand.h"
 #include "AttackHandle.h"
+
+#include "ICommandMediator.h"
+
+#include "MLibrary.h"
 
 namespace SmithPlayerActor::Private
 {
@@ -44,10 +47,9 @@ namespace SmithPlayerActor::Private
 ASmithPlayerActor::ASmithPlayerActor()
 	: m_springArm(nullptr)
 	, m_cam(nullptr)
-	, m_turnComponent(nullptr)
 	, m_moveComponent(nullptr)
 	, m_atkComponent(nullptr)
-	, m_event({})
+	, m_commandMediator(nullptr)
 	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
 	, m_camDir(North)
 	, m_actorFaceDir(North)
@@ -58,7 +60,7 @@ ASmithPlayerActor::ASmithPlayerActor()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultRootComponent"));
 
 	m_springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	check((m_springArm != nullptr))
@@ -81,9 +83,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 		m_camDir = VectorDirToEDir(actorFwd);
 	}
 
-	m_turnComponent = CreateDefaultSubobject<UTurnControlComponent>(TEXT("TurnComponent"));
-	check((m_turnComponent != nullptr));
-	m_turnComponent->SetTurnPriority(ETurnPriority::PlayerSelf);
+	SetTurnPriority(ETurnPriority::PlayerSelf);
 
 	m_moveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
 	check((m_moveComponent != nullptr));
@@ -113,13 +113,11 @@ void ASmithPlayerActor::BeginPlay()
 	check((enhancedInputSubsystem != nullptr));
 
 	enhancedInputSubsystem->AddMappingContext(m_mappingCtx, 0);
-	
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	m_event.Clear();
 }
 
 // Called every frame
@@ -133,6 +131,7 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 		PrimaryActorTick.bCanEverTick = false;
 		return;
 	}
+
 }
 
 // Called to bind functionality to input
@@ -151,32 +150,9 @@ void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
-UTurnControlComponent* ASmithPlayerActor::GetTurnControl() const
+void ASmithPlayerActor::SetCommandMediator(ICommandMediator* mediator)
 {
-  return m_turnComponent;
-}
-
-FDelegateHandle ASmithPlayerActor::Subscribe(FRequestCommandEvent::FDelegate& delegate)
-{
-	if (delegate.IsBound())
-	{
-		return m_event.Add(delegate);
-	}
-
-	return delegate.GetHandle();
-}
-
-bool ASmithPlayerActor::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle)
-{
-	if (obj != nullptr && m_event.IsBoundToObject(obj))
-	{
-		m_event.Remove(delegateHandle);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	m_commandMediator = mediator;
 }
 
 void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
@@ -188,7 +164,7 @@ void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
 		return;
 	}
 
-	if (!::IsValid(m_turnComponent) || !m_turnComponent->IsCommandSendable())
+	if (!IsCommandSendable())
 	{
 		return;
 	}
@@ -227,7 +203,7 @@ void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
 		return;
 	}
 
-	if (!::IsValid(m_turnComponent) || !m_turnComponent->IsCommandSendable())
+	if (!IsCommandSendable())
 	{
 		return;
 	}
@@ -269,28 +245,6 @@ void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 					);
 }
 
-void ASmithPlayerActor::sendCommand(TSharedPtr<IBattleCommand> command)
-{
-	if (command == nullptr)
-	{
-		return;
-	}
-
-	auto turnComp = GetTurnControl();
-	if (turnComp == nullptr || !turnComp->IsCommandSendable())
-	{
-		return;
-	}
-
-	if (!m_event.IsBound())
-	{
-		return;
-	}
-
-	m_event.Broadcast(this, command);
-
-}
-
 void ASmithPlayerActor::moveImpl(FVector moveDir)
 {
 	using namespace SmithPlayerActor::Private;
@@ -316,10 +270,11 @@ void ASmithPlayerActor::moveImpl(FVector moveDir)
 																										 );
 
 	// TODO 何もヒットしない場合移動コマンドを出す
-	if (!isHit && ::IsValid(m_moveComponent))
+	if (!isHit && ::IsValid(m_moveComponent) && m_commandMediator.IsValid())
 	{
 		m_moveComponent->SetTerminusPos(endPos);
-		sendCommand(MakeShared<UE::Smith::Command::MoveCommand>(m_moveComponent));
+		
+		m_commandMediator->SendMoveCommand(this, m_moveComponent);
 	}
 }
 
@@ -337,13 +292,16 @@ void ASmithPlayerActor::attackImpl()
 		for(auto actorPtr : hitActors)
 		{
 			IAttackable* attackable = Cast<IAttackable>(actorPtr);
-			sendCommand(MakeShared<UE::Smith::Command::AttackCommand>(m_atkComponent, attackable, AttackHandle{GetName(), 3}));
+			if (m_commandMediator.IsValid())
+			{
+				m_commandMediator->SendAttackCommand(this, m_atkComponent, attackable, AttackHandle{GetName(), 3});
+			}
 		}
 	}
 	// なかったら空振りする
 	else
 	{
-		sendCommand(MakeShared<UE::Smith::Command::AttackCommand>(nullptr, nullptr, AttackHandle{}));
+		m_commandMediator->SendAttackCommand(this, nullptr, nullptr, AttackHandle{});
 	}
 }
 

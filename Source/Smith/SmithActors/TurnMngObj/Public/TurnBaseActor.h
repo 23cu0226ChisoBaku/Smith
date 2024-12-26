@@ -4,13 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "ITurnManageable.h"
+#include "ICanCommandMediate.h"
 #include "TurnBaseActor.generated.h"
 
 class IBattleCommand;
+class IMoveable;
+class ICanMakeAttack;
+class IAttackable;
+struct AttackHandle;
 
 UCLASS()
-class SMITH_API ATurnBaseActor : public AActor , public ITurnManageable
+class SMITH_API ATurnBaseActor : public AActor , public ITurnManageable , public ICanCommandMediate
 {
 	GENERATED_BODY()
 	
@@ -27,17 +33,22 @@ public:
 	virtual void Tick(float DeltaTime);
 
 public:
-	UTurnControlComponent* GetTurnControl() const override final;
-	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
-	bool Unsubscribe(UObject*, FDelegateHandle) override final;
+
+	// Interfaces
+	#pragma region Interfaces
+		// ICanCommandMediate
+		#pragma region ICanCommandMediate
+		void SetCommandMediator(ICommandMediator*) override final;
+		#pragma endregion ICanCommandMediate
+		// end of ICanCommandMediate
 
 protected:
-	void SendCommand(TSharedPtr<IBattleCommand>);
+	void SendMoveCommand(IMoveable*);
+	void SendAttackCommand(ICanMakeAttack*, IAttackable*, AttackHandle&&);
 
-protected:
-	UPROPERTY()
-	TObjectPtr<UTurnControlComponent> TurnComponent;
+	#pragma endregion Interfaces
+	// end of Interfaces
 private:
-	FRequestCommandEvent m_event;
+	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
 	
 };

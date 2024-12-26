@@ -19,8 +19,10 @@ Encoding : UTF-8
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "ITurnManageable.h"
 #include "IAttackable.h"
+#include "ICanCommandMediate.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -53,7 +55,7 @@ struct AttackHandle;
 /// @brief プレイヤークラス
 ///
 UCLASS()
-class SMITH_API ASmithPlayerActor final: public APawn , public ITurnManageable , public IAttackable
+class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable, public IAttackable, public ICanCommandMediate
 {
 	GENERATED_BODY()
 
@@ -106,15 +108,6 @@ public:
 // Interfaces Override
 #pragma region Interfaces Override
 
-	// ITurnManageable (TurnSystem Module)
-	#pragma region ITurnManageable
-	public:
-		UTurnControlComponent* GetTurnControl() const override final;
-		FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
-		bool Unsubscribe(UObject*,FDelegateHandle) override final;
-	#pragma endregion ITurnManageable
-	// end of ITurnManageable (TurnSystem Module)
-
 	// IAttackable (SmithActor Module)
 	#pragma region IAttackable
 	public:
@@ -122,13 +115,19 @@ public:
 	#pragma endregion IAttackable
 	// end of IAttackable
 
+	// ICanCommandMediate (SmithGod Module)
+	#pragma region ICanCommandMediate
+	public:
+		void SetCommandMediator(ICommandMediator*) override final;
+	#pragma endregion ICanCommandMediate
+	// end of ICanCommandMediate
+
 #pragma endregion Interfaces Override
 // end of Interfaces Override
 
 // Private Functions
 #pragma region Private Functions
 private:
-	void sendCommand(TSharedPtr<IBattleCommand>);
 	void moveImpl(FVector);
 	void attackImpl();
 	void changeFwdImpl(EDir_Test);
@@ -160,8 +159,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> m_cam;
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UTurnControlComponent> m_turnComponent;
-	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USmithMoveComponent> m_moveComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USmithAttackComponent> m_atkComponent;
@@ -177,6 +174,9 @@ private:
 	TObjectPtr<UInputAction> m_cameraAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> m_debugAction;
+
+	// TODO 仲介でシステムとやり取りする
+	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
 #pragma endregion UProperties
 // end of UProperties
 //---------------------------------------
@@ -187,7 +187,6 @@ private:
 // Private Properties
 #pragma region Private Properties
 private:
-	FRequestCommandEvent m_event;
 	int32 m_hp;
 
 	EDir_Test m_camDir;

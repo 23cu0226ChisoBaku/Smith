@@ -3,14 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/WeakInterfacePtr.h"
 #include "IBattleCommand.h"
 
-class ASmithPlayerActor;
 class IMoveable;
-/**
- * 
- */
 
 namespace UE::Smith::Command
 {
@@ -21,12 +16,13 @@ namespace UE::Smith::Command
 		~MoveCommand();
 
 	public:
-		virtual void Start() override;
-		virtual void Execute(float deltaTime) override;
-		virtual void End() override;
-		virtual bool IsFinish() const override;
+		void Start() override final;
+		void Execute(float deltaTime) override final;
+		void End() override final;
+		bool IsFinish() const override final;
 
 	private:
-		TWeakInterfacePtr<IMoveable> m_move;
+		class MoveImpl;
+		TUniquePtr<MoveImpl> m_moveImpl;
 	};
 }

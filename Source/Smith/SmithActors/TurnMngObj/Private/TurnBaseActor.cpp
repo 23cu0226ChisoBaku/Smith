@@ -2,24 +2,16 @@
 
 
 #include "TurnBaseActor.h"
-#include "TurnControlComponent.h"
+#include "IMoveable.h"
+#include "ICommandMediator.h"
 
 // Sets default values
 ATurnBaseActor::ATurnBaseActor()
-	: TurnComponent(nullptr)
-	, m_event({})
+	: m_commandMediator(nullptr)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	UTurnControlComponent* turnComp = CreateDefaultSubobject<UTurnControlComponent>(TEXT("TurnComponent"));
-
-	if (turnComp != nullptr)
-	{
-		AddInstanceComponent(turnComp);
-	}
-
-	TurnComponent = turnComp;
 }
 
 // Called when the game starts or when spawned
@@ -34,50 +26,33 @@ void ATurnBaseActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-UTurnControlComponent *ATurnBaseActor::GetTurnControl() const
+void ATurnBaseActor::SetCommandMediator(ICommandMediator* mediator)
 {
-	check(TurnComponent != nullptr);
-
-  return TurnComponent;
+	m_commandMediator = mediator;
 }
 
-FDelegateHandle ATurnBaseActor::Subscribe(FRequestCommandEvent::FDelegate& delegate)
+void ATurnBaseActor::SendMoveCommand(IMoveable* moveable)
 {
-	if (delegate.IsBound())
-	{
-		return m_event.Add(delegate);
-	}
-
-	return delegate.GetHandle();
-}
-
-bool ATurnBaseActor::Unsubscribe(UObject* objPtr, FDelegateHandle handle)
-{
-	if (m_event.IsBoundToObject(objPtr))
-	{
-		m_event.Remove(handle);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-void ATurnBaseActor::SendCommand(TSharedPtr<IBattleCommand> command)
-{
-	if (!::IsValid(TurnComponent))
+	if (!IsCommandSendable())
 	{
 		return;
 	}
 
-	if (!TurnComponent->IsCommandSendable())
+	if (m_commandMediator.IsValid())
+	{
+		m_commandMediator->SendMoveCommand(this, moveable);
+	}
+}
+
+void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, IAttackable* target, AttackHandle&& handle)
+{
+	if (!IsCommandSendable())
 	{
 		return;
 	}
 
-	if (m_event.IsBound())
+	if (m_commandMediator.IsValid())
 	{
-		m_event.Broadcast(this, command);
+		m_commandMediator->SendAttackCommand(this, attacker, target, ::MoveTemp(handle));
 	}
 }

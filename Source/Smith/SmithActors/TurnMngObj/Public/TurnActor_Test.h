@@ -24,6 +24,4 @@ protected:
 public:
 	void Tick(float DeltaTime) override final;
 
-private:
-	float m_TimeCnt;
 };
