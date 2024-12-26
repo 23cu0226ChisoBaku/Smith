@@ -9,7 +9,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "SmithBattleSubsystem.h"
-#include "TurnControlComponent.h"
 #include "SmithMoveComponent.h"
 #include "SmithAttackComponent.h"
 #include "AttackCommand.h"
@@ -48,11 +47,9 @@ namespace SmithPlayerActor::Private
 ASmithPlayerActor::ASmithPlayerActor()
 	: m_springArm(nullptr)
 	, m_cam(nullptr)
-	, m_turnComponent(nullptr)
 	, m_moveComponent(nullptr)
 	, m_atkComponent(nullptr)
 	, m_commandMediator(nullptr)
-	, m_event({})
 	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
 	, m_camDir(North)
 	, m_actorFaceDir(North)
@@ -86,9 +83,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 		m_camDir = VectorDirToEDir(actorFwd);
 	}
 
-	m_turnComponent = CreateDefaultSubobject<UTurnControlComponent>(TEXT("TurnComponent"));
-	check((m_turnComponent != nullptr));
-	m_turnComponent->SetTurnPriority(ETurnPriority::PlayerSelf);
+	SetTurnPriority(ETurnPriority::PlayerSelf);
 
 	m_moveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
 	check((m_moveComponent != nullptr));
@@ -123,7 +118,6 @@ void ASmithPlayerActor::BeginPlay()
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	m_event.Clear();
 }
 
 // Called every frame
@@ -156,34 +150,6 @@ void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
-UTurnControlComponent* ASmithPlayerActor::GetTurnControl() const
-{
-  return m_turnComponent;
-}
-
-FDelegateHandle ASmithPlayerActor::Subscribe(FRequestCommandEvent::FDelegate& delegate)
-{
-	if (delegate.IsBound())
-	{
-		return m_event.Add(delegate);
-	}
-
-	return delegate.GetHandle();
-}
-
-bool ASmithPlayerActor::Unsubscribe(UObject* obj, FDelegateHandle delegateHandle)
-{
-	if (obj != nullptr && m_event.IsBoundToObject(obj))
-	{
-		m_event.Remove(delegateHandle);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
 void ASmithPlayerActor::SetCommandMediator(ICommandMediator* mediator)
 {
 	m_commandMediator = mediator;
@@ -198,7 +164,7 @@ void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
 		return;
 	}
 
-	if (!::IsValid(m_turnComponent) || !m_turnComponent->IsCommandSendable())
+	if (!IsCommandSendable())
 	{
 		return;
 	}
@@ -237,7 +203,7 @@ void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
 		return;
 	}
 
-	if (!::IsValid(m_turnComponent) || !m_turnComponent->IsCommandSendable())
+	if (!IsCommandSendable())
 	{
 		return;
 	}

@@ -36,15 +36,6 @@ public:
 
 	// Interfaces
 	#pragma region Interfaces
-
-		// ITurnManageable
-		#pragma region ITurnManageable
-		UTurnControlComponent* GetTurnControl() const override final;
-		FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
-		bool Unsubscribe(UObject*, FDelegateHandle) override final;
-		#pragma endregion ITurnManageable
-		// end of ITurnManageable
-
 		// ICanCommandMediate
 		#pragma region ICanCommandMediate
 		void SetCommandMediator(ICommandMediator*) override final;
@@ -57,9 +48,6 @@ protected:
 
 	#pragma endregion Interfaces
 	// end of Interfaces
-protected:
-	UPROPERTY()
-	TObjectPtr<UTurnControlComponent> TurnComponent;
 private:
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
 	

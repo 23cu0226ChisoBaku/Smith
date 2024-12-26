@@ -5,7 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "ITurnManageable.h"
-#include "TurnControlComponent.h"
 #include "IBattleCommand.h"
 #include "BattleCommandManager.h"
 
@@ -51,9 +50,6 @@ void USmithBattleSubsystem::StartBattle()
 
   if (turnManageable.Num() > 0)
   {
-    FRequestCommandEvent::FDelegate requestDelegate;
-    requestDelegate.BindUObject(this, &USmithBattleSubsystem::registerCommand);
-
     TArray<TWeakInterfacePtr<ITurnManageable>> registerWaitList;
     registerWaitList.Reserve(turnManageable.Num());
 
@@ -61,20 +57,18 @@ void USmithBattleSubsystem::StartBattle()
     {
       // TODO componentをInterfaceに変換
       ITurnManageable* iManageable = Cast<ITurnManageable>(manageable);
-      UTurnControlComponent* turnCtrl = iManageable->GetTurnControl();
-      iManageable->Subscribe(requestDelegate);
 
-      if (turnCtrl != nullptr)
+      if (iManageable != nullptr)
       {
-        const ETurnPriority actorPriority = turnCtrl->GetPriority();
+        const ETurnPriority actorPriority = iManageable->GetPriority();
         if (actorPriority == ETurnPriority::PlayerSelf)
         {
-          turnCtrl->SetCommandSendable(true);
+          iManageable->SetCommandSendable(true);
           registerWaitList.Emplace(iManageable);
         }
         else
         {
-          turnCtrl->SetCommandSendable(false);
+          iManageable->SetCommandSendable(false);
         }
 
         if (!m_priorityManageableLists.Contains(actorPriority))
@@ -138,15 +132,7 @@ void USmithBattleSubsystem::registerNextTurnObjs()
       bool invalid = false;
       if (nextTurnObj.IsValid())
       {
-        auto turnCtrl = nextTurnObj->GetTurnControl();
-        if (::IsValid(turnCtrl))
-        {
-          turnCtrl->SetCommandSendable(true);
-        }
-        else
-        {
-          invalid = true;
-        }
+        nextTurnObj->SetCommandSendable(true);
       }
       else
       {

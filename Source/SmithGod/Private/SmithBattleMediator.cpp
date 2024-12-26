@@ -21,6 +21,7 @@ USmithBattleMediator::USmithBattleMediator()
 
 void USmithBattleMediator::BeginDestroy()
 {
+  Super::BeginDestroy();
   m_battleSys.Reset();
   m_mapMgr.Reset();
 }

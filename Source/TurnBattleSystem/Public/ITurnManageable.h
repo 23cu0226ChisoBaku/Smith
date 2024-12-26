@@ -24,15 +24,8 @@ Encoding : UTF-8
 #include "TurnPriority.h"
 #include "ITurnManageable.generated.h"
 
-class UTurnControlComponent;
 class IBattleCommand;
 class ITurnManageable;
-
-///
-/// @brief コマンドを出す専用デリゲート
-///
-DECLARE_MULTICAST_DELEGATE_TwoParams(FRequestCommandEvent, ITurnManageable*, TSharedPtr<IBattleCommand>);
-
 
 UINTERFACE(MinimalAPI)
 class UTurnManageable : public UInterface
@@ -46,30 +39,16 @@ class UTurnManageable : public UInterface
 class TURNBATTLESYSTEM_API ITurnManageable
 {
 	GENERATED_BODY()
-
-public: 
-	ITurnManageable();
+	
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
-public:
-	/// TODO 後で直す
-	/// @brief ターンコントローラーを取得
-	virtual UTurnControlComponent* GetTurnControl() const = 0;
-	/// @brief コマンド発送イベントを購読
-	virtual FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) = 0;
-	/// @brief コマンド発送イベントを解読
-	virtual bool Unsubscribe(UObject*,FDelegateHandle) = 0;
+	public:
+		void SetCommandSendable(bool);
+		void SetTurnPriority(ETurnPriority);
 
-public:
-	void SetCommandSendable(bool);
-	void SetTurnPriority(ETurnPriority);
+		bool IsCommandSendable() const;
+		ETurnPriority GetPriority() const;
 
-	bool IsCommandSendable() const;
-	ETurnPriority GetPriority() const;
-
-public:
-	virtual bool IsValid() const = 0;
-
-private:
-	class TurnManageImpl;
-	TurnManageImpl* m_pImpl;
+	private:
+		ETurnPriority m_priority = ETurnPriority::PlayerSelf;
+		uint8 m_bIsCmdSendable : 1 = false;
 };

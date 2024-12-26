@@ -10,8 +10,6 @@
 #include "IAttackable.h"
 #include "MyEnemy.generated.h"
 
-
-class UTurnControlComponent;
 class USmithMoveComponent;
 class USmithAttackComponent;
 
@@ -37,25 +35,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 ATK;
 
-// TODO Create by Mai
-#pragma region ITurnManageable Interface
-public:
-	UTurnControlComponent* GetTurnControl() const override final;
-	FDelegateHandle Subscribe(FRequestCommandEvent::FDelegate&) override final;
-	bool Unsubscribe(UObject*,FDelegateHandle) override final;
-
 	void OnAttack(AttackHandle&&) override;
 private:
-	UPROPERTY()
-	TObjectPtr<UTurnControlComponent> m_turnCtrl;
 	UPROPERTY()
 	TObjectPtr<USmithMoveComponent> m_moveComp;
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_attackComp;
-
-private:
-	FRequestCommandEvent m_event;
-#pragma endregion
 
 private:
 	void PlayerCheck();

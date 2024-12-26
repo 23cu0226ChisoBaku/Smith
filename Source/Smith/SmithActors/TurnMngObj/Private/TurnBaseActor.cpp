@@ -2,20 +2,15 @@
 
 
 #include "TurnBaseActor.h"
-#include "TurnControlComponent.h"
 #include "IMoveable.h"
 #include "ICommandMediator.h"
 
 // Sets default values
 ATurnBaseActor::ATurnBaseActor()
-	: TurnComponent(nullptr)
-	, m_commandMediator(nullptr)
+	: m_commandMediator(nullptr)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	TurnComponent = CreateDefaultSubobject<UTurnControlComponent>(TEXT("TurnComponent"));
-	check((TurnComponent != nullptr))
 
 }
 
@@ -31,21 +26,6 @@ void ATurnBaseActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-UTurnControlComponent *ATurnBaseActor::GetTurnControl() const
-{
-  return TurnComponent;
-}
-
-FDelegateHandle ATurnBaseActor::Subscribe(FRequestCommandEvent::FDelegate& delegate)
-{
-	return delegate.GetHandle();
-}
-
-bool ATurnBaseActor::Unsubscribe(UObject* objPtr, FDelegateHandle handle)
-{
-	return false;
-}
-
 void ATurnBaseActor::SetCommandMediator(ICommandMediator* mediator)
 {
 	m_commandMediator = mediator;
@@ -53,7 +33,7 @@ void ATurnBaseActor::SetCommandMediator(ICommandMediator* mediator)
 
 void ATurnBaseActor::SendMoveCommand(IMoveable* moveable)
 {
-	if (!::IsValid(TurnComponent) || !TurnComponent->IsCommandSendable())
+	if (!IsCommandSendable())
 	{
 		return;
 	}
@@ -66,7 +46,7 @@ void ATurnBaseActor::SendMoveCommand(IMoveable* moveable)
 
 void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, IAttackable* target, AttackHandle&& handle)
 {
-	if (!::IsValid(TurnComponent) || !TurnComponent->IsCommandSendable())
+	if (!IsCommandSendable())
 	{
 		return;
 	}

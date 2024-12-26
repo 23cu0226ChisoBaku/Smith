@@ -2,15 +2,10 @@
 
 
 #include "TurnActor_Test.h"
-#include "TurnControlComponent.h"
 
 ATurnActor_Test::ATurnActor_Test()
 {
-  if (TurnComponent != nullptr)
-  {
-    TurnComponent->SetTurnPriority(ETurnPriority::Rival);
-  }
-
+  SetTurnPriority(ETurnPriority::Rival);
 }
 
 void ATurnActor_Test::BeginPlay()

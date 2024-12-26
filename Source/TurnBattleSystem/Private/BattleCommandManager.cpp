@@ -3,7 +3,6 @@
 
 #include "BattleCommandManager.h"
 #include "IBattleCommand.h"
-#include "TurnControlComponent.h"
 #include "SmithBattleSubsystem.h"
 #include "Debug.h"
 
@@ -55,11 +54,8 @@ void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedP
 
   if (m_requestCmdWaitList.Contains(requester))
   {
-    auto turnCtrl = requester->GetTurnControl();
-    if (::IsValid(turnCtrl))
-    {
-      turnCtrl->SetCommandSendable(false);
-    }
+    requester->SetCommandSendable(false);
+    
     m_commandLists.Emplace(::MoveTemp(command));
     m_requestCmdWaitList.Remove(requester);
   }
