@@ -19,68 +19,95 @@ Encoding : UTF-8
 
 namespace Smith::Map
 {
+  class FSmithMapObj::MapObjImpl
+  {
+    public:
+      MapObjImpl(AActor* actor)
+        : m_actor(actor)
+        , m_uniqueID({})
+        , m_coord({})
+      {
+        if (::IsValid(m_actor.Get()))
+        {
+          const FString uniqueStr = m_actor->GetName() + FString::FromInt(m_actor->GetUniqueID());
+          m_uniqueID = FGuid{uniqueStr};
+        }
+      }
+      ~MapObjImpl()
+      {
+        m_actor.Reset();
+        m_uniqueID.Invalidate();
+      }
+      AActor* GetActor() const
+      {
+        return m_actor.Get();
+      }
+      FGuid GetUniqueID() const
+      {
+        return m_uniqueID;
+      }
+      bool IsValid() const
+      {
+        return m_actor.IsValid() && m_uniqueID.IsValid();
+      }
+      bool ReferenceEquals(const AActor* actor) const
+      {
+        if (!::IsValid(actor) || !IsValid()) [[unlikely]]
+        {
+          return false;
+        }
+
+        return m_actor.Get() == actor;
+      }
+      FMapCoord GetCoord() const
+      {
+        return m_coord;
+      }
+      void SetCoord(FMapCoord coord)
+      {
+        m_coord = coord;
+      }
+    private:
+      TWeakObjectPtr<AActor> m_actor;
+      FGuid m_uniqueID;
+      FMapCoord m_coord;
+  };
+
   FSmithMapObj::FSmithMapObj(AActor* actor)
-    : m_actor(actor)
-    , m_uniqueID({})
-    , m_coord({})
-  { 
-    if (::IsValid(actor))
-    {
-      const FString uniqueStr = actor->GetName() + FString::FromInt(actor->GetUniqueID());
-      m_uniqueID = FGuid{uniqueStr};
-    }
-  }
+    : m_pImpl(new MapObjImpl(actor))
+  { }
 
   FSmithMapObj::~FSmithMapObj()
   {
-    m_uniqueID.Invalidate();
-    m_actor.Reset();
+    m_pImpl.Reset();
   }
 
   FGuid FSmithMapObj::GetUniqueID() const
   {
-    return m_uniqueID;
+    return m_pImpl->GetUniqueID();
   }
-
   AActor* FSmithMapObj::GetActor() const
   {
-    if (!m_actor.IsValid())
-    {
-      return nullptr;
-    }
-    else [[likely]]
-    {
-      return m_actor.Get();
-    }
+    return m_pImpl->GetActor();
   }
 
   bool FSmithMapObj::IsValid() const
   {
-    return m_uniqueID.IsValid() && m_actor.IsValid();
+    return m_pImpl.IsValid();
   }
 
-  bool FSmithMapObj::ReferenceEquals(AActor* const actor) const
+  bool FSmithMapObj::ReferenceEquals(const AActor* actor) const
   {
-    if (!::IsValid(actor)) [[unlikely]]
-    {
-      return false;
-    }
-
-    if (!IsValid())
-    {
-      return false;
-    }
-
-    return m_actor.Get() == actor;
+    return m_pImpl->ReferenceEquals(actor);
   }
 
   FMapCoord FSmithMapObj::GetCoord() const
   {
-    return m_coord;
+    return m_pImpl->GetCoord();
   }
 
-  void FSmithMapObj::SetCoord(const FMapCoord& newCoord)
+  void FSmithMapObj::SetCoord(FMapCoord newCoord)
   {
-    m_coord = newCoord;
+    m_pImpl->SetCoord(newCoord);
   }
 }
