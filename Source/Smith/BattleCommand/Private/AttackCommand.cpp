@@ -17,6 +17,7 @@ namespace UE::Smith::Command
   {
     public:
       AttackImpl(ICanMakeAttack* attacker)
+        : m_attacker(attacker)
       {
 
       }
@@ -68,6 +69,7 @@ namespace UE::Smith::Command
     {
       attacker->SetAttackTarget(target);
       attacker->SetAttackHandle(::MoveTemp(handle));
+      MDebug::LogWarning("setting attack target");
     }
     m_attackImpl = ::MakeUnique<AttackImpl>(attacker);
   }
