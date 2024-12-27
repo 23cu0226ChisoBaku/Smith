@@ -64,12 +64,12 @@ namespace UE::Smith::Command
   AttackCommand::AttackCommand(ICanMakeAttack* attacker, IAttackable* target, AttackHandle&& handle)
     : m_attackImpl(nullptr)
   {
-    if (attacker != nullptr &&  ::IsValid(attacker->_getUObject()))
+    if (attacker != nullptr && ::IsValid(attacker->_getUObject()))
     {
       attacker->SetAttackTarget(target);
       attacker->SetAttackHandle(::MoveTemp(handle));
-      m_attackImpl = ::MakeUnique<AttackImpl>(attacker);
     }
+    m_attackImpl = ::MakeUnique<AttackImpl>(attacker);
   }
 
   AttackCommand::~AttackCommand()
