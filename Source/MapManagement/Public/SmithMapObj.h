@@ -26,11 +26,11 @@ Encoding : UTF-8
 
 namespace Smith::Map
 {
-	class MAPMANAGEMENT_API FSmithMapObj
+	class MAPMANAGEMENT_API FSmithMapObj final
 	{
 	public:
 		explicit FSmithMapObj(AActor*);
-		virtual ~FSmithMapObj();
+		~FSmithMapObj();
 
 	public:
 		/// @brief ユニークIDを返す
@@ -44,16 +44,13 @@ namespace Smith::Map
 		bool IsValid() const;
     /// @brief 同じAActorを参照しているかをチェック
 		/// @return 同じだったらtrue, 引数が無効もしくは同じじゃなかったらfalse
-		bool ReferenceEquals(AActor* const) const;
-
+		bool ReferenceEquals(const AActor*) const;
 		FMapCoord GetCoord() const;
-
-		void SetCoord(const FMapCoord&);
+		void SetCoord(FMapCoord);
 
 	private:
-		TWeakObjectPtr<AActor> m_actor;
-		FGuid m_uniqueID;
-		FMapCoord m_coord;
+		class MapObjImpl;
+		TUniquePtr<MapObjImpl> m_pImpl;
 	};
 }
 
