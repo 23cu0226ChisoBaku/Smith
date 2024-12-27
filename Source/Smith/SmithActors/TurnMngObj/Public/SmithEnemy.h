@@ -40,6 +40,7 @@ private:
 	void PlayerCheck();
 	FVector MoveDirection();
 
+	// マップができて、経路探索ができたら消す
 	AActor *m_target;
 	float MOVE_DISTANCE;
 	float m_timer;
