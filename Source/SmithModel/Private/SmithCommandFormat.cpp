@@ -63,12 +63,12 @@ namespace UE::Smith
 
       return *this;
     }
-    void FSmithCommandFormat::SetupFormat(const ESmithFormatType* srcData, size_t srcSize, uint64 row, uint64 column)
+    void FSmithCommandFormat::SetupFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column)
     {
       check(srcData != nullptr)
-      check(srcSize == sizeof(ESmithFormatType) * row * column)
+      check(dataCnt == row * column)
 
-      m_formatArr = TDimension2Array<ESmithFormatType>(srcData, srcSize, row, column);
+      m_formatArr = TDimension2Array<ESmithFormatType>(srcData, dataCnt, row, column);
       setCNCoord();
     }
 

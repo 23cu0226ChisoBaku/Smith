@@ -9,7 +9,7 @@ class IMoveable;
 
 namespace UE::Smith::Command
 {
-	class SMITH_API MoveCommand : public IBattleCommand
+	class SMITH_API MoveCommand final : public IBattleCommand
 	{
 	public:
 		MoveCommand(IMoveable*);

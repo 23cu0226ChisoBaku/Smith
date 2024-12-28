@@ -32,7 +32,7 @@ namespace UE::MLibrary
 		template<typename T>
 		class TDimension2Array final
 		{
-
+			static_assert(sizeof(T) != 0, "incompleted type");
 		//---------------------------------------
 		/*
 							エイリアスやアサーション
@@ -150,13 +150,14 @@ namespace UE::MLibrary
 					memset(m_elemArr, 0, sizeof(ElementType) * arrSize);
 				}
 
-				TDimension2Array(const ElementType* src, const size_t srcSize, const uint64 row, const uint64 column)
+				TDimension2Array(const ElementType* src, size_t dataCnt, uint64 row, uint64 column)
 					: TDimension2Array(row, column)
 				{
 					check(src != nullptr)
 					// サイズが０じゃない　かつ　サイズが （データのサイズ * 行の数 * 列の数）と等しい時に通過する
-					check(((srcSize != 0) && (srcSize == (sizeof(ElementType) * row * column))))
+					check(((dataCnt != 0) && (dataCnt ==  row * column))))
 
+					const size_t srcSize = sizeof(ElementType) * m_row * m_column;
 					memcpy_s(m_elemArr, srcSize, src, srcSize);
 				}
 

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/WeakInterfacePtr.h"
 #include "IBattleCommand.h"
 
 class ICanMakeAttack;
@@ -12,7 +11,7 @@ struct AttackHandle;
 
 namespace UE::Smith::Command
 {
-	class SMITH_API AttackCommand : public IBattleCommand
+	class SMITH_API AttackCommand final: public IBattleCommand
 	{
 	public:
 		AttackCommand(ICanMakeAttack*, IAttackable*, AttackHandle&&);

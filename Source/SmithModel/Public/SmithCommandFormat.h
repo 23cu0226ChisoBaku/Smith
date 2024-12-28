@@ -50,7 +50,7 @@ namespace UE::Smith
 				FSmithCommandFormat& operator=(FSmithCommandFormat&&) noexcept;
 
 			public:
-				void SetupFormat(const ESmithFormatType* srcData, size_t srcSize, uint64 row, uint64 column);
+				void SetupFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
 				UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> GetFormatArray() const;
 				FMapCoord GetCNCoord() const;
 				uint64 GetRow() const;
