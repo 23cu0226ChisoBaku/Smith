@@ -30,6 +30,7 @@ Encoding : UTF-8
 #include "ZeroMem.h"
 #include "UInterfaceValidCheck.h"
 #include "GetAddComponent.h"
+#include "MAssertion.h"
 
 #pragma endregion
 // end of Debug Tool Include

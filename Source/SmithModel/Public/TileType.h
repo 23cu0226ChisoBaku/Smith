@@ -10,5 +10,6 @@ enum class ETileType : uint8
   Void = 0,
 	Ground = 1,
   Wall = 2,
-
+  Corridor = 3,
+  
 };

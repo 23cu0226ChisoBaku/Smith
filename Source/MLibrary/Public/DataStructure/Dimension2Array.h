@@ -32,106 +32,105 @@ namespace UE::MLibrary
 		template<typename T>
 		class TDimension2Array final
 		{
-			static_assert(sizeof(T) != 0, "incompleted type");
-		//---------------------------------------
-		/*
-							エイリアスやアサーション
-		*/
-		//---------------------------------------
-		public:
-			using ElementType = T;
-			using ElementTypePtr = ElementType*;
-			using Iterator = ArrayIterator<TDimension2Array<ElementType>>;
-			using ConstIterator = const Iterator;
-
-		private:
-			class TDimension2ArrayRowArr
-			{
-				friend class TDimension2Array<ElementType>;
-				using Iterator = ArrayIterator<TDimension2ArrayRowArr>;
+			//---------------------------------------
+			/*
+								エイリアスやアサーション
+			*/
+			//---------------------------------------
+			public:
+				using ElementType = T;
+				using ElementTypePtr = ElementType*;
+				using Iterator = ArrayIterator<TDimension2Array<ElementType>>;
 				using ConstIterator = const Iterator;
-				private:
-					TDimension2ArrayRowArr(ElementType* src, uint64 length)
-						: m_rowArr(src)
-						, m_length(length)
-					{	}
-				public:
-					~TDimension2ArrayRowArr()
-					{
-						memset(this, 0, sizeof(this));
-					}
-				public:
-					const ElementType& At_Readonly(uint64 idx) const
-					{
-						return at_impl_copy(idx);
-					}
-					const ElementType& At(uint64 idx) const
-					{
-						return at_impl_copy(idx);
-					}
-					ElementType& At(uint64 idx)
-					{
-						return at_impl(idx);
-					}
-					uint64 Length() const
-					{
-						return m_length;
-					}
 
-				public:
-					const ElementType& operator[](uint64 idx) const
-					{
-						return at_impl_copy(idx);
-					}
-					ElementType& operator[](uint64 idx)
-					{
-						return at_impl(idx);
-					}
-				private:
-					ElementType& at_impl(uint64 idx) 
-					{
-						check(m_rowArr != nullptr)
-						check(m_length != 0)
+			private:
+				class TDimension2ArrayRowArr
+				{
+					friend class TDimension2Array<ElementType>;
+					using Iterator = ArrayIterator<TDimension2ArrayRowArr>;
+					using ConstIterator = const Iterator;
+					private:
+						TDimension2ArrayRowArr(ElementType* src, uint64 length)
+							: m_rowArr(src)
+							, m_length(length)
+						{	}
+					public:
+						~TDimension2ArrayRowArr()
+						{
+							memset(this, 0, sizeof(this));
+						}
+					public:
+						const ElementType& At_Readonly(uint64 idx) const
+						{
+							return at_impl_copy(idx);
+						}
+						const ElementType& At(uint64 idx) const
+						{
+							return at_impl_copy(idx);
+						}
+						ElementType& At(uint64 idx)
+						{
+							return at_impl(idx);
+						}
+						uint64 Length() const
+						{
+							return m_length;
+						}
 
-						return m_rowArr[idx];
-					}
-					ElementType at_impl_copy(uint64 idx)
+					public:
+						const ElementType& operator[](uint64 idx) const
+						{
+							return at_impl_copy(idx);
+						}
+						ElementType& operator[](uint64 idx)
+						{
+							return at_impl(idx);
+						}
+					private:
+						ElementType& at_impl(uint64 idx) 
+						{
+							check(m_rowArr != nullptr)
+							check(m_length != 0)
+
+							return m_rowArr[idx];
+						}
+						ElementType at_impl_copy(uint64 idx)
+						{
+							check(m_rowArr != nullptr)
+							check(m_length != 0)
+
+							return m_rowArr[idx];
+						}
+
+						// イテレータ
+					Iterator begin()
 					{
-						check(m_rowArr != nullptr)
-						check(m_length != 0)
-
-						return m_rowArr[idx];
+						return Iterator(m_rowArr);
 					}
-
-					// イテレータ
-				Iterator begin()
-				{
-					return Iterator(m_rowArr);
-				}
-				ConstIterator begin() const
-				{
-					return ConstIterator(m_rowArr);
-				}
-				Iterator end()
-				{
-					return Iterator(m_rowArr + m_length);
-				}
-				ConstIterator end() const
-				{
-					return ConstIterator(m_rowArr + m_length);
-				}
-				
-				private:
-					ElementType* m_rowArr;
-					uint64 m_length;
-			};
+					ConstIterator begin() const
+					{
+						return ConstIterator(m_rowArr);
+					}
+					Iterator end()
+					{
+						return Iterator(m_rowArr + m_length);
+					}
+					ConstIterator end() const
+					{
+						return ConstIterator(m_rowArr + m_length);
+					}
+					
+					private:
+						ElementType* m_rowArr;
+						uint64 m_length;
+				};
 
 			using RowArray = typename TDimension2ArrayRowArr;
-		//---------------------------------------
-		/*
-										ctorとdtor
-		*/
-		//---------------------------------------
+			//---------------------------------------
+			/*
+											ctorとdtor
+			*/
+			//---------------------------------------
 			public:
 				TDimension2Array()
 					: m_elemArr(nullptr)
@@ -149,13 +148,28 @@ namespace UE::MLibrary
 					m_elemArr = new ElementType[arrSize];
 					memset(m_elemArr, 0, sizeof(ElementType) * arrSize);
 				}
+				TDimension2Array(uint64 row, uint64 column, const T& defaultValue)
+					: m_elemArr(nullptr)
+					, m_row(row)
+					, m_column(column)
+				{
+					check( ((m_row * m_column) > 0) )
+
+					const uint64 arrSize = m_row * m_column;
+					m_elemArr = new ElementType[arrSize];
+
+					for (uint64 i = 0; i < arrSize; ++i)
+					{
+						m_elemArr[i] = defaultValue;
+					}
+				}
 
 				TDimension2Array(const ElementType* src, size_t dataCnt, uint64 row, uint64 column)
 					: TDimension2Array(row, column)
 				{
 					check(src != nullptr)
 					// サイズが０じゃない　かつ　サイズが （データのサイズ * 行の数 * 列の数）と等しい時に通過する
-					check(((dataCnt != 0) && (dataCnt ==  row * column))))
+					check(((dataCnt != 0) && (dataCnt ==  row * column)))
 
 					const size_t srcSize = sizeof(ElementType) * m_row * m_column;
 					memcpy_s(m_elemArr, srcSize, src, srcSize);
@@ -310,7 +324,7 @@ namespace UE::MLibrary
 				{
 					return m_row * m_column;
 				}
-		// イテレータ
+			// イテレータ
 				Iterator begin()
 				{
 					return Iterator(m_elemArr);
@@ -327,18 +341,18 @@ namespace UE::MLibrary
 				{
 					return ConstIterator(m_elemArr + m_row * m_column);
 				}
-		//---------------------------------------
-		/*
-						パブリック関数(インターフェース)
-		*/
-		//---------------------------------------
+			//---------------------------------------
+			/*
+							パブリック関数(インターフェース)
+			*/
+			//---------------------------------------
 			public:
 
-		//---------------------------------------
-		/*
-						オペレーターオーバーロード
-		*/
-		//---------------------------------------
+			//---------------------------------------
+			/*
+							オペレーターオーバーロード
+			*/
+			//---------------------------------------
 			public:
 				/// @brief 配列の行を返す(読み込み専用)
 				/// @param row 行のインデックス
@@ -361,8 +375,8 @@ namespace UE::MLibrary
 				{
 						return at_impl(row);
 				}
-		// Private
-		#pragma region Private
+			// Private
+			#pragma region Private
 			private:
 				void dispose() noexcept
 				{
@@ -407,11 +421,11 @@ namespace UE::MLibrary
 
 				}
 
-		//---------------------------------------
-		/*
-						 スタティック変数(public)
-		*/
-		//---------------------------------------
+			//---------------------------------------
+			/*
+							スタティック変数(public)
+			*/
+			//---------------------------------------
 			public:
 				static const TDimension2Array<ElementType> EmptyArray;
 
@@ -420,8 +434,8 @@ namespace UE::MLibrary
 				uint64 m_row;
 				uint64 m_column;
 
-		#pragma endregion
-		// Private
+			#pragma endregion
+			// Private
 		};
 
 		template<typename T>
