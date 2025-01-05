@@ -20,7 +20,8 @@ public class Smith : ModuleRules
 																							"Smith/BattleCommand",
 																							"Smith/SmithActors/Player/Public",
 																							"Smith/SmithActors/TurnMngObj/Public",
-																							"Smith/SmithActors",
+                                                                                            "Smith/SmithActors/Weapon/Public",
+                                                                                            "Smith/SmithActors",
 																							"Smith",
 																							"Smith/Models/Public",	  
 																						});
