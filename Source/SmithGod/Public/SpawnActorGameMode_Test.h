@@ -25,9 +25,12 @@ Encoding : UTF-8
 */
 //---------------------------------------
 class USmithBattleMediator;
-namespace Smith::Map
+namespace UE::Smith
 {
-	class SmithMapManager;
+	namespace Map
+	{
+		class FSmithMapManager;
+	}
 }
 
 ///
@@ -70,5 +73,5 @@ private:
 */
 //---------------------------------------
 private:
-	TSharedPtr<Smith::Map::SmithMapManager> m_mapMgr;
+	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
 };

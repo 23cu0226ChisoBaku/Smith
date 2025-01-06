@@ -32,3 +32,8 @@ void USmithMoveComponent::Move()
 		MDebug::Log("Owner null No Move");
 	}
 }
+
+void USmithMoveComponent::SetDestination(FVector destination)
+{
+	m_terminus = destination;
+}

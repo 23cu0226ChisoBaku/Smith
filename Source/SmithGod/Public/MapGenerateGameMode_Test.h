@@ -4,7 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "SmithMapBluePrint.h"
+#include "SmithMapConstructionBluePrint.h"
 #include "MapGenerateGameMode_Test.generated.h"
+
+class USmithBattleMediator;
+namespace UE::Smith
+{
+	namespace Map
+	{
+		class FSmithMap;
+		class FSmithMapManager;
+	}
+}
 
 /**
  * 
@@ -20,4 +32,19 @@ class SMITHGOD_API AMapGenerateGameMode_Test : public AGameModeBase
 //---------------------------------------
 public:
 	AMapGenerateGameMode_Test();
+
+public:
+	void StartPlay() override final;
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
+
+private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FSmithMapBluePrint MapBluePrint;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FSmithMapConstructionBluePrint MapConstructionBluePrint;
+	UPROPERTY()
+	TObjectPtr<USmithBattleMediator> m_battleMediator;
+
+private:
+	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
 };

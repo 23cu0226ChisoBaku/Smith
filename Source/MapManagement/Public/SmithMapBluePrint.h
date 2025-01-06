@@ -54,7 +54,5 @@ public:
 	ETileType DefaultRoomTileType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ETileType DefaultCorridorTileType;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DefaultRoomGenerateChanceRate;				// 部屋を生成するデフォルトの確率
 
 };

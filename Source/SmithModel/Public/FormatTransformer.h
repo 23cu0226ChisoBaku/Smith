@@ -26,12 +26,12 @@ Encoding : UTF-8
 
 namespace UE::Smith
 {
-	inline namespace Battle
+	namespace Battle
 	{
 		class SMITHMODEL_API FFormatTransformer
 		{
 			public:
-				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(FSmithCommandFormat format, FMapCoord cnMapCoord);
+				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(const FSmithCommandFormat& format, FMapCoord cnMapCoord);
 		};
 	}
 }

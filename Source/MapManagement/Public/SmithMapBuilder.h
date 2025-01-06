@@ -64,8 +64,11 @@ namespace UE::Smith
 				/// @param        設計図
 				/// @return       作成成功-> true 作成失敗-> false
 				///
-				bool Build(FSmithMap*, FSmithMapBluePrint);
+				bool Build(FSmithMap*, const FSmithMapBluePrint&);
 
+			private:
+				void generateRoom(FSmithMap*, const FSmithMapBluePrint& , uint8 sectionIdx);
+				void generateJoint(FSmithMap*, const FSmithMapBluePrint&, uint8 sectionIdx);
 		};
 	}
 }

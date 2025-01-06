@@ -4,6 +4,7 @@
 #include "SmithStaticObj.h"
 #include "FormatTransformer.h"
 #include "FormatInfo_Import.h"
+#include "AttackHandle.h"
 using namespace UE::Smith::Battle;
 using namespace UE::MLibrary::MDataStructure;
 
@@ -42,7 +43,7 @@ void ASmithStaticObj::BeginPlay()
 		}
 	}
 
-	FMapCoord cnCoordTemp = { 0, 9 };
+	FMapCoord cnCoordTemp{ 0, 9 };
 
   auto mapCoordArr = FFormatTransformer::FormatToMapCoord(m_format, cnCoordTemp);
 
@@ -52,9 +53,9 @@ void ASmithStaticObj::BeginPlay()
 		for (uint64 x = 0 ; x < mapCoordArr.Column(); ++x)
 		{
 			rowString += "{ ";
-			rowString += FString::FromInt(mapCoordArr[y][x].x);
+			rowString += FString::FromInt(mapCoordArr.At_ReadOnly(y, x).x);
 			rowString += " , ";
-			rowString += FString::FromInt(mapCoordArr[y][x].y);
+			rowString += FString::FromInt(mapCoordArr.At_ReadOnly(y, x).y);
 			rowString += " } ";
 		}
 		if (GEngine)

@@ -23,6 +23,7 @@ Encoding : UTF-8
 #include "ITurnManageable.h"
 #include "IAttackable.h"
 #include "ICanCommandMediate.h"
+#include "ICanSetOnMap.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -48,6 +49,14 @@ class IBattleCommand;
 
 // SmithActor Module
 struct AttackHandle;
+
+namespace UE::Smith
+{
+	namespace Battle
+	{
+		enum class EMoveDirection : uint8;
+	}
+}
 #pragma endregion Forward Declaration
 // end of Forward Declaration
 
@@ -55,7 +64,7 @@ struct AttackHandle;
 /// @brief プレイヤークラス
 ///
 UCLASS()
-class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable, public IAttackable, public ICanCommandMediate
+class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable, public IAttackable, public ICanCommandMediate, public ICanSetOnMap
 {
 	GENERATED_BODY()
 
@@ -122,13 +131,17 @@ public:
 	#pragma endregion ICanCommandMediate
 	// end of ICanCommandMediate
 
+	public:
+		uint8 GetOnMapSizeX() const override final;
+		uint8 GetOnMapSizeY() const override final;
+
 #pragma endregion Interfaces Override
 // end of Interfaces Override
 
 // Private Functions
 #pragma region Private Functions
 private:
-	void moveImpl(FVector);
+	void moveImpl(UE::Smith::Battle::EMoveDirection);
 	void attackImpl();
 	void changeFwdImpl(EDir_Test);
 	void updateCamImpl(EDir_Test);

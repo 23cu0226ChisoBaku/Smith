@@ -4,6 +4,9 @@
 #include "TurnBaseActor.h"
 #include "IMoveable.h"
 #include "ICommandMediator.h"
+#include "MoveDirection.h"
+
+#include "MLibrary.h"
 
 // Sets default values
 ATurnBaseActor::ATurnBaseActor()
@@ -31,20 +34,24 @@ void ATurnBaseActor::SetCommandMediator(ICommandMediator* mediator)
 	m_commandMediator = mediator;
 }
 
-void ATurnBaseActor::SendMoveCommand(IMoveable* moveable)
+void ATurnBaseActor::SendMoveCommand(IMoveable* moveable, UE::Smith::Battle::EMoveDirection direction, uint8 moveDistance)
 {
 	if (!IsCommandSendable())
 	{
 		return;
 	}
+	else
+	{
+		MDebug::LogWarning("send succeed");
+	}
 
 	if (m_commandMediator.IsValid())
 	{
-		m_commandMediator->SendMoveCommand(this, moveable);
+		m_commandMediator->SendMoveCommand(this, moveable, direction, moveDistance);
 	}
 }
 
-void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, IAttackable* target, AttackHandle&& handle)
+void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& handle)
 {
 	if (!IsCommandSendable())
 	{
@@ -53,6 +60,6 @@ void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, IAttackable* ta
 
 	if (m_commandMediator.IsValid())
 	{
-		m_commandMediator->SendAttackCommand(this, attacker, target, ::MoveTemp(handle));
+		m_commandMediator->SendAttackCommand(this, attacker, format, ::MoveTemp(handle));
 	}
 }

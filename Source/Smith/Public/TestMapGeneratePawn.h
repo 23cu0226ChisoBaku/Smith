@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "SmithMapBluePrint.h"
+#include "SmithMapConstructionBluePrint.h"
 #include "TestMapGeneratePawn.generated.h"
 
 namespace UE::Smith
@@ -37,6 +38,8 @@ public:
 private:
 	UPROPERTY(EditAnywhere)
 	FSmithMapBluePrint blueprint;
+	UPROPERTY(EditAnywhere)
+	FSmithMapConstructionBluePrint constructionBP;
 
 private:
 	UE::Smith::Map::FSmithMap* map;

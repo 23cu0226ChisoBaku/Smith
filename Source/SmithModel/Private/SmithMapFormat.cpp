@@ -5,7 +5,7 @@
 
 namespace UE::Smith
 {
-  inline namespace Map
+  namespace Map
   {
     FSmithMapFormat::FSmithMapFormat()
     {

@@ -66,13 +66,14 @@ namespace UE::Smith
 				void GenerateMap(uint8 row, uint8 column, uint8 widthPerSection,uint8 heightPerSection, uint8 sectionGap, uint8 defaultValue);
 				///
 				/// @brief                  部屋を生成する
+				/// @param sectionIdx       生成するセクションのインデックス
 				/// @param roomMinWidth     部屋の最小横幅
 				/// @param roomMaxWidth     部屋の最大横幅
 				/// @param roomMinHeight    部屋の最小縦幅
 				/// @param roomMaxHeight    部屋の最大縦幅
 				/// @param defaultValue     部屋の初期データ
 				///
-				void GenerateRooms(uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue);
+				void GenerateRoom(uint8 sectionIdx, uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue);
 				///
 				/// @brief 部屋を接続する
 				///

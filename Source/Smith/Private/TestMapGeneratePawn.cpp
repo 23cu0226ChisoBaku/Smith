@@ -5,6 +5,7 @@
 #include "SmithRect.h"
 #include "SmithMap.h"
 #include "SmithMapBuilder.h"
+#include "SmithMapConstructor.h"
 
 #include "MLibrary.h"
 
@@ -22,27 +23,30 @@ ATestMapGeneratePawn::ATestMapGeneratePawn()
 void ATestMapGeneratePawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	UE::Smith::Map::FSmithMapBuilder* builder =  new UE::Smith::Map::FSmithMapBuilder();
-	map = new UE::Smith::Map::FSmithMap();
+	// using namespace UE::Smith::Map;
 
-	builder->Build(map, blueprint);
-	
-	UE::Smith::Map::FSmithRect mapRect = map->GetMap();
-	
-	for (uint8 y = 0; y < mapRect.GetHeight(); ++y)
-	{
-		FString str{};
-		for (uint8 x = 0; x < mapRect.GetWidth(); ++x)
-		{
-			str.Append(FString::FromInt(mapRect.GetRect(x,y)));
-			str.Append(TEXT(" "));
-		}
-		MDebug::LogWarning(str);
-	}
+	// TSharedPtr<FSmithMapBuilder> builder = ::MakeShared<FSmithMapBuilder>();
+	// map = new UE::Smith::Map::FSmithMap();
 
-	delete builder;
-	delete map;
+	// builder->Build(map, blueprint);
+	
+	// UE::Smith::Map::FSmithRect mapRect = map->GetMap();
+	
+	// for (uint8 y = 0; y < mapRect.GetHeight(); ++y)
+	// {
+	// 	FString str{};
+	// 	for (uint8 x = 0; x < mapRect.GetWidth(); ++x)
+	// 	{
+	// 		str.Append(FString::FromInt(mapRect.GetRect(x,y)));
+	// 		str.Append(TEXT(" "));
+	// 	}
+	// 	MDebug::LogWarning(str);
+	// }
+
+	// TSharedPtr<FSmithMapConstructor> constructor = ::MakeShared<FSmithMapConstructor>();
+	// constructor->ConstructMap(GetWorld(), mapRect, constructionBP);
+
+	// delete map;
 }
 
 // Called every frame

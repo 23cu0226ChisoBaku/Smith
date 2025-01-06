@@ -44,7 +44,17 @@ namespace UE::Smith
         { }
         ~RectImpl()
         { }
-
+        RectImpl(const RectImpl& other)
+          : m_rect(other.m_rect)
+        { }
+        RectImpl& operator=(const RectImpl& other)
+        {
+          if (this != &other)
+          {
+            m_rect = other.m_rect;
+          }
+          return *this;
+        }
       // SmithRect Implementation
       #pragma region SmithRect Implementation
       public:
@@ -57,7 +67,7 @@ namespace UE::Smith
           {
             for(uint64 x = 0; x < m_rect.Column(); ++x)
             {
-              m_rect[y][x] = data;
+              m_rect.At(y, x) = data;
             }
           }
         }
@@ -68,7 +78,7 @@ namespace UE::Smith
             return;
           }
 
-          m_rect[y][x] = value;
+          m_rect.At(y, x) = value;
         }
         void FillRect(uint8 left, uint8 top, uint8 right, uint8 bottom, uint8 data)
         {
@@ -89,7 +99,7 @@ namespace UE::Smith
           {
             for (uint8 x = left; x < fillRight; ++x)
             {
-              m_rect[y][x] = data;
+              m_rect.At(y, x) = data;
             }
           }
         }
@@ -111,7 +121,7 @@ namespace UE::Smith
             return OUT_OF_BOUNDS;
           }
 
-          return m_rect[y][x];
+          return m_rect.At_ReadOnly(y, x);
         }
         bool IsOutOfBounds(uint8 x, uint8 y) const
         {
@@ -143,6 +153,19 @@ namespace UE::Smith
         m_pImpl.Reset();
         // ユニークポインターのためインスタンスを使用してコピーする
         m_pImpl = ::MoveTemp(implTemp);
+      }
+
+      return *this;
+    }
+    FSmithRect::FSmithRect(FSmithRect&& other) noexcept
+      : m_pImpl(::MoveTemp(other.m_pImpl))
+    { }
+    FSmithRect& FSmithRect::operator=(FSmithRect&& other) noexcept
+    {
+      if (this != &other)
+      {
+        m_pImpl.Reset();
+        m_pImpl = ::MoveTemp(other.m_pImpl);
       }
 
       return *this;

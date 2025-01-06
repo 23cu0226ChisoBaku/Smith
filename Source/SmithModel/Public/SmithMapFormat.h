@@ -12,7 +12,7 @@
 
 namespace UE::Smith
 {
-	inline namespace Map
+	namespace Map
 	{
 		class SMITHMODEL_API FSmithMapFormat
 		{

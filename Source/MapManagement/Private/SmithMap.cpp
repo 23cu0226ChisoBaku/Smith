@@ -97,61 +97,58 @@ namespace UE::Smith
           }
         }
 
-        void GenerateRooms(uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue)
-        {
-          for(int32 i = 0; i < m_sections.Num(); ++i)
+        void GenerateRoom(uint8 sectionIdx, uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue)
+        {    
+          if (!m_sections.Contains(sectionIdx))
           {
-            if (!m_sections.Contains(i))
-            {
-              MDebug::LogError(TEXT("Section Index Error: Can not get section by Index: ") + FString::FromInt(i));
-              MDebug::LogError(TEXT("Exit Generate Rooms"));
-              return;
-            }
-            if (!m_sections[i].IsValid())
-            {
-              MDebug::LogError(TEXT("Section Invalid. Index: ") + FString::FromInt(i));
-              continue;
-            }
-            const uint8 sectionWidth = m_sections[i]->GetWidth();
-            const uint8 sectionHeight = m_sections[i]->GetHeight();
-
-            // 入力値をチェック
-            if ((roomMinWidth > sectionWidth || roomMaxWidth > sectionWidth)
-                || (roomMinHeight > sectionHeight || roomMaxHeight > sectionHeight))
-                {
-                  MDebug::LogError(TEXT("Can not create room at section ") + FString::FromInt(i + 1));
-                  MDebug::LogError(TEXT("Index: ") + FString::FromInt(i));
-                  continue;
-                }
-
-            // 部屋を作成
-            const uint8 roomWidth = StaticCast<uint8>(FMath::RandRange(roomMinWidth, roomMaxWidth)); 
-            const uint8 roomHeight = StaticCast<uint8>(FMath::RandRange(roomMinHeight, roomMaxHeight));
-            const uint8 roomMaxLeft = sectionWidth - roomWidth; 
-            const uint8 roomMaxTop = sectionHeight - roomHeight;
-            const uint8 left = StaticCast<uint8>(FMath::RandRange(0, roomMaxLeft));
-            const uint8 top = StaticCast<uint8>(FMath::RandRange(0, roomMaxTop));
-            const uint8 right = left + roomWidth - 1;
-            const uint8 bottom = top + roomHeight - 1;
-
-            m_sections[i]->GenerateRoom(left, top, right, bottom, defaultValue);
-
-            // TODO TestCode
-            FSmithRect sectionRect = m_sections[i]->GetSectionRect();
-            const uint8 sectionRow = i / m_column;
-            const uint8 sectionColumn = i % m_column;
-            const uint8 xOffset = sectionColumn * (m_sections[i]->GetWidth() + m_sectionGap) + m_sectionGap;
-            const uint8 yOffset = sectionRow * (m_sections[i]->GetHeight() + m_sectionGap) + m_sectionGap;
-
-            // マップの矩形に部屋の情報を入れる
-            for (int y = 0; y < sectionRect.GetHeight(); ++y)
-            {
-              for (int x = 0; x < sectionRect.GetWidth(); ++x)
-              {
-                m_mapRect.SetRect(x + xOffset, y + yOffset, sectionRect.GetRect(x, y));
-              }
-            }      
+            MDebug::LogError(TEXT("Section Index Error: Can not get section by Index: ") + FString::FromInt(sectionIdx));
+            MDebug::LogError(TEXT("Exit Generate Rooms"));
+            return;
           }
+          if (!m_sections[sectionIdx].IsValid())
+          {
+            MDebug::LogError(TEXT("Section Invalid. Index: ") + FString::FromInt(sectionIdx));
+            return;
+          }
+          const uint8 sectionWidth = m_sections[sectionIdx]->GetWidth();
+          const uint8 sectionHeight = m_sections[sectionIdx]->GetHeight();
+
+          // 入力値をチェック
+          if ((roomMinWidth > sectionWidth || roomMaxWidth > sectionWidth)
+              || (roomMinHeight > sectionHeight || roomMaxHeight > sectionHeight))
+              {
+                MDebug::LogError(TEXT("Can not create room at section ") + FString::FromInt(sectionIdx + 1));
+                MDebug::LogError(TEXT("Index: ") + FString::FromInt(sectionIdx));
+                return;
+              }
+
+          // 部屋を作成
+          const uint8 roomWidth = StaticCast<uint8>(FMath::RandRange(roomMinWidth, roomMaxWidth)); 
+          const uint8 roomHeight = StaticCast<uint8>(FMath::RandRange(roomMinHeight, roomMaxHeight));
+          const uint8 roomMaxLeft = sectionWidth - roomWidth; 
+          const uint8 roomMaxTop = sectionHeight - roomHeight;
+          const uint8 left = StaticCast<uint8>(FMath::RandRange(0, roomMaxLeft));
+          const uint8 top = StaticCast<uint8>(FMath::RandRange(0, roomMaxTop));
+          const uint8 right = left + roomWidth - 1;
+          const uint8 bottom = top + roomHeight - 1;
+
+          m_sections[sectionIdx]->GenerateRoom(left, top, right, bottom, defaultValue);
+
+          // TODO TestCode
+          FSmithRect sectionRect = m_sections[sectionIdx]->GetSectionRect();
+          const uint8 sectionRow = sectionIdx / m_column;
+          const uint8 sectionColumn = sectionIdx % m_column;
+          const uint8 xOffset = sectionColumn * (m_sections[sectionIdx]->GetWidth() + m_sectionGap) + m_sectionGap;
+          const uint8 yOffset = sectionRow * (m_sections[sectionIdx]->GetHeight() + m_sectionGap) + m_sectionGap;
+
+          // マップの矩形に部屋の情報を入れる
+          for (int y = 0; y < sectionRect.GetHeight(); ++y)
+          {
+            for (int x = 0; x < sectionRect.GetWidth(); ++x)
+            {
+              m_mapRect.SetRect(x + xOffset, y + yOffset, sectionRect.GetRect(x, y));
+            }
+          }      
         }
         void ConnectRooms(uint8 corridorData)
         {
@@ -182,24 +179,28 @@ namespace UE::Smith
             roomInfos.Emplace(RoomInfo{ m_sections[i]->GetSectionIdx(), FInt32Vector2(left, top)});
           }
 
-          // 始点をランダムに決める
+          // 始点部屋をランダムに決める
           const int32 randomStartIdx = FMath::RandRange(0, roomInfos.Num() - 1);
 
           RoomInfo currentRoom = roomInfos[randomStartIdx];
           roomInfos.Remove(currentRoom);
 
+          // 通路の座標を入れるコンテナ
           TArray<FUint32Vector2> corridorCoords;
+
           // Test code
           FString test{};
           test.Append(FString::FromInt(currentRoom.SectionIdx));
           test.Append(TEXT("->"));
+          
+          // 始点から一番近い部屋を探して、通路を繋げていく
           while (roomInfos.Num() > 0)
           {
             RoomInfo closestRoom = findClosestRoomTo(roomInfos, currentRoom);
             roomInfos.Remove(closestRoom);
+
             test.Append(FString::FromInt(closestRoom.SectionIdx));
             test.Append(TEXT("->"));
-
             appendCorridorIndex(corridorCoords, currentRoom, closestRoom);
             currentRoom = closestRoom;
           }
@@ -227,7 +228,14 @@ namespace UE::Smith
         {
           return m_mapRect;
         }
+      // TODO プライベート関数にする意味がない
       private:
+        ///
+        /// @brief              一番近い部屋を探す
+        /// @param rooms        残りの部屋
+        /// @param currentRoom  現在の部屋
+        /// @return             見つけた部屋
+        ///
         RoomInfo findClosestRoomTo(const TArray<RoomInfo>& rooms, const RoomInfo& currentRoom)
         {
           FInt32Vector2 closest = currentRoom.OriginCoord;
@@ -237,9 +245,11 @@ namespace UE::Smith
           // 今の部屋に一番近い部屋を探す
           for (const auto& room : rooms)
           {
+            // 距離を計算
             const int32 distanceSquaredX = FMath::Square(currentRoom.OriginCoord.X - room.OriginCoord.X);
             const int32 distanceSquaredY = FMath::Square(currentRoom.OriginCoord.Y - room.OriginCoord.Y);
             const float distance = FMath::Sqrt(StaticCast<float>(distanceSquaredX + distanceSquaredY));
+
             if (distance < minDistance)
             {
               minDistance = distance;
@@ -249,6 +259,13 @@ namespace UE::Smith
           }
           return RoomInfo{closestRoomSectionIdx, closest};
         }
+        // TODO 同上
+        ///
+        /// @brief              二つの部屋を繋げていく道路座標を取得
+        /// @param outCoordArr  通路座標を入れるコンテナ（Out）
+        /// @param roomFrom     始点部屋
+        /// @param roomTo       終点部屋
+        ///
         void appendCorridorIndex(TArray<FUint32Vector2>& outCoordArr, const RoomInfo& roomFrom, const RoomInfo& roomTo)
         {
           const uint8 fromRight = roomFrom.OriginCoord.X + m_sections[roomFrom.SectionIdx]->GetRoomWidth() - 1;
@@ -297,6 +314,8 @@ namespace UE::Smith
 
             }
             break;
+
+            // Yから
             case 1:
             {
               // 曲がる所の座標追加
@@ -353,9 +372,9 @@ namespace UE::Smith
     {
       m_pImpl->GenerateMap(row, column, widthPerSection, heightPerSection, sectionGap, defaultValue);
     }
-    void FSmithMap::GenerateRooms(uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue)
+    void FSmithMap::GenerateRoom(uint8 sectionIdx, uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue)
     {
-      m_pImpl->GenerateRooms(roomMinWidth, roomMaxWidth, roomMinHeight, roomMaxHeight, defaultValue);
+      m_pImpl->GenerateRoom(sectionIdx, roomMinWidth, roomMaxWidth, roomMinHeight, roomMaxHeight, defaultValue);
     }
     void FSmithMap::ConnectRooms(uint8 corridorData)
     {
