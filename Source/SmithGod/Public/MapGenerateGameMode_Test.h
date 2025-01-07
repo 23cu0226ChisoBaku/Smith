@@ -38,9 +38,9 @@ public:
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FSmithMapBluePrint MapBluePrint;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FSmithMapConstructionBluePrint MapConstructionBluePrint;
 	UPROPERTY()
 	TObjectPtr<USmithBattleMediator> m_battleMediator;

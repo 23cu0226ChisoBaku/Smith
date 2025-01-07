@@ -199,7 +199,14 @@ namespace UE::Smith
             return;
           }
 
-          auto mapCoords = FFormatTransformer::FormatToMapCoord(format, format.GetCNCoord());
+          if (!m_onMapObjsCoordTable.Contains(mapObj))
+          {
+            return;
+          }
+
+          const FMapCoord mapObjOriginCoord = m_onMapObjsCoordTable[mapObj];
+
+          auto mapCoords = FFormatTransformer::FormatToMapCoord(format, mapObjOriginCoord);
 
           for (uint64 y = 0; y < format.GetRow(); ++y)
           {
@@ -218,6 +225,7 @@ namespace UE::Smith
                 continue;
               }
 
+              MDebug::LogWarning("Attacking X:" + FString::FromInt(mapCoord.x) + "Y:" + FString::FromInt(mapCoord.y));
               ICanSetOnMap* coordMapObj = m_staySpaceTable[mapCoord]->GetMapObject();
               if (coordMapObj == nullptr || coordMapObj == mapObj)
               {

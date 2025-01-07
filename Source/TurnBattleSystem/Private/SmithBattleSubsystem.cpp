@@ -7,12 +7,28 @@
 #include "ITurnManageable.h"
 #include "IBattleCommand.h"
 #include "BattleCommandManager.h"
+#include "SmithTurnBattleWorldSettings.h"
 
 #include "Debug.h"
 
 bool USmithBattleSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
-  return true;
+  if (!Super::ShouldCreateSubsystem(Outer))
+  {
+    return false;
+  }
+
+  UWorld* worldOuter = Cast<UWorld>(Outer);
+  if (::IsValid(worldOuter))
+  {
+    ASmithTurnBattleWorldSettings* smithWorldSettings = Cast<ASmithTurnBattleWorldSettings>(worldOuter->GetWorldSettings());
+    if (::IsValid(smithWorldSettings))
+    {
+      return smithWorldSettings->IsBattleLevel();
+    }
+  }
+
+  return false;
 }
 
 void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
