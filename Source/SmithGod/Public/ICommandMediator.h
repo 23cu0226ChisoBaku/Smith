@@ -10,6 +10,9 @@ class IMoveable;
 
 class ICanMakeAttack;
 class IAttackable;
+
+class ISkillable;
+
 struct AttackHandle;
 
 // This class does not need to be modified.
@@ -30,4 +33,5 @@ class SMITHGOD_API ICommandMediator
 public:
 	virtual void SendMoveCommand(AActor*, IMoveable*) = 0;
 	virtual void SendAttackCommand(AActor*, ICanMakeAttack*, IAttackable*, AttackHandle&&) = 0;
+	virtual void SendSkillCommand(AActor*,ISkillable*) = 0;
 };

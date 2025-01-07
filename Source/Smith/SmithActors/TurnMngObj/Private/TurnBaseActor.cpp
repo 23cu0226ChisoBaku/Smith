@@ -56,3 +56,16 @@ void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, IAttackable* ta
 		m_commandMediator->SendAttackCommand(this, attacker, target, ::MoveTemp(handle));
 	}
 }
+
+void ATurnBaseActor::SendSkillCommand(ISkillable* skillable)
+{
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
+	if (m_commandMediator.IsValid())
+	{
+		m_commandMediator->SendSkillCommand(this, skillable);
+	}
+}

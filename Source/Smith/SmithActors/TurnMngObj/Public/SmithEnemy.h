@@ -18,33 +18,35 @@ class SMITH_API ASmithEnemy : public ATurnBaseActor, public IAttackable
 {
 	GENERATED_BODY()
 public:
-	// Sets default values for this actor's properties
 	ASmithEnemy();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	void OnAttack(AttackHandle &&) override;
+	virtual void OnAttack(AttackHandle &&) override;
+	void OnHeal(int32);
 
-private:
+protected:
 	UPROPERTY()
 	TObjectPtr<USmithMoveComponent> m_moveComp;
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_attackComp;
 
-private:
-	void PlayerCheck();
+protected:
+	// マップが実装されたら引数を整数値にする
+	AActor *PlayerCheck(float checkLenth = 1.0f);
+	int32 m_skillCoolTurn;
+	int32 m_skillCnt;
+	int32 m_atk;
+	int32 m_hp;
+
+	float m_timer;
+
 	FVector MoveDirection();
 
+private:
 	// マップができて、経路探索ができたら消す
 	AActor *m_target;
 	float MOVE_DISTANCE;
-	float m_timer;
-
-	// TODO
-	float m_hp;
 };

@@ -13,6 +13,7 @@ class IBattleCommand;
 class IMoveable;
 class ICanMakeAttack;
 class IAttackable;
+class ISkillable;
 struct AttackHandle;
 
 UCLASS()
@@ -45,6 +46,7 @@ public:
 protected:
 	void SendMoveCommand(IMoveable*);
 	void SendAttackCommand(ICanMakeAttack*, IAttackable*, AttackHandle&&);
+	void SendSkillCommand(ISkillable*);
 
 	#pragma endregion Interfaces
 	// end of Interfaces

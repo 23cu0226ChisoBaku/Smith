@@ -33,7 +33,8 @@ public:
 public:
 	void SendMoveCommand(AActor*, IMoveable*) override final;
 	void SendAttackCommand(AActor*, ICanMakeAttack*, IAttackable*, AttackHandle&&) override final;
-
+	void SendSkillCommand(AActor*,ISkillable*) override final;
+	
 private:
 	UPROPERTY()
 	TWeakObjectPtr<USmithBattleSubsystem> m_battleSys;

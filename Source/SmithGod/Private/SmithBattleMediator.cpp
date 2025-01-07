@@ -8,9 +8,11 @@
 #include "IMoveable.h"
 #include "ICanMakeAttack.h"
 #include "IAttackable.h"
+#include "ISkillable.h"
 
 #include "MoveCommand.h"
 #include "AttackCommand.h"
+#include "SkillCommand.h"
 
 #include "Debug.h"
 
@@ -71,5 +73,22 @@ void USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
   }
 
   m_battleSys->registerCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(atkHandle)));
+}
+
+void USmithBattleMediator::SendSkillCommand(AActor* requester, ISkillable* skill)
+{
+  if (!::IsValid(requester))
+  {
+    MDebug::LogError("Requester INVALID!!!");
+    return;
+  }
+
+  if (!m_mapMgr.IsValid() || !m_battleSys.IsValid())
+  {
+    MDebug::LogError("System INVALID!!!");
+    return;
+  }
+
+  m_battleSys->registerCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::SkillCommand>(skill));
 }
 

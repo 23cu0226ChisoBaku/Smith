@@ -9,10 +9,10 @@
 #include "Debug.h"
 
 ASmithEnemy::ASmithEnemy()
-    : m_hp(5.0f)
+    : m_hp(5)
 {
   SetTurnPriority(ETurnPriority::Rival);
-  PrimaryActorTick.bCanEverTick = true;
+  PrimaryActorTick.bCanEverTick = false;
 
   m_moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno Enemy Move Component"));
   check((m_moveComp != nullptr));
@@ -37,46 +37,38 @@ void ASmithEnemy::BeginPlay()
     m_target = Cast<ASmithPlayerActor>(aActor);
     break;
   }
-}
 
-void ASmithEnemy::Tick(float DeltaTime)
-{
-  Super::Tick(DeltaTime);
-
-  if (IsCommandSendable())
-  {
-    m_timer += DeltaTime;
-  }
-
-  if (m_timer > 0.5f)
-  {
-    m_timer = 0.0f;
-    PlayerCheck();
-  }
+  MDebug::LogWarning("Super Class BeginPlay");
 }
 
 void ASmithEnemy::OnAttack(AttackHandle &&handle)
 {
   m_hp -= handle.AttackPower;
-
   MDebug::LogError(GetName() + TEXT(" left HP:") + FString::FromInt(m_hp));
 
-  if (m_hp <= 0)
+  if (m_hp <= 0.0f)
   {
     Destroy();
   }
 }
 
-void ASmithEnemy::PlayerCheck()
+void ASmithEnemy::OnHeal(int32 heal)
+{
+  m_hp += heal;
+  MDebug::LogError("Heal" + m_hp);
+}
+
+// プレイヤーが攻撃範囲内にプレイヤーがいるか確認
+AActor *ASmithEnemy::PlayerCheck(float checkLenth)
 {
   const float rayLenth = MOVE_DISTANCE;
   const FVector StartLocation = GetActorLocation();
 
   const FVector EndLocation[4] = {
-      StartLocation + FVector::ForwardVector * rayLenth,
-      StartLocation + FVector::BackwardVector * rayLenth,
-      StartLocation + FVector::RightVector * rayLenth,
-      StartLocation + FVector::LeftVector * rayLenth};
+      StartLocation + FVector::ForwardVector * rayLenth * checkLenth,
+      StartLocation + FVector::BackwardVector * rayLenth * checkLenth,
+      StartLocation + FVector::RightVector * rayLenth * checkLenth,
+      StartLocation + FVector::LeftVector * rayLenth * checkLenth};
 
   FHitResult HitResult;
   FCollisionQueryParams CollisionParams;
@@ -104,22 +96,22 @@ void ASmithEnemy::PlayerCheck()
     // Playerにヒットしていたら攻撃
     if (::IsValid(HitActor))
     {
+      // デバッグ用レイ
       DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Red, false, 1.0f);
       DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Blue, false, 1.0f, 0, 1.0f);
 
       MDebug::LogWarning(HitActor->GetName() + "Object");
       IAttackable *attackable = Cast<IAttackable>(HitActor);
 
-      if (attackable != nullptr)
+      if (attackable != nullptr)    
       {
-        // TODO麦くんが直す
-        SendAttackCommand(m_attackComp, attackable, AttackHandle{GetName(), 4});
-        MDebug::Log("Is Attack");
-        return;
+        MDebug::Log("attackable");
+        return HitActor;
       }
       else
       {
-        MDebug::LogError("attack null");
+        MDebug::LogError("attack null " + GetName() + " " + HitActor->GetName());
+        return nullptr;
       }
     }
   }
@@ -131,11 +123,10 @@ void ASmithEnemy::PlayerCheck()
     DrawDebugLine(GetWorld(), StartLocation, EndLocation[i], FColor::Green, false, 1.0f, 0, 1.0f);
   }
 
-  // 移動の処理
-  m_moveComp->SetTerminusPos(MoveDirection());
-  SendMoveCommand(m_moveComp);
+  return nullptr;
 }
 
+// 経路探索完成までの仮実装
 FVector ASmithEnemy::MoveDirection()
 {
   FVector myPos = GetActorLocation();
@@ -164,6 +155,5 @@ FVector ASmithEnemy::MoveDirection()
   }
 
   retPos = myPos;
-
   return retPos;
 }
