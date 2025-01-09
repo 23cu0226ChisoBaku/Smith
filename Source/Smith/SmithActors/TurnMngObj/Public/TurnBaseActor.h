@@ -15,6 +15,15 @@ class ICanMakeAttack;
 class IAttackable;
 struct AttackHandle;
 
+namespace UE::Smith
+{
+	namespace Battle
+	{
+		class FSmithCommandFormat;
+		enum class EMoveDirection : uint8;
+	}
+}
+
 UCLASS()
 class SMITH_API ATurnBaseActor : public AActor , public ITurnManageable , public ICanCommandMediate
 {
@@ -43,8 +52,8 @@ public:
 		// end of ICanCommandMediate
 
 protected:
-	void SendMoveCommand(IMoveable*);
-	void SendAttackCommand(ICanMakeAttack*, IAttackable*, AttackHandle&&);
+	void SendMoveCommand(IMoveable*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance);
+	void SendAttackCommand(ICanMakeAttack*, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&);
 
 	#pragma endregion Interfaces
 	// end of Interfaces

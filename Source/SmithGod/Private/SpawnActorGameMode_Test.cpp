@@ -12,13 +12,15 @@
 
 ASpawnActorGameMode_Test::ASpawnActorGameMode_Test()
   : m_battleMediator(nullptr)
-  , m_mapMgr(new Smith::Map::SmithMapManager{})
+  , m_mapMgr(nullptr)
 {
   static ConstructorHelpers::FClassFinder<APawn> PlayerBP(TEXT("/Game/BP/BP_SmithPlayerActor"));
   if (PlayerBP.Class != nullptr)
   {
     DefaultPawnClass = PlayerBP.Class;
   }
+
+  m_mapMgr = ::MakeShared<UE::Smith::Map::FSmithMapManager>();
 }
 
 void ASpawnActorGameMode_Test::StartPlay()

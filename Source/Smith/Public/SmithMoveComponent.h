@@ -20,6 +20,7 @@ public:
 
 public:
 	virtual void Move() override;
+	virtual void SetDestination(FVector) override;
 	void SetTerminusPos(FVector pos) ;
 	void SetMoveSpeed(float speed)
 	{

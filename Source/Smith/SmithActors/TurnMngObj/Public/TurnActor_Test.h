@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "TurnBaseActor.h"
+#include "IAttackable.h"
+#include "ICanSetOnMap.h"
 #include "TurnActor_Test.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SMITH_API ATurnActor_Test final: public ATurnBaseActor
+class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap
 {
 	GENERATED_BODY()
 
@@ -23,5 +25,10 @@ protected:
 	
 public:
 	void Tick(float DeltaTime) override final;
+
+public:
+	void OnAttack(AttackHandle&&) override final;
+	uint8 GetOnMapSizeX() const override final;
+	uint8 GetOnMapSizeY() const override final;
 
 };

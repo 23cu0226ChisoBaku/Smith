@@ -14,6 +14,9 @@
 #include "AttackCommand.h"
 #include "MoveCommand.h"
 #include "AttackHandle.h"
+#include "SmithCommandFormat.h"
+#include "FormatType.h"
+#include "MoveDirection.h"
 
 #include "ICommandMediator.h"
 
@@ -102,7 +105,7 @@ void ASmithPlayerActor::BeginPlay()
 	// TODO BPで設定できるようにする
 	if (::IsValid(m_springArm))
 	{
-		m_springArm->SetWorldRotation(FRotator{300.0, 0.0, 0.0});
+		m_springArm->SetWorldRotation(FRotator{270.0, 0.0, 0.0});
 	}
 
 	// Mapping Contextを設定
@@ -193,7 +196,7 @@ void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
 
 	const EDir_Test newDir = VectorDirToEDir(FVector{directionX, directionY, 0.0});
 	changeFwdImpl(newDir);
-	moveImpl(FVector{directionX, directionY, 0.0});
+	moveImpl(StaticCast<UE::Smith::Battle::EMoveDirection>(newDir));
 }
 
 void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
@@ -245,36 +248,15 @@ void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 					);
 }
 
-void ASmithPlayerActor::moveImpl(FVector moveDir)
+void ASmithPlayerActor::moveImpl(UE::Smith::Battle::EMoveDirection direction)
 {
-	using namespace SmithPlayerActor::Private;
 
-	FHitResult hit{};
-
-	const FVector startPos = GetActorLocation();
-	const FVector endPos = startPos + moveDir * TILE_SIZE;
-
-	FCollisionQueryParams hitParam;
-	hitParam.AddIgnoredActor(this);
-	// TODO temp size
-	const float sphereRadius = CAPSULE_HALF_HEIGHT * 0.5f;
-
-	const bool isHit = GetWorld()->SweepSingleByChannel(
-																											hit, 
-																											GetActorLocation(),
-																											endPos,
-																											FQuat::Identity,
-																											ECollisionChannel::ECC_MAX,
-																											FCollisionShape::MakeSphere(sphereRadius),
-																											hitParam
-																										 );
-
-	// TODO 何もヒットしない場合移動コマンドを出す
-	if (!isHit && ::IsValid(m_moveComponent) && m_commandMediator.IsValid())
+	// 移動コマンドを出す
+	if (::IsValid(m_moveComponent) && m_commandMediator.IsValid())
 	{
-		m_moveComponent->SetTerminusPos(endPos);
+		// m_moveComponent->SetTerminusPos(endPos);
 		
-		m_commandMediator->SendMoveCommand(this, m_moveComponent);
+		m_commandMediator->SendMoveCommand(this, m_moveComponent, direction, 1);
 	}
 }
 
@@ -292,16 +274,30 @@ void ASmithPlayerActor::attackImpl()
 		for(auto actorPtr : hitActors)
 		{
 			IAttackable* attackable = Cast<IAttackable>(actorPtr);
-			if (m_commandMediator.IsValid())
-			{
-				m_commandMediator->SendAttackCommand(this, m_atkComponent, attackable, AttackHandle{GetName(), 3});
-			}
+			
 		}
 	}
-	// なかったら空振りする
-	else
+	if (m_commandMediator.IsValid())
 	{
-		m_commandMediator->SendAttackCommand(this, nullptr, nullptr, AttackHandle{});
+		// TODO Test Code
+		UE::Smith::Battle::FSmithCommandFormat formatTest;
+
+		ESmithFormatType* type = new ESmithFormatType[9];
+		for (int32 i = 0; i < 9; ++i)
+		{
+			if (i != 4)
+			{
+				type[i] = ESmithFormatType::EFFECT;
+			}
+			else
+			{
+				type[i] = ESmithFormatType::CENTER_NO_EFFECT;
+			}
+		}
+		formatTest.SetupFormat(type, 9, 3, 3);
+		m_commandMediator->SendAttackCommand(this, m_atkComponent, formatTest, AttackHandle{GetName(), 3});
+
+		delete type;
 	}
 }
 
@@ -398,4 +394,14 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 		DisableInput(Cast<APlayerController>(Controller));
 
 	}
+}
+
+uint8 ASmithPlayerActor::GetOnMapSizeX() const
+{
+	return 1;
+}
+
+uint8 ASmithPlayerActor::GetOnMapSizeY() const
+{
+	return 1;
 }

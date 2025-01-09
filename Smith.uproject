@@ -28,7 +28,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"CoreUObject"
+				"CoreUObject",
+				"Engine"
 			]
 		},
 		{
@@ -42,7 +43,10 @@
 		{
 			"Name": "SmithGod",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [

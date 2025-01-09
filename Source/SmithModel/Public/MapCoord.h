@@ -24,9 +24,31 @@ struct SMITHMODEL_API FMapCoord
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 x;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 y;
+	public:
+		constexpr FMapCoord()
+		  : x(0)
+  		, y(0)
+		{ }
+		FMapCoord(uint8 _x, uint8 _y);
+		FMapCoord(const FMapCoord&);
+		FMapCoord& operator=(const FMapCoord&);
+		~FMapCoord() = default;
+	public:
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		uint8 x;
+		UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		uint8 y;
 };
+
+/// @brief 比較演算子
+SMITHMODEL_API bool operator==(const FMapCoord&, const FMapCoord&);
+
+#if UE_BUILD_DEBUG
+uint32 GetTypeHash(const FMapCoord&);
+#else /// @brief optimize by inlining in shipping and development builds
+__forceinline uint32 GetTypeHash(const FMapCoord& Thing)
+{
+	uint32 Hash = FCrc::MemCrc32(&Thing, sizeof(FMapCoord));
+	return Hash;
+}
+#endif
