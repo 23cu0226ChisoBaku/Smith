@@ -3,35 +3,46 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DataStructure/Dimension2Array.h"
 
 struct FMapCoord;
+class IAttackable;
+class ICanSetOnMap;
 
-namespace Smith::Map
+namespace UE::Smith
 {
-  class FSmithMapObj;
+	namespace Battle
+	{
+    class FSmithCommandFormat;
+    enum class EMoveDirection : uint8;
+  }
 }
 
-/**
-* 
-*/
+struct FSmithMapBluePrint;
+struct FSmithMapConstructionBluePrint;
+struct FSmithEnemyGenerateBluePrint;
 
-namespace Smith::Map
+namespace UE::Smith
 {
-  class MAPMANAGEMENT_API SmithMapManager final
+  namespace Map
   {
-  public:
-    SmithMapManager();
-    ~SmithMapManager();
-  
+    class FSmithMap;
 
-  public:
-    void AssignMap(const FMapCoord* mapData, uint64 row, uint64 column);
-    void AddMapObj(FSmithMapObj*);
-    void UpdateMapObjCoord(AActor* const, FMapCoord);
+    class MAPMANAGEMENT_API FSmithMapManager final
+    {
+      public:
+        FSmithMapManager();
+        ~FSmithMapManager();
+      
+      public:
+        void InitMap(UWorld*, const FSmithMapBluePrint&, const FSmithMapConstructionBluePrint&);
+        void InitMapObjs(UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
+        void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
+        void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
+        void MoveMapObj(ICanSetOnMap*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance, FVector&);
 
-  private:
-    UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> m_curtMap;
-    TMap<uint32, TSharedPtr<FSmithMapObj>> m_onMapObjects;
-  };
+      private:
+        class MapMgrImpl;
+        TUniquePtr<MapMgrImpl> m_pImpl;
+    };
+  }
 }

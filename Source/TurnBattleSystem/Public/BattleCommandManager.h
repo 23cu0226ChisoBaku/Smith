@@ -12,8 +12,7 @@ class IBattleCommand;
 class ITurnManageable;
 class UBattleCommandManager;
 
-DECLARE_EVENT(UBattleCommandManager, FStartEndEvent)
-
+DECLARE_MULTICAST_DELEGATE(FStartEndEvent)
 
 UCLASS()
 class TURNBATTLESYSTEM_API UBattleCommandManager final: public UObject

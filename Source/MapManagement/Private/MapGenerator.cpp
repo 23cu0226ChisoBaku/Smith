@@ -4,46 +4,46 @@
 #include "MapGenerator.h"
 #include "Debug.h"
 
-UMapGenerator::UMapGenerator()
-  : m_mapBuffer({})
-  { }
+// UMapGenerator::UMapGenerator()
+//   : m_mapBuffer({})
+//   { }
 
-bool UMapGenerator::GenerateMap(UWorld* world, const FString& mapMetaDataPath, FMapCoord originCoord)
-{
-  if (!::IsValid(world))
-  {
-    MDebug::LogError("Invalid World ------ Generate Map");
-    return false;
-  }
+// bool UMapGenerator::GenerateMap(UWorld* world, const FString& mapMetaDataPath, FMapCoord originCoord)
+// {
+//   if (!::IsValid(world))
+//   {
+//     MDebug::LogError("Invalid World ------ Generate Map");
+//     return false;
+//   }
 
-  if (mapMetaDataPath.IsEmpty())
-  {
-    MDebug::LogError("Empty Map Path ------ Generate Map");
-    return false;
-  }
+//   if (mapMetaDataPath.IsEmpty())
+//   {
+//     MDebug::LogError("Empty Map Path ------ Generate Map");
+//     return false;
+//   }
 
-  uint32 pathHash = GetTypeHash(mapMetaDataPath);
+//   uint32 pathHash = GetTypeHash(mapMetaDataPath);
 
-  if (!m_mapBuffer.Contains(pathHash))
-  {
-    TSoftObjectPtr<UDataTable> m_map = LoadObject<UDataTable>(world, *mapMetaDataPath); 
+//   if (!m_mapBuffer.Contains(pathHash))
+//   {
+//     TSoftObjectPtr<UDataTable> m_map = LoadObject<UDataTable>(world, *mapMetaDataPath); 
 
-    if (!m_map.IsValid())
-    {
-      m_map.LoadSynchronous();
-    }
+//     if (!m_map.IsValid())
+//     {
+//       m_map.LoadSynchronous();
+//     }
 
-    UDataTable* dataTable = m_map.Get();
+//     UDataTable* dataTable = m_map.Get();
 
-    if (!::IsValid(dataTable))
-    {
-      MDebug::LogError("Can not load data ------ Generate Map");
-      MDebug::LogError(TEXT("File Path : ") + mapMetaDataPath);
-      return false;
-    }
+//     if (!::IsValid(dataTable))
+//     {
+//       MDebug::LogError("Can not load data ------ Generate Map");
+//       MDebug::LogError(TEXT("File Path : ") + mapMetaDataPath);
+//       return false;
+//     }
 
-    return true;
-  }
+//     return true;
+//   }
 
-  return false;
-}
+//   return false;
+// }

@@ -8,9 +8,12 @@
 #include "SmithBattleMediator.generated.h"
 
 class USmithBattleSubsystem;
-namespace Smith::Map
+namespace UE::Smith
 {
-	class SmithMapManager;
+	namespace Map
+	{
+		class FSmithMapManager;
+	}
 }
 /**
  * 
@@ -21,7 +24,7 @@ class SMITHGOD_API USmithBattleMediator final: public UObject, public ICommandMe
 	GENERATED_BODY()
 
 public:
-	using MapManager = typename Smith::Map::SmithMapManager;
+	using MapManager = typename UE::Smith::Map::FSmithMapManager;
 
 public:
 	USmithBattleMediator();
@@ -31,10 +34,9 @@ public:
 	void SetupMediator(USmithBattleSubsystem*, TSharedPtr<MapManager>);
 
 public:
-	void SendMoveCommand(AActor*, IMoveable*) override final;
-	void SendAttackCommand(AActor*, ICanMakeAttack*, IAttackable*, AttackHandle&&) override final;
-	void SendSkillCommand(AActor*,ISkillable*) override final;
-	
+	void SendMoveCommand(AActor*, IMoveable*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance) override final;
+	void SendAttackCommand(AActor*, ICanMakeAttack*, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&) override final;
+
 private:
 	UPROPERTY()
 	TWeakObjectPtr<USmithBattleSubsystem> m_battleSys;

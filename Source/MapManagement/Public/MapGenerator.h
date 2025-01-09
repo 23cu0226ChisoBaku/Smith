@@ -28,11 +28,6 @@ class MAPMANAGEMENT_API UMapGenerator : public UObject
 	GENERATED_BODY()
 
 	public:
-		UMapGenerator();
-	
-	public:
-		bool GenerateMap(UWorld*, const FString& mapMetaDataPath, FMapCoord originCoord);
+		UMapGenerator(){}
 
-	private:
-		TMap<uint32, TSoftObjectPtr<UDataTable>> m_mapBuffer;
 };

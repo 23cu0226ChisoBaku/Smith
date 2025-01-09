@@ -20,6 +20,7 @@ Encoding : UTF-8
 #define M_DIMENSION_TWO_ARRAY
 
 #include "ArrayIterator.h"
+#include <vector> 
 
 namespace UE::MLibrary
 {
@@ -32,106 +33,22 @@ namespace UE::MLibrary
 		template<typename T>
 		class TDimension2Array final
 		{
-
-		//---------------------------------------
-		/*
-							エイリアスやアサーション
-		*/
-		//---------------------------------------
-		public:
-			using ElementType = T;
-			using ElementTypePtr = ElementType*;
-			using Iterator = ArrayIterator<TDimension2Array<ElementType>>;
-			using ConstIterator = const Iterator;
-
-		private:
-			class TDimension2ArrayRowArr
-			{
-				friend class TDimension2Array<ElementType>;
-				using Iterator = ArrayIterator<TDimension2ArrayRowArr>;
+			//---------------------------------------
+			/*
+								エイリアスやアサーション
+			*/
+			//---------------------------------------
+			public:
+				using ElementType = T;
+				using ElementTypePtr = ElementType*;
+				using Iterator = ArrayIterator<TDimension2Array<ElementType>>;
 				using ConstIterator = const Iterator;
-				private:
-					TDimension2ArrayRowArr(ElementType* src, uint64 length)
-						: m_rowArr(src)
-						, m_length(length)
-					{	}
-				public:
-					~TDimension2ArrayRowArr()
-					{
-						memset(this, 0, sizeof(this));
-					}
-				public:
-					const ElementType& At_Readonly(uint64 idx) const
-					{
-						return at_impl_copy(idx);
-					}
-					const ElementType& At(uint64 idx) const
-					{
-						return at_impl_copy(idx);
-					}
-					ElementType& At(uint64 idx)
-					{
-						return at_impl(idx);
-					}
-					uint64 Length() const
-					{
-						return m_length;
-					}
 
-				public:
-					const ElementType& operator[](uint64 idx) const
-					{
-						return at_impl_copy(idx);
-					}
-					ElementType& operator[](uint64 idx)
-					{
-						return at_impl(idx);
-					}
-				private:
-					ElementType& at_impl(uint64 idx) 
-					{
-						check(m_rowArr != nullptr)
-						check(m_length != 0)
-
-						return m_rowArr[idx];
-					}
-					ElementType at_impl_copy(uint64 idx)
-					{
-						check(m_rowArr != nullptr)
-						check(m_length != 0)
-
-						return m_rowArr[idx];
-					}
-
-					// イテレータ
-				Iterator begin()
-				{
-					return Iterator(m_rowArr);
-				}
-				ConstIterator begin() const
-				{
-					return ConstIterator(m_rowArr);
-				}
-				Iterator end()
-				{
-					return Iterator(m_rowArr + m_length);
-				}
-				ConstIterator end() const
-				{
-					return ConstIterator(m_rowArr + m_length);
-				}
-				
-				private:
-					ElementType* m_rowArr;
-					uint64 m_length;
-			};
-
-			using RowArray = typename TDimension2ArrayRowArr;
-		//---------------------------------------
-		/*
-										ctorとdtor
-		*/
-		//---------------------------------------
+			//---------------------------------------
+			/*
+											ctorとdtor
+			*/
+			//---------------------------------------
 			public:
 				TDimension2Array()
 					: m_elemArr(nullptr)
@@ -148,15 +65,32 @@ namespace UE::MLibrary
 					const uint64 arrSize = m_row * m_column;
 					m_elemArr = new ElementType[arrSize];
 					memset(m_elemArr, 0, sizeof(ElementType) * arrSize);
+
+				}
+				TDimension2Array(uint64 row, uint64 column, const T& defaultValue)
+					: m_elemArr(nullptr)
+					, m_row(row)
+					, m_column(column)
+				{
+					check( ((m_row * m_column) > 0) )
+
+					const uint64 arrSize = m_row * m_column;
+					m_elemArr = new ElementType[arrSize];
+					for (uint64 i = 0; i < arrSize; ++i)
+					{
+						m_elemArr[i] = defaultValue;
+					}
+
 				}
 
-				TDimension2Array(const ElementType* src, const size_t srcSize, const uint64 row, const uint64 column)
+				TDimension2Array(const ElementType* src, size_t dataCnt, uint64 row, uint64 column)
 					: TDimension2Array(row, column)
 				{
 					check(src != nullptr)
 					// サイズが０じゃない　かつ　サイズが （データのサイズ * 行の数 * 列の数）と等しい時に通過する
-					check(((srcSize != 0) && (srcSize == (sizeof(ElementType) * row * column))))
+					check(((dataCnt != 0) && (dataCnt ==  row * column)))
 
+					const size_t srcSize = sizeof(ElementType) * m_row * m_column;
 					memcpy_s(m_elemArr, srcSize, src, srcSize);
 				}
 
@@ -230,34 +164,6 @@ namespace UE::MLibrary
 		*/
 		//---------------------------------------
 			public:
-				/// @brief 配列の行を返す(読み込み専用)
-				/// @param row 行のインデックス
-				/// @return 配列[行のインデックス]のコンスト参照
-				const RowArray At_ReadOnly(uint64 row) const&
-				{
-					return at_impl(row);
-				}
-				/// @brief 配列の行を返す(読み込み専用)
-				/// @param row 行のインデックス
-				/// @return 配列[行のインデックス]のコンスト参照
-				const RowArray At(uint64 row) const&
-				{
-					return at_impl(row);
-				}
-				/// @brief 配列の行を返す(書き込み可能)
-				/// @param row 行のインデックス
-				/// @return 配列[行のインデックス]の参照
-				RowArray At(uint64 row) &
-				{
-					return at_impl(row);
-				}
-				/// @brief 配列の行を返す(書き込み可能)
-				/// @param row 行のインデックス
-				/// @return 配列[行のインデックス]の参照
-				RowArray At(uint64 row) &&
-				{
-					return at_impl(row);
-				}
 
 				/// @brief 二次元配列の値を返す(読み込み専用)
 				/// @param row 行のインデックス
@@ -265,7 +171,7 @@ namespace UE::MLibrary
 				/// @return 配列[行のインデックス][列のインデックス]のコンスト参照
 				const ElementType& At_ReadOnly(uint64 row, uint64 column) const &
 				{
-					return at_impl_copy(row, column);
+					return at_impl(row, column);
 				}
 				/// @brief 二次元配列の値を返す(読み込み専用)
 				/// @param row 行のインデックス
@@ -273,7 +179,7 @@ namespace UE::MLibrary
 				/// @return 配列[行のインデックス][列のインデックス]のコンスト参照
 				const ElementType& At(uint64 row, uint64 column) const &
 				{
-					return at_impl_copy(row, column);
+					return at_impl(row, column);
 				}
 				/// @brief 二次元配列の値を返す(書き込み可能)
 				/// @param row 行のインデックス
@@ -309,7 +215,7 @@ namespace UE::MLibrary
 				{
 					return m_row * m_column;
 				}
-		// イテレータ
+			// イテレータ
 				Iterator begin()
 				{
 					return Iterator(m_elemArr);
@@ -326,42 +232,22 @@ namespace UE::MLibrary
 				{
 					return ConstIterator(m_elemArr + m_row * m_column);
 				}
-		//---------------------------------------
-		/*
-						パブリック関数(インターフェース)
-		*/
-		//---------------------------------------
+			//---------------------------------------
+			/*
+							パブリック関数(インターフェース)
+			*/
+			//---------------------------------------
 			public:
 
-		//---------------------------------------
-		/*
-						オペレーターオーバーロード
-		*/
-		//---------------------------------------
+			//---------------------------------------
+			/*
+							オペレーターオーバーロード
+			*/
+			//---------------------------------------
 			public:
-				/// @brief 配列の行を返す(読み込み専用)
-				/// @param row 行のインデックス
-				/// @return 配列[行のインデックス]のコンスト参照
-				const RowArray operator[](uint64 row) const&
-				{
-						return at_impl(row);
-				}
-				/// @brief 配列の行を返す(読み込み専用)
-				/// @param row 行のインデックス
-				/// @return 配列[行のインデックス]の参照
-				RowArray operator[](uint64 row) &
-				{
-						return at_impl(row);
-				}
-				/// @brief 配列の行を返す(読み込み専用)
-				/// @param row 行のインデックス
-				/// @return 配列[行のインデックス]の参照
-				RowArray operator[](uint64 row) &&
-				{
-						return at_impl(row);
-				}
-		// Private
-		#pragma region Private
+
+			// Private
+			#pragma region Private
 			private:
 				void dispose() noexcept
 				{
@@ -372,23 +258,17 @@ namespace UE::MLibrary
 
 					memset(this, 0, sizeof(this));
 				}
-				RowArray at_impl(uint64 row)
-				{
-					check(m_elemArr != nullptr)
-					check(row < m_row)
-
-					return RowArray(m_elemArr + row * m_column, m_column);
-				}
-
-				const	RowArray at_impl(uint64 row) const
-				{
-					check(m_elemArr != nullptr)
-					check(row < m_row)
-
-					return RowArray(m_elemArr + row * m_column, m_column);
-				}
 
 				ElementType& at_impl(uint64 row, uint64 column)
+				{
+					check(m_elemArr != nullptr)
+					check(row < m_row && column < m_column)
+
+					return m_elemArr[row * m_column + column];
+
+				}
+
+				const ElementType& at_impl(uint64 row, uint64 column) const
 				{
 					check(m_elemArr != nullptr)
 					check(row < m_row && column < m_column)
@@ -406,11 +286,11 @@ namespace UE::MLibrary
 
 				}
 
-		//---------------------------------------
-		/*
-						 スタティック変数(public)
-		*/
-		//---------------------------------------
+			//---------------------------------------
+			/*
+							スタティック変数(public)
+			*/
+			//---------------------------------------
 			public:
 				static const TDimension2Array<ElementType> EmptyArray;
 
@@ -419,8 +299,8 @@ namespace UE::MLibrary
 				uint64 m_row;
 				uint64 m_column;
 
-		#pragma endregion
-		// Private
+			#pragma endregion
+			// Private
 		};
 
 		template<typename T>

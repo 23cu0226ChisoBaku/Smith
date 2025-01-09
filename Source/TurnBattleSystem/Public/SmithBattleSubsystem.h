@@ -8,6 +8,8 @@
 #include "TurnPriority.h"
 #include "SmithBattleSubsystem.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnTurnFinishEvent);
+
 class IBattleCommand;
 class UBattleCommandManager;
 
@@ -47,6 +49,9 @@ public:
 // end of FTickableObject Interface
 public:
 	void registerCommand(ITurnManageable*, TSharedPtr<IBattleCommand>);
+	// TODO
+	void SubscribeOnTurnStartEvent(TDelegate<void()>&);
+	void SubscribeOnTurnFinishEvent(TDelegate<void()>&);
 private:
 	void registerNextTurnObjs();
 	void emptyContainers();

@@ -21,11 +21,12 @@ Encoding : UTF-8
 
 #include "DataStructure/Dimension2Array.h"
 #include "MapCoord.h"
-#include "FormatType.h"
+
+enum class ESmithFormatType : uint8;
 
 namespace UE::Smith
 {
-	inline namespace Battle
+	namespace Battle
 	{
 		///
 		/// @brief コマンドフォーマット
@@ -50,11 +51,12 @@ namespace UE::Smith
 				FSmithCommandFormat& operator=(FSmithCommandFormat&&) noexcept;
 
 			public:
-				void SetupFormat(const ESmithFormatType* srcData, size_t srcSize, uint64 row, uint64 column);
+				void SetupFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
 				UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> GetFormatArray() const;
 				FMapCoord GetCNCoord() const;
 				uint64 GetRow() const;
 				uint64 GetColumn() const;
+				ESmithFormatType GetFormatData(uint64 x, uint64 y) const;
 
 			private:
 				void setCNCoord();

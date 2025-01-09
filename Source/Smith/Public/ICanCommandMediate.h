@@ -15,7 +15,7 @@ class UCanCommandMediate : public UInterface
 	GENERATED_BODY()
 };
 
-class SMITHGOD_API ICanCommandMediate
+class SMITH_API ICanCommandMediate
 {
 	GENERATED_BODY()
 
