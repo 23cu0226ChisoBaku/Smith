@@ -10,3 +10,13 @@ Weapon_Base::Weapon_Base()
 Weapon_Base::~Weapon_Base()
 {
 }
+
+void Weapon_Base::SwapSkill(int, Skill)
+{
+
+}
+
+void Weapon_Base::Upgrade(IParamAbsorbable*)
+{
+
+}

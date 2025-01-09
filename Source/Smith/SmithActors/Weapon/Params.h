@@ -3,15 +3,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Params.generated.h"
 
 /**
  * 
  */
-class SMITH_API Params
+USTRUCT()
+struct SMITH_API FParams
 {
+	GENERATED_BODY()
 public:
+	UPROPERTY(EditAnywhere, Category = "Params|Edit")
 	int32 HP;
+	UPROPERTY(EditAnywhere, Category = "Params|Edit")
 	int32 ATK;
+	UPROPERTY(EditAnywhere, Category = "Params|Edit")
 	int32 DEF;
+	UPROPERTY(EditAnywhere, Category = "Params|Edit")
 	int32 CRT;
 };
+

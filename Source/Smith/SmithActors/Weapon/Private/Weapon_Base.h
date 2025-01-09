@@ -24,21 +24,16 @@ Encoding: UTF-8
 
 
 
-class SMITH_API Weapon_Base:public IParamAbsorbable
+class SMITH_API Weapon_Base
 {
 public:
 	Weapon_Base();
 	virtual ~Weapon_Base();
 
-	//void SwapSkill(int, Skill);
-	//void Upgrade(IParamAbsorbable*);
-
-private:
-
-public:
-
+	void SwapSkill(int, Skill);
+	void Upgrade(IParamAbsorbable*);
 
 private:
 	TArray <Skill> m_skillslots;
-	Params m_params;
+	//Params m_params;
 };
