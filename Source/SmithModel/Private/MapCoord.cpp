@@ -18,11 +18,6 @@ Encoding : UTF-8
 #include "MapCoord.h"
 #include "Misc/Crc.h"
 
-constexpr FMapCoord::FMapCoord()
-  : x(0)
-  , y(0)
-{ }
-
 FMapCoord::FMapCoord(uint8 _x, uint8 _y)
   : x(_x)
   , y(_y)

@@ -105,7 +105,7 @@ void ASmithPlayerActor::BeginPlay()
 	// TODO BPで設定できるようにする
 	if (::IsValid(m_springArm))
 	{
-		m_springArm->SetWorldRotation(FRotator{300.0, 0.0, 0.0});
+		m_springArm->SetWorldRotation(FRotator{270.0, 0.0, 0.0});
 	}
 
 	// Mapping Contextを設定
@@ -250,27 +250,6 @@ void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 
 void ASmithPlayerActor::moveImpl(UE::Smith::Battle::EMoveDirection direction)
 {
-	using namespace SmithPlayerActor::Private;
-
-	// FHitResult hit{};
-
-	// const FVector startPos = GetActorLocation();
-	// const FVector endPos = startPos + moveDir * TILE_SIZE;
-
-	// FCollisionQueryParams hitParam;
-	// hitParam.AddIgnoredActor(this);
-	// // TODO temp size
-	// const float sphereRadius = CAPSULE_HALF_HEIGHT * 0.5f;
-
-	// const bool isHit = GetWorld()->SweepSingleByChannel(
-	// 																										hit, 
-	// 																										GetActorLocation(),
-	// 																										endPos,
-	// 																										FQuat::Identity,
-	// 																										ECollisionChannel::ECC_MAX,
-	// 																										FCollisionShape::MakeSphere(sphereRadius),
-	// 																										hitParam
-	// 																									 );
 
 	// 移動コマンドを出す
 	if (::IsValid(m_moveComponent) && m_commandMediator.IsValid())

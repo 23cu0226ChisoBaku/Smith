@@ -16,9 +16,10 @@ namespace UE::Smith
     enum class EMoveDirection : uint8;
   }
 }
-/**
-* 
-*/
+
+struct FSmithMapBluePrint;
+struct FSmithMapConstructionBluePrint;
+struct FSmithEnemyGenerateBluePrint;
 
 namespace UE::Smith
 {
@@ -33,8 +34,9 @@ namespace UE::Smith
         ~FSmithMapManager();
       
       public:
-        void AssignMap(TUniquePtr<FSmithMap>&&, int32 tileSize, FVector originCoord_World);
-        void AddMapObj(ICanSetOnMap*, uint8 x, uint8 y);
+        void InitMap(UWorld*, const FSmithMapBluePrint&, const FSmithMapConstructionBluePrint&);
+        void InitMapObjs(UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
+        void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
         void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
         void MoveMapObj(ICanSetOnMap*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance, FVector&);
 

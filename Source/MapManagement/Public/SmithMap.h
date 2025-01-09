@@ -31,6 +31,7 @@ namespace UE::Smith
 		*/
 		//---------------------------------------
 		class FSmithRect;
+		class FSmithSection;
 
 		/// 
 		/// @brief マップクラス 
@@ -98,6 +99,9 @@ namespace UE::Smith
         /// @return                 マップの矩形
         ///
 				FSmithRect GetMap() const;
+				FSmithSection* GetSection(uint8 rowIdx, uint8 columnIdx) const;
+				uint8 GetSectionLeft(uint8 columnIdx) const;
+				uint8 GetSectionTop(uint8 rowIdx) const;
 			#pragma endregion FSmithMap Interface
 			// end of FSmithMap Interface
 			private:

@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "SmithMapBluePrint.h"
 #include "SmithMapConstructionBluePrint.h"
+#include "SmithEnemyGenerateBluePrint.h"
 #include "MapGenerateGameMode_Test.generated.h"
 
 class USmithBattleMediator;
@@ -42,6 +43,8 @@ private:
 	FSmithMapBluePrint MapBluePrint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FSmithMapConstructionBluePrint MapConstructionBluePrint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FSmithEnemyGenerateBluePrint EnemyGenerateBluePrint;
 	UPROPERTY()
 	TObjectPtr<USmithBattleMediator> m_battleMediator;
 

@@ -6,6 +6,7 @@
 #include "SmithRect.h"
 
 #include "MLibrary.h"
+#include "InvalidValues.h"
 
 #include <limits>
 
@@ -95,6 +96,10 @@ namespace UE::Smith
               m_sections.Emplace(sectionIdx, ::MoveTemp(section));
             }
           }
+
+          // TODO
+          m_sectionWidth = widthPerSection;
+          m_sectionHeight = heightPerSection;
         }
 
         void GenerateRoom(uint8 sectionIdx, uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue)
@@ -228,6 +233,45 @@ namespace UE::Smith
         {
           return m_mapRect;
         }
+        FSmithSection* GetSection(uint8 rowIdx, uint8 columnIdx) const
+        {
+          if (rowIdx >= m_row || columnIdx >= m_column)
+          {
+            return nullptr;
+          }
+
+          const uint8 sectionIdx = rowIdx * m_column + columnIdx;
+
+          if (!m_sections.Contains(sectionIdx))
+          {
+            return nullptr;
+          }
+
+          return m_sections[sectionIdx].Get();
+        }
+
+        // TODO
+        uint8 GetSectionLeft(uint8 columnIdx) const
+        {          
+          if (columnIdx >= m_column)
+          {
+            return 0xffu;
+          }
+
+          const uint8 sectionLeft = columnIdx * m_sectionWidth + (columnIdx + 1) * m_sectionGap; 
+          return sectionLeft;
+        }
+        // TODO
+        uint8 GetSectionTop(uint8 rowIdx) const
+        {
+          if (rowIdx >= m_row)
+          {
+            return 0xffu;
+          }
+
+          const uint8 sectionTop = rowIdx * m_sectionHeight + (rowIdx + 1) * m_sectionGap;  
+          return sectionTop;
+        }
       // TODO プライベート関数にする意味がない
       private:
         ///
@@ -355,6 +399,10 @@ namespace UE::Smith
         uint8 m_row;
         uint8 m_column;
         uint8 m_sectionGap;
+
+        // TODO
+        uint8 m_sectionWidth;
+        uint8 m_sectionHeight;
     };
     #pragma endregion FSmithMap Implementation
     // end of FSmithMap Implementation
@@ -395,6 +443,18 @@ namespace UE::Smith
     FSmithRect FSmithMap::GetMap() const
     {
       return m_pImpl->GetMapRect();
+    }
+    FSmithSection* FSmithMap::GetSection(uint8 rowIdx, uint8 columnIdx) const
+    {
+      return m_pImpl->GetSection(rowIdx, columnIdx);
+    }
+    uint8 FSmithMap::GetSectionLeft(uint8 columnIdx) const
+    {
+      return m_pImpl->GetSectionLeft(columnIdx);
+    }
+    uint8 FSmithMap::GetSectionTop(uint8 rowIdx) const
+    {
+      return m_pImpl->GetSectionTop(rowIdx);
     }
     #pragma endregion FSmithMap Interface
     // end of FSmithMap Interface

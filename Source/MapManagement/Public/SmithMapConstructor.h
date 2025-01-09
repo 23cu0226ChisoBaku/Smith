@@ -15,6 +15,7 @@ namespace UE::Smith
 	namespace Map
 	{
 		class FSmithRect;
+
 		class MAPMANAGEMENT_API FSmithMapConstructor
 		{
 			public:

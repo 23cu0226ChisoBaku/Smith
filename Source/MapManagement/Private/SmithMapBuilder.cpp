@@ -2,8 +2,12 @@
 
 
 #include "SmithMapBuilder.h"
-#include "SmithMapBluePrint.h"
+#include "SmithRect.h"
 #include "SmithMap.h"
+#include "SmithMapBluePrint.h"
+#include "SmithMapDataModel.h"
+#include "TileType.h"
+#include "MapCoord.h"
 
 namespace SimpleArrayShuffle::Private
 {
@@ -67,6 +71,60 @@ namespace UE::Smith
 
       map->ConnectRooms(StaticCast<uint8>(blueprint.DefaultCorridorTileType));
       return true;
+    }
+
+    TSharedPtr<FSmithMapDataModel> FSmithMapBuilder::GenerateModel(TSharedPtr<FSmithMap> pMap)
+    {
+      if (!pMap.IsValid())
+      {
+        return nullptr;
+      }
+      
+      TSharedPtr<FSmithMapDataModel> model = ::MakeShared<FSmithMapDataModel>();
+
+      model->Map = pMap;
+
+      const FSmithRect mapRect = pMap->GetMap();
+      const uint8 mapRectWidth = mapRect.GetWidth();
+      const uint8 mapRectHeight = mapRect.GetHeight();
+
+      for (uint8 y = 0; y < mapRectHeight; ++y)
+      {
+        for (uint8 x = 0; x < mapRectWidth; ++x)
+        {
+          ETileType tileType = StaticCast<ETileType>(mapRect.GetRect(x, y));
+          FMapCoord coord(x, y);
+          switch (tileType)
+          {
+            case ETileType::Wall:
+            {
+              if (!model->ObstacleTable.Contains(coord))
+              {
+                model->ObstacleTable.Emplace(coord, ::MakeShared<FObstacleTileInfoContainer>());
+              }
+            }
+            break;
+
+            case ETileType::Ground:
+            case ETileType::Corridor:
+            {
+              if (!model->StaySpaceTable.Contains(coord))
+              {
+                model->StaySpaceTable.Emplace(coord, ::MakeShared<FStaySpaceTileInfoContainer>(tileType));
+              }
+            }
+            break;
+            
+            case ETileType::Void:
+            {
+
+            }
+            break;
+          }
+        }
+      }
+
+      return model;
     }
 
     void FSmithMapBuilder::generateRoom(FSmithMap* map, const FSmithMapBluePrint& blueprint, uint8 sectionIdx)

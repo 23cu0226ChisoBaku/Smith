@@ -49,6 +49,7 @@ void AMapGenerateGameMode_Test::StartPlay()
   else
   {
     UE_LOG(LogTemp, Warning, TEXT("Can not init Battle System"));
+    return;
   }
 
   // マップマネージャーを初期化
@@ -58,15 +59,7 @@ void AMapGenerateGameMode_Test::StartPlay()
 
   using namespace UE::Smith::Map;
   {
-    TUniquePtr<FSmithMap> mapData = ::MakeUnique<FSmithMap>();
-
-    TUniquePtr<FSmithMapBuilder> mapBuilder = ::MakeUnique<FSmithMapBuilder>();
-    mapBuilder->Build(mapData.Get(), MapBluePrint);
-
-    TUniquePtr<FSmithMapConstructor> constructor = ::MakeUnique<FSmithMapConstructor>();
-    constructor->ConstructMap(GetWorld(), mapData->GetMap(), MapConstructionBluePrint);
-
-    m_mapMgr->AssignMap(::MoveTemp(mapData), MapConstructionBluePrint.TileSize, MapConstructionBluePrint.OriginCoordinate);
+    m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
   }
 
   TArray<AActor*> canCmdMediateObjs;
@@ -82,30 +75,11 @@ void AMapGenerateGameMode_Test::StartPlay()
     }
   }
 
-  // TODO
-  UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UCanSetOnMap::StaticClass(), canCmdMediateObjs);
+  // TODO 
+  // single playなので０番がプレイヤー
+  APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+  m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
 
-  if (canCmdMediateObjs.Num() > 0)
-  {
-    for (auto obj : canCmdMediateObjs)
-    {
-      ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(obj);
-      if (Cast<ASmithPlayerActor>(obj))
-      {
-        MDebug::Log("Add Player");
-        m_mapMgr->AddMapObj(mapObj, 1, 1);
-      }
-      else if (Cast<ATurnActor_Test>(obj))
-      {
-        MDebug::Log("Add Turn Actor");
-        m_mapMgr->AddMapObj(mapObj, 4, 4);
-      }
-    }
-  }
-  else
-  {
-    MDebug::LogError(" Hahkdshaskda");
-  }
 }
 
 void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)

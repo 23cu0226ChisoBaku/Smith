@@ -105,6 +105,17 @@ void USmithBattleSubsystem::StartBattle()
   }
 }
 
+// TODO
+void USmithBattleSubsystem::SubscribeOnTurnStartEvent(TDelegate<void()>& delegate)
+{
+  m_battleCmdMgr->OnStartExecuteEvent.Add(delegate);
+}
+
+void USmithBattleSubsystem::SubscribeOnTurnFinishEvent(TDelegate<void()>& delegate)
+{
+  m_battleCmdMgr->OnEndExecuteEvent.Add(delegate);
+}
+
 void USmithBattleSubsystem::registerCommand(ITurnManageable* requester, TSharedPtr<IBattleCommand> battleCommand)
 {
   if (requester == nullptr || battleCommand == nullptr)

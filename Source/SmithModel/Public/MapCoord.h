@@ -25,7 +25,10 @@ struct SMITHMODEL_API FMapCoord
 	GENERATED_BODY()
 
 	public:
-		constexpr FMapCoord();
+		constexpr FMapCoord()
+		  : x(0)
+  		, y(0)
+		{ }
 		FMapCoord(uint8 _x, uint8 _y);
 		FMapCoord(const FMapCoord&);
 		FMapCoord& operator=(const FMapCoord&);

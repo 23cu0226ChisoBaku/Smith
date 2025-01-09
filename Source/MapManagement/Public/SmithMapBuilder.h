@@ -38,6 +38,7 @@ namespace UE::Smith
 		*/
 		//---------------------------------------
 		class FSmithMap;
+		struct FSmithMapDataModel;
 
 		///
 		/// @brief マップ作成クラス
@@ -65,6 +66,7 @@ namespace UE::Smith
 				/// @return       作成成功-> true 作成失敗-> false
 				///
 				bool Build(FSmithMap*, const FSmithMapBluePrint&);
+				TSharedPtr<FSmithMapDataModel> GenerateModel(TSharedPtr<FSmithMap>);
 
 			private:
 				void generateRoom(FSmithMap*, const FSmithMapBluePrint& , uint8 sectionIdx);
