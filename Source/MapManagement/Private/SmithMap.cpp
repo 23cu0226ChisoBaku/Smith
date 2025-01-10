@@ -7,6 +7,7 @@
 
 #include "MLibrary.h"
 #include "InvalidValues.h"
+#include "MLibrary.h"
 
 #include <limits>
 
