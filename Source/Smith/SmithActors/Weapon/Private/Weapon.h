@@ -26,7 +26,7 @@ public:
 	void Upgrade(IParamAbsorbable*);
 
 private:
-	UPROPERTY(EditAnywhere)
+	//UPROPERTY(EditAnywhere)
 	TArray <Skill> m_skillslots;
 	UPROPERTY(EditAnywhere)
 	FParams m_params;
