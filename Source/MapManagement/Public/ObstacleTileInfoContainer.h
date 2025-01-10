@@ -28,7 +28,6 @@ namespace UE::Smith
 				FObstacleTileInfoContainer& operator=(FObstacleTileInfoContainer&&) noexcept;
 			private:
 				virtual bool isAbleToStayOn_Impl() const override;
-				virtual void reset_Impl() override;
 		};
 	}
 }

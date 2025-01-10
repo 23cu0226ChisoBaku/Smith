@@ -46,9 +46,5 @@ namespace UE::Smith
       return false;
     }
 
-    void FObstacleTileInfoContainer::reset_Impl()
-    {
-      
-    }
   }
 }
