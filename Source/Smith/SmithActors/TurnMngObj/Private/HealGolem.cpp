@@ -34,18 +34,18 @@ void AHealGolem::Tick(float DeltaTime)
     IAttackable* attack = Cast<IAttackable>(target);
     if (Cast<ASmithEnemy>(target) != nullptr && m_skillCnt <= 0)
     {
-      SendSkillCommand(this);
+      //SendSkillCommand(this);
     }
     else if (attack != nullptr)
     {
-      SendAttackCommand(m_attackComp, attack, AttackHandle{GetName(), m_atk});
+      //SendAttackCommand(m_attackComp, attack, AttackHandle{GetName(), m_atk});
       --m_skillCnt;
     }
     else
     {
       // 移動の処理
-      m_moveComp->SetTerminusPos(MoveDirection());
-      SendMoveCommand(m_moveComp);
+      //m_moveComp->SetTerminusPos(MoveDirection());
+     // SendMoveCommand(m_moveComp);
     }
 
     m_timer = 0.0f;

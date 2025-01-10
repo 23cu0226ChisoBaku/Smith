@@ -21,30 +21,36 @@ void ASmallGolem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	MDebug::LogWarning("Enemy Tick");
 	// コマンドが送れる状態か
 	if (IsCommandSendable())
 	{
 		m_timer += DeltaTime;
+		MDebug::LogError("Enemy IsCommandSendable");
+	}
+	else
+	{
+		MDebug::LogError("No Sendable");
 	}
 
 	if (m_timer > 0.5f)
 	{
 		target = PlayerCheck();
 		IAttackable *attack = Cast<IAttackable>(target);
-		if (attack != nullptr && m_skillCnt <= 0)
+		// if (attack != nullptr && m_skillCnt <= 0)
+		// {
+		// 	//SendSkillCommand(this);
+		// }
+		if (attack != nullptr)
 		{
-			SendSkillCommand(this);
-		}
-		else if (attack != nullptr)
-		{
-			SendAttackCommand(m_attackComp, attack, AttackHandle{GetName(), m_atk});
-			--m_skillCnt;
+			//SendAttackCommand(m_attackComp, attack, AttackHandle{GetName(), m_atk});
+			//--m_skillCnt;
 		}
 		else
 		{
 			// 移動の処理
-			m_moveComp->SetTerminusPos(MoveDirection());
-			SendMoveCommand(m_moveComp);
+			//m_moveComp->SetTerminusPos(MoveDirection());
+			SendMoveCommand(m_moveComp,(UE::Smith::Battle::EMoveDirection)MoveDirection(),1);
 		}
 
 		m_timer = 0.0f;

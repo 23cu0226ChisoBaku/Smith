@@ -31,13 +31,3 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 {
   MDebug::LogError("Get Attack by" + handle.AttackName);
 }
-
-uint8 ATurnActor_Test::GetOnMapSizeX() const
-{
-  return 1;
-}
-
-uint8 ATurnActor_Test::GetOnMapSizeY() const
-{
-  return 1;
-}

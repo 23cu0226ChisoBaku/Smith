@@ -127,11 +127,11 @@ AActor *ASmithEnemy::PlayerCheck(float checkLenth)
 }
 
 // 経路探索完成までの仮実装
-FVector ASmithEnemy::MoveDirection()
+uint8 ASmithEnemy::MoveDirection()
 {
   FVector myPos = GetActorLocation();
   FVector targetPos;
-  FVector retPos = FVector::ZeroVector;
+  uint8 retPos = 0xff;
   if (m_target != nullptr)
   {
     targetPos = m_target->GetActorLocation();
@@ -139,21 +139,20 @@ FVector ASmithEnemy::MoveDirection()
 
   if (targetPos.X > myPos.X)
   {
-    myPos += MOVE_DISTANCE * FVector::ForwardVector;
+    retPos = 0;
   }
   else if (targetPos.X < myPos.X)
   {
-    myPos += MOVE_DISTANCE * FVector::BackwardVector;
+    retPos = 4;
   }
   else if (targetPos.Y > myPos.Y)
   {
-    myPos += MOVE_DISTANCE * FVector::RightVector;
+    retPos = 2;
   }
   else if (targetPos.Y < myPos.Y)
   {
-    myPos += MOVE_DISTANCE * FVector::LeftVector;
+    retPos = 6;
   }
 
-  retPos = myPos;
   return retPos;
 }

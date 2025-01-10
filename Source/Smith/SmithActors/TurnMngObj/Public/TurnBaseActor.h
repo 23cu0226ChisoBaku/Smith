@@ -7,6 +7,7 @@
 #include "UObject/WeakInterfacePtr.h"
 #include "ITurnManageable.h"
 #include "ICanCommandMediate.h"
+#include "ICanSetOnMap.h"
 #include "TurnBaseActor.generated.h"
 
 class IBattleCommand;
@@ -25,11 +26,11 @@ namespace UE::Smith
 }
 
 UCLASS()
-class SMITH_API ATurnBaseActor : public AActor , public ITurnManageable , public ICanCommandMediate
+class SMITH_API ATurnBaseActor : public AActor, public ITurnManageable, public ICanCommandMediate, public ICanSetOnMap
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ATurnBaseActor();
 
@@ -37,27 +38,29 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay();
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime);
 
 public:
-
-	// Interfaces
-	#pragma region Interfaces
-		// ICanCommandMediate
-		#pragma region ICanCommandMediate
-		void SetCommandMediator(ICommandMediator*) override final;
-		#pragma endregion ICanCommandMediate
-		// end of ICanCommandMediate
+// Interfaces
+#pragma region Interfaces
+// ICanCommandMediate
+#pragma region ICanCommandMediate
+	void SetCommandMediator(ICommandMediator *) override final;
+#pragma endregion ICanCommandMediate
+// end of ICanCommandMediate
+#pragma region ICanSetOnMap
+	uint8 GetOnMapSizeX() const override final;
+	uint8 GetOnMapSizeY() const override final;
+#pragma endregion ICanSetOnMap
 
 protected:
-	void SendMoveCommand(IMoveable*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance);
-	void SendAttackCommand(ICanMakeAttack*, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&);
+	void SendMoveCommand(IMoveable *, UE::Smith::Battle::EMoveDirection, uint8 moveDistance);
+	void SendAttackCommand(ICanMakeAttack *, const UE::Smith::Battle::FSmithCommandFormat &, AttackHandle &&);
 
-	#pragma endregion Interfaces
+#pragma endregion Interfaces
 	// end of Interfaces
 private:
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
-	
 };

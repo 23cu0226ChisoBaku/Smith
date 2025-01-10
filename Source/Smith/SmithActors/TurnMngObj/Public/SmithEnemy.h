@@ -43,7 +43,7 @@ protected:
 
 	float m_timer;
 
-	FVector MoveDirection();
+	uint8 MoveDirection();
 
 private:
 	// マップができて、経路探索ができたら消す
