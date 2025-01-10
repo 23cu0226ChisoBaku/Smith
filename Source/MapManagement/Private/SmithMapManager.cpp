@@ -59,6 +59,7 @@ namespace UE::Smith
         }
         void InitMap(UWorld* world, const FSmithMapBluePrint& mapBP, const FSmithMapConstructionBluePrint& constructionBP)
         {    
+
           check(::IsValid(world));
           if (world == nullptr)
           {
