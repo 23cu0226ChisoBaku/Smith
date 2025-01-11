@@ -105,7 +105,7 @@ void ASmithPlayerActor::BeginPlay()
 	// TODO BPで設定できるようにする
 	if (::IsValid(m_springArm))
 	{
-		m_springArm->SetWorldRotation(FRotator{270.0, 0.0, 0.0});
+		m_springArm->SetWorldRotation(FRotator{300.0, 0.0, 0.0});
 	}
 
 	// Mapping Contextを設定

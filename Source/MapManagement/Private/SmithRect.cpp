@@ -63,9 +63,9 @@ namespace UE::Smith
           // ムーブ代入（Move assignment）
           // heightは行（Row）、widthは列（Column）
           m_rect = FDimension2D_uint8(StaticCast<uint64>(height), StaticCast<uint64>(width));
-          for(uint64 y = 0; y < m_rect.Row(); ++y)
+          for (uint64 y = 0; y < m_rect.Row(); ++y)
           {
-            for(uint64 x = 0; x < m_rect.Column(); ++x)
+            for (uint64 x = 0; x < m_rect.Column(); ++x)
             {
               m_rect.At(y, x) = data;
             }
