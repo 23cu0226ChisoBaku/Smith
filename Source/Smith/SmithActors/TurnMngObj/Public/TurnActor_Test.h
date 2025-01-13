@@ -8,6 +8,9 @@
 #include "ICanSetOnMap.h"
 #include "TurnActor_Test.generated.h"
 
+struct FSmithAIStrategyContainer;
+class USmithTurnBaseAIAttackStrategy;
+class USmithAttackComponent;
 /**
  * 
  */
@@ -31,4 +34,18 @@ public:
 	uint8 GetOnMapSizeX() const override final;
 	uint8 GetOnMapSizeY() const override final;
 
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	TArray<FSmithAIStrategyContainer> AIRegistrationList;
+	UPROPERTY()
+	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USmithTurnBaseAIAttackStrategy> saa;
+	UPROPERTY()
+	TObjectPtr<USmithAttackComponent> m_atkComponent;
+
+		// Attack Format
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
+	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
 };

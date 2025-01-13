@@ -4,7 +4,7 @@
 #include "BattleCommandManager.h"
 #include "IBattleCommand.h"
 #include "SmithBattleSubsystem.h"
-#include "Debug.h"
+#include "MLibrary.h"
 
 UBattleCommandManager::UBattleCommandManager(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -45,9 +45,8 @@ void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedP
     return;
   }
 
-  check((requester != nullptr && ::IsValid(requester->_getUObject())));
-
-  if (requester == nullptr || !::IsValid(requester->_getUObject()))
+  check(IS_UINTERFACE_VALID(requester));
+  if (!IS_UINTERFACE_VALID(requester))
   {
     return;
   }
@@ -62,6 +61,7 @@ void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedP
   else
   {
     MDebug::LogError("Cant Register");
+    return;
   }
 
   if (m_requestCmdWaitList.Num() == 0)

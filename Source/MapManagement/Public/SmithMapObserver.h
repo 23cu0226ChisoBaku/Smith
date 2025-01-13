@@ -31,7 +31,7 @@ namespace UE::Smith
 			  void AssignMap(TSharedPtr<FSmithMapDataModel>, FVector originCoord_World, int32 mapTileSize);
 				void InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
 				void GenerateNewEnemy();
-				void ChasePlayer(ICanSetOnMap*, uint8 chaseRadius);
+				void ChaseTarget(ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius);
 
 			private:
 				class MapObserverImpl;

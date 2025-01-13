@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "UObject/NoExportTypes.h"
-#include "Tickable.h"
 #include "BattleCommandManager.generated.h"
 
 class IBattleCommand;

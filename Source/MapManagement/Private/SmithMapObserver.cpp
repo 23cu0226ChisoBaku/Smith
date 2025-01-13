@@ -97,12 +97,10 @@ namespace UE::Smith
                 continue;
               }
 
-              // TODO
               const uint8 roomWidth = section->GetRoomWidth();
               const uint8 roomHeight = section->GetRoomHeight();
-              const uint8 roomArea = roomWidth * roomHeight;
-              // TODO 部屋の面積が１以下だったら生成しない
-              if (roomArea <= 1)
+              // 部屋の横幅と縦幅のいずれかが１以下だったらオブジェクトを生成しない
+              if (roomWidth <= 1 && roomHeight <= 1)
               {
                 continue;
               }
@@ -125,7 +123,6 @@ namespace UE::Smith
 
               check(roomCoords.Num() >= generateBP.InitGenerateCountPerRoom);
               RandomShuffle(roomCoords);
-              // TODO
 
               // 敵のBPクラスを取得
               TSubclassOf<class AActor> subClass = TSoftClassPtr<AActor>(FSoftObjectPath(*generateBP.EnemyBPPath)).LoadSynchronous();
@@ -140,7 +137,6 @@ namespace UE::Smith
                 const FMapCoord mapCoord = roomCoords[i]; 
                 if (!model_shared->StaySpaceTable.Contains(mapCoord))
                 {
-                  MDebug::LogError("Brain Fuck --- Map Observer InitMapObj()");
                   return;
                 }
 
@@ -155,7 +151,7 @@ namespace UE::Smith
                 ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(enemy);
                 if (mapObj == nullptr)
                 {
-                  MDebug::LogError("Cant place actor on map because it is not implemented ICanSetOnMap");
+                  MDebug::LogError("Can not place actor on map because it is not implemented ICanSetOnMap");
                   enemy->Destroy();
                   return;
                 }
@@ -231,7 +227,7 @@ namespace UE::Smith
     {
 
     }
-    void FSmithMapObserver::ChasePlayer(ICanSetOnMap*, uint8 chaseRadius)
+    void FSmithMapObserver::ChaseTarget(ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
     {
 
     }

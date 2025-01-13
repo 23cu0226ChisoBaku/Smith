@@ -17,6 +17,7 @@
 #include "SmithCommandFormat.h"
 #include "FormatType.h"
 #include "MoveDirection.h"
+#include "FormatInfo_Import.h"
 
 #include "ICommandMediator.h"
 
@@ -24,27 +25,26 @@
 
 namespace SmithPlayerActor::Private
 {
+	#define DIRECTION_ENUM ASmithPlayerActor::EDir_Test
 	constexpr int32 PlayerHP_Temp = 30;
-	constexpr float TILE_SIZE = 250.0f;
 
-	// Temp Capsule Size
-	// TODO obsolete when map is done
-	constexpr float CAPSULE_RADIUS = 90.0f;
-	constexpr float CAPSULE_HALF_HEIGHT = 240.0f;
 	// 方向の数につき隣の方向の間の角度
-	constexpr double Angle_Per_Direction = 360.0 / (double)ASmithPlayerActor::EDir_Test::DirectionCnt;
+	constexpr double Angle_Per_Direction = 360.0 / (double)DIRECTION_ENUM::DirectionCnt;
 
 	// ベクトルを方向列挙に変換する(X,Yだけ,Zは無視)
-	ASmithPlayerActor::EDir_Test VectorDirToEDir(const FVector& direction)
+	DIRECTION_ENUM VectorDirToEDir(const FVector& direction)
 	{
 		const double dot = direction.Dot(FVector::ForwardVector);
-		const FVector dir = direction.Cross(FVector::ForwardVector);
+		const FVector cross = direction.Cross(FVector::ForwardVector);
 
-		// 外積のZによって180補正するかどうかを決める
-		const double newAngle = FMath::RadiansToDegrees(acos(dot)) + (dir.Z > 0.0 ? 180.0 : 0.0); 
-
-		return StaticCast<ASmithPlayerActor::EDir_Test>(round(newAngle / Angle_Per_Direction));
+		const double angle = FMath::RadiansToDegrees(acos(dot));
+		// (1,0,0)(※EDir_Test::Northを表すベクトル)から時計回りに回転しdirectionまで回転した角度を計算
+		const double angleClockwise =  cross.Z > 0.0 ? (360.0 - angle) : angle; 
+		const DIRECTION_ENUM dir = StaticCast<DIRECTION_ENUM>(StaticCast<uint8>(round(angleClockwise / Angle_Per_Direction)) % DIRECTION_ENUM::DirectionCnt);
+		return dir;
 	}
+	
+	#undef DIRECTION_ENUM
 }
 
 ASmithPlayerActor::ASmithPlayerActor()
@@ -90,7 +90,6 @@ ASmithPlayerActor::ASmithPlayerActor()
 
 	m_moveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
 	check((m_moveComponent != nullptr));
-	m_moveComponent->SetMoveSpeed(TILE_SIZE);
 
 	m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Smith AttackComponent"));
 	check((m_atkComponent != nullptr));
@@ -115,7 +114,17 @@ void ASmithPlayerActor::BeginPlay()
 	UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerCtrl->GetLocalPlayer());
 	check((enhancedInputSubsystem != nullptr));
 
-	enhancedInputSubsystem->AddMappingContext(m_mappingCtx, 0);
+	enhancedInputSubsystem->AddMappingContext(MappingCtx, 0);
+	// TODO
+	for (auto& pair : AttackFormatTables)
+	{
+		if (!pair.Value.IsValid())
+		{
+			pair.Value.LoadSynchronous();
+		}
+
+		registerAttackFormat(pair.Key, pair.Value.Get());
+	}
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -146,10 +155,10 @@ void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	if (::IsValid(inputComp))
 	{
-		inputComp->BindAction(m_moveAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Move_Input);
-		inputComp->BindAction(m_attackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack_Input);
-		inputComp->BindAction(m_cameraAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Look_Input);
-		inputComp->BindAction(m_debugAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Debug_SelfDamage_Input);
+		inputComp->BindAction(MoveAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Move_Input);
+		inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Look_Input);
+		inputComp->BindAction(AttackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack_Input);
+		inputComp->BindAction(DebugAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Debug_SelfDamage_Input);
 	}
 }
 
@@ -160,20 +169,16 @@ void ASmithPlayerActor::SetCommandMediator(ICommandMediator* mediator)
 
 void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
 {
-	using namespace SmithPlayerActor::Private;
-
-	if (!m_bCanMove)
-	{
-		return;
-	}
-
 	if (!IsCommandSendable())
 	{
 		return;
 	}
 
-	const FVector2D movementInput = value.Get<FVector2D>();
-	if (movementInput == FVector2D::ZeroVector)
+	using namespace SmithPlayerActor::Private;
+
+	FVector2D movementInput = value.Get<FVector2D>();
+	movementInput.Normalize();
+	if (movementInput.IsNearlyZero())
 	{
 		return;
 	}
@@ -201,11 +206,6 @@ void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
 
 void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
 {
-	if (!m_bCanAttack)
-	{
-		return;
-	}
-
 	if (!IsCommandSendable())
 	{
 		return;
@@ -214,23 +214,28 @@ void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
 	attackImpl();
 }
 
-// TODO Test
 void ASmithPlayerActor::Look_Input(const FInputActionValue& value)
 {
-	const FVector2D lookInput = value.Get<FVector2D>();
+	if (!IsCommandSendable())
+	{
+		return;
+	}
 
-	if (lookInput == FVector2D::ZeroVector)
+	FVector2D lookInput = value.Get<FVector2D>();
+	lookInput.Normalize();
+	if (lookInput.IsNearlyZero())
 	{
 		return;
 	}
 
 	uint8 newDir = StaticCast<uint8>(m_camDir);
 
-	if (lookInput.X > 0.0f)
+	// TODO
+	if (lookInput.X > 0.9f)
 	{
 		newDir += East;
 	}
-	else if (lookInput.X < 0.0f)
+	else if (lookInput.X < -0.9f)
 	{
 		newDir += West;
 	}
@@ -250,54 +255,33 @@ void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 
 void ASmithPlayerActor::moveImpl(UE::Smith::Battle::EMoveDirection direction)
 {
-
 	// 移動コマンドを出す
 	if (::IsValid(m_moveComponent) && m_commandMediator.IsValid())
 	{
-		// m_moveComponent->SetTerminusPos(endPos);
-		
 		m_commandMediator->SendMoveCommand(this, m_moveComponent, direction, 1);
 	}
 }
 
 void ASmithPlayerActor::attackImpl()
 {
-	TArray<AActor*> hitActors {};
-
-	const FVector atkDir = GetActorForwardVector();
-
-	// TODO
-	// 前一マスにActorを探す
-	if (searchActorsInDirection(atkDir, hitActors))
-	{
-		// 攻撃できる相手を攻撃コマンドに登録
-		for(auto actorPtr : hitActors)
-		{
-			IAttackable* attackable = Cast<IAttackable>(actorPtr);
-			
-		}
-	}
+	// TODO deep nest is bad
 	if (m_commandMediator.IsValid())
 	{
-		// TODO Test Code
-		UE::Smith::Battle::FSmithCommandFormat formatTest;
-
-		ESmithFormatType* type = new ESmithFormatType[9];
-		for (int32 i = 0; i < 9; ++i)
+		FString attackKey = TEXT("");
+		// 斜めだったら
+		if (m_actorFaceDir % 2 == 1)
 		{
-			if (i != 4)
-			{
-				type[i] = ESmithFormatType::EFFECT;
-			}
-			else
-			{
-				type[i] = ESmithFormatType::CENTER_NO_EFFECT;
-			}
+			attackKey = TEXT("AttackDiagonal");
 		}
-		formatTest.SetupFormat(type, 9, 3, 3);
-		m_commandMediator->SendAttackCommand(this, m_atkComponent, formatTest, AttackHandle{GetName(), 3});
+		else
+		{
+			attackKey = TEXT("Attack");
+		}
 
-		delete type;
+		if (m_normalAttackFormatBuffer.Contains(attackKey) && m_normalAttackFormatBuffer[attackKey].IsValid())
+		{
+			m_commandMediator->SendAttackCommand(this, m_atkComponent, StaticCast<UE::Smith::Battle::EMoveDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{GetName(), 3});
+		}
 	}
 }
 
@@ -336,42 +320,53 @@ void ASmithPlayerActor::updateCamImpl(EDir_Test newDirection)
 	m_springArm->SetWorldRotation(springArmNewRotator);
 }
 
-bool ASmithPlayerActor::searchActorsInDirection(FVector direction, TArray<AActor*>& OutResult)
+bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTable* formatTable)
 {
-	using namespace SmithPlayerActor::Private;
+	if (m_normalAttackFormatBuffer.Contains(name))
+  {
+    return false;
+  }
 
-	OutResult.Empty();
+  if (formatTable == nullptr)
+  {
+    return false;
+  }
 
-	TArray<FHitResult> hits{};
+	TArray<FFormatInfo_Import*> arr;
+	formatTable->GetAllRows<FFormatInfo_Import>("", arr);
 
-	const FVector startPos = GetActorLocation();
-	const FVector endPos = startPos + direction * TILE_SIZE;
-
-	FCollisionQueryParams hitParam;
-	hitParam.AddIgnoredActor(this);
-
-	// TODO temp code
-	const float sphereRadius = CAPSULE_HALF_HEIGHT * 0.5f;
-	
-	const bool isHit = GetWorld()->SweepMultiByChannel(
-																											hits, 
-																											GetActorLocation(),
-																											endPos,
-																											FQuat::Identity,
-																											ECollisionChannel::ECC_MAX,
-																											FCollisionShape::MakeSphere(sphereRadius),
-																											hitParam
-																										);
-
-	if (isHit)
+	if (arr.Num() <= 1)
 	{
-		for(const auto& hitResult: hits)
-		{
-			OutResult.Emplace(hitResult.GetActor());
-		}
+		return false;
 	}
 
-	return isHit;
+	TArray<FName> names = formatTable->GetRowNames();
+	if (!names[0].IsEqual(TEXT("FormatInfo")))
+	{
+		return false;
+	}
+	
+	const uint8 formatRow = arr[0]->Row;
+	const uint8 formatColumn = arr[0]->Column;
+	const size_t dataCnt = formatRow * formatColumn;
+
+	check((arr.Num() - 1) == StaticCast<int32>(dataCnt));
+	if ((arr.Num() - 1) != StaticCast<int32>(dataCnt))
+	{
+		return false;
+	}
+
+	TArray<ESmithFormatType> typeSrcData;
+
+	for (int i = 1; i < arr.Num(); ++i)
+	{
+		typeSrcData.Emplace(arr[i]->Type);
+	}
+
+	TSharedPtr<UE::Smith::Battle::FSmithCommandFormat> formatPtr = ::MakeShared<UE::Smith::Battle::FSmithCommandFormat>(typeSrcData.GetData(), dataCnt, formatRow, formatColumn);
+	m_normalAttackFormatBuffer.Emplace(name, formatPtr);
+
+	return true;
 }
 
 void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
@@ -388,10 +383,25 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 	{
 		MDebug::LogError(TEXT("Player is dead"));
 
-		// ゲームを停めて、レベルをリロードする
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
-		UGameplayStatics::OpenLevel(GetWorld(), FName(*(GetWorld()->GetName())), false);
-		DisableInput(Cast<APlayerController>(Controller));
+		UWorld* world = GetWorld();
+		if (::IsValid(world))
+		{
+			// ゲームを停めて、レベルをリロードする
+			UGameplayStatics::SetGamePaused(world, true);
+			UGameplayStatics::OpenLevel(world, FName(*(world->GetName())), false);
+			DisableInput(Cast<APlayerController>(Controller));
+		}
+		else
+		{
+			#if WITH_EDITOR
+				if (GEngine != nullptr)
+				{
+					UKismetSystemLibrary::QuitEditor();
+				}		
+			#else
+				UKismetSystemLibrary::QuitGame();
+			#endif
+		}
 
 	}
 }

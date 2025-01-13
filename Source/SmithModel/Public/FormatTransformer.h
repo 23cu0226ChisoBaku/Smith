@@ -16,18 +16,25 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
-
-#include "SmithCommandFormat.h"
-#include "MapCoord.h"
-
 #ifndef SMITH_FORMAT_TRANS
 #define SMITH_FORMAT_TRANS
+
+#include "CoreMinimal.h"
+
+struct FMapCoord;
+
+namespace UE::MLibrary::MDataStructure
+{
+	template<typename T>
+	class TDimension2Array;
+}
 
 namespace UE::Smith
 {
 	namespace Battle
 	{
+		class FSmithCommandFormat;
+
 		class SMITHMODEL_API FFormatTransformer
 		{
 			public:

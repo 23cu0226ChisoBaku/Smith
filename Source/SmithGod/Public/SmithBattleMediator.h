@@ -35,7 +35,7 @@ public:
 
 public:
 	void SendMoveCommand(AActor*, IMoveable*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance) override final;
-	void SendAttackCommand(AActor*, ICanMakeAttack*, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&) override final;
+	void SendAttackCommand(AActor*, ICanMakeAttack*, UE::Smith::Battle::EMoveDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&) override final;
 
 private:
 	UPROPERTY()

@@ -81,7 +81,7 @@ void USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, U
 
 }
 
-void USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle)
+void USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, UE::Smith::Battle::EMoveDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle)
 {
   if (!::IsValid(requester))
   {

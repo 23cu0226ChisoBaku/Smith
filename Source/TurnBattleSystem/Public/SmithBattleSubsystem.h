@@ -67,6 +67,8 @@ private:
 	TMap<ETurnPriority, FITurnManageableWrapper> m_priorityManageableLists;
 
 private:
+	FDelegateHandle m_startDelegateHandle;
+	FDelegateHandle m_endDelegateHandle;
 	ETurnPriority m_curtTurn;
 	uint8 m_bCanExecuteCmd : 1;
 };

@@ -16,6 +16,8 @@ Encoding : UTF-8
 */
 
 #include "FormatTransformer.h"
+#include "SmithCommandFormat.h"
+#include "MapCoord.h"
 
 using namespace UE::MLibrary::MDataStructure;
 

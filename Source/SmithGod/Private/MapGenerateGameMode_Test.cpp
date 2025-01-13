@@ -35,8 +35,6 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
 
 void AMapGenerateGameMode_Test::StartPlay()
 {
-  Super::StartPlay();
-
   m_battleMediator = NewObject<USmithBattleMediator>();
   check((m_battleMediator != nullptr));
 
@@ -82,9 +80,15 @@ void AMapGenerateGameMode_Test::StartPlay()
     }
   }
 
+  Super::StartPlay();
 }
 
 void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
   Super::EndPlay(EndPlayReason);
+}
+
+void AMapGenerateGameMode_Test::StartNewStage()
+{
+  
 }

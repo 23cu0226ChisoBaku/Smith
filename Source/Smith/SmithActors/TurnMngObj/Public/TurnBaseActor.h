@@ -13,6 +13,8 @@ class IBattleCommand;
 class IMoveable;
 class ICanMakeAttack;
 class IAttackable;
+class USmithAIStrategy;
+class USmithAIBehaviorProcessor;
 struct AttackHandle;
 
 namespace UE::Smith
@@ -24,7 +26,7 @@ namespace UE::Smith
 	}
 }
 
-UCLASS()
+UCLASS(Abstract)
 class SMITH_API ATurnBaseActor : public AActor , public ITurnManageable , public ICanCommandMediate
 {
 	GENERATED_BODY()
@@ -53,11 +55,20 @@ public:
 
 protected:
 	void SendMoveCommand(IMoveable*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance);
-	void SendAttackCommand(ICanMakeAttack*, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&);
+	void SendAttackCommand(ICanMakeAttack*, UE::Smith::Battle::EMoveDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&);
 
 	#pragma endregion Interfaces
 	// end of Interfaces
+
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	bool bUseSmithAIProcessor;
+
+protected:
+	UPROPERTY()
+	TObjectPtr<USmithAIBehaviorProcessor> m_aiBehaviorProcessor;
+
+protected:
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
 	
 };
