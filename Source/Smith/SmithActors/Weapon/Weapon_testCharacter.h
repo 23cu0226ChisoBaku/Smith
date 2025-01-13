@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "Weapon_testCharacter.generated.h"
 
+class Weapon;
+
 UCLASS()
 class SMITH_API AWeapon_testCharacter : public APawn
 {
@@ -26,4 +28,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void GetInput(float);
+
+	void SetWeapon(Weapon* pWeapon);;
+
+	Weapon* p_weapon;
 };
