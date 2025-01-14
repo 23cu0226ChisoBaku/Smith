@@ -88,20 +88,25 @@ void AWeapon_testCharacter::SetWeapon(AWeapon* pWeapon)
 
 void AWeapon_testCharacter::UpdateWeaponParams()
 {
+	// ログ出力
 	FParams param = p_weapon->GetParam();
 	MDebug::LogError("before:HP-" + FString::FromInt(param.HP)
 		+ "ATK-" + FString::FromInt(param.ATK)
 		+ "DEF-" + FString::FromInt(param.DEF)
 		+ "CRT-" + FString::FromInt(param.CRT));
 
+	// FParams用意する
 	FParams updateParams = {10, 10, 10, 10};
 	p_weapon->SetParam(updateParams);
+
+	// ログ出力
 	MDebug::LogError("after:HP-" + FString::FromInt(param.HP)
 		+ "ATK-" + FString::FromInt(param.ATK)
 		+ "DEF-" + FString::FromInt(param.DEF)
 		+ "CRT-" + FString::FromInt(param.CRT));
 
 }
+
 void AWeapon_testCharacter::GetAxis(float value)
 {
 	if(value>1.0f) UpdateWeaponParams();
