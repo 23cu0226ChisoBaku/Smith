@@ -274,7 +274,6 @@ void ASmithPlayerActor::attackImpl()
 		for(auto actorPtr : hitActors)
 		{
 			IAttackable* attackable = Cast<IAttackable>(actorPtr);
-			
 		}
 	}
 	if (m_commandMediator.IsValid())

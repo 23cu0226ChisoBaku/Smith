@@ -3,6 +3,8 @@
 #include "SmithActors/TurnMngObj/Public/SmallGolem.h"
 #include "SmithAttackComponent.h"
 #include "SmithPlayerActor.h"
+#include "SmithCommandFormat.h"
+#include "FormatType.h"
 
 #include "Debug.h"
 
@@ -21,16 +23,10 @@ void ASmallGolem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	MDebug::LogWarning("Enemy Tick");
 	// コマンドが送れる状態か
 	if (IsCommandSendable())
 	{
 		m_timer += DeltaTime;
-		MDebug::LogError("Enemy IsCommandSendable");
-	}
-	else
-	{
-		MDebug::LogError("No Sendable");
 	}
 
 	if (m_timer > 0.5f)
@@ -43,13 +39,29 @@ void ASmallGolem::Tick(float DeltaTime)
 		// }
 		if (attack != nullptr)
 		{
-			//SendAttackCommand(m_attackComp, attack, AttackHandle{GetName(), m_atk});
-			//--m_skillCnt;
+					UE::Smith::Battle::FSmithCommandFormat formatTest;
+
+		ESmithFormatType* type = new ESmithFormatType[9];
+		for (int32 i = 0; i < 9; ++i)
+		{
+			if (i != 4)
+			{
+				type[i] = ESmithFormatType::EFFECT;
+			}
+			else
+			{
+				type[i] = ESmithFormatType::CENTER_NO_EFFECT;
+			}
+		}
+		formatTest.SetupFormat(type, 9, 3, 3);
+		SendAttackCommand(m_attackComp, formatTest, AttackHandle{GetName(), m_atk});
+
+		--m_skillCnt;
+		delete type;
 		}
 		else
 		{
 			// 移動の処理
-			//m_moveComp->SetTerminusPos(MoveDirection());
 			SendMoveCommand(m_moveComp,(UE::Smith::Battle::EMoveDirection)MoveDirection(),1);
 		}
 

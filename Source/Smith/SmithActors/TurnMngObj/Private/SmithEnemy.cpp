@@ -18,7 +18,7 @@ ASmithEnemy::ASmithEnemy()
   check((m_moveComp != nullptr));
 
   m_moveComp->SetMoveSpeed(250.0f);
-  MOVE_DISTANCE = 250.0f;
+  MOVE_DISTANCE = 100.0f;
 
   m_attackComp = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Konno Enemy Attack Component"));
 }
@@ -62,13 +62,15 @@ void ASmithEnemy::OnHeal(int32 heal)
 AActor *ASmithEnemy::PlayerCheck(float checkLenth)
 {
   const float rayLenth = MOVE_DISTANCE;
-  const FVector StartLocation = GetActorLocation();
+    const float high = 100.0f;
+  const FVector StartLocation = GetActorLocation() + FVector::UpVector * high;
 
   const FVector EndLocation[4] = {
-      StartLocation + FVector::ForwardVector * rayLenth * checkLenth,
-      StartLocation + FVector::BackwardVector * rayLenth * checkLenth,
-      StartLocation + FVector::RightVector * rayLenth * checkLenth,
-      StartLocation + FVector::LeftVector * rayLenth * checkLenth};
+      StartLocation + FVector::ForwardVector * rayLenth * checkLenth ,
+      StartLocation + FVector::BackwardVector * rayLenth * checkLenth ,
+      StartLocation + FVector::RightVector * rayLenth * checkLenth ,
+      StartLocation + FVector::LeftVector * rayLenth * checkLenth ,
+  };
 
   FHitResult HitResult;
   FCollisionQueryParams CollisionParams;
@@ -94,7 +96,7 @@ AActor *ASmithEnemy::PlayerCheck(float checkLenth)
     HitActor = HitResult.GetActor();
 
     // Playerにヒットしていたら攻撃
-    if (::IsValid(HitActor))
+    if (::IsValid(HitActor) && Cast<IAttackable>(HitActor) != nullptr)
     {
       // デバッグ用レイ
       DrawDebugPoint(GetWorld(), HitResult.ImpactPoint, 10.0f, FColor::Red, false, 1.0f);
@@ -103,14 +105,14 @@ AActor *ASmithEnemy::PlayerCheck(float checkLenth)
       MDebug::LogWarning(HitActor->GetName() + "Object");
       IAttackable *attackable = Cast<IAttackable>(HitActor);
 
-      if (attackable != nullptr)    
+      if (attackable != nullptr)
       {
         MDebug::Log("attackable");
         return HitActor;
       }
       else
       {
-        MDebug::LogError("attack null " + GetName() + " " + HitActor->GetName());
+        MDebug::LogError("attack null " + GetName() + " HitObject " + HitActor->GetName());
         return nullptr;
       }
     }

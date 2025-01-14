@@ -1,6 +1,7 @@
 
 #include "EnhanceCommand.h"
 #include "UObject/WeakInterfacePtr.h"
+#include "IEnhanceable.h"
 #include "EnhanceSystem.h"
 
 #include "Debug.h"
@@ -49,7 +50,7 @@ namespace UE::Smith::Command
         return true;
       }
     private:
-      TWeakInterfacePtr<EnhanceSystem> m_enhance;
+      TWeakInterfacePtr<IEnhanceable> m_enhance;
   };
   #pragma endregion MoveCommand PImpl
   // end of MoveCommand PImpl

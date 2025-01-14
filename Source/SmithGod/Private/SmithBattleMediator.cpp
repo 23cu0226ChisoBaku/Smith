@@ -47,7 +47,6 @@ void USmithBattleMediator::SetupMediator(USmithBattleSubsystem* battleSys, TShar
 
 void USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, UE::Smith::Battle::EMoveDirection moveDirection, uint8 moveDistance)
 {
-
   if (!m_mapMgr.IsValid() || !m_battleSys.IsValid())
   {
     MDebug::LogError("System INVALID!!!");
