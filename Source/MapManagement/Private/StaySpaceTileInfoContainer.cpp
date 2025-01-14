@@ -1,5 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+StaySpaceTileInfoContainer.cpp
+
+Author : MAI ZHICONG
+
+Description : 
+
+Update History: 2025/01/05 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "StaySpaceTileInfoContainer.h"
 #include "UObject/WeakInterfacePtr.h"
@@ -9,6 +23,9 @@ namespace UE::Smith
 {
   namespace Map
   {
+    ///
+    /// @brief FStaySpaceTileInfoContainer実装クラス
+    ///
     class FStaySpaceTileInfoContainer::StaySpaceTileInfoImpl
     {
       public:
@@ -32,6 +49,7 @@ namespace UE::Smith
       private:
         TWeakInterfacePtr<ICanSetOnMap> m_mapObj;
     };
+
     FStaySpaceTileInfoContainer::FStaySpaceTileInfoContainer(ETileType type)
       : FTileInfoContainer(type)
       , m_pImpl(::MakeUnique<StaySpaceTileInfoImpl>())
@@ -51,9 +69,9 @@ namespace UE::Smith
     {
       if (this != &other)
       {
-        TUniquePtr<StaySpaceTileInfoImpl> temp = ::MakeUnique<StaySpaceTileInfoImpl>(*other.m_pImpl);
-
         FTileInfoContainer::operator=(other);
+        // 例外安全
+        TUniquePtr<StaySpaceTileInfoImpl> temp = ::MakeUnique<StaySpaceTileInfoImpl>(*other.m_pImpl);
 
         m_pImpl.Reset();
         m_pImpl = ::MoveTemp(temp);
@@ -88,7 +106,7 @@ namespace UE::Smith
     // TODO not implemented
     void FStaySpaceTileInfoContainer::SetPickable(IPickable* pickable)
     {
-
+      unimplemented()
     }
 
     ICanSetOnMap* FStaySpaceTileInfoContainer::GetMapObject() const
@@ -99,6 +117,7 @@ namespace UE::Smith
     // TODO not implemented
     bool FStaySpaceTileInfoContainer::CanPlacePickable() const
     {
+      unimplemented();
       return false;
     }
 

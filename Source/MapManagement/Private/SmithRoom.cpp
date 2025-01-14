@@ -23,16 +23,19 @@ namespace UE::Smith
 {
   namespace Map
   {
+    ///
+    /// @brief FSmithRoom
+    ///
     // FSmithRoom Implementation
     #pragma region FSmithRoom Implementation
     class FSmithRoom::RoomImpl
     {
+      //---------------------------------------
+      /*
+                      ctorとdtor
+      */
+      //---------------------------------------  
       public:
-        //---------------------------------------
-        /*
-                        ctorとdtor
-        */
-        //---------------------------------------  
         RoomImpl(uint8 sectionIdx)
           : m_roomRect{}
           , m_sectionIdx(sectionIdx)

@@ -1,27 +1,40 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMapObjOperator.h
 
+Author : MAI ZHICONG
+
+Description : マップオブジェクトを操作する(移動など)クラス
+
+Update History: 2025/01/08 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 #include "SmithMapObjOperator.h"
 #include "SmithMap.h"
 #include "SmithMapDataModel.h"
 #include "InvalidValues.h"
 #include "ICanSetOnMap.h"
 #include "MoveDirection.h"
-
 #include "SmithCommandFormat.h"
 #include "FormatType.h"
 #include "FormatTransformer.h"
-
 #include "IAttackable.h"
 
 #include "MLibrary.h"
 
+// 内部使用
 namespace UE::Smith
 {
   namespace Map
   {
     namespace Private
     {
+      // 移動先チェックビット
       static const uint8 DirectionCheckBits[8] = 
       {
         0b0001,     // North
@@ -34,8 +47,11 @@ namespace UE::Smith
         0b1001,     // NorthWest
       };
     }
-
     using namespace UE::Smith::Battle;
+    
+    ///
+    /// @brief FSmithMapObjOperator実装クラス
+    ///
     class FSmithMapObjOperator::MapObjOperatorImpl
     {
       using Model = typename FSmithMapDataModel;
@@ -44,13 +60,10 @@ namespace UE::Smith
           : m_model(nullptr)
           , m_originCoord_World(FVector::ZeroVector)
           , m_mapTileSize(0)
-        {
-
-        }
+        { }
         ~MapObjOperatorImpl()
-        {
+        { }
 
-        }
         void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
         {
           check(m_model.IsValid());
@@ -77,9 +90,9 @@ namespace UE::Smith
             return;
           }
 
+          // オブジェクトの中心座標
           const FMapCoord mapObjOriginCoord = model_shared->OnMapObjsCoordTable[mapObj];
-
-          auto mapCoords = FFormatTransformer::FormatToMapCoord(format, mapObjOriginCoord);
+          UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> mapCoords = FFormatTransformer::FormatToMapCoord(format, mapObjOriginCoord);
 
           for (uint64 y = 0; y < format.GetRow(); ++y)
           {

@@ -399,7 +399,7 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 					UKismetSystemLibrary::QuitEditor();
 				}		
 			#else
-				UKismetSystemLibrary::QuitGame();
+				//UKismetSystemLibrary::QuitGame();
 			#endif
 		}
 

@@ -22,13 +22,19 @@ Encoding : UTF-8
 namespace UE::FSmithRect::Private
 {
   // 矩形の範囲外を超える時のデフォルト値
-  constexpr uint8 OUT_OF_BOUNDS = 0;
+  // 255U
+  constexpr uint8 OUT_OF_BOUNDS = 0xffu;
 }
 
 namespace UE::Smith
 {
 	namespace Map
 	{
+    ///
+    /// @brief FSmithRect実装
+    ///
+    // SmithRect Implementation
+    #pragma region SmithRect Implementation
     class FSmithRect::RectImpl
     {
       //---------------------------------------
@@ -38,12 +44,24 @@ namespace UE::Smith
       //---------------------------------------
       private:
         using FDimension2D_uint8 = typename UE::MLibrary::MDataStructure::TDimension2Array<uint8>;
+
+      //---------------------------------------
+      /*
+                      ctorとdtor
+      */
+      //--------------------------------------- 
       public:
         RectImpl()
           : m_rect{}
         { }
         ~RectImpl()
         { }
+
+        //---------------------------------------
+        /*
+                        コピー
+        */
+        //---------------------------------------
         RectImpl(const RectImpl& other)
           : m_rect(other.m_rect)
         { }
@@ -55,10 +73,9 @@ namespace UE::Smith
           }
           return *this;
         }
-      // SmithRect Implementation
-      #pragma region SmithRect Implementation
+
       public:
-        void GenerateRect(uint8 width, uint8 height, uint8 data)
+        void GenerateRect(uint8 width, uint8 height, uint8 defaultData)
         {
           // ムーブ代入（Move assignment）
           // heightは行（Row）、widthは列（Column）
@@ -67,7 +84,7 @@ namespace UE::Smith
           {
             for (uint64 x = 0; x < m_rect.Column(); ++x)
             {
-              m_rect.At(y, x) = data;
+              m_rect.At(y, x) = defaultData;
             }
           }
         }
@@ -75,6 +92,9 @@ namespace UE::Smith
         {
           if (IsOutOfBounds(x, y))
           {
+            MDebug::LogError("Invalid x or y");
+            MDebug::LogError("Max X:" + FString::FromInt(GetHeight()) + " x = " + FString::FromInt(x));
+            MDebug::LogError("Max Y:" + FString::FromInt(GetWidth()) + " y = " + FString::FromInt(y));
             return;
           }
 
@@ -148,6 +168,7 @@ namespace UE::Smith
     {
       if (this != &other)
       {
+        // 例外安全
         TUniquePtr<RectImpl> implTemp = ::MakeUnique<RectImpl>(*other.m_pImpl);
 
         m_pImpl.Reset();
@@ -170,9 +191,9 @@ namespace UE::Smith
 
       return *this;
     }
-    void FSmithRect::GenerateRect(uint8 width, uint8 height, uint8 data)
+    void FSmithRect::GenerateRect(uint8 width, uint8 height, uint8 defaultData)
     {
-      m_pImpl->GenerateRect(width, height, data);
+      m_pImpl->GenerateRect(width, height, defaultData);
     }
     void FSmithRect::SetRect(uint8 x, uint8 y, uint8 data)
     {

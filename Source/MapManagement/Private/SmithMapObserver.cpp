@@ -1,17 +1,30 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMapObserver.cpp
+
+Author : MAI ZHICONG
+
+Description : マップを観察し処理するクラス(※Smithマップ専用)
+
+Update History: 2025/01/07 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "SmithMapObserver.h"
-
 #include "UObject/WeakInterfacePtr.h"
 #include "SmithEnemyGenerateBluePrint.h"
 #include "MapCoord.h"
 #include "ICanSetOnMap.h"
 #include "SmithMapDataModel.h"
 #include "SmithSection.h"
-
 #include "MLibrary.h"
 
+// 内部使用(シャッフル)
 namespace UE::Smith::Map::Private
 {
   template<typename T>
@@ -33,6 +46,9 @@ namespace UE::Smith
 {
   namespace Map
   {
+    ///
+    /// @brief FSmithMapObserver実装クラス 
+    ///
     class FSmithMapObserver::MapObserverImpl
     {
       public:
@@ -51,6 +67,7 @@ namespace UE::Smith
         {
           using namespace UE::Smith::Map::Private;
 
+          // AssignMapをこの前に呼び出す必要がある
           check(m_model.IsValid())
           if (!m_model.IsValid())
           {
@@ -62,6 +79,7 @@ namespace UE::Smith
             return;
           }
 
+          // マップに置けないプレイヤーだと初期化しない
           ICanSetOnMap* playerMapObj = Cast<ICanSetOnMap>(player);
           if (playerMapObj == nullptr)
           {
@@ -73,6 +91,7 @@ namespace UE::Smith
           {
             return;
           }
+
           TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
           if (!map_shared.IsValid())
           {
@@ -84,6 +103,7 @@ namespace UE::Smith
           const uint8 mapRow = map_shared->GetRow();
           const uint8 mapColumn = map_shared->GetColumn();
 
+          // 空いているタイルの座標を入れる
           TArray<FMapCoord> remainCoords{};
 
           for (uint8 y = 0; y < mapRow; ++y)
@@ -91,7 +111,6 @@ namespace UE::Smith
             for (uint8 x = 0; x < mapColumn; ++x)
             {
               FSmithSection* section = map_shared->GetSection(y, x);
-
               if (section == nullptr)
               {
                 continue;
@@ -110,8 +129,8 @@ namespace UE::Smith
               const uint8 roomLeft = sectionLeft + section->GetRoomLeft();
               const uint8 roomTop = sectionTop + section->GetRoomTop();
 
+              // 今の部屋のタイル情報を入れるコンテナ
               TArray<FMapCoord> roomCoords{};
-
               for (uint8 roomY = 0; roomY < roomHeight; ++roomY)
               {
                 for (uint8 roomX = 0; roomX < roomWidth; ++roomX)
@@ -121,6 +140,7 @@ namespace UE::Smith
                 }
               }   
 
+              // マップのタイル数が生成する敵の数より小さいするとき例外として処理
               check(roomCoords.Num() >= generateBP.InitGenerateCountPerRoom);
               RandomShuffle(roomCoords);
 
@@ -132,9 +152,11 @@ namespace UE::Smith
                 MDebug::LogError("Invalid Enemy BP Path");
                 return;
               }
+
               for (int32 i = 0; i < StaticCast<int32>(generateBP.InitGenerateCountPerRoom); ++i)
               {
                 const FMapCoord mapCoord = roomCoords[i]; 
+                // タイルがモデルに入ってないと処理を中断する
                 if (!model_shared->StaySpaceTable.Contains(mapCoord))
                 {
                   return;
@@ -147,7 +169,7 @@ namespace UE::Smith
                                                         );
                 AActor* enemy = world->SpawnActor<AActor>(subClass, spawnWorldCoord, FRotator::ZeroRotator);
 
-                // TODO
+                // 生成した敵がマップに置けないと処理を中断する
                 ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(enemy);
                 if (mapObj == nullptr)
                 {
@@ -160,6 +182,7 @@ namespace UE::Smith
 
               }
 
+              // 何も入っていない部屋のタイルの座標を入れて、プレイヤー生成するとき使う
               for (int32 i = StaticCast<int32>(generateBP.InitGenerateCountPerRoom); i < roomCoords.Num(); ++ i)
               {
                 remainCoords.Emplace(roomCoords[i]);
@@ -168,9 +191,9 @@ namespace UE::Smith
           }
 
           check(remainCoords.Num() > 0);
-          // プレイヤーを配置
           RandomShuffle(remainCoords);
           
+          // プレイヤーを配置
           const FMapCoord playerMapCoord = remainCoords[0];
           const FVector playerWorldCoord = FVector(
                                                     m_originCoord_World.X + StaticCast<double>(StaticCast<int32>(playerMapCoord.x) * m_mapTileSize),

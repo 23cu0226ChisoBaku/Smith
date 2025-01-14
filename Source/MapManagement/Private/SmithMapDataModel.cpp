@@ -1,8 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMapDataModel.cpp
+
+Author : MAI ZHICONG
+
+Description : マップデータ情報モデル
+
+Update History: 2025/01/06 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "SmithMapDataModel.h"
 #include "InvalidValues.h"
+
 namespace UE::Smith
 {
   namespace Map

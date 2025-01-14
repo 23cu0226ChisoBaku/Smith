@@ -18,24 +18,32 @@ Encoding : UTF-8
 #include "SmithSection.h"
 #include "SmithRect.h"
 #include "SmithRoom.h"
+#include "MLibrary.h"
+
+// Deprecated Include
 #include "SmithConnection.h"
 
-#include "MLibrary.h"
 
 namespace UE::Smith
 {
   namespace Map
   {
-
-    // FSmithSection実装
+    ///
+    /// @brief FSmithSection実装
+    ///
+    // FSmithSection Implementation
     #pragma region FSmithSection Implementation
     class FSmithSection::SectionImpl
     {
+      //---------------------------------------
+      /*
+                      ctorとdtor
+      */
+      //---------------------------------------        
       public:
         SectionImpl(uint8 sectionIdx)
           : m_sectionRect{}
           , m_room(nullptr)
-          , m_connectionIdxs{}
           , m_roomLeft(0)
           , m_roomTop(0)
           , m_sectionIdx(sectionIdx)
@@ -88,24 +96,6 @@ namespace UE::Smith
         bool HasRoom() const
         {
           return m_room.IsValid();
-        }
-        bool IsConnected() const
-        {
-          return m_connectionIdxs.Num() > 0;
-        }
-        void AddConnection(FSmithConnection connection)
-        {
-          if (connection.From != m_sectionIdx)
-          {
-            return;
-          }
-
-          if (m_connectionIdxs.Contains(connection.To))
-          {
-            return;
-          }
-
-          m_connectionIdxs.Emplace(connection.To);
         }
         uint8 GetWidth() const
         {
@@ -168,7 +158,6 @@ namespace UE::Smith
       private:
         FSmithRect m_sectionRect;
         TUniquePtr<FSmithRoom> m_room;
-        TSet<uint8> m_connectionIdxs;
         uint8 m_roomLeft;
         uint8 m_roomTop;
         uint8 m_sectionIdx;
@@ -197,14 +186,21 @@ namespace UE::Smith
     {
       return m_pImpl->HasRoom();
     }
+
+    // Deprecated Interface
+    #pragma region Deprecated Interface
     bool FSmithSection::IsConnected() const
     {
-      return m_pImpl->IsConnected();
+      //return m_pImpl->IsConnected();
+      return false;
     }
     void FSmithSection::AddConnection(FSmithConnection connection)
     {
-      m_pImpl->AddConnection(connection);
+      //m_pImpl->AddConnection(connection);
     }
+    #pragma endregion Deprecated Interface
+    // end of Deprecated Interface
+
     uint8 FSmithSection::GetWidth() const
     {
       return m_pImpl->GetWidth();

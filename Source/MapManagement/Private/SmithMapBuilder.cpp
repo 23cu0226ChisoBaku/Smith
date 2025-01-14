@@ -1,5 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMapBuilder.cpp
+
+Author : MAI ZHICONG
+
+Description : マップを作成するクラス
+
+Update History: 2024/12/31 作成
+							: 2024/01/05 マップモデル作成関数追加
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "SmithMapBuilder.h"
 #include "SmithRect.h"
@@ -9,6 +24,7 @@
 #include "TileType.h"
 #include "MapCoord.h"
 
+// シャッフル関数(内部使用)
 namespace SimpleArrayShuffle::Private
 {
   template<typename T>
@@ -35,23 +51,29 @@ namespace UE::Smith
     FSmithMapBuilder::~FSmithMapBuilder()
     { }
 
-    bool FSmithMapBuilder::Build(FSmithMap* map, const FSmithMapBluePrint& blueprint)
+    bool FSmithMapBuilder::Build(FSmithMap* pMap, const FSmithMapBluePrint& blueprint)
     {
-      if (map == nullptr)
+      if (pMap == nullptr)
       {
         return false;
       }
 
       using namespace SimpleArrayShuffle::Private;
 
-      map->GenerateMap(blueprint.SectionRow, blueprint.SectionColumn, blueprint.SectionWidth, blueprint.SectionHeight, blueprint.SectionGap, StaticCast<uint8>(blueprint.DefaultSectionTileType));
+      pMap->GenerateMap(blueprint.SectionRow, blueprint.SectionColumn, blueprint.SectionWidth, blueprint.SectionHeight, blueprint.SectionGap, StaticCast<uint8>(blueprint.DefaultSectionTileType));
       
-      const uint8 sectionCnt = map->GetSectionCount();
+      const uint8 sectionCnt = pMap->GetSectionCount();
+
+      if (sectionCnt == 0)
+      {
+        return false;
+      }
 
       // 作成する部屋の数を決める
-      const int32 generateRandomRoomCnt = FMath::RandRange(StaticCast<int32>(blueprint.RoomGenerateMinNum),StaticCast<int32>(blueprint.RoomGenerateMaxNum));
-      const int32 generateRoomCnt = generateRandomRoomCnt > sectionCnt ? sectionCnt : generateRandomRoomCnt;
+      const int32 generateRandomRoomCnt = FMath::RandRange(StaticCast<int32>(blueprint.RoomGenerateMinNum), StaticCast<int32>(blueprint.RoomGenerateMaxNum));
+      const int32 generateRoomCnt = (generateRandomRoomCnt > sectionCnt) ? sectionCnt : generateRandomRoomCnt;
       
+      // セクションインデックスをシャッフルし、部屋を作ると作らないセクションを分ける
       TArray<uint8> sectionIdxArr{};
       sectionIdxArr.Reserve(sectionCnt);
       for (uint8 idx = 0; idx < sectionCnt; ++idx)
@@ -60,16 +82,19 @@ namespace UE::Smith
       }
       RandomShuffle(sectionIdxArr);
 
+      // 部屋を作る
       for (int32 i = 0; i < generateRoomCnt; ++i)
       {
-        generateRoom(map, blueprint, sectionIdxArr[i]);
+        generateRoom(pMap, blueprint, sectionIdxArr[i]);
       }
+      // 部屋を作らない（1*1の矩形を配置）
       for (int32 i = generateRoomCnt; i < sectionCnt; ++i)
       {
-        generateJoint(map, blueprint, sectionIdxArr[i]);
+        generateJoint(pMap, blueprint, sectionIdxArr[i]);
       }
 
-      map->ConnectRooms(StaticCast<uint8>(blueprint.DefaultCorridorTileType));
+      // 部屋をつないでいく
+      pMap->ConnectRooms(StaticCast<uint8>(blueprint.DefaultCorridorTileType));
       return true;
     }
 
@@ -94,6 +119,7 @@ namespace UE::Smith
         {
           ETileType tileType = StaticCast<ETileType>(mapRect.GetRect(x, y));
           FMapCoord coord(x, y);
+          // マップ情報を初期化する
           switch (tileType)
           {
             case ETileType::Wall:

@@ -3,7 +3,6 @@
 #include "SmithMapManager.h"
 #include "SmithRect.h"
 #include "SmithMap.h"
-#include "SmithMapObj.h"
 
 #include "ObstacleTileInfoContainer.h"
 #include "StaySpaceTileInfoContainer.h"
