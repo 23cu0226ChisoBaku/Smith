@@ -22,7 +22,7 @@ class SMITH_API IEnhanceable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-virtual void Enhance() = 0;
 // 引数はあとでWeponとItemのポインタに変える
-virtual void SetEnhance(int32,int32) = 0;
+virtual void Enhance(int32,int32) = 0;
+
 };

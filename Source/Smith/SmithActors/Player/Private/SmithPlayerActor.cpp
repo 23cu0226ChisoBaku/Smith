@@ -35,43 +35,44 @@ namespace SmithPlayerActor::Private
 	constexpr double Angle_Per_Direction = 360.0 / (double)ASmithPlayerActor::EDir_Test::DirectionCnt;
 
 	// ベクトルを方向列挙に変換する(X,Yだけ,Zは無視)
-	ASmithPlayerActor::EDir_Test VectorDirToEDir(const FVector& direction)
+	ASmithPlayerActor::EDir_Test VectorDirToEDir(const FVector &direction)
 	{
 		const double dot = direction.Dot(FVector::ForwardVector);
 		const FVector dir = direction.Cross(FVector::ForwardVector);
 
 		// 外積のZによって180補正するかどうかを決める
-		const double newAngle = FMath::RadiansToDegrees(acos(dot)) + (dir.Z > 0.0 ? 180.0 : 0.0); 
+		const double newAngle = FMath::RadiansToDegrees(acos(dot)) + (dir.Z > 0.0 ? 180.0 : 0.0);
 
 		return StaticCast<ASmithPlayerActor::EDir_Test>(round(newAngle / Angle_Per_Direction));
 	}
 }
 
 ASmithPlayerActor::ASmithPlayerActor()
-	: m_springArm(nullptr)
-	, m_cam(nullptr)
-	, m_moveComponent(nullptr)
-	, m_atkComponent(nullptr)
-	, m_commandMediator(nullptr)
-	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
-	, m_camDir(North)
-	, m_actorFaceDir(North)
-	, m_bCanMove(true)
-	, m_bCanAttack(true)
+		: m_springArm(nullptr), 
+		 m_cam(nullptr), 
+		 m_moveComponent(nullptr),
+		 m_atkComponent(nullptr), 
+		 m_commandMediator(nullptr), 
+		 m_hp(SmithPlayerActor::Private::PlayerHP_Temp), 
+		 m_camDir(North), 
+		 m_actorFaceDir(North), 
+		 m_bCanMove(true),
+		 m_bCanAttack(true)
+
 {
 	using namespace SmithPlayerActor::Private;
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultRootComponent"));
 
 	m_springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	check((m_springArm != nullptr))
-	m_springArm->SetupAttachment(RootComponent);
+			m_springArm->SetupAttachment(RootComponent);
 
 	m_cam = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	check((m_cam != nullptr))
-	m_cam->SetupAttachment(m_springArm, USpringArmComponent::SocketName);
+			m_cam->SetupAttachment(m_springArm, USpringArmComponent::SocketName);
 
 	m_springArm->bDoCollisionTest = false;
 	m_springArm->bEnableCameraLag = false;
@@ -94,14 +95,13 @@ ASmithPlayerActor::ASmithPlayerActor()
 
 	m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Smith AttackComponent"));
 	check((m_atkComponent != nullptr));
-
 }
 
 // Called when the game starts or when spawned
 void ASmithPlayerActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// TODO BPで設定できるようにする
 	if (::IsValid(m_springArm))
 	{
@@ -109,10 +109,10 @@ void ASmithPlayerActor::BeginPlay()
 	}
 
 	// Mapping Contextを設定
-	APlayerController* playerCtrl = Cast<APlayerController>(Controller);
+	APlayerController *playerCtrl = Cast<APlayerController>(Controller);
 	check((playerCtrl != nullptr));
 
-	UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerCtrl->GetLocalPlayer());
+	UEnhancedInputLocalPlayerSubsystem *enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerCtrl->GetLocalPlayer());
 	check((enhancedInputSubsystem != nullptr));
 
 	enhancedInputSubsystem->AddMappingContext(m_mappingCtx, 0);
@@ -134,15 +134,14 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 		PrimaryActorTick.bCanEverTick = false;
 		return;
 	}
-
 }
 
 // Called to bind functionality to input
-void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	UEnhancedInputComponent *inputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
 	if (::IsValid(inputComp))
 	{
@@ -153,12 +152,12 @@ void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
-void ASmithPlayerActor::SetCommandMediator(ICommandMediator* mediator)
+void ASmithPlayerActor::SetCommandMediator(ICommandMediator *mediator)
 {
 	m_commandMediator = mediator;
 }
 
-void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
+void ASmithPlayerActor::Move_Input(const FInputActionValue &value)
 {
 	using namespace SmithPlayerActor::Private;
 
@@ -199,7 +198,7 @@ void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
 	moveImpl(StaticCast<UE::Smith::Battle::EMoveDirection>(newDir));
 }
 
-void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
+void ASmithPlayerActor::Attack_Input(const FInputActionValue &value)
 {
 	if (!m_bCanAttack)
 	{
@@ -215,7 +214,7 @@ void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
 }
 
 // TODO Test
-void ASmithPlayerActor::Look_Input(const FInputActionValue& value)
+void ASmithPlayerActor::Look_Input(const FInputActionValue &value)
 {
 	const FVector2D lookInput = value.Get<FVector2D>();
 
@@ -238,14 +237,13 @@ void ASmithPlayerActor::Look_Input(const FInputActionValue& value)
 	updateCamImpl(StaticCast<EDir_Test>(newDir % DirectionCnt));
 }
 
-void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
+void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue &value)
 {
 	OnAttack(
-						{ 
-							TEXT("God"),		// Attack
-						  10,							// Damage
-						}
-					);
+			{
+					TEXT("God"), // Attack
+					10,					 // Damage
+			});
 }
 
 void ASmithPlayerActor::moveImpl(UE::Smith::Battle::EMoveDirection direction)
@@ -255,14 +253,14 @@ void ASmithPlayerActor::moveImpl(UE::Smith::Battle::EMoveDirection direction)
 	if (::IsValid(m_moveComponent) && m_commandMediator.IsValid())
 	{
 		// m_moveComponent->SetTerminusPos(endPos);
-		
+
 		m_commandMediator->SendMoveCommand(this, m_moveComponent, direction, 1);
 	}
 }
 
 void ASmithPlayerActor::attackImpl()
 {
-	TArray<AActor*> hitActors {};
+	TArray<AActor *> hitActors{};
 
 	const FVector atkDir = GetActorForwardVector();
 
@@ -271,9 +269,9 @@ void ASmithPlayerActor::attackImpl()
 	if (searchActorsInDirection(atkDir, hitActors))
 	{
 		// 攻撃できる相手を攻撃コマンドに登録
-		for(auto actorPtr : hitActors)
+		for (auto actorPtr : hitActors)
 		{
-			IAttackable* attackable = Cast<IAttackable>(actorPtr);
+			IAttackable *attackable = Cast<IAttackable>(actorPtr);
 		}
 	}
 	if (m_commandMediator.IsValid())
@@ -281,7 +279,7 @@ void ASmithPlayerActor::attackImpl()
 		// TODO Test Code
 		UE::Smith::Battle::FSmithCommandFormat formatTest;
 
-		ESmithFormatType* type = new ESmithFormatType[9];
+		ESmithFormatType *type = new ESmithFormatType[9];
 		for (int32 i = 0; i < 9; ++i)
 		{
 			if (i != 4)
@@ -335,7 +333,7 @@ void ASmithPlayerActor::updateCamImpl(EDir_Test newDirection)
 	m_springArm->SetWorldRotation(springArmNewRotator);
 }
 
-bool ASmithPlayerActor::searchActorsInDirection(FVector direction, TArray<AActor*>& OutResult)
+bool ASmithPlayerActor::searchActorsInDirection(FVector direction, TArray<AActor *> &OutResult)
 {
 	using namespace SmithPlayerActor::Private;
 
@@ -351,20 +349,19 @@ bool ASmithPlayerActor::searchActorsInDirection(FVector direction, TArray<AActor
 
 	// TODO temp code
 	const float sphereRadius = CAPSULE_HALF_HEIGHT * 0.5f;
-	
+
 	const bool isHit = GetWorld()->SweepMultiByChannel(
-																											hits, 
-																											GetActorLocation(),
-																											endPos,
-																											FQuat::Identity,
-																											ECollisionChannel::ECC_MAX,
-																											FCollisionShape::MakeSphere(sphereRadius),
-																											hitParam
-																										);
+			hits,
+			GetActorLocation(),
+			endPos,
+			FQuat::Identity,
+			ECollisionChannel::ECC_MAX,
+			FCollisionShape::MakeSphere(sphereRadius),
+			hitParam);
 
 	if (isHit)
 	{
-		for(const auto& hitResult: hits)
+		for (const auto &hitResult : hits)
 		{
 			OutResult.Emplace(hitResult.GetActor());
 		}
@@ -373,7 +370,7 @@ bool ASmithPlayerActor::searchActorsInDirection(FVector direction, TArray<AActor
 	return isHit;
 }
 
-void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
+void ASmithPlayerActor::OnAttack(AttackHandle &&attack)
 {
 	m_hp -= attack.AttackPower;
 
@@ -391,7 +388,6 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 		UGameplayStatics::SetGamePaused(GetWorld(), true);
 		UGameplayStatics::OpenLevel(GetWorld(), FName(*(GetWorld()->GetName())), false);
 		DisableInput(Cast<APlayerController>(Controller));
-
 	}
 }
 
