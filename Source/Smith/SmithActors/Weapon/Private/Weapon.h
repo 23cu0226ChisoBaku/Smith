@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include"SmithActors/Weapon/Private/Weapon_Base.h"
-#include"SmithActors/Weapon/Params.h"
+#include "SmithActors/Weapon/Private/Weapon_Base.h"
+#include "SmithActors/Weapon/Params.h"
 #include "Smith/Public/ParamAbsorbable.h"
 #include "Debug.h"
 #include "Weapon.generated.h"
@@ -21,6 +21,8 @@ public:
 	void Tick(float DeltaTime);
 
 	virtual FParams GetParam() override;
+
+	void SetParam(FParams);
 
 	void SwapSkill(int, Skill);
 	void Upgrade(IParamAbsorbable*);
