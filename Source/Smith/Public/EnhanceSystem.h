@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include "IEnhanceable.h"
+#include "IEnhanceSystem.h"
 #include "CoreMinimal.h"
 
-class SMITH_API EnhanceSystem:public IEnhanceable
+class SMITH_API EnhanceSystem:public IEnhanceSystem
 {
 public:
   EnhanceSystem();
 
 public:
-  void Enhance(int32,int32) override final;
+  void Enhance(IEnhanceable*,FParams) override final;
 };

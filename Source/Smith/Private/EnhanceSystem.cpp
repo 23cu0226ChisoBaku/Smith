@@ -7,7 +7,13 @@ EnhanceSystem::EnhanceSystem()
 {
 }
 
-void EnhanceSystem::Enhance(int32 wepon,int32 item)
+void EnhanceSystem::Enhance(IEnhanceable* weapon,FParams item)
 {
-  MDebug::LogError("Enhance Result " + FString::FromInt(wepon + item));
+  FParams enhancePoint = weapon->GetParam();
+  enhancePoint.HP += item.HP;
+  enhancePoint.ATK += item.ATK;
+  enhancePoint.DEF += item.DEF;
+  enhancePoint.CRT += item.CRT;
+
+  weapon->SetParam(enhancePoint);
 }
