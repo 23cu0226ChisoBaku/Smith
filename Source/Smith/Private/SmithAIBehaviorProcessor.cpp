@@ -7,8 +7,8 @@
 
 USmithAIBehaviorProcessor::USmithAIBehaviorProcessor(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
-  , m_strategyContainer{}
   , TickConditionDelegate{}
+  , m_strategyContainer{}
   , m_bIsProcessorRunning(false)
 { }
 
@@ -84,6 +84,10 @@ void USmithAIBehaviorProcessor::Tick(float DeltaTime)
     if (success)
     {
       break;
+    }
+    else
+    {
+      MDebug::LogError("Move next strategy");
     }
     
   }

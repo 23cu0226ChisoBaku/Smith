@@ -8,17 +8,26 @@
 #include "SmithAIBehaviorProcessor.h"
 #include "SmithAIStrategyContainer.h"
 #include "SmithTurnBaseAIAttackStrategy.h"
+#include "SmithTurnBaseAIMoveStrategy.h"
 #include "SmithAttackComponent.h"
+#include "SmithMoveComponent.h"
 #include "FormatInfo_Import.h"
 #include "MLibrary.h"
 
 ATurnActor_Test::ATurnActor_Test()
+  : m_attackStrategy(nullptr)
+  , m_moveStrategy(nullptr)
+  , m_atkComponent(nullptr)
+  , m_moveComponent(nullptr)
 {
   PrimaryActorTick.bCanEverTick = false;
   SetTurnPriority(ETurnPriority::Rival);
 
   m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
   check(m_atkComponent != nullptr);
+
+  m_moveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
+  check(m_moveComponent != nullptr);
 
 }
 
@@ -32,6 +41,7 @@ void ATurnActor_Test::BeginPlay()
     m_attackStrategy->SetOwner(this);
     m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get());
   }
+
   // TODO
 	for (auto& pair : AttackFormatTables)
 	{
@@ -46,11 +56,22 @@ void ATurnActor_Test::BeginPlay()
     }
 	}
 
+  m_moveStrategy = NewObject<USmithTurnBaseAIMoveStrategy>(this);
+  if (m_moveStrategy != nullptr)
+  {
+    m_moveStrategy->SetOwner(this);
+    m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveComponent, 1);
+  }
+
   if (m_aiBehaviorProcessor != nullptr)
   {  
     if (m_attackStrategy != nullptr)
     {
       m_aiBehaviorProcessor->RegisterAIStrategy(0, m_attackStrategy);
+    }
+    if (m_moveStrategy != nullptr)
+    {
+      m_aiBehaviorProcessor->RegisterAIStrategy(-1, m_moveStrategy);
     }
 
 		m_aiBehaviorProcessor->RunBehaviorProcessor();
@@ -71,6 +92,7 @@ void ATurnActor_Test::Tick(float DeltaTime)
 void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 {
   MDebug::LogError("Get Attack by" + handle.AttackName);
+  Destroy();
 }
 
 uint8 ATurnActor_Test::GetOnMapSizeX() const

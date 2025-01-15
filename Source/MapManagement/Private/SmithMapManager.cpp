@@ -1,25 +1,31 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMapManager.cpp
+
+Author : MAI ZHICONG
+
+Description : マップマネージャー
+
+Update History: 2025/01/04 作成
+              : 2025/01/06 クラス分けてマップを操作する
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 #include "SmithMapManager.h"
 #include "SmithRect.h"
 #include "SmithMap.h"
 
-#include "ObstacleTileInfoContainer.h"
-#include "StaySpaceTileInfoContainer.h"
-
 #include "ICanSetOnMap.h"
 #include "IAttackable.h"
 
-#include "FormatTransformer.h"
 #include "MapCoord.h"
 #include "TileType.h"
 #include "SmithCommandFormat.h"
-#include "FormatType.h"
 #include "MoveDirection.h"
-
-#include "UObject/WeakInterfacePtr.h"
-
-#include "InvalidValues.h"
 
 #include "SmithMapBuilder.h"
 #include "SmithMapConstructor.h"
@@ -39,9 +45,17 @@ namespace UE::Smith
   {
     using namespace UE::Smith::Battle;
 
+    ///
+    /// @brief マップマネージャー実装クラス
+    ///
     class FSmithMapManager::MapMgrImpl
     {
       public:
+        //---------------------------------------
+        /*
+                        ctorとdtor
+        */
+        //---------------------------------------
         MapMgrImpl()
           : m_mapBuilder(::MakeUnique<FSmithMapBuilder>())
           , m_mapConstructor(::MakeUnique<FSmithMapConstructor>())
@@ -58,28 +72,32 @@ namespace UE::Smith
         }
         void InitMap(UWorld* world, const FSmithMapBluePrint& mapBP, const FSmithMapConstructionBluePrint& constructionBP)
         {    
-
-          check(::IsValid(world));
-          if (world == nullptr)
-          {
-            return;
-          }
+          // 安全性チェック
+          #pragma region Safe Check
+            check(::IsValid(world));
+            if (world == nullptr)
+            {
+              return;
+            }
+          #pragma endregion Safe Check
 
           TSharedPtr<FSmithMap> temp = ::MakeShared<FSmithMap>();
           
+          // マップを構築する
           if(!m_mapBuilder->Build(temp.Get(), mapBP))
           {
             return;
           }
 
+          // マップモデルを作成する
           TSharedPtr<FSmithMapDataModel> tempModel = m_mapBuilder->GenerateModel(temp);
-          
           check(tempModel.IsValid());
           if (!tempModel.IsValid())
           {
             return;
           }
 
+          // マネージャーを更新
           m_map.Reset();
           m_map = ::MoveTemp(temp);
 
@@ -94,6 +112,8 @@ namespace UE::Smith
         }
         void InitMapObjs(UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
         {
+          // 安全性チェック
+          #pragma region Safe Check
           check((m_mapObserver.IsValid() && m_deployDirector.IsValid()));
           if (!m_mapObserver.IsValid() || !m_deployDirector.IsValid())
           {
@@ -105,6 +125,7 @@ namespace UE::Smith
           {
             return;
           }
+          #pragma endregion Safe Check
 
           TMap<FMapCoord, ICanSetOnMap*> deployMapObjs{};
           m_mapObserver->InitMapObj(deployMapObjs, world, player, generateBP);

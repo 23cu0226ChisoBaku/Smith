@@ -61,7 +61,6 @@ namespace UE::Smith
       using namespace SimpleArrayShuffle::Private;
 
       pMap->GenerateMap(blueprint.SectionRow, blueprint.SectionColumn, blueprint.SectionWidth, blueprint.SectionHeight, blueprint.SectionGap, StaticCast<uint8>(blueprint.DefaultSectionTileType));
-      
       const uint8 sectionCnt = pMap->GetSectionCount();
 
       if (sectionCnt == 0)
@@ -100,10 +99,13 @@ namespace UE::Smith
 
     TSharedPtr<FSmithMapDataModel> FSmithMapBuilder::GenerateModel(TSharedPtr<FSmithMap> pMap)
     {
+      // 安全性チェック
+      #pragma region Safe Check
       if (!pMap.IsValid())
       {
         return nullptr;
       }
+      #pragma endregion Safe Check
       
       TSharedPtr<FSmithMapDataModel> model = ::MakeShared<FSmithMapDataModel>();
 

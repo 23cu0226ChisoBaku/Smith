@@ -10,5 +10,5 @@
 class SMITHMODEL_API InvalidValues
 {
 public:
-	static const FVector MapInvalidCoord;
+	static const FVector MapInvalidCoord_World;
 };

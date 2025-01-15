@@ -43,10 +43,20 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
 
   for (auto& format : m_attackFormatTables)
   {
-    m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), UE::Smith::Battle::EMoveDirection::North, *format.Value, AttackHandle{GetName(), 1}); 
+    if (!format.Value.IsValid())
+    {
+      continue;
+    }
+
+    bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), UE::Smith::Battle::EMoveDirection::North, *format.Value, AttackHandle{GetName(), 1});
+    if (success)
+    {
+      return true;
+    }
   }
 
-  return true;
+  MDebug::LogError("Attack failed");
+  return false;
 }
 
 

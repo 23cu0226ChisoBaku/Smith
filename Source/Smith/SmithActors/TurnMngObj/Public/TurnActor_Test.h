@@ -10,7 +10,9 @@
 
 struct FSmithAIStrategyContainer;
 class USmithTurnBaseAIAttackStrategy;
+class USmithTurnBaseAIMoveStrategy;
 class USmithAttackComponent;
+class USmithMoveComponent;
 /**
  * 
  */
@@ -39,11 +41,12 @@ private:
 	TArray<FSmithAIStrategyContainer> AIRegistrationList;
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USmithTurnBaseAIAttackStrategy> saa;
+	UPROPERTY()
+	TObjectPtr<USmithTurnBaseAIMoveStrategy> m_moveStrategy;
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_atkComponent;
+	UPROPERTY()
+	TObjectPtr<USmithMoveComponent> m_moveComponent;
 
 		// Attack Format
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))

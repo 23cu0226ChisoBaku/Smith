@@ -34,11 +34,16 @@ namespace UE::Smith
 	namespace Battle
 	{
 		class FSmithCommandFormat;
+		enum class EMoveDirection : uint8;
 
 		class SMITHMODEL_API FFormatTransformer
 		{
 			public:
 				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(const FSmithCommandFormat& format, FMapCoord cnMapCoord);
+				static FSmithCommandFormat GetRotatedFormat(const FSmithCommandFormat& src, EMoveDirection direction);
+
+			private:
+				static FSmithCommandFormat getRotatedFormatImpl(const FSmithCommandFormat& src, EMoveDirection direction);
 		};
 	}
 }

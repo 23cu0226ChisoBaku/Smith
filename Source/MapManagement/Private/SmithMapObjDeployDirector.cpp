@@ -1,5 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMapObjDeployDirector.cpp
+
+Author : MAI ZHICONG
+
+Description : マップオブジェクトを新しく配置するクラス
+
+Update History: 2025/01/08 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "SmithMapObjDeployDirector.h"
 #include "SmithMapDataModel.h"
@@ -10,6 +24,10 @@ namespace UE::Smith
 {
   namespace Map
   {
+    ///
+    /// @brief FSmithMapObjDeployDirector実装クラス
+    /// namespace UE::Smith::Map
+    ///
     class FSmithMapObjDeployDirector::DeployDirectorImpl
     {
       public:
@@ -21,8 +39,13 @@ namespace UE::Smith
           m_model.Reset();
         }
       public:
+        void AssignMap(TSharedPtr<FSmithMapDataModel> pModel)
+        {
+          m_model = pModel;
+        }
         void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
         {
+          check(m_model.IsValid())
           if (!m_model.IsValid())
           {
             return;
@@ -44,7 +67,7 @@ namespace UE::Smith
             for (uint8 mapObjSizeY = 0; mapObjSizeY < mapObj->GetOnMapSizeY(); ++mapObjSizeY)
             {
 
-              FMapCoord coord(x + mapObjSizeX, y + mapObjSizeY);
+              const FMapCoord coord(x + mapObjSizeX, y + mapObjSizeY);
               if (!model_shared->StaySpaceTable.Contains(coord))
               {
                 MDebug::LogError("Can not place Obj Here");
@@ -55,17 +78,13 @@ namespace UE::Smith
             }
           }
 
+          // マップに存在しないオブジェクトを追加する
           if (!model_shared->OnMapObjsCoordTable.Contains(mapObj))
           {
             model_shared->OnMapObjsCoordTable.Emplace(mapObj, FMapCoord{x, y});
           }
+        }
 
-          MDebug::LogWarning("Deploy map obj");
-        }
-        void AssignMap(TSharedPtr<FSmithMapDataModel> pModel)
-        {
-          m_model = pModel;
-        }
       private:
         TWeakPtr<FSmithMapDataModel> m_model;
     };
