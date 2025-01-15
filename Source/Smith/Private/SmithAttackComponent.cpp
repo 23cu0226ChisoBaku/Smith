@@ -2,6 +2,8 @@
 
 #include "SmithAttackComponent.h"
 #include "IAttackable.h"
+#include "SmithTestAIAttackStrategy.h"
+#include "SmithCommandFormat.h"
 
 // Sets default values for this component's properties
 USmithAttackComponent::USmithAttackComponent()
@@ -18,15 +20,32 @@ void USmithAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-}
+	// if (AIStrategySubclass != nullptr)
+	// {
+	// 	m_aiStrategy = NewObject<USmithAIAttackStrategy>(this, AIStrategySubclass);
+	// }
 
-void USmithAttackComponent::Attack(AMyPlayerCharacter *player, int32 damage)
-{
-	if (GEngine != nullptr)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "Player to Attack");
-	}
+
+	// if (m_aiStrategy != nullptr)
+	// {
+	// 	for (const auto& pair : AttackFormatTables)
+	// 	{
+	// 		if (!pair.Value.IsValid())
+	// 		{
+	// 			pair.Value.LoadSynchronous();
+	// 		}
+
+	// 		UDataTable* formatTable = pair.Value.Get();
+	// 		if (!::IsValid(formatTable))
+	// 		{
+	// 			continue;
+	// 		}
+
+	// 		m_aiStrategy->RegisterAttackFormat(pair.Key, formatTable);
+	// 	}
+	// }
+
+	// ...
 }
 
 void USmithAttackComponent::SetAttackTarget(IAttackable* target)

@@ -35,8 +35,8 @@ void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
   Super::Initialize(Collection);
   m_bCanExecuteCmd = false;
-
   emptyContainers();
+
   if (m_battleCmdMgr == nullptr)
   {
     m_battleCmdMgr = NewObject<UBattleCommandManager>(GetWorld());
@@ -44,8 +44,8 @@ void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
   check(m_battleCmdMgr != nullptr)
 
-  m_battleCmdMgr->OnStartExecuteEvent.AddUObject(this, &USmithBattleSubsystem::startExecute);
-  m_battleCmdMgr->OnEndExecuteEvent.AddUObject(this, &USmithBattleSubsystem::endExecute);
+  m_startDelegateHandle = m_battleCmdMgr->OnStartExecuteEvent.AddUObject(this, &USmithBattleSubsystem::startExecute);
+  m_endDelegateHandle = m_battleCmdMgr->OnEndExecuteEvent.AddUObject(this, &USmithBattleSubsystem::endExecute);
   
 }
 
@@ -55,6 +55,8 @@ void USmithBattleSubsystem::Deinitialize()
   emptyContainers();
   if (m_battleCmdMgr != nullptr)
   {
+    m_battleCmdMgr->OnStartExecuteEvent.Remove(m_startDelegateHandle);
+    m_battleCmdMgr->OnEndExecuteEvent.Remove(m_endDelegateHandle);
     m_battleCmdMgr->MarkAsGarbage();
   }
 }

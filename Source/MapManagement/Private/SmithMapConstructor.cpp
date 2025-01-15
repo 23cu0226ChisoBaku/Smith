@@ -1,5 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMapConstructor.h
+
+Author : MAI ZHICONG
+
+Description : マップオブジェクトをワールドに配置するクラス
+
+Update History: 2024/01/04 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "SmithMapConstructor.h"
 #include "SmithRect.h"
@@ -12,12 +26,10 @@ namespace UE::Smith
   namespace Map
   {
     FSmithMapConstructor::FSmithMapConstructor()
-    {
-    }
+    { }
 
     FSmithMapConstructor::~FSmithMapConstructor()
-    {
-    }
+    { }
 
     void FSmithMapConstructor::ConstructMap(UWorld* world, const FSmithRect& mapRect, const FSmithMapConstructionBluePrint& blueprint)
     {
@@ -36,6 +48,7 @@ namespace UE::Smith
       const uint8 mapRow = mapRect.GetHeight();
       const uint8 mapColumn = mapRect.GetWidth();
 
+      // オブジェクトリフレクションクラスポインタを入れるバッファ
       TMap<ETileType,UClass*> tileActorBuffer;
       tileActorBuffer.Reserve(blueprint.TileBuildingMaterialPaths.Num());
 
@@ -72,6 +85,7 @@ namespace UE::Smith
                                    blueprint.OriginCoordinate.Z
                                   );
           
+          // オブジェクトを配置
           world->SpawnActor<AActor>(tileActorBuffer[tileType], spawnCoord, FRotator::ZeroRotator);
         }
       }

@@ -14,13 +14,12 @@ namespace UE::Smith
 {
 	namespace Map
 	{
-		class FSmithMap;
 		class FSmithMapManager;
 	}
 }
 
 /**
- * 
+ * ダンジョンゲームモード
  */
 UCLASS()
 class SMITHGOD_API AMapGenerateGameMode_Test : public AGameModeBase
@@ -39,11 +38,15 @@ public:
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	void StartNewStage();
+
+private:
+	/** ダンジョンマップ設計図 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithMapBluePrint MapBluePrint;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithMapConstructionBluePrint MapConstructionBluePrint;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint EnemyGenerateBluePrint;
 	UPROPERTY()
 	TObjectPtr<USmithBattleMediator> m_battleMediator;

@@ -1,5 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+ObstacleInfoContainer.cpp
+
+Author : MAI ZHICONG
+
+Description : 障害物タイルの情報コンテナ
+
+Update History: 2025/01/05 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "ObstacleTileInfoContainer.h"
 

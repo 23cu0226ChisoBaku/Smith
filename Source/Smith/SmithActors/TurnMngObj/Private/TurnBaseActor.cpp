@@ -5,12 +5,15 @@
 #include "IMoveable.h"
 #include "ICommandMediator.h"
 #include "MoveDirection.h"
+#include "SmithAIBehaviorProcessor.h"
+#include "SmithAIStrategy.h"
 
 #include "MLibrary.h"
 
 // Sets default values
 ATurnBaseActor::ATurnBaseActor()
-	: m_commandMediator(nullptr)
+	: m_aiBehaviorProcessor(nullptr)
+	, m_commandMediator(nullptr)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -21,6 +24,15 @@ ATurnBaseActor::ATurnBaseActor()
 void ATurnBaseActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (bUseSmithAIProcessor)
+	{
+		m_aiBehaviorProcessor = NewObject<USmithAIBehaviorProcessor>(this);
+		check(m_aiBehaviorProcessor != nullptr);
+
+		m_aiBehaviorProcessor->TickConditionDelegate.BindUObject(this, &ATurnBaseActor::IsCommandSendable);
+	}
+
 }
 
 // Called every frame
@@ -51,7 +63,7 @@ void ATurnBaseActor::SendMoveCommand(IMoveable* moveable, UE::Smith::Battle::EMo
 	}
 }
 
-void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& handle)
+void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, UE::Smith::Battle::EMoveDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& handle)
 {
 	if (!IsCommandSendable())
 	{
@@ -60,6 +72,6 @@ void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, const UE::Smith
 
 	if (m_commandMediator.IsValid())
 	{
-		m_commandMediator->SendAttackCommand(this, attacker, format, ::MoveTemp(handle));
+		m_commandMediator->SendAttackCommand(this, attacker, direction, format, ::MoveTemp(handle));
 	}
 }

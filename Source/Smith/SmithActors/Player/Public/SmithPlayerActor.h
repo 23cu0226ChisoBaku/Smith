@@ -55,6 +55,7 @@ namespace UE::Smith
 	namespace Battle
 	{
 		enum class EMoveDirection : uint8;
+		class FSmithCommandFormat;
 	}
 }
 #pragma endregion Forward Declaration
@@ -117,14 +118,14 @@ public:
 // Interfaces Override
 #pragma region Interfaces Override
 
-	// IAttackable (SmithActor Module)
+	// IAttackable (Smith Module)
 	#pragma region IAttackable
 	public:
 		void OnAttack(AttackHandle&&) override final;
 	#pragma endregion IAttackable
 	// end of IAttackable
 
-	// ICanCommandMediate (SmithGod Module)
+	// ICanCommandMediate (Smith Module)
 	#pragma region ICanCommandMediate
 	public:
 		void SetCommandMediator(ICommandMediator*) override final;
@@ -145,9 +146,7 @@ private:
 	void attackImpl();
 	void changeFwdImpl(EDir_Test);
 	void updateCamImpl(EDir_Test);
-
-	// TODO Temp function
-	bool searchActorsInDirection(FVector, TArray<AActor*>&);
+	bool registerAttackFormat(const FString&, const UDataTable*);
 
 private:
 	// Input bind Functions
@@ -177,16 +176,22 @@ private:
 	TObjectPtr<USmithAttackComponent> m_atkComponent;
 
 	// Enhanced Input
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputMappingContext> m_mappingCtx;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> m_moveAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> m_attackAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> m_cameraAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> m_debugAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputMappingContext> MappingCtx;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> MoveAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> AttackAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> CameraAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> DebugAction;
+
+	// Attack Format
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
+	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
+
+	TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
 
 	// TODO 仲介でシステムとやり取りする
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
@@ -201,10 +206,8 @@ private:
 #pragma region Private Properties
 private:
 	int32 m_hp;
-
 	EDir_Test m_camDir;
 	EDir_Test m_actorFaceDir;
-	
 	uint8 m_bCanMove : 1;
 	uint8 m_bCanAttack : 1;
 

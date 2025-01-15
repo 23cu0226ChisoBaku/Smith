@@ -5,7 +5,7 @@
 #include <limits>
 
 // 無限大
-const FVector InvalidValues::MapInvalidCoord = FVector( 
+const FVector InvalidValues::MapInvalidCoord_World = FVector( 
                                                         std::numeric_limits<double>::infinity(),
                                                         std::numeric_limits<double>::infinity(),
                                                         std::numeric_limits<double>::infinity()

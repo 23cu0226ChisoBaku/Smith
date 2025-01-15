@@ -8,6 +8,7 @@ Author : MAI ZHICONG
 Description : マップを作成するクラス
 
 Update History: 2024/12/31 作成
+							: 2024/01/05 マップモデル作成関数追加
 
 Version : alpha_1.0.0
 
@@ -42,6 +43,7 @@ namespace UE::Smith
 
 		///
 		/// @brief マップ作成クラス
+		/// namespace UE::Smith::Map
 		///
 		class MAPMANAGEMENT_API FSmithMapBuilder
 		{
@@ -66,9 +68,15 @@ namespace UE::Smith
 				/// @return       作成成功-> true 作成失敗-> false
 				///
 				bool Build(FSmithMap*, const FSmithMapBluePrint&);
+				///
+				/// @brief        マップモデルを作成する
+				/// @param        マップポインター(TSharedPtr)
+				/// @return       作成成功-> モデルへのSharedPtr 作成失敗-> nullptr
+				///
 				TSharedPtr<FSmithMapDataModel> GenerateModel(TSharedPtr<FSmithMap>);
 
 			private:
+				// TODO Temp Code
 				void generateRoom(FSmithMap*, const FSmithMapBluePrint& , uint8 sectionIdx);
 				void generateJoint(FSmithMap*, const FSmithMapBluePrint&, uint8 sectionIdx);
 		};

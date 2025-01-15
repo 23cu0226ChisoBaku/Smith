@@ -24,7 +24,7 @@ Encoding : UTF-8
 
 namespace UE::MLibrary
 {
-	inline namespace MDataStructure
+	namespace MDataStructure
 	{
 		///
 		/// @brief 二次元配列
