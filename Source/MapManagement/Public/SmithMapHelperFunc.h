@@ -2,9 +2,10 @@
 
 #pragma once
 
+#ifndef SMITH_MAP_HELPER_FUNC
+#define SMITH_MAP_HELPER_FUNC
+
 #include "CoreMinimal.h"
-
-
 /**
  * 
  */
@@ -16,14 +17,16 @@ namespace UE::Smith
 
 		class MAPMANAGEMENT_API FSmithMapHelperFunc
 		{
-		// Cannot Create Instance	
-		private:
-			FSmithMapHelperFunc() = delete;
-			~FSmithMapHelperFunc() = delete;
+			// Cannot Create Instance	
+			private:
+				FSmithMapHelperFunc() = delete;
+				~FSmithMapHelperFunc() = delete;
 
-		public:
-			static bool IsInSameRoom(FSmithMap*, uint8 x1, uint8 y1, uint8 x2, uint8 y2);
-			static bool IsInSameSection(FSmithMap*, uint8 x1, uint8 y1, uint8 x2, uint8 y2);
+			public:
+				static bool IsInSameRoom(FSmithMap*, uint8 x1, uint8 y1, uint8 x2, uint8 y2);
+				static bool IsInSameSection(FSmithMap*, uint8 x1, uint8 y1, uint8 x2, uint8 y2);
 		};
 	}
 }
+
+#endif

@@ -324,6 +324,14 @@ namespace UE::Smith
           const uint8 sectionTop = rowIdx * m_sectionHeight + (rowIdx + 1) * m_sectionGap;  
           return sectionTop;
         }
+        uint8 GetMapWidth() const
+        {
+          return m_mapRect.GetWidth();
+        }
+        uint8 GetMapHeight() const
+        {
+          return m_mapRect.GetHeight();
+        }
       // TODO プライベート関数にする意味がない
       private:
         ///
@@ -508,6 +516,14 @@ namespace UE::Smith
     uint8 FSmithMap::GetSectionTop(uint8 rowIdx) const
     {
       return m_pImpl->GetSectionTop(rowIdx);
+    }
+    uint8 FSmithMap::GetMapWidth() const
+    {
+      return m_pImpl->GetMapWidth();
+    }
+    uint8 FSmithMap::GetMapHeight() const
+    {
+      return m_pImpl->GetMapHeight();
     }
     #pragma endregion FSmithMap Interface
     // end of FSmithMap Interface

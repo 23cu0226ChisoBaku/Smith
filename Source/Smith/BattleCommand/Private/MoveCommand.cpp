@@ -66,7 +66,7 @@ namespace UE::Smith::Command
   MoveCommand::~MoveCommand()
   {
     m_moveImpl.Reset();
-    memset(this, 0, sizeof(this));
+    memset(this, 0, sizeof(*this));
   }
 
   void MoveCommand::Start()

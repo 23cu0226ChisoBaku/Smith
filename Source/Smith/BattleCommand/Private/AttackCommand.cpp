@@ -76,7 +76,7 @@ namespace UE::Smith::Command
   AttackCommand::~AttackCommand()
   {
     m_attackImpl.Reset();
-    memset(this, 0 , sizeof(this));
+    memset(this, 0 , sizeof(*this));
   }
 
   void AttackCommand::Start()

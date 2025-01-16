@@ -129,6 +129,8 @@ namespace UE::Smith
 					/// @return									セクションの上座標
 					///
 					uint8 GetSectionTop(uint8 rowIdx) const;
+					uint8 GetMapWidth() const;
+					uint8 GetMapHeight() const;
 			#pragma endregion FSmithMap Interface
 			// end of FSmithMap Interface
 			private:

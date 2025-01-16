@@ -23,6 +23,7 @@ Encoding : UTF-8
 #include "SmithMapDataModel.h"
 #include "SmithSection.h"
 #include "Direction.h"
+#include "SmithMapHelperFunc.h"
 #include "MLibrary.h"
 
 // 内部使用(シャッフル)
@@ -246,6 +247,12 @@ namespace UE::Smith
             return false;
           }
 
+          chaseTarget_internal(outChaseDirection, chaser, target, chaseRadius);
+          if (outChaseDirection == EDirection::Invalid)
+          {
+            return false;
+          }
+          
           return true;
         }
 
@@ -274,7 +281,179 @@ namespace UE::Smith
           const uint8 chaserCoordY = model_shared->OnMapObjsCoordTable[chaser].y;
           const uint8 targetCoordX = model_shared->OnMapObjsCoordTable[target].x;
           const uint8 targetCoordY = model_shared->OnMapObjsCoordTable[target].y;
-          return true;
+
+          return FSmithMapHelperFunc::IsInSameSection(map_shared.Get(), chaserCoordX, chaserCoordY, targetCoordX, targetCoordY);
+        }
+        void chaseTarget_internal(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
+        {
+          if (!m_model.IsValid()) [[unlikely]]
+          {
+            MDebug::LogError("model invalid --- chaseTarget_internal");
+            return;
+          } 
+
+          TSharedPtr<FSmithMapDataModel> model_shared = m_model.Pin();
+          if (!model_shared->Map.IsValid()) [[unlikely]]
+          {
+            MDebug::LogError("map invalid --- chaseTarget_internal");
+            return;
+          } 
+          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+
+          const uint8 chaserCoordX = model_shared->OnMapObjsCoordTable[chaser].x;
+          const uint8 chaserCoordY = model_shared->OnMapObjsCoordTable[chaser].y;
+          const uint8 mapWidth = map_shared->GetMapWidth();
+          const uint8 mapHeight = map_shared->GetMapHeight();
+
+          int32 chaseCoordX_Offset = chaseRadius;
+          int32 chaseCoordY_Offset = 0;
+          bool bChaseSucceed = false;
+
+          // TODO Need Comment Immediately
+          while (chaseCoordX_Offset > 0)
+          {
+            {
+              const int32 checkMapCoordX = StaticCast<int32>(chaserCoordX) + chaseCoordX_Offset;
+              const int32 checkMapCoordY = StaticCast<int32>(chaserCoordY) + chaseCoordY_Offset;
+              if ((checkMapCoordX >= 0 && checkMapCoordX < StaticCast<int32>(mapWidth))
+                  || (checkMapCoordY >= 0 || checkMapCoordY < StaticCast<int32>(mapHeight))
+                )
+              {
+                const FMapCoord checkMapCoord{StaticCast<uint8>(checkMapCoordX), StaticCast<uint8>(checkMapCoordY)};  
+                if (model_shared->StaySpaceTable.Contains(checkMapCoord))
+                {
+                  if (model_shared->StaySpaceTable[checkMapCoord]->GetMapObject() == target)
+                  {
+                    bChaseSucceed = true;
+                    break;
+                  }
+                }
+              }
+            }
+
+            {
+              const int32 checkMapCoordX_Reverse = StaticCast<int32>(chaserCoordX) - chaseCoordY_Offset;
+              const int32 checkMapCoordY_Reverse = StaticCast<int32>(chaserCoordY) - chaseCoordY_Offset;
+              
+              if ((checkMapCoordX_Reverse >= 0 && checkMapCoordX_Reverse < StaticCast<int32>(mapWidth))
+                  || (checkMapCoordY_Reverse >= 0 || checkMapCoordY_Reverse < StaticCast<int32>(mapHeight))
+                )
+              {
+                const FMapCoord checkMapCoord_Reverse{StaticCast<uint8>(checkMapCoordX_Reverse), StaticCast<uint8>(checkMapCoordY_Reverse)};  
+                if (model_shared->StaySpaceTable.Contains(checkMapCoord_Reverse))
+                {
+                  if (model_shared->StaySpaceTable[checkMapCoord_Reverse]->GetMapObject() == target)
+                  {
+                    chaseCoordX_Offset *= -1;
+                    chaseCoordY_Offset *= -1;
+                    bChaseSucceed = true;
+                    break;
+                  }
+                }
+              }
+            }
+            --chaseCoordX_Offset;
+            ++chaseCoordY_Offset;
+          }
+
+          if (!bChaseSucceed)
+          {
+            while (chaseCoordX_Offset > -StaticCast<int32>(chaseRadius))
+            {
+              {
+                const int32 checkMapCoordX = StaticCast<int32>(chaserCoordX) + chaseCoordX_Offset;
+                const int32 checkMapCoordY = StaticCast<int32>(chaserCoordY) + chaseCoordY_Offset;
+                if ((checkMapCoordX >= 0 && checkMapCoordX < StaticCast<int32>(mapWidth))
+                    || (checkMapCoordY >= 0 || checkMapCoordY < StaticCast<int32>(mapHeight))
+                  )
+                {
+                  const FMapCoord checkMapCoord{StaticCast<uint8>(checkMapCoordX), StaticCast<uint8>(checkMapCoordY)};  
+                  if (model_shared->StaySpaceTable.Contains(checkMapCoord))
+                  {
+                    if (model_shared->StaySpaceTable[checkMapCoord]->GetMapObject() == target)
+                    {
+                      bChaseSucceed = true;
+                      break;
+                    }
+                  }
+                }
+              }
+
+              {
+                const int32 checkMapCoordX_Reverse = StaticCast<int32>(chaserCoordX) - chaseCoordY_Offset;
+                const int32 checkMapCoordY_Reverse = StaticCast<int32>(chaserCoordY) - chaseCoordY_Offset;
+                
+                if ((checkMapCoordX_Reverse >= 0 && checkMapCoordX_Reverse < StaticCast<int32>(mapWidth))
+                    || (checkMapCoordY_Reverse >= 0 || checkMapCoordY_Reverse < StaticCast<int32>(mapHeight))
+                  )
+                {
+                  const FMapCoord checkMapCoord_Reverse{StaticCast<uint8>(checkMapCoordX_Reverse), StaticCast<uint8>(checkMapCoordY_Reverse)};  
+                  if (model_shared->StaySpaceTable.Contains(checkMapCoord_Reverse))
+                  {
+                    if (model_shared->StaySpaceTable[checkMapCoord_Reverse]->GetMapObject() == target)
+                    {
+                      chaseCoordX_Offset *= -1;
+                      chaseCoordY_Offset *= -1;
+                      bChaseSucceed = true;
+                      break;
+                    }
+                  }
+                }
+              }
+              --chaseCoordX_Offset;
+              --chaseCoordY_Offset;
+            }
+          }
+
+          if (!bChaseSucceed)
+          {
+            outChaseDirection = EDirection::Invalid;
+            return;
+          }
+
+          check(((chaseCoordX_Offset != 0) && (chaseCoordY_Offset != 0)));
+
+          if (chaseCoordX_Offset > 0)
+          {
+            if (chaseCoordY_Offset > 0)
+            {
+              outChaseDirection = EDirection::NorthEast;
+            }
+            else if (chaseCoordY_Offset < 0)
+            {
+              outChaseDirection = EDirection::SouthEast;
+            }
+            else
+            {
+              outChaseDirection = EDirection::East;
+            }
+          }
+          else if (chaseCoordX_Offset < 0)
+          {
+            if (chaseCoordY_Offset > 0)
+            {
+              outChaseDirection = EDirection::NorthWest;
+            }
+            else if (chaseCoordY_Offset < 0)
+            {
+              outChaseDirection = EDirection::SouthWest;
+            }
+            else
+            {
+              outChaseDirection = EDirection::West;
+            }
+          }
+          else
+          {
+            if (chaseCoordY_Offset > 0)
+            {
+              outChaseDirection = EDirection::North;
+            }
+            else if (chaseCoordY_Offset < 0)
+            {
+              outChaseDirection = EDirection::South;
+            } 
+          }
 
         }
       private:

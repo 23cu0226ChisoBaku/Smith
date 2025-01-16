@@ -4,7 +4,6 @@
 #include "SmithMapHelperFunc.h"
 #include "SmithSection.h"
 #include "SmithMap.h"
-#include "SmithMapHelperFunc.h"
 
 namespace UE::Smith
 {
@@ -17,7 +16,7 @@ namespace UE::Smith
         return false;
       }
 
-      if (!IsInSameSection(map, x1, y1, x2, y2));
+      if (!IsInSameSection(map, x1, y1, x2, y2))
       {
         return false;
       }

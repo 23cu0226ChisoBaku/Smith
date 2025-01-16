@@ -35,5 +35,7 @@ bool USmithTurnBaseAIMoveStrategy::executeImpl()
     return false;
   }
 
+  EDirection moveDir = EDirection::Invalid;
+
   return m_mediator->SendMoveCommand(GetOwner(), m_move.Get(), EDirection::North, m_moveSpeed);
 }
