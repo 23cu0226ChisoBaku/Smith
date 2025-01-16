@@ -34,9 +34,11 @@ namespace UE::Smith
 	namespace Battle
 	{
     class FSmithCommandFormat;
-    enum class EMoveDirection : uint8;
   }
 }
+
+enum class EDirection : uint8;
+
 struct FMapCoord;
 struct FSmithMapBluePrint;
 struct FSmithMapConstructionBluePrint;
@@ -127,7 +129,7 @@ namespace UE::Smith
         /// @param moveDistance                   移動距離(何マス分)
         /// @param FVector                        移動先の座標
         ///
-        void MoveMapObj(ICanSetOnMap*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance, FVector&);
+        void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
 			#pragma endregion FSmithMapManager Interface
 			// end of FSmithMapManager Interface
       private:

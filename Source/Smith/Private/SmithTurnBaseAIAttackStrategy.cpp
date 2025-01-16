@@ -4,7 +4,7 @@
 #include "SmithTurnBaseAIAttackStrategy.h"
 #include "ICommandMediator.h"
 #include "ICanMakeAttack.h"
-#include "MoveDirection.h"
+#include "Direction.h"
 #include "AttackHandle.h"
 #include "MLibrary.h"
 
@@ -48,7 +48,7 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
       continue;
     }
 
-    bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), UE::Smith::Battle::EMoveDirection::North, *format.Value, AttackHandle{GetName(), 1});
+    bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), EDirection::North, *format.Value, AttackHandle{GetName(), 1});
     if (success)
     {
       return true;

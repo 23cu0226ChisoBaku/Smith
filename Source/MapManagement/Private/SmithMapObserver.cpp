@@ -22,6 +22,7 @@ Encoding : UTF-8
 #include "ICanSetOnMap.h"
 #include "SmithMapDataModel.h"
 #include "SmithSection.h"
+#include "Direction.h"
 #include "MLibrary.h"
 
 // 内部使用(シャッフル)
@@ -69,7 +70,7 @@ namespace UE::Smith
 
           // AssignMapをこの前に呼び出す必要がある
           check(m_model.IsValid())
-          if (!m_model.IsValid())
+          if (!m_model.IsValid()) [[unlikely]]
           {
             return;
           }
@@ -207,6 +208,75 @@ namespace UE::Smith
           m_player = playerMapObj;
           m_generateBP = generateBP;
         }
+        bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
+        {
+          outChaseDirection = EDirection::Invalid;
+
+          check(m_model.IsValid())
+          if (!m_model.IsValid())
+          {
+            return false;
+          }
+          // TODO
+          // Chase Player Use Only
+          if (!m_player.IsValid() || m_player != target)
+          {
+            return false;
+          }
+
+          if (!IS_UINTERFACE_VALID(chaser) || !IS_UINTERFACE_VALID(target) || chaseRadius == 0)
+          {
+            return false;
+          }
+
+          TSharedPtr<FSmithMapDataModel> model_shared = m_model.Pin();
+          if (!model_shared.IsValid())
+          {
+            return false;
+          }
+
+          if (!model_shared->OnMapObjsCoordTable.Contains(chaser)
+              || !model_shared->OnMapObjsCoordTable.Contains(target))
+          {
+            return false; 
+          }
+
+          if (!isInSameSection(chaser, target))
+          {
+            return false;
+          }
+
+          return true;
+        }
+
+      private:
+        bool isInSameSection(ICanSetOnMap* chaser, ICanSetOnMap* target)
+        {
+          if (!IS_UINTERFACE_VALID(chaser) || !IS_UINTERFACE_VALID(target)) [[unlikely]]
+          {
+            return false;
+          }
+          TSharedPtr<FSmithMapDataModel> model_shared = m_model.Pin();
+          if (!model_shared->OnMapObjsCoordTable.Contains(chaser)
+              || !model_shared->OnMapObjsCoordTable.Contains(target)) [[unlikely]]
+          {
+            return false; 
+          }
+
+          if (!model_shared->Map.IsValid())
+          {
+            MDebug::LogError("Invalid Map --- SmithMapObserver->isInSameRoom");
+            return false;
+          }
+          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+
+          const uint8 chaserCoordX = model_shared->OnMapObjsCoordTable[chaser].x;
+          const uint8 chaserCoordY = model_shared->OnMapObjsCoordTable[chaser].y;
+          const uint8 targetCoordX = model_shared->OnMapObjsCoordTable[target].x;
+          const uint8 targetCoordY = model_shared->OnMapObjsCoordTable[target].y;
+          return true;
+
+        }
       private:
         TWeakPtr<FSmithMapDataModel> m_model;
         TWeakInterfacePtr<ICanSetOnMap> m_player;
@@ -250,9 +320,9 @@ namespace UE::Smith
     {
 
     }
-    void FSmithMapObserver::ChaseTarget(ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
+    bool FSmithMapObserver::ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
     {
-
+      return m_pImpl->ChaseTarget(outChaseDirection, chaser, target, chaseRadius);
     }
 
   }

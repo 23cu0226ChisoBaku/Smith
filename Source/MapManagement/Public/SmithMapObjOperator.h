@@ -28,12 +28,12 @@ Encoding : UTF-8
 //---------------------------------------
 class IAttackable;
 class ICanSetOnMap;
+enum class EDirection : uint8;
 namespace UE::Smith
 {
 	namespace Battle
 	{
 		class FSmithCommandFormat;
-		enum class EMoveDirection : uint8;
 	}
 }
 
@@ -104,7 +104,7 @@ namespace UE::Smith
 				/// @param moveDistance 						移動距離
 				/// @param FVector									移動先の座標
 				///
-				void MoveMapObj(ICanSetOnMap*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance, FVector&);
+				void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
 			#pragma endregion FSmithMapObjOperator Interface
 			// end of FSmithMapObjOperator Interface
 			private:

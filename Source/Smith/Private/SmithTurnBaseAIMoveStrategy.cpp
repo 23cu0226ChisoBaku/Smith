@@ -4,7 +4,7 @@
 #include "SmithTurnBaseAIMoveStrategy.h"
 #include "ICommandMediator.h"
 #include "IMoveable.h"
-#include "MoveDirection.h"
+#include "Direction.h"
 #include "MLibrary.h"
 
 USmithTurnBaseAIMoveStrategy::USmithTurnBaseAIMoveStrategy(const FObjectInitializer& ObjectInitializer)
@@ -30,11 +30,10 @@ void USmithTurnBaseAIMoveStrategy::BeginDestroy()
 
 bool USmithTurnBaseAIMoveStrategy::executeImpl()
 {
-  using namespace UE::Smith::Battle;
   if (!m_mediator.IsValid() || !m_move.IsValid())
   {
     return false;
   }
 
-  return m_mediator->SendMoveCommand(GetOwner(), m_move.Get(), EMoveDirection::North, m_moveSpeed);
+  return m_mediator->SendMoveCommand(GetOwner(), m_move.Get(), EDirection::North, m_moveSpeed);
 }

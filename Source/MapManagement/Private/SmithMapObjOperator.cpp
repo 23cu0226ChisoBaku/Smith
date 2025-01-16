@@ -19,7 +19,7 @@ Encoding : UTF-8
 #include "SmithMapDataModel.h"
 #include "InvalidValues.h"
 #include "ICanSetOnMap.h"
-#include "MoveDirection.h"
+#include "Direction.h"
 #include "SmithCommandFormat.h"
 #include "FormatType.h"
 #include "FormatTransformer.h"
@@ -154,7 +154,7 @@ namespace UE::Smith
             }
           }
         }
-        void MoveMapObj(ICanSetOnMap* mapObj, EMoveDirection moveDirection, uint8 moveDistance, FVector& destination)
+        void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
           // 安全性チェック
           #pragma region Safe Check
@@ -174,7 +174,7 @@ namespace UE::Smith
           // end of Safe Check
 
           const uint8 moveDirectionCheck_bitsIdx = StaticCast<uint8>(moveDirection);
-          if (moveDirectionCheck_bitsIdx > StaticCast<uint8>(EMoveDirection::DirectionCount))
+          if (moveDirectionCheck_bitsIdx > StaticCast<uint8>(EDirection::DirectionCount))
           {
             return;
           }
@@ -429,7 +429,7 @@ namespace UE::Smith
     {
       m_pImpl->FindAttackableMapObjs(outActors, mapObj, format);
     }
-    void FSmithMapObjOperator::MoveMapObj(ICanSetOnMap* mapObj, UE::Smith::Battle::EMoveDirection moveDirection, uint8 moveDistance, FVector& destination)
+    void FSmithMapObjOperator::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     { 
       m_pImpl->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
     }

@@ -34,8 +34,8 @@ public:
 	void SetupMediator(USmithBattleSubsystem*, TSharedPtr<MapManager>);
 
 public:
-	bool SendMoveCommand(AActor*, IMoveable*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance) override final;
-	bool SendAttackCommand(AActor*, ICanMakeAttack*, UE::Smith::Battle::EMoveDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&) override final;
+	bool SendMoveCommand(AActor*, IMoveable*, EDirection, uint8 moveDistance) override final;
+	bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&) override final;
 
 private:
 	UPROPERTY()

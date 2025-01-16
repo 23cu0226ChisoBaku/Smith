@@ -25,7 +25,7 @@ Encoding : UTF-8
 #include "MapCoord.h"
 #include "TileType.h"
 #include "SmithCommandFormat.h"
-#include "MoveDirection.h"
+#include "Direction.h"
 
 #include "SmithMapBuilder.h"
 #include "SmithMapConstructor.h"
@@ -144,7 +144,7 @@ namespace UE::Smith
         {
           m_mapOperator->FindAttackableMapObjs(outActors, mapObj, format);
         }
-        void MoveMapObj(ICanSetOnMap* mapObj, EMoveDirection moveDirection, uint8 moveDistance, FVector& destination)
+        void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
           m_mapOperator->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
         }
@@ -180,7 +180,7 @@ namespace UE::Smith
     {
       m_pImpl->FindAttackableMapObjs(outActors, mapObj, format);
     } 
-    void FSmithMapManager::MoveMapObj(ICanSetOnMap* mapObj, UE::Smith::Battle::EMoveDirection moveDirection, uint8 moveDistance, FVector& destination)
+    void FSmithMapManager::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     {
       return m_pImpl->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
     }

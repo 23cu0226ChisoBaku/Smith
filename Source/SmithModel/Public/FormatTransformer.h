@@ -22,6 +22,7 @@ Encoding : UTF-8
 #include "CoreMinimal.h"
 
 struct FMapCoord;
+enum class EDirection : uint8;
 
 namespace UE::MLibrary::MDataStructure
 {
@@ -34,16 +35,16 @@ namespace UE::Smith
 	namespace Battle
 	{
 		class FSmithCommandFormat;
-		enum class EMoveDirection : uint8;
+
 
 		class SMITHMODEL_API FFormatTransformer
 		{
 			public:
 				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(const FSmithCommandFormat& format, FMapCoord cnMapCoord);
-				static FSmithCommandFormat GetRotatedFormat(const FSmithCommandFormat& src, EMoveDirection direction);
+				static FSmithCommandFormat GetRotatedFormat(const FSmithCommandFormat& src, EDirection direction);
 
 			private:
-				static FSmithCommandFormat getRotatedFormatImpl(const FSmithCommandFormat& src, EMoveDirection direction);
+				static FSmithCommandFormat getRotatedFormatImpl(const FSmithCommandFormat& src, EDirection direction);
 		};
 	}
 }

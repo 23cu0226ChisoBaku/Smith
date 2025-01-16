@@ -29,6 +29,7 @@ Encoding : UTF-8
 class ICanSetOnMap;
 struct FSmithEnemyGenerateBluePrint;
 struct FMapCoord;
+enum class EDirection : uint8;
 
 namespace UE::Smith
 {
@@ -94,7 +95,7 @@ namespace UE::Smith
 				/// @brief 未使用
 				void GenerateNewEnemy();
 				/// @brief 未使用
-				void ChaseTarget(ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius);
+				bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius);
 			#pragma endregion FSmithMapObserver Interface
 			// end of FSmithMapObserver Interface
 			private:

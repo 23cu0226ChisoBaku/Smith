@@ -273,6 +273,34 @@ namespace UE::Smith
           return m_sections[sectionIdx].Get();
         }
 
+        FSmithSection* GetSectionByCoord(uint8 x, uint8 y) const
+        {
+          // 入力値チェック
+          if (x >= m_mapRect.GetWidth() || y >= m_mapRect.GetHeight())
+          {
+            return nullptr;
+          }
+
+          // 座標がギャップの範囲内にあるか（あったらnullptr返し）
+          if ((x % (m_sectionWidth + m_sectionGap)) < m_sectionGap 
+              || (y % (m_sectionHeight + m_sectionGap)) < m_sectionGap)
+          {
+            return nullptr;
+          }
+
+          const uint8 sectionRow = y / (m_sectionHeight + m_sectionGap);
+          const uint8 sectionColumn = x / (m_sectionWidth + m_sectionGap);
+          const uint8 sectionIdx = sectionRow * m_column + sectionColumn;
+
+          // セクションIDが存在しない場合
+          if (!m_sections.Contains(sectionIdx))
+          {
+            return nullptr;
+          }
+
+          return m_sections[sectionIdx].Get();
+        }
+
         uint8 GetSectionLeft(uint8 columnIdx) const
         {          
           // 入力値チェック（無効値255u）
@@ -468,6 +496,10 @@ namespace UE::Smith
     FSmithSection* FSmithMap::GetSection(uint8 rowIdx, uint8 columnIdx) const
     {
       return m_pImpl->GetSection(rowIdx, columnIdx);
+    }
+    FSmithSection* FSmithMap::GetSectionByCoord(uint8 x, uint8 y) const
+    {
+      return m_pImpl->GetSectionByCoord(x, y);
     }
     uint8 FSmithMap::GetSectionLeft(uint8 columnIdx) const
     {

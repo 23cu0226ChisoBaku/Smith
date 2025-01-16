@@ -16,7 +16,7 @@
 #include "AttackHandle.h"
 #include "SmithCommandFormat.h"
 #include "FormatType.h"
-#include "MoveDirection.h"
+#include "Direction.h"
 #include "FormatInfo_Import.h"
 
 #include "ICommandMediator.h"
@@ -201,7 +201,7 @@ void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
 
 	const EDir_Test newDir = VectorDirToEDir(FVector{directionX, directionY, 0.0});
 	changeFwdImpl(newDir);
-	moveImpl(StaticCast<UE::Smith::Battle::EMoveDirection>(newDir));
+	moveImpl(StaticCast<EDirection>(newDir));
 }
 
 void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
@@ -253,7 +253,7 @@ void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 					);
 }
 
-void ASmithPlayerActor::moveImpl(UE::Smith::Battle::EMoveDirection direction)
+void ASmithPlayerActor::moveImpl(EDirection direction)
 {
 	// 移動コマンドを出す
 	if (::IsValid(m_moveComponent) && m_commandMediator.IsValid())
@@ -280,7 +280,7 @@ void ASmithPlayerActor::attackImpl()
 
 		if (m_normalAttackFormatBuffer.Contains(attackKey) && m_normalAttackFormatBuffer[attackKey].IsValid())
 		{
-			m_commandMediator->SendAttackCommand(this, m_atkComponent, StaticCast<UE::Smith::Battle::EMoveDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{GetName(), 3});
+			m_commandMediator->SendAttackCommand(this, m_atkComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{GetName(), 3});
 		}
 	}
 }

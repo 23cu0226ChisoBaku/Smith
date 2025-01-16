@@ -49,12 +49,12 @@ class IBattleCommand;
 
 // SmithActor Module
 struct AttackHandle;
+enum class EDirection : uint8;
 
 namespace UE::Smith
 {
 	namespace Battle
 	{
-		enum class EMoveDirection : uint8;
 		class FSmithCommandFormat;
 	}
 }
@@ -142,7 +142,7 @@ public:
 // Private Functions
 #pragma region Private Functions
 private:
-	void moveImpl(UE::Smith::Battle::EMoveDirection);
+	void moveImpl(EDirection);
 	void attackImpl();
 	void changeFwdImpl(EDir_Test);
 	void updateCamImpl(EDir_Test);

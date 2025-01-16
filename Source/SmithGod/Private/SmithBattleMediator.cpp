@@ -16,7 +16,7 @@
 
 #include "SmithCommandFormat.h"
 #include "FormatTransformer.h"
-#include "MoveDirection.h"
+#include "Direction.h"
 
 #include "InvalidValues.h"
 
@@ -46,7 +46,7 @@ void USmithBattleMediator::SetupMediator(USmithBattleSubsystem* battleSys, TShar
   
 }
 
-bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, UE::Smith::Battle::EMoveDirection moveDirection, uint8 moveDistance)
+bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, EDirection moveDirection, uint8 moveDistance)
 {
   if (!m_mapMgr.IsValid() || !m_battleSys.IsValid())
   {
@@ -84,7 +84,7 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, U
 
 }
 
-bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, UE::Smith::Battle::EMoveDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle)
+bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle)
 {
   if (!::IsValid(requester))
   {
