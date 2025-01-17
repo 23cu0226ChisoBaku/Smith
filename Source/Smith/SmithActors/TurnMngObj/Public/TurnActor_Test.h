@@ -4,13 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "TurnBaseActor.h"
+#include "IAttackable.h"
+#include "ICanSetOnMap.h"
 #include "TurnActor_Test.generated.h"
 
+struct FSmithAIStrategyContainer;
+class USmithTurnBaseAIAttackStrategy;
+class USmithTurnBaseAIMoveStrategy;
+class USmithAttackComponent;
+class USmithMoveComponent;
 /**
  * 
  */
 UCLASS()
-class SMITH_API ATurnActor_Test final: public ATurnBaseActor
+class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap
 {
 	GENERATED_BODY()
 
@@ -24,6 +31,24 @@ protected:
 public:
 	void Tick(float DeltaTime) override final;
 
+public:
+	void OnAttack(AttackHandle&&) override final;
+	uint8 GetOnMapSizeX() const override final;
+	uint8 GetOnMapSizeY() const override final;
+
 private:
-	float m_TimeCnt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	TArray<FSmithAIStrategyContainer> AIRegistrationList;
+	UPROPERTY()
+	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
+	UPROPERTY()
+	TObjectPtr<USmithTurnBaseAIMoveStrategy> m_moveStrategy;
+	UPROPERTY()
+	TObjectPtr<USmithAttackComponent> m_atkComponent;
+	UPROPERTY()
+	TObjectPtr<USmithMoveComponent> m_moveComponent;
+
+		// Attack Format
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
+	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
 };

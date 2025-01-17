@@ -2,30 +2,37 @@
 
 
 #include "TurnBaseActor.h"
-#include "TurnControlComponent.h"
+#include "IMoveable.h"
+#include "ICommandMediator.h"
+#include "MoveDirection.h"
+#include "SmithAIBehaviorProcessor.h"
+#include "SmithAIStrategy.h"
+
+#include "MLibrary.h"
 
 // Sets default values
 ATurnBaseActor::ATurnBaseActor()
-	: TurnComponent(nullptr)
-	, m_event({})
+	: m_aiBehaviorProcessor(nullptr)
+	, m_commandMediator(nullptr)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	UTurnControlComponent* turnComp = CreateDefaultSubobject<UTurnControlComponent>(TEXT("TurnComponent"));
-
-	if (turnComp != nullptr)
-	{
-		AddInstanceComponent(turnComp);
-	}
-
-	TurnComponent = turnComp;
 }
 
 // Called when the game starts or when spawned
 void ATurnBaseActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (bUseSmithAIProcessor)
+	{
+		m_aiBehaviorProcessor = NewObject<USmithAIBehaviorProcessor>(this);
+		check(m_aiBehaviorProcessor != nullptr);
+
+		m_aiBehaviorProcessor->TickConditionDelegate.BindUObject(this, &ATurnBaseActor::IsCommandSendable);
+	}
+
 }
 
 // Called every frame
@@ -34,50 +41,37 @@ void ATurnBaseActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-UTurnControlComponent *ATurnBaseActor::GetTurnControl() const
+void ATurnBaseActor::SetCommandMediator(ICommandMediator* mediator)
 {
-	check(TurnComponent != nullptr);
-
-  return TurnComponent;
+	m_commandMediator = mediator;
 }
 
-FDelegateHandle ATurnBaseActor::Subscribe(FRequestCommandEvent::FDelegate& delegate)
+void ATurnBaseActor::SendMoveCommand(IMoveable* moveable, UE::Smith::Battle::EMoveDirection direction, uint8 moveDistance)
 {
-	if (delegate.IsBound())
+	if (!IsCommandSendable())
 	{
-		return m_event.Add(delegate);
-	}
-
-	return delegate.GetHandle();
-}
-
-bool ATurnBaseActor::Unsubscribe(UObject* objPtr, FDelegateHandle handle)
-{
-	if (m_event.IsBoundToObject(objPtr))
-	{
-		m_event.Remove(handle);
-		return true;
+		return;
 	}
 	else
 	{
-		return false;
+		MDebug::LogWarning("send succeed");
+	}
+
+	if (m_commandMediator.IsValid())
+	{
+		m_commandMediator->SendMoveCommand(this, moveable, direction, moveDistance);
 	}
 }
 
-void ATurnBaseActor::SendCommand(TSharedPtr<IBattleCommand> command)
+void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, UE::Smith::Battle::EMoveDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& handle)
 {
-	if (!::IsValid(TurnComponent))
+	if (!IsCommandSendable())
 	{
 		return;
 	}
 
-	if (!TurnComponent->IsCommandSendable())
+	if (m_commandMediator.IsValid())
 	{
-		return;
-	}
-
-	if (m_event.IsBound())
-	{
-		m_event.Broadcast(this, command);
+		m_commandMediator->SendAttackCommand(this, attacker, direction, format, ::MoveTemp(handle));
 	}
 }

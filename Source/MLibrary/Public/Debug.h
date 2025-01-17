@@ -30,43 +30,49 @@ namespace UE::MLibrary
 {
 	class MLIBRARY_API Debug
 	{
-	public:
-		static void Log(const char*);
-		static void Log(const wchar_t*);
-		static void Log(const std::string&);
-		static void Log(const std::wstring&);
-		static void Log(const FString&);
+		private:
+			enum class MLIB_DEBUG_LEVEL : uint8
+			{
+				Log,
+				Warning,
+				Error,
+			};
 
-		static void LogWarning(const char*);
-		static void LogWarning(const wchar_t*);
-		static void LogWarning(const std::string&);
-		static void LogWarning(const std::wstring&);
-		static void LogWarning(const FString&);
+		public:
+			static void Log(const char*);
+			static void Log(const wchar_t*);
+			static void Log(const std::string&);
+			static void Log(const std::wstring&);
+			static void Log(const FString&);
 
-		static void LogError(const char*);
-		static void LogError(const wchar_t*);
-		static void LogError(const std::string&);
-		static void LogError(const std::wstring&);
-		static void LogError(const FString&);
+			static void LogWarning(const char*);
+			static void LogWarning(const wchar_t*);
+			static void LogWarning(const std::string&);
+			static void LogWarning(const std::wstring&);
+			static void LogWarning(const FString&);
 
-	public:
-		static float gLogTime;
+			static void LogError(const char*);
+			static void LogError(const wchar_t*);
+			static void LogError(const std::string&);
+			static void LogError(const std::wstring&);
+			static void LogError(const FString&);
 
-	private:
-		static void log_impl(const FString&);
-		static void log_warning_impl(const FString&);
-		static void log_error_impl(const FString&);
+		public:
+			static float gLogTime;
 
-		static FString append_impl(const FString&, const char*);
-		static FString append_impl(const FString&, const wchar_t*);
-		static FString append_impl(const FString&, const std::string&);
-		static FString append_impl(const FString&, const std::wstring&);
-		static FString append_impl(const FString&, const FString&);
-		
-	private:
-		static const DebugFormat LOG_FORMAT;
-		static const DebugFormat LOG_WARNING_FORMAT;
-		static const DebugFormat LOG_ERROR_FORMAT;
+		private:
+			static void log_impl(MLIB_DEBUG_LEVEL, const FString&);
+
+			static FString append_impl(const FString&, const char*);
+			static FString append_impl(const FString&, const wchar_t*);
+			static FString append_impl(const FString&, const std::string&);
+			static FString append_impl(const FString&, const std::wstring&);
+			static FString append_impl(const FString&, const FString&);
+			
+		private:
+			static const DebugFormat LOG_FORMAT;
+			static const DebugFormat LOG_WARNING_FORMAT;
+			static const DebugFormat LOG_ERROR_FORMAT;
 	};
 }
 
