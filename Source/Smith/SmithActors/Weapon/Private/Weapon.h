@@ -21,15 +21,14 @@ public:
 	void Tick(float DeltaTime);
 
 	virtual FParams GetParam() override;
-
-	void SetParam(FParams);
+	void AddParam(FParams);
 
 	void SwapSkill(int, Skill);
 	void Upgrade(IParamAbsorbable*);
 
 private:
-	//UPROPERTY(EditAnywhere)
 	TArray <Skill> m_skillslots;
+	const FParams m_params;
 	UPROPERTY(EditAnywhere)
-	FParams m_params;
+	FParams m_currentParams;
 };

@@ -32,8 +32,4 @@ public:
 
 	void SwapSkill(int, Skill);
 	void Upgrade(IParamAbsorbable*);
-
-private:
-	TArray <Skill> m_skillslots;
-	//Params m_params;
 };

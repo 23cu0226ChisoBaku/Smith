@@ -6,6 +6,8 @@
 
 // Sets default values
 AWeapon::AWeapon()
+	:m_params((FParams(10, 10, 10, 10)))
+	,m_currentParams(m_params)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 }
@@ -26,15 +28,12 @@ void AWeapon::Tick(float DeltaTime)
 
 FParams AWeapon::GetParam()
 {
-	return m_params;
+	return m_currentParams;
 }
 
-void AWeapon::SetParam(FParams SetParams)
+void AWeapon::AddParam(FParams Params)
 {
-	m_params.HP += SetParams.HP;
-	m_params.ATK += SetParams.ATK;
-	m_params.DEF += SetParams.DEF;
-	m_params.CRT += SetParams.CRT;
+	m_currentParams = m_currentParams + Params;
 }
 
 void AWeapon::SwapSkill(int, Skill)
@@ -42,8 +41,13 @@ void AWeapon::SwapSkill(int, Skill)
 	MDebug::LogError("called SwapSkill");
 }
 
-void AWeapon::Upgrade(IParamAbsorbable*)
+void AWeapon::Upgrade(IParamAbsorbable* material)
 {
+	if (material == nullptr)
+	{
+		return;
+	}
+	AddParam(material->GetParam());
 	MDebug::LogError("called Upgrade");
 }
 

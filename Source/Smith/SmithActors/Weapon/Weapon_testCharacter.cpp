@@ -97,7 +97,7 @@ void AWeapon_testCharacter::UpdateWeaponParams()
 
 	// FParams—pˆÓ‚·‚é
 	FParams updateParams = {10, 10, 10, 10};
-	p_weapon->SetParam(updateParams);
+	p_weapon->AddParam(updateParams);
 
 	// ƒƒOo—Í
 	MDebug::LogError("after:HP-" + FString::FromInt(param.HP)

@@ -23,3 +23,5 @@ public:
 	int32 CRT;
 };
 
+FParams operator+(const FParams& lhs, const FParams& rhs);
+
