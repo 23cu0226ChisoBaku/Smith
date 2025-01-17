@@ -21,7 +21,7 @@ public:
 	void Tick(float DeltaTime);
 
 	virtual FParams GetParam() override;
-	void AddParam(FParams);
+	void AddParam(FParams) override;
 
 	void SwapSkill(int, Skill);
 	void Upgrade(IParamAbsorbable*);
