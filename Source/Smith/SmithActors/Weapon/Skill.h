@@ -16,13 +16,15 @@ namespace UE::Smith
 		class FSmithCommandFormat;
 	}
 }
+
 USTRUCT()
-struct  SMITH_API Skill
+struct  SMITH_API FSkill
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY(EditAnywhere)
 	FString NAME;
+	UPROPERTY(EditAnywhere)
 	int32 VALUE;
-}
-
+	TSoftObjectPtr<UDataTable> SkillTable;
 };

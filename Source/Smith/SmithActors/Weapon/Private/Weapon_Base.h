@@ -30,6 +30,6 @@ public:
 	Weapon_Base();
 	virtual ~Weapon_Base();
 
-	void SwapSkill(int, Skill);
+	void SwapSkill(int, FSkill);
 	void Upgrade(IParamAbsorbable*);
 };

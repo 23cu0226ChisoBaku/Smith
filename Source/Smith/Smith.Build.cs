@@ -21,7 +21,7 @@ public class Smith : ModuleRules
 																							"Smith/SmithActors/Player/Public",
 																							"Smith/SmithActors/TurnMngObj/Public",
                                                                                             "Smith/SmithActors/Weapon/Public",
-                                                                                            "Smith/SmithActors",
+                                                                                            "Smith/SmithActors/Interfaces",
 																							"Smith",
 																							"Smith/Models/Public",	  
 																						});

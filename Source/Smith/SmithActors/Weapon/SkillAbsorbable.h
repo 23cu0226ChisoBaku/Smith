@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "IMoveable.generated.h"
+#include "SkillAbsorbable.generated.h"
+
+struct FSkill;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UMoveable : public UInterface
+class USkillAbsorbable : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,11 +18,12 @@ class UMoveable : public UInterface
 /**
  * 
  */
-class SMITH_API IMoveable
+class SMITH_API ISkillAbsorbable
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Move() = 0;
+	virtual FSkill GetSkills() = 0;
+	virtual void SetSkills(FSkill*) = 0;
 };
