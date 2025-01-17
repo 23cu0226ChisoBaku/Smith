@@ -10,6 +10,7 @@
 #include "MapGenerateGameMode_Test.generated.h"
 
 class USmithBattleMediator;
+class USmithChasePlayerTracker;
 namespace UE::Smith
 {
 	namespace Map
@@ -50,6 +51,8 @@ private:
 	FSmithEnemyGenerateBluePrint EnemyGenerateBluePrint;
 	UPROPERTY()
 	TObjectPtr<USmithBattleMediator> m_battleMediator;
+	UPROPERTY()
+	TObjectPtr<USmithChasePlayerTracker> m_chasePlayerTracker;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;

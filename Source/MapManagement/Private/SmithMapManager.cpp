@@ -148,6 +148,10 @@ namespace UE::Smith
         {
           m_mapOperator->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
         }
+        bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
+        {
+          return m_mapObserver->ChasePlayer(outChaseDirection, chaser, chaseRadius);
+        }
       private:
         TUniquePtr<FSmithMapBuilder> m_mapBuilder;
         TUniquePtr<FSmithMapConstructor> m_mapConstructor;
@@ -183,6 +187,10 @@ namespace UE::Smith
     void FSmithMapManager::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     {
       return m_pImpl->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
+    }
+    bool FSmithMapManager::ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
+    {
+      return m_pImpl->ChasePlayerTarget(outChaseDirection, chaser, chaseRadius);
     }
   }
 }

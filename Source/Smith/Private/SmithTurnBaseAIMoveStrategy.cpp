@@ -2,6 +2,7 @@
 
 
 #include "SmithTurnBaseAIMoveStrategy.h"
+#include "SmithMoveDirector.h"
 #include "ICommandMediator.h"
 #include "IMoveable.h"
 #include "Direction.h"
@@ -10,32 +11,37 @@
 USmithTurnBaseAIMoveStrategy::USmithTurnBaseAIMoveStrategy(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
   , m_mediator(nullptr)
+  , m_moveDirector(nullptr)
   , m_move(nullptr)
   , m_moveSpeed(0)
 { }
 
-void USmithTurnBaseAIMoveStrategy::Initialize(ICommandMediator* mediator, IMoveable* move, uint8 moveSpeed)
+void USmithTurnBaseAIMoveStrategy::Initialize(ICommandMediator* mediator, USmithMoveDirector* moveDirector, IMoveable* move, uint8 moveSpeed)
 {
   m_mediator = mediator;
+  m_moveDirector = moveDirector;
   m_move = move;
   m_moveSpeed = moveSpeed;
 }
 
 void USmithTurnBaseAIMoveStrategy::BeginDestroy()
 {
-  Super::BeginDestroy();
-  m_move = nullptr;
+  m_mediator.Reset();
+  m_moveDirector.Reset();
+  m_move.Reset();
   m_moveSpeed = 0;
+  
+  Super::BeginDestroy();
 }
 
 bool USmithTurnBaseAIMoveStrategy::executeImpl()
 {
-  if (!m_mediator.IsValid() || !m_move.IsValid())
+  if (!m_mediator.IsValid() || !m_moveDirector.IsValid() || !m_move.IsValid())
   {
     return false;
   }
 
-  EDirection moveDir = EDirection::Invalid;
+  EDirection moveDir = m_moveDirector->GetNextDirection();
 
-  return m_mediator->SendMoveCommand(GetOwner(), m_move.Get(), EDirection::North, m_moveSpeed);
+  return m_mediator->SendMoveCommand(GetOwner(), m_move.Get(), moveDir, m_moveSpeed);
 }

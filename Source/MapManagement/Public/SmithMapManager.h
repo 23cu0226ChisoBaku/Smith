@@ -130,6 +130,7 @@ namespace UE::Smith
         /// @param FVector                        移動先の座標
         ///
         void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
+        bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
 			#pragma endregion FSmithMapManager Interface
 			// end of FSmithMapManager Interface
       private:

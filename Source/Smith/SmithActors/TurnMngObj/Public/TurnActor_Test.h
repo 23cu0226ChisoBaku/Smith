@@ -6,6 +6,7 @@
 #include "TurnBaseActor.h"
 #include "IAttackable.h"
 #include "ICanSetOnMap.h"
+#include "IMoveDirector.h"
 #include "TurnActor_Test.generated.h"
 
 struct FSmithAIStrategyContainer;
@@ -13,11 +14,12 @@ class USmithTurnBaseAIAttackStrategy;
 class USmithTurnBaseAIMoveStrategy;
 class USmithAttackComponent;
 class USmithMoveComponent;
+class USmithMoveDirector;
 /**
  * 
  */
 UCLASS()
-class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap
+class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap, public IMoveDirector
 {
 	GENERATED_BODY()
 
@@ -36,9 +38,14 @@ public:
 	uint8 GetOnMapSizeX() const override final;
 	uint8 GetOnMapSizeY() const override final;
 
+public:
+	UClass* GetMoveDirectorUClass() const override final;
+	void SetMoveDirector(USmithMoveDirector*) override final;
+	uint8 GetChaseRadius() const override final;
+
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
-	TArray<FSmithAIStrategyContainer> AIRegistrationList;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	// TArray<FSmithAIStrategyContainer> AIRegistrationList;
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
 	UPROPERTY()
@@ -51,4 +58,10 @@ private:
 		// Attack Format
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
 	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<USmithMoveDirector> MoveDirectorSubclass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	uint8 ChaseRadius;
+	UPROPERTY()
+	TObjectPtr<USmithMoveDirector> m_moveDirector;
 };

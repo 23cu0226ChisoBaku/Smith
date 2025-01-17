@@ -11,6 +11,7 @@
 #include "SmithAttackComponent.h"
 #include "SmithMoveComponent.h"
 #include "FormatInfo_Import.h"
+#include "SmithMoveDirector.h"
 #include "MLibrary.h"
 
 ATurnActor_Test::ATurnActor_Test()
@@ -59,7 +60,7 @@ void ATurnActor_Test::BeginPlay()
   if (m_moveStrategy != nullptr)
   {
     m_moveStrategy->SetOwner(this);
-    m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveComponent, 1);
+    m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, m_moveComponent, 1);
   }
 
   if (m_aiBehaviorProcessor != nullptr)
@@ -102,4 +103,19 @@ uint8 ATurnActor_Test::GetOnMapSizeX() const
 uint8 ATurnActor_Test::GetOnMapSizeY() const
 {
   return 1;
+}
+
+UClass* ATurnActor_Test::GetMoveDirectorUClass() const
+{
+  return MoveDirectorSubclass.Get();
+}
+
+void ATurnActor_Test::SetMoveDirector(USmithMoveDirector* director)
+{
+  m_moveDirector = director;
+}
+
+uint8 ATurnActor_Test::GetChaseRadius() const
+{
+  return ChaseRadius;
 }

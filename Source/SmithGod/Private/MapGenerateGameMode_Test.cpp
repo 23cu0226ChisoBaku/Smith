@@ -12,18 +12,22 @@
 
 #include "ICanCommandMediate.h"
 #include "ICanSetOnMap.h"
+#include "IMoveDirector.h"
 #include "TurnActor_Test.h"
 #include "SmithBattleMediator.h"
+#include "SmithChasePlayerTracker.h"
 #include "SmithBattleSubsystem.h"
 
 #include "Kismet/GameplayStatics.h"
 
 #include "SmithPlayerActor.h"
+#include "SmithMapBaseMoveDirector.h"
 
 #include "MLibrary.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   : m_battleMediator(nullptr)
+  , m_chasePlayerTracker(nullptr)
   , m_mapMgr(nullptr)
 {
   static ConstructorHelpers::FClassFinder<APawn> PlayerBP(TEXT("/Game/BP/BP_TestMapGeneratePawn"));
@@ -35,7 +39,7 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
 
 void AMapGenerateGameMode_Test::StartPlay()
 {
-  m_battleMediator = NewObject<USmithBattleMediator>();
+  m_battleMediator = NewObject<USmithBattleMediator>(this);
   check((m_battleMediator != nullptr));
 
   // マップマネージャーを初期化
@@ -71,11 +75,42 @@ void AMapGenerateGameMode_Test::StartPlay()
 
     if (canCmdMediateObjs.Num() > 0)
     {
-      for (auto obj : canCmdMediateObjs)
+      for (auto& obj : canCmdMediateObjs)
       {
         // TODO componentをInterfaceに変換
         ICanCommandMediate* mediatable = Cast<ICanCommandMediate>(obj);
         mediatable->SetCommandMediator(m_battleMediator);
+      }
+    }
+  }
+
+  {
+    TArray<AActor*> moveDirectorImplementedActors;
+    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UMoveDirector::StaticClass(), moveDirectorImplementedActors);
+    {
+      if (moveDirectorImplementedActors.Num() > 0)
+      {
+        m_chasePlayerTracker = NewObject<USmithChasePlayerTracker>(this);
+        check(m_chasePlayerTracker != nullptr);
+
+        for (auto& obj : moveDirectorImplementedActors)
+        {
+          ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(obj);
+          if (mapObj == nullptr)
+          {
+            continue;
+          }
+
+          IMoveDirector* moveDirector = Cast<IMoveDirector>(obj);
+          UClass* moveDirectorSub = moveDirector->GetMoveDirectorUClass();
+
+          if (moveDirectorSub->IsChildOf<USmithMapBaseMoveDirector>())
+          {
+            USmithMapBaseMoveDirector* mb_moveDirector = NewObject<USmithMapBaseMoveDirector>(obj);
+            mb_moveDirector->Initialize(m_chasePlayerTracker, mapObj, moveDirector->GetChaseRadius());
+            moveDirector->SetMoveDirector(mb_moveDirector);
+          }
+        }
       }
     }
   }

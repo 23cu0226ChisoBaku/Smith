@@ -86,7 +86,11 @@ namespace UE::Smith
                                   );
           
           // オブジェクトを配置
-          world->SpawnActor<AActor>(tileActorBuffer[tileType], spawnCoord, FRotator::ZeroRotator);
+          // TODO
+          const int32 randRotator = FMath::RandRange(0,3);
+          const FRotator rotate = FRotator{0.0, 90.0 * StaticCast<double>(randRotator) , 0.0};
+          
+          world->SpawnActor<AActor>(tileActorBuffer[tileType], spawnCoord, rotate);
         }
       }
     }

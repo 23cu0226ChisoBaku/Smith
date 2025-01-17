@@ -209,6 +209,10 @@ namespace UE::Smith
           m_player = playerMapObj;
           m_generateBP = generateBP;
         }
+        bool ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
+        {
+          return ChaseTarget(outChaseDirection, chaser, m_player.Get(), chaseRadius);
+        }
         bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
         {
           outChaseDirection = EDirection::Invalid;
@@ -494,6 +498,10 @@ namespace UE::Smith
     void FSmithMapObserver::InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
     {
       m_pImpl->InitMapObj(outMapObjs, world, player, generateBP);
+    }
+    bool FSmithMapObserver::ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
+    {
+      return m_pImpl->ChasePlayer(outChaseDirection, chaser, chaseRadius);
     }
     void FSmithMapObserver::GenerateNewEnemy()
     {
