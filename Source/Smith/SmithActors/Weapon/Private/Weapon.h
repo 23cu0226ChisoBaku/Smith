@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "SmithActors/Weapon/Private/Weapon_Base.h"
 #include "SmithActors/Weapon/Params.h"
 #include "SmithActors/Weapon/Skill.h"
 #include "Smith/Public/ParamAbsorbable.h"
@@ -34,6 +33,8 @@ public:
 private:
 	TArray <FSkill> m_skillslots;
 	const FParams m_params;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,Category = "Params|Edit")
 	FParams m_currentParams;
+	UPROPERTY(EditAnywhere, Category = "Params|Edit")
+	FString m_name;
 };

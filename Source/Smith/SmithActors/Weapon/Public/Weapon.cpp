@@ -8,6 +8,7 @@
 AWeapon::AWeapon()
 	:m_params((FParams(10, 10, 10, 10)))
 	,m_currentParams(m_params)
+	,m_name("SWORD")
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 }
