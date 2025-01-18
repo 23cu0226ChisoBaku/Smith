@@ -38,7 +38,7 @@ void AWeapon::AddParam(FParams Params)
 
 FSkill AWeapon::GetSkills()
 {
-	return;
+	return m_skillslots[0];	// ‰¼’u‚«
  }
 
 void AWeapon::SetSkills(FSkill*)
@@ -47,7 +47,7 @@ void AWeapon::SetSkills(FSkill*)
 }
 
 
-void AWeapon::SwapSkill(int, FSkill)
+void AWeapon::SwapSkill(int32, FSkill)
 {
 	MDebug::LogError("called SwapSkill");
 }

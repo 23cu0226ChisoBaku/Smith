@@ -28,7 +28,7 @@ public:
 	virtual FSkill GetSkills() override;
 	virtual void SetSkills(FSkill*) override;
 
-	void SwapSkill(int, FSkill);
+	void SwapSkill(int32, FSkill);
 	void Upgrade(IParamAbsorbable*);
 
 private:
