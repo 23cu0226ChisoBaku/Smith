@@ -11,7 +11,7 @@
 class SMITH_API TestWeapon final : public IEnhanceable
 {
 public:
-	TestWeapon();
+	TestWeapon(int32,int32,int32,int32);
 	~TestWeapon();
 
 public:

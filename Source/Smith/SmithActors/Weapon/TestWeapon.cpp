@@ -4,8 +4,8 @@
 #include "SmithActors/Weapon/TestWeapon.h"
 #include "Debug.h"
 
-TestWeapon::TestWeapon()
-:m_params{10,5,0,0}
+TestWeapon::TestWeapon(int32 hp = 0,int32 atk = 0, int32 def = 0,int32 crt = 0)
+:m_params{hp,atk,def,crt}
 {
   MDebug::Log("HP " + FString::FromInt(m_params.HP));
   MDebug::Log("ATK " + FString::FromInt(m_params.ATK));

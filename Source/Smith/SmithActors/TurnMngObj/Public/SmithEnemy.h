@@ -34,7 +34,7 @@ protected:
 	TObjectPtr<USmithAttackComponent> m_attackComp;
 
 protected:
-	// マップが実装されたら引数を整数値にする
+	// 数を整数値にする//
 	AActor *PlayerCheck(float checkLenth = 1.0f);
 	int32 m_skillCoolTurn;
 	int32 m_skillCnt;

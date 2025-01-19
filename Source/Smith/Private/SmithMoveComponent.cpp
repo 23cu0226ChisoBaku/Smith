@@ -1,6 +1,5 @@
 
 #include "SmithMoveComponent.h"
-#include "MyPlayerCharacter.h"
 #include "SmithPlayerActor.h"
 #include "Debug.h"
 #include "Kismet/GameplayStatics.h"
