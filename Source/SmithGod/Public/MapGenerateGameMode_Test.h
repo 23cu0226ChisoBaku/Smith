@@ -11,6 +11,9 @@
 
 class USmithBattleMediator;
 class USmithChasePlayerTracker;
+class USmithBattleSubsystem;
+class USmithEventPublisher;
+class USmithEventSystem;
 namespace UE::Smith
 {
 	namespace Map
@@ -39,7 +42,13 @@ public:
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
 private:
-	void StartNewStage();
+	void initializeGame();
+	void startNewLevel();
+	void clearCurrentLevel();
+
+// TODO
+public:
+	void goToNextLevel();
 
 private:
 	/** ダンジョンマップ設計図 */
@@ -50,7 +59,13 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint EnemyGenerateBluePrint;
 	UPROPERTY()
+	TObjectPtr<USmithBattleSubsystem> m_battleSystem;
+	UPROPERTY()
 	TObjectPtr<USmithBattleMediator> m_battleMediator;
+	UPROPERTY()
+	TObjectPtr<USmithEventPublisher> m_eventPublisher;
+	UPROPERTY()
+	TObjectPtr<USmithEventSystem> m_eventSystem;
 	UPROPERTY()
 	TObjectPtr<USmithChasePlayerTracker> m_chasePlayerTracker;
 

@@ -460,6 +460,7 @@ namespace UE::Smith
         uint8 m_sectionGap;
         uint8 m_sectionWidth;
         uint8 m_sectionHeight;
+
     };
     #pragma endregion FSmithMap Implementation
     // end of FSmithMap Implementation

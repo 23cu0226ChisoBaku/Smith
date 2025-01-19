@@ -23,21 +23,24 @@ void USmithTurnBaseAIAttackStrategy::Initialize(ICanMakeAttack* attacker, IComma
 
 void USmithTurnBaseAIAttackStrategy::BeginDestroy()
 {
-  Super::BeginDestroy();
   m_mediator = nullptr;
   m_attacker = nullptr;
   OnChangeDirectionDelegate.Unbind();
+  
+  Super::BeginDestroy();
 }
 
 bool USmithTurnBaseAIAttackStrategy::executeImpl()
 {
   if (m_attackFormatTables.Num() == 0)
   {
+    MDebug::LogError("No format");
     return false;
   }
 
   if (!m_mediator.IsValid() || !m_attacker.IsValid())
   {
+    MDebug::LogError("not initialize -- attack strategy");
     return false;
   }
 
@@ -48,10 +51,14 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
       continue;
     }
 
-    bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), EDirection::North, *format.Value, AttackHandle{GetName(), 1});
-    if (success)
+    for (uint8 i = 0u; i < 4u; ++i)
     {
-      return true;
+      EDirection atkDir = StaticCast<EDirection>(i * 2u);
+      bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *format.Value, AttackHandle{GetName(), 1}, false);
+      if (success)
+      {
+        return true;
+      }
     }
   }
 

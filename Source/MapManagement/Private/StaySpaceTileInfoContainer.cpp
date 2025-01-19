@@ -18,6 +18,7 @@ Encoding : UTF-8
 #include "StaySpaceTileInfoContainer.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "ICanSetOnMap.h"
+#include "ISmithMapEvent.h"
 
 namespace UE::Smith
 {
@@ -29,9 +30,18 @@ namespace UE::Smith
     class FStaySpaceTileInfoContainer::StaySpaceTileInfoImpl
     {
       public:
+        StaySpaceTileInfoImpl()
+          : m_mapObj(nullptr)
+          , m_event(nullptr)
+        { }
+      public:
         void SetMapObj(ICanSetOnMap* mapObj)
         {
           m_mapObj = mapObj;
+        }
+        void SetEvent(ISmithMapEvent* event)
+        {
+          m_event = event;
         }
         bool IsAbleToStayOn() const
         {
@@ -41,6 +51,10 @@ namespace UE::Smith
         {
           return m_mapObj.Get();
         }
+        ISmithMapEvent* GetEvent() const
+        {
+          return m_event.Get();
+        }
         void ResetContainer()
         {
           m_mapObj.Reset();
@@ -48,6 +62,7 @@ namespace UE::Smith
 
       private:
         TWeakInterfacePtr<ICanSetOnMap> m_mapObj;
+        TWeakInterfacePtr<ISmithMapEvent> m_event;
     };
 
     FStaySpaceTileInfoContainer::FStaySpaceTileInfoContainer(ETileType type)
@@ -108,10 +123,19 @@ namespace UE::Smith
     {
       unimplemented()
     }
+    void FStaySpaceTileInfoContainer::SetEvent(ISmithMapEvent* event)
+    {
+      m_pImpl->SetEvent(event);
+    }
 
     ICanSetOnMap* FStaySpaceTileInfoContainer::GetMapObject() const
     {
       return m_pImpl->GetMapObject();
+    }
+
+    ISmithMapEvent* FStaySpaceTileInfoContainer::GetEvent() const
+    {
+      return m_pImpl->GetEvent();
     }
 
     // TODO not implemented

@@ -29,6 +29,8 @@ Encoding : UTF-8
 //---------------------------------------
 class IAttackable;
 class ICanSetOnMap;
+class IEventRegister;
+class USmithEventPublisher;
 namespace UE::Smith
 {
 	namespace Battle
@@ -59,7 +61,7 @@ namespace UE::Smith
 		///	@brief マップを管理するマネージャー
 		/// namespace UE::Smith::Map
 		///
-    class MAPMANAGEMENT_API FSmithMapManager final
+    class MAPMANAGEMENT_API FSmithMapManager final : public FGCObject
     {			
       //---------------------------------------
 			/*
@@ -94,6 +96,7 @@ namespace UE::Smith
 			// FSmithMapManager Interface
 			#pragma region FSmithMapManager Interface
       public:
+        void AssignEventRegister(IEventRegister*);
         ///
         /// @brief                                マップを初期化する
         /// @param UWorld                         ダンジョンオブジェクトを配置するUnreal Engine ワールド
@@ -108,6 +111,8 @@ namespace UE::Smith
         /// @param FSmithEnemyGenerateBluePrint   敵生成する設計図
         ///
         void InitMapObjs(UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
+        // TODO
+        void InitMapEvents(UWorld*, USmithEventPublisher*);
         /// 
         /// @brief                                マップオブジェクトを配置する
         /// @param ICanSetOnMap                   マップオブジェクト
@@ -131,8 +136,12 @@ namespace UE::Smith
         ///
         void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
         bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
+        void Reset();
 			#pragma endregion FSmithMapManager Interface
 			// end of FSmithMapManager Interface
+
+        virtual void AddReferencedObjects(FReferenceCollector&) override;
+        virtual FString GetReferencerName() const override;
       private:
         ///
         /// @brief マップマネージャー実装クラス(pImplイディオム)

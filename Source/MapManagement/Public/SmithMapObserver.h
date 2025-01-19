@@ -92,7 +92,8 @@ namespace UE::Smith
 				/// @param	FSmithEnemyGenerateBluePrint	敵を生成する設計図
 				///
 				void InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
-
+				void ClearMapObjs_IgnorePlayer();
+				void InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination);
 				bool ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
 				/// @brief 未使用
 				void GenerateNewEnemy();

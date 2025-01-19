@@ -34,7 +34,7 @@ bool USmithChasePlayerTracker::TrackTarget(EDirection& outDirection, ICanSetOnMa
   }
 
   TSharedPtr<FSmithMapManager> mapMgr_shared = m_mapMgr.Pin();
-  return false;
+  return mapMgr_shared->ChasePlayerTarget(outDirection, chaser, chaseRadius);
 }
 
 

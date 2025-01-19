@@ -18,6 +18,8 @@
 #include "FormatType.h"
 #include "Direction.h"
 #include "FormatInfo_Import.h"
+#include "MapObjType.h"
+#include "SmithNextLevelEvent.h"
 
 #include "ICommandMediator.h"
 
@@ -54,10 +56,13 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, m_atkComponent(nullptr)
 	, m_commandMediator(nullptr)
 	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
+	, m_rotateSpeed(720.0f)
+	, m_rotatingDirection(0)
 	, m_camDir(North)
 	, m_actorFaceDir(North)
 	, m_bCanMove(true)
 	, m_bCanAttack(true)
+	, m_bRotatingCamera(false)
 {
 	using namespace SmithPlayerActor::Private;
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -142,6 +147,35 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 	{
 		PrimaryActorTick.bCanEverTick = false;
 		return;
+	}
+
+	if (m_bRotatingCamera)
+	{
+		using namespace SmithPlayerActor::Private;
+		FRotator springArmNewRotator = m_springArm->GetComponentRotation();
+		const double targetAngle = StaticCast<double>(m_camDir) * Angle_Per_Direction;
+		if (springArmNewRotator.Yaw < 0.0)
+		{
+			springArmNewRotator.Yaw += 360.0;
+		}
+
+		double leftAngle = targetAngle - springArmNewRotator.Yaw;
+		if (FMath::Abs(leftAngle) > 90.0)
+		{
+			leftAngle += 360.0 * StaticCast<double>(m_rotatingDirection);
+		}
+
+		float rotateAngle = m_rotateSpeed * DeltaTime * StaticCast<float>(m_rotatingDirection);
+		if (FMath::Abs(rotateAngle) > FMath::Abs(leftAngle))
+		{
+			rotateAngle = leftAngle;
+			m_bRotatingCamera = false;
+			m_rotatingDirection = 0;
+			EnableInput(Cast<APlayerController>(Controller));
+		}
+
+		springArmNewRotator.Yaw += StaticCast<double>(rotateAngle);
+		m_springArm->SetWorldRotation(springArmNewRotator);
 	}
 
 }
@@ -234,10 +268,12 @@ void ASmithPlayerActor::Look_Input(const FInputActionValue& value)
 	if (lookInput.X > 0.9f)
 	{
 		newDir += East;
+		m_rotatingDirection = 1;
 	}
 	else if (lookInput.X < -0.9f)
 	{
 		newDir += West;
+		m_rotatingDirection = -1;
 	}
 
 	updateCamImpl(StaticCast<EDir_Test>(newDir % DirectionCnt));
@@ -313,11 +349,10 @@ void ASmithPlayerActor::updateCamImpl(EDir_Test newDirection)
 		return;
 	}
 
+	m_bRotatingCamera = true;
 	m_camDir = newDirection;
-	FRotator springArmNewRotator = m_springArm->GetRelativeRotation();
-	const double springArmRotateY = StaticCast<double>(m_camDir) * Angle_Per_Direction;
-	springArmNewRotator.Yaw = springArmRotateY;
-	m_springArm->SetWorldRotation(springArmNewRotator);
+	DisableInput(Cast<APlayerController>(Controller));
+
 }
 
 bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTable* formatTable)
@@ -414,4 +449,20 @@ uint8 ASmithPlayerActor::GetOnMapSizeX() const
 uint8 ASmithPlayerActor::GetOnMapSizeY() const
 {
 	return 1;
+}
+
+EMapObjType ASmithPlayerActor::GetType() const
+{
+	return EMapObjType::Player;
+}
+
+void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
+{
+	if (!::IsValid(event))
+	{
+		return;
+	}
+
+	MDebug::Log("Player TRIGGERED next level event");
+
 }

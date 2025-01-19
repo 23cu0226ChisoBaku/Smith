@@ -27,6 +27,7 @@ Encoding : UTF-8
 */
 //---------------------------------------
 class ICanSetOnMap;
+class ISmithMapEvent;
 
 namespace UE::Smith
 {
@@ -40,10 +41,10 @@ namespace UE::Smith
 		struct FSmithMapDataModel;
 
 		///
-		///	@brief マップオブジェクトを新しく配置するクラス
+		///	@brief マップにものを新しく配置するクラス
 		/// namespace UE::Smith::Map
 		///
-		class MAPMANAGEMENT_API FSmithMapObjDeployDirector
+		class MAPMANAGEMENT_API FSmithMapDeployDirector
 		{
 			//---------------------------------------
 			/*
@@ -51,15 +52,15 @@ namespace UE::Smith
 			*/
 			//---------------------------------------
 			public:
-				FSmithMapObjDeployDirector();
-				~FSmithMapObjDeployDirector();
+				FSmithMapDeployDirector();
+				~FSmithMapDeployDirector();
 				//---------------------------------------
 				/*
 													ムーブ
 				*/
 				//---------------------------------------
-				FSmithMapObjDeployDirector(FSmithMapObjDeployDirector&&) noexcept;
-				FSmithMapObjDeployDirector& operator=(FSmithMapObjDeployDirector&&) noexcept;
+				FSmithMapDeployDirector(FSmithMapDeployDirector&&) noexcept;
+				FSmithMapDeployDirector& operator=(FSmithMapDeployDirector&&) noexcept;
 
 			//---------------------------------------
 			/*
@@ -67,8 +68,8 @@ namespace UE::Smith
 			*/
 			//---------------------------------------
 			private:
-				FSmithMapObjDeployDirector(const FSmithMapObjDeployDirector&) = delete;
-				FSmithMapObjDeployDirector& operator=(const FSmithMapObjDeployDirector&) = delete;
+				FSmithMapDeployDirector(const FSmithMapDeployDirector&) = delete;
+				FSmithMapDeployDirector& operator=(const FSmithMapDeployDirector&) = delete;
 
 			//---------------------------------------
 			/*
@@ -89,12 +90,13 @@ namespace UE::Smith
 				///	@param	x												X座標
 				/// @param	y												Y座標
 				///
-				void DeployMapObj(ICanSetOnMap*,uint8 x, uint8 y);
+				void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
+				void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y);
 			#pragma endregion FSmithMapDeployDirector Interface
 			// end of FSmithMapDeployDirector Interface
 			private:
 				///
-				///	@brief FSmithMapDeployDirector実装クラス(pImplイディオム)
+				///	@brief FSmithMapDeployDirector(pImplイディオム)
 				///
 				class DeployDirectorImpl;
 				TUniquePtr<DeployDirectorImpl> m_pImpl;

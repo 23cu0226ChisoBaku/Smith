@@ -34,5 +34,6 @@ class SMITH_API ICommandMediator
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual bool SendMoveCommand(AActor*, IMoveable*, EDirection, uint8 moveDistance) = 0;
-	virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&) = 0;
+	virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&, bool bAttackEvenNoTarget = true) = 0;
+	virtual bool SendIdleCommand(AActor*) = 0;
 };

@@ -28,6 +28,7 @@ Encoding : UTF-8
 //---------------------------------------
 class IAttackable;
 class ICanSetOnMap;
+class IEventRegister;
 enum class EDirection : uint8;
 namespace UE::Smith
 {
@@ -83,6 +84,7 @@ namespace UE::Smith
 			// FSmithMapObserver Interface
 			#pragma region FSmithMapObjOperator Interface
 			public:
+				void AssignEventRegister(IEventRegister*);
 				///
 				///	@brief													マップモデルを登録する
 				/// @param	FSmithMapDataModel			マップモデル

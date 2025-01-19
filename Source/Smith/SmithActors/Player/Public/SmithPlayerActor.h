@@ -24,6 +24,7 @@ Encoding : UTF-8
 #include "IAttackable.h"
 #include "ICanCommandMediate.h"
 #include "ICanSetOnMap.h"
+#include "IEventTriggerable.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -65,7 +66,9 @@ namespace UE::Smith
 /// @brief プレイヤークラス
 ///
 UCLASS()
-class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable, public IAttackable, public ICanCommandMediate, public ICanSetOnMap
+class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
+																			 , public IAttackable, public ICanCommandMediate
+																			 , public ICanSetOnMap, public IEventTriggerable
 {
 	GENERATED_BODY()
 
@@ -135,6 +138,10 @@ public:
 	public:
 		uint8 GetOnMapSizeX() const override final;
 		uint8 GetOnMapSizeY() const override final;
+		EMapObjType GetType() const override final;
+
+	public:
+		void OnTriggerEvent(USmithNextLevelEvent*) override final;
 
 #pragma endregion Interfaces Override
 // end of Interfaces Override
@@ -206,10 +213,14 @@ private:
 #pragma region Private Properties
 private:
 	int32 m_hp;
+	float m_rotateSpeed;
+	int32 m_rotatingDirection;
 	EDir_Test m_camDir;
 	EDir_Test m_actorFaceDir;
 	uint8 m_bCanMove : 1;
 	uint8 m_bCanAttack : 1;
+	uint8 m_bRotatingCamera : 1;
+	
 
 #pragma endregion Private Properties
 // end of Private Properties

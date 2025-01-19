@@ -61,18 +61,22 @@ void USmithAIBehaviorProcessor::RunBehaviorProcessor()
   m_bIsProcessorRunning = true;
 }
 
-void USmithAIBehaviorProcessor::StopBehaviorProcessor()
-{
-  m_bIsProcessorRunning = false;
-}
-
-void USmithAIBehaviorProcessor::Tick(float DeltaTime)
+void USmithAIBehaviorProcessor::TickBehaviorProcessor(float deltaTime)
 {
   if (!m_bIsProcessorRunning)
   {
     return;
   }
 
+  if (TickConditionDelegate.IsBound())
+  {
+    if (!TickConditionDelegate.Execute())
+    {
+      return;
+    }
+  }
+
+  MDebug::LogError("Ticking Strategy");
   for (auto& strategy : m_strategyContainer)
   {
     if (strategy.Strategy == nullptr)
@@ -88,40 +92,13 @@ void USmithAIBehaviorProcessor::Tick(float DeltaTime)
     else
     {
       MDebug::LogError("Move next strategy");
-    }
-    
+    }   
   }
 }
-bool USmithAIBehaviorProcessor::IsTickable() const
-{
-  if (TickConditionDelegate.IsBound())
-  {
-    return TickConditionDelegate.Execute();
-  }
-  else
-  {
-    return false;
-  }
-} 
 
-TStatId USmithAIBehaviorProcessor::GetStatId() const
+void USmithAIBehaviorProcessor::StopBehaviorProcessor()
 {
-  RETURN_QUICK_DECLARE_CYCLE_STAT(USmithAIBehaviorProcessor, STATGROUP_Tickables);
-}
-
-bool USmithAIBehaviorProcessor::IsTickableWhenPaused() const
-{
-  return false;
-}
-
-bool USmithAIBehaviorProcessor::IsTickableInEditor() const
-{
-  return true;
-}
-
-UWorld* USmithAIBehaviorProcessor::GetTickableGameObjectWorld() const
-{
-  return GetWorld();
+  m_bIsProcessorRunning = false;
 }
 
 bool operator<(const FSmithAIStrategyContainer& lhs, const FSmithAIStrategyContainer& rhs)

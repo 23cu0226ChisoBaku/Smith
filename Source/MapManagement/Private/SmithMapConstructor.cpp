@@ -26,6 +26,7 @@ namespace UE::Smith
   namespace Map
   {
     FSmithMapConstructor::FSmithMapConstructor()
+      : m_mapMaterials{}
     { }
 
     FSmithMapConstructor::~FSmithMapConstructor()
@@ -90,9 +91,23 @@ namespace UE::Smith
           const int32 randRotator = FMath::RandRange(0,3);
           const FRotator rotate = FRotator{0.0, 90.0 * StaticCast<double>(randRotator) , 0.0};
           
-          world->SpawnActor<AActor>(tileActorBuffer[tileType], spawnCoord, rotate);
+          AActor* actor = world->SpawnActor<AActor>(tileActorBuffer[tileType], spawnCoord, rotate);
+
+          m_mapMaterials.Emplace(actor);
         }
       }
+    }
+    void FSmithMapConstructor::DestructMap()
+    {
+      for (auto& material : m_mapMaterials)
+      {
+        if (material.IsValid())
+        {
+          material->Destroy();
+        }
+      }
+
+      m_mapMaterials.Reset();
     }
   }
 }

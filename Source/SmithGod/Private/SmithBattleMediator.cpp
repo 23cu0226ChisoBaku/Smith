@@ -78,23 +78,22 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, E
   else
   {
     move->SetDestination(destinationVector);
-    m_battleSys->registerCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::MoveCommand>(move));
+    m_battleSys->RegisterCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::MoveCommand>(move));
     return true;
   }
-
 }
 
-bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle)
+bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle, bool bAttackEvenNoTarget)
 {
-  if (!::IsValid(requester))
-  {
-    MDebug::LogError("Requester INVALID!!!");
-    return false;
-  }
-
   if (!m_mapMgr.IsValid() || !m_battleSys.IsValid())
   {
     MDebug::LogError("System INVALID!!!");
+    return false;
+  }
+
+  if (!::IsValid(requester))
+  {
+    MDebug::LogError("Requester INVALID!!!");
     return false;
   }
 
@@ -113,23 +112,50 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
   // TODO
   UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, direction);
   TArray<IAttackable*> attackables{};
-  // TODO Safe Cast may cause performance issue
   mapMgrSharedPtr->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
 
+  // TODO Safe Cast may cause performance issue
   ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
   if (attackables.Num() > 0)
   {
     for(auto target : attackables)
     {
-      // TODO Safe Cast may cause performance issue
-      m_battleSys->registerCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(atkHandle)));
+      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(atkHandle)));
     }
+    return true;
+  }
+
+  if (bAttackEvenNoTarget)
+  {
+    m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, nullptr, ::MoveTemp(atkHandle)));
     return true;
   }
   else
   {
-    m_battleSys->registerCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, nullptr, ::MoveTemp(atkHandle)));
     return false;
   }
+}
+
+bool USmithBattleMediator::SendIdleCommand(AActor* requester)
+{
+  if (!m_battleSys.IsValid())
+  {
+    return false;
+  }
+  
+  if (!::IsValid(requester))
+  {
+    return false;
+  }
+
+  ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
+  if (!IS_UINTERFACE_VALID(requesterTurnManageable))
+  {
+    return false;
+  }
+
+  m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::NullCommand>());
+  return true;
+
 }
 

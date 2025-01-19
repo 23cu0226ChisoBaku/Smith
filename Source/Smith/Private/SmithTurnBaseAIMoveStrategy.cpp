@@ -38,6 +38,7 @@ bool USmithTurnBaseAIMoveStrategy::executeImpl()
 {
   if (!m_mediator.IsValid() || !m_moveDirector.IsValid() || !m_move.IsValid())
   {
+    MDebug::LogError("not initialize -- move strategy");
     return false;
   }
 

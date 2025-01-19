@@ -7,11 +7,14 @@
 #include "IAttackable.h"
 #include "ICanSetOnMap.h"
 #include "IMoveDirector.h"
+#include "ISmithSimpleAIDriven.h"
+#include "MapObjType.h"
 #include "TurnActor_Test.generated.h"
 
 struct FSmithAIStrategyContainer;
 class USmithTurnBaseAIAttackStrategy;
 class USmithTurnBaseAIMoveStrategy;
+class USmithTurnBaseAIIdleStrategy;
 class USmithAttackComponent;
 class USmithMoveComponent;
 class USmithMoveDirector;
@@ -19,7 +22,7 @@ class USmithMoveDirector;
  * 
  */
 UCLASS()
-class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap, public IMoveDirector
+class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap, public IMoveDirector, public ISmithSimpleAIDriven
 {
 	GENERATED_BODY()
 
@@ -37,6 +40,8 @@ public:
 	void OnAttack(AttackHandle&&) override final;
 	uint8 GetOnMapSizeX() const override final;
 	uint8 GetOnMapSizeY() const override final;
+	EMapObjType GetType() const override final;
+	void TurnOnAI() override final;
 
 public:
 	UClass* GetMoveDirectorUClass() const override final;
@@ -51,6 +56,8 @@ private:
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIMoveStrategy> m_moveStrategy;
 	UPROPERTY()
+	TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
+	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_atkComponent;
 	UPROPERTY()
 	TObjectPtr<USmithMoveComponent> m_moveComponent;
@@ -62,6 +69,8 @@ private:
 	TSubclassOf<USmithMoveDirector> MoveDirectorSubclass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
 	uint8 ChaseRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapObjectType, meta = (AllowPrivateAccess = "true"))
+	EMapObjType MapObjectType;
 	UPROPERTY()
 	TObjectPtr<USmithMoveDirector> m_moveDirector;
 };
