@@ -173,34 +173,40 @@ private:
 #pragma region UProperties
 private:
 	// Components
+	/** カメラアーム */
+	UPROPERTY(VisibleAnywhere, Category = Player)
+	TObjectPtr<USpringArmComponent> CameraBoom;
+	/** カメラ */
+	UPROPERTY(VisibleAnywhere, Category = Player)
+	TObjectPtr<UCameraComponent> Camera;
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USpringArmComponent> m_springArm;
+	TObjectPtr<USmithMoveComponent> MoveComponent;
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCameraComponent> m_cam;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USmithMoveComponent> m_moveComponent;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USmithAttackComponent> m_atkComponent;
+	TObjectPtr<USmithAttackComponent> AttackComponent;
 
 	// Enhanced Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> MappingCtx;
+	/** 移動インプットアクション */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> MoveAction;
+	/** 攻撃インプットアクション */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> AttackAction;
+	/** カメラ移動インプットアクション */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> CameraAction;
+	/** デバッグ専用！！ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> DebugAction;
-
-	// Attack Format
+	
+	/** 攻撃フォーマット */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
 	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
 
 	TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
 
-	// TODO 仲介でシステムとやり取りする
+	// コマンドを送る時に使う仲介
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
 #pragma endregion UProperties
 // end of UProperties

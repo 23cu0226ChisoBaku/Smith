@@ -50,10 +50,10 @@ namespace SmithPlayerActor::Private
 }
 
 ASmithPlayerActor::ASmithPlayerActor()
-	: m_springArm(nullptr)
-	, m_cam(nullptr)
-	, m_moveComponent(nullptr)
-	, m_atkComponent(nullptr)
+	: CameraBoom(nullptr)
+	, Camera(nullptr)
+	, MoveComponent(nullptr)
+	, AttackComponent(nullptr)
 	, m_commandMediator(nullptr)
 	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
 	, m_rotateSpeed(720.0f)
@@ -70,20 +70,20 @@ ASmithPlayerActor::ASmithPlayerActor()
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultRootComponent"));
 
-	m_springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	check((m_springArm != nullptr))
-	m_springArm->SetupAttachment(RootComponent);
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	check((CameraBoom != nullptr))
+	CameraBoom->SetupAttachment(RootComponent);
 
-	m_cam = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	check((m_cam != nullptr))
-	m_cam->SetupAttachment(m_springArm, USpringArmComponent::SocketName);
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	check((Camera != nullptr))
+	Camera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
-	m_springArm->bDoCollisionTest = false;
-	m_springArm->bEnableCameraLag = false;
-	m_springArm->bEnableCameraRotationLag = false;
-	m_springArm->SetUsingAbsoluteRotation(true);
-	m_springArm->SetWorldRotation(FRotator::ZeroRotator);
-	m_springArm->TargetArmLength = 1500.0f;
+	CameraBoom->bDoCollisionTest = false;
+	CameraBoom->bEnableCameraLag = false;
+	CameraBoom->bEnableCameraRotationLag = false;
+	CameraBoom->SetUsingAbsoluteRotation(true);
+	CameraBoom->SetWorldRotation(FRotator::ZeroRotator);
+	CameraBoom->TargetArmLength = 1500.0f;
 
 	const FVector actorFwd = GetActorLocation().GetUnsafeNormal();
 	if (actorFwd != FVector::ZeroVector)
@@ -93,11 +93,11 @@ ASmithPlayerActor::ASmithPlayerActor()
 
 	SetTurnPriority(ETurnPriority::PlayerSelf);
 
-	m_moveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
-	check((m_moveComponent != nullptr));
+	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
+	check((MoveComponent != nullptr));
 
-	m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Smith AttackComponent"));
-	check((m_atkComponent != nullptr));
+	AttackComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Smith AttackComponent"));
+	check((AttackComponent != nullptr));
 
 }
 
@@ -107,9 +107,9 @@ void ASmithPlayerActor::BeginPlay()
 	Super::BeginPlay();
 	
 	// TODO BPで設定できるようにする
-	if (::IsValid(m_springArm))
+	if (::IsValid(CameraBoom))
 	{
-		m_springArm->SetWorldRotation(FRotator{300.0, 0.0, 0.0});
+		CameraBoom->SetWorldRotation(FRotator{300.0, 0.0, 0.0});
 	}
 
 	// Mapping Contextを設定
@@ -152,7 +152,7 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 	if (m_bRotatingCamera)
 	{
 		using namespace SmithPlayerActor::Private;
-		FRotator springArmNewRotator = m_springArm->GetComponentRotation();
+		FRotator springArmNewRotator = CameraBoom->GetComponentRotation();
 		const double targetAngle = StaticCast<double>(m_camDir) * Angle_Per_Direction;
 		if (springArmNewRotator.Yaw < 0.0)
 		{
@@ -175,7 +175,7 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 		}
 
 		springArmNewRotator.Yaw += StaticCast<double>(rotateAngle);
-		m_springArm->SetWorldRotation(springArmNewRotator);
+		CameraBoom->SetWorldRotation(springArmNewRotator);
 	}
 
 }
@@ -292,9 +292,9 @@ void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 void ASmithPlayerActor::moveImpl(EDirection direction)
 {
 	// 移動コマンドを出す
-	if (::IsValid(m_moveComponent) && m_commandMediator.IsValid())
+	if (::IsValid(MoveComponent) && m_commandMediator.IsValid())
 	{
-		m_commandMediator->SendMoveCommand(this, m_moveComponent, direction, 1);
+		m_commandMediator->SendMoveCommand(this, MoveComponent, direction, 1);
 	}
 }
 
@@ -316,7 +316,7 @@ void ASmithPlayerActor::attackImpl()
 
 		if (m_normalAttackFormatBuffer.Contains(attackKey) && m_normalAttackFormatBuffer[attackKey].IsValid())
 		{
-			m_commandMediator->SendAttackCommand(this, m_atkComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{GetName(), 3});
+			m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{GetName(), 3});
 		}
 	}
 }
@@ -339,7 +339,7 @@ void ASmithPlayerActor::changeFwdImpl(EDir_Test newDirection)
 void ASmithPlayerActor::updateCamImpl(EDir_Test newDirection)
 {
 	using namespace SmithPlayerActor::Private;
-	if (!::IsValid(m_springArm))
+	if (!::IsValid(CameraBoom))
 	{
 		return;
 	}

@@ -76,7 +76,6 @@ void USmithAIBehaviorProcessor::TickBehaviorProcessor(float deltaTime)
     }
   }
 
-  MDebug::LogError("Ticking Strategy");
   for (auto& strategy : m_strategyContainer)
   {
     if (strategy.Strategy == nullptr)
@@ -89,10 +88,6 @@ void USmithAIBehaviorProcessor::TickBehaviorProcessor(float deltaTime)
     {
       break;
     }
-    else
-    {
-      MDebug::LogError("Move next strategy");
-    }   
   }
 }
 

@@ -5,6 +5,7 @@
 #include "UObject/WeakInterfacePtr.h"
 #include "SmithAttackComponent.h"
 #include "IAttackable.h"
+#include "ISmithAnimator.h"
 #include "AttackHandle.h"
 #include "Debug.h"
 
@@ -16,20 +17,23 @@ namespace UE::Smith::Command
   class AttackCommand::AttackImpl
   {
     public:
-      AttackImpl(ICanMakeAttack* attacker)
+      AttackImpl(ICanMakeAttack* attacker, ISmithAnimator* animator)
         : m_attacker(attacker)
-      {
-
-      }
+        , m_animator(animator)
+      { }
       ~AttackImpl()
       {
         m_attacker.Reset();
+        m_animator.Reset();
       }
 
     public:
       void Start()
       {
-
+        if (m_animator.IsValid())
+        {
+          m_animator->SwitchAnimation(SMITH_ANIM_ATTACK);
+        }
       }
       void Update(float deltaTime)
       {
@@ -43,26 +47,32 @@ namespace UE::Smith::Command
         {
           attackStr.Append(TEXT("EMPTY OBJECT"));
         }
-
         attackStr.Append(TEXT(" Attack"));
 
-        //UE::MLibrary::Debug::Log(attackStr);
+        if (m_animator.IsValid())
+        {
+          m_animator->UpdateAnimation(deltaTime);
+        }
       }
       void End()
       {
-
+        if (m_animator.IsValid())
+        {
+          m_animator->SwitchAnimation(SMITH_ANIM_IDLE);
+        }
       }
       bool IsFinish() const
       {
-        return true;
+        return m_animator.IsValid() ? m_animator->IsAnimationFinish() : true;
       }
     private:
       TWeakInterfacePtr<ICanMakeAttack> m_attacker;
+      TWeakInterfacePtr<ISmithAnimator> m_animator;
   };
   #pragma endregion AttackCommand PImpl
   // end of AttackCommand PImpl
 
-  AttackCommand::AttackCommand(ICanMakeAttack* attacker, IAttackable* target, AttackHandle&& handle)
+  AttackCommand::AttackCommand(ICanMakeAttack* attacker, IAttackable* target, AttackHandle&& handle, ISmithAnimator* animator)
     : m_attackImpl(nullptr)
   {
     if (attacker != nullptr && ::IsValid(attacker->_getUObject()))
@@ -70,7 +80,7 @@ namespace UE::Smith::Command
       attacker->SetAttackTarget(target);
       attacker->SetAttackHandle(::MoveTemp(handle));
     }
-    m_attackImpl = ::MakeUnique<AttackImpl>(attacker);
+    m_attackImpl = ::MakeUnique<AttackImpl>(attacker, animator);
   }
 
   AttackCommand::~AttackCommand()
