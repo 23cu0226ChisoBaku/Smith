@@ -7,17 +7,11 @@
 #include "UObject/WeakInterfacePtr.h"
 #include "SmithTurnBaseAIAttackStrategy.generated.h"
 
-namespace UE::Smith
-{
-	namespace Battle
-	{
-		enum class EMoveDirection : uint8;
-	}
-}
 class ICommandMediator;
 class ICanMakeAttack;
+enum class EDirection : uint8;
 
-DECLARE_DELEGATE_OneParam(FOnChangeFaceDirectionEvent, UE::Smith::Battle::EMoveDirection);
+DECLARE_DELEGATE_OneParam(FOnChangeFaceDirectionEvent, EDirection);
 
 /**
  * 

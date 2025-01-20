@@ -24,6 +24,7 @@ Encoding : UTF-8
 #include "IAttackable.h"
 #include "ICanCommandMediate.h"
 #include "ICanSetOnMap.h"
+#include "IEventTriggerable.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -49,12 +50,12 @@ class IBattleCommand;
 
 // SmithActor Module
 struct AttackHandle;
+enum class EDirection : uint8;
 
 namespace UE::Smith
 {
 	namespace Battle
 	{
-		enum class EMoveDirection : uint8;
 		class FSmithCommandFormat;
 	}
 }
@@ -65,7 +66,9 @@ namespace UE::Smith
 /// @brief プレイヤークラス
 ///
 UCLASS()
-class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable, public IAttackable, public ICanCommandMediate, public ICanSetOnMap
+class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
+																			 , public IAttackable, public ICanCommandMediate
+																			 , public ICanSetOnMap, public IEventTriggerable
 {
 	GENERATED_BODY()
 
@@ -135,6 +138,10 @@ public:
 	public:
 		uint8 GetOnMapSizeX() const override final;
 		uint8 GetOnMapSizeY() const override final;
+		EMapObjType GetType() const override final;
+
+	public:
+		void OnTriggerEvent(USmithNextLevelEvent*) override final;
 
 #pragma endregion Interfaces Override
 // end of Interfaces Override
@@ -142,7 +149,7 @@ public:
 // Private Functions
 #pragma region Private Functions
 private:
-	void moveImpl(UE::Smith::Battle::EMoveDirection);
+	void moveImpl(EDirection);
 	void attackImpl();
 	void changeFwdImpl(EDir_Test);
 	void updateCamImpl(EDir_Test);
@@ -166,34 +173,40 @@ private:
 #pragma region UProperties
 private:
 	// Components
+	/** カメラアーム */
+	UPROPERTY(VisibleAnywhere, Category = Player)
+	TObjectPtr<USpringArmComponent> CameraBoom;
+	/** カメラ */
+	UPROPERTY(VisibleAnywhere, Category = Player)
+	TObjectPtr<UCameraComponent> Camera;
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USpringArmComponent> m_springArm;
+	TObjectPtr<USmithMoveComponent> MoveComponent;
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCameraComponent> m_cam;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USmithMoveComponent> m_moveComponent;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USmithAttackComponent> m_atkComponent;
+	TObjectPtr<USmithAttackComponent> AttackComponent;
 
 	// Enhanced Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> MappingCtx;
+	/** 移動インプットアクション */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> MoveAction;
+	/** 攻撃インプットアクション */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> AttackAction;
+	/** カメラ移動インプットアクション */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> CameraAction;
+	/** デバッグ専用！！ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> DebugAction;
-
-	// Attack Format
+	
+	/** 攻撃フォーマット */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
 	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
 
 	TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
 
-	// TODO 仲介でシステムとやり取りする
+	// コマンドを送る時に使う仲介
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
 #pragma endregion UProperties
 // end of UProperties
@@ -206,10 +219,14 @@ private:
 #pragma region Private Properties
 private:
 	int32 m_hp;
+	float m_rotateSpeed;
+	int32 m_rotatingDirection;
 	EDir_Test m_camDir;
 	EDir_Test m_actorFaceDir;
 	uint8 m_bCanMove : 1;
 	uint8 m_bCanAttack : 1;
+	uint8 m_bRotatingCamera : 1;
+	
 
 #pragma endregion Private Properties
 // end of Private Properties

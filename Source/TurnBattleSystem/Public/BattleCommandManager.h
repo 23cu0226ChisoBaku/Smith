@@ -10,6 +10,7 @@
 class IBattleCommand;
 class ITurnManageable;
 class UBattleCommandManager;
+class IEventExecutor;
 
 DECLARE_MULTICAST_DELEGATE(FStartEndEvent)
 
@@ -26,18 +27,14 @@ public:
 // start of UBattleCommandManager Interface
 #pragma region UBattleCommandManager Interface
 public:
+	void AssignEventExecutor(IEventExecutor*);
 	void RegisterWaitList(const TArray<TWeakInterfacePtr<ITurnManageable>>&);
 	void RegisterCommand(ITurnManageable*, TSharedPtr<IBattleCommand>&&);
 	void ExecuteCommands(float deltaTime);
+	void Initialize();
+	void Reset();
 #pragma endregion
 // end of UBattleCommandManager Interface
-
-// start of Test Code
-#pragma region Test Code
-public:
-	void Test();
-#pragma endregion
-// end of Test Code
 
 public:
 	FStartEndEvent OnStartExecuteEvent;
@@ -45,6 +42,8 @@ public:
 private:
 	TArray<ITurnManageable*> m_requestCmdWaitList;
 	TArray<TSharedPtr<IBattleCommand>> m_commandLists;
+	TWeakInterfacePtr<IEventExecutor> m_eventExecutor;
 	uint8 m_bIsExecutingCommand : 1;
+	uint8 m_bCanRegister : 1;
 
 };

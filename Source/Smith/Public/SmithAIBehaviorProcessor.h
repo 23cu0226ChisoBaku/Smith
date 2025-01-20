@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Tickable.h"
 #include "SmithAIStrategyContainer.h"
 #include "SmithAIBehaviorProcessor.generated.h"
 
@@ -16,7 +15,7 @@ class USmithAIStrategy;
  * 
  */
 UCLASS()
-class SMITH_API USmithAIBehaviorProcessor : public UObject , public FTickableGameObject
+class SMITH_API USmithAIBehaviorProcessor : public UObject
 {
 	GENERATED_BODY()
 
@@ -25,26 +24,11 @@ public:
 
 	void BeginDestroy() override final;
 
-	// start of FTickableObjectBase Interface
-	#pragma region FTickableObjectBase Interface
-		void Tick(float DeltaTime) override final;
-		bool IsTickable() const override final;
-		TStatId GetStatId() const override final;
-	#pragma endregion
-	// end of FTickableObjectBase Interface
-
-	// start of FTickableObject Interface
-	#pragma region FTickableObject Interface
-		bool IsTickableWhenPaused() const override final;
-		bool IsTickableInEditor() const override final;
-		UWorld* GetTickableGameObjectWorld() const override final;
-	#pragma endregion
-	// end of FTickableObject Interface
-
 public:
 	void RegisterAIStrategy(int32 priority, USmithAIStrategy*);
 	void EmptyStrategy();
 	void RunBehaviorProcessor();
+	void TickBehaviorProcessor(float deltaTime);
 	void StopBehaviorProcessor();
 
 public:

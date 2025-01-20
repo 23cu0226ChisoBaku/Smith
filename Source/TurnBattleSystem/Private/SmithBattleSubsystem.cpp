@@ -7,6 +7,7 @@
 #include "ITurnManageable.h"
 #include "IBattleCommand.h"
 #include "BattleCommandManager.h"
+#include "IEventExecutor.h"
 #include "SmithTurnBattleWorldSettings.h"
 
 #include "Debug.h"
@@ -34,15 +35,12 @@ bool USmithBattleSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
   Super::Initialize(Collection);
-  m_bCanExecuteCmd = false;
-  emptyContainers();
-
   if (m_battleCmdMgr == nullptr)
   {
     m_battleCmdMgr = NewObject<UBattleCommandManager>(GetWorld());
   }
-
   check(m_battleCmdMgr != nullptr)
+  ResetBattle();
 
   m_startDelegateHandle = m_battleCmdMgr->OnStartExecuteEvent.AddUObject(this, &USmithBattleSubsystem::startExecute);
   m_endDelegateHandle = m_battleCmdMgr->OnEndExecuteEvent.AddUObject(this, &USmithBattleSubsystem::endExecute);
@@ -51,17 +49,18 @@ void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void USmithBattleSubsystem::Deinitialize()
 {
-  Super::Deinitialize();
-  emptyContainers();
+  ResetBattle();
   if (m_battleCmdMgr != nullptr)
   {
     m_battleCmdMgr->OnStartExecuteEvent.Remove(m_startDelegateHandle);
     m_battleCmdMgr->OnEndExecuteEvent.Remove(m_endDelegateHandle);
     m_battleCmdMgr->MarkAsGarbage();
   }
+
+  Super::Deinitialize();
 }
 
-void USmithBattleSubsystem::StartBattle()
+void USmithBattleSubsystem::InitializeBattle()
 {
   TArray<AActor*> turnManageable;
   UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UTurnManageable::StaticClass(),turnManageable);
@@ -100,11 +99,44 @@ void USmithBattleSubsystem::StartBattle()
 
     if (m_battleCmdMgr != nullptr)
     {
+      m_battleCmdMgr->Initialize();
       m_battleCmdMgr->RegisterWaitList(registerWaitList);
     }
 
     m_curtTurn = ETurnPriority::PlayerSelf;
   }
+}
+
+void USmithBattleSubsystem::ResetBattle()
+{
+  m_battleCmdMgr->Reset();
+  m_priorityManageableLists.Reset();
+  m_bCanExecuteCmd = false;
+}
+
+void USmithBattleSubsystem::AssignEventExecutor(IEventExecutor* eventExecutor)
+{
+  if (m_battleCmdMgr != nullptr)
+  {
+    m_battleCmdMgr->AssignEventExecutor(eventExecutor);
+  }
+}
+
+void USmithBattleSubsystem::RegisterCommand(ITurnManageable* requester, TSharedPtr<IBattleCommand> battleCommand)
+{
+  if (requester == nullptr || battleCommand == nullptr)
+  {
+    MDebug::LogError("Can not register!!!");
+    return;
+  }
+
+  check(m_battleCmdMgr != nullptr);
+  if (m_battleCmdMgr == nullptr)
+  {
+    return;
+  }
+  m_battleCmdMgr->RegisterCommand(requester, ::MoveTemp(battleCommand));
+
 }
 
 // TODO
@@ -118,72 +150,53 @@ void USmithBattleSubsystem::SubscribeOnTurnFinishEvent(TDelegate<void()>& delega
   m_battleCmdMgr->OnEndExecuteEvent.Add(delegate);
 }
 
-void USmithBattleSubsystem::registerCommand(ITurnManageable* requester, TSharedPtr<IBattleCommand> battleCommand)
+
+void USmithBattleSubsystem::registerNextTurnObjs()
 {
-  if (requester == nullptr || battleCommand == nullptr)
-  {
-    return;
-  }
-
   check(m_battleCmdMgr != nullptr);
-
   if (m_battleCmdMgr == nullptr)
   {
     return;
   }
-  m_battleCmdMgr->RegisterCommand(requester, ::MoveTemp(battleCommand));
-
-}
-
-void USmithBattleSubsystem::registerNextTurnObjs()
-{
-  // TODO Strange Design
-  uint8 errorCnt = 0;
 
   const ETurnPriority prevTurn = m_curtTurn;
+  ETurnPriority nextTurn = prevTurn;
   do
   {
-    m_curtTurn = StaticCast<ETurnPriority>((StaticCast<uint8>(m_curtTurn) + 1u) % StaticCast<uint8>(ETurnPriority::PriorityTypeCnt));
-
-    if (m_curtTurn == prevTurn)
+    nextTurn = StaticCast<ETurnPriority>((StaticCast<uint8>(nextTurn) + 1u) % StaticCast<uint8>(ETurnPriority::PriorityTypeCnt));
+    if (m_priorityManageableLists.Contains(nextTurn))
     {
-      break;
+      int32 idx = 0;
+      while (idx < m_priorityManageableLists[nextTurn].Elements.Num())
+      {
+        auto nextTurnObj = m_priorityManageableLists[nextTurn].Elements[idx];
+        bool invalid = false;
+
+        if (nextTurnObj.IsValid())
+        {
+          nextTurnObj->SetCommandSendable(true);
+        }
+        else
+        {
+          invalid = true;
+        }
+
+        if (invalid)
+        {
+          m_priorityManageableLists[nextTurn].Elements.RemoveAt(idx);
+          continue;
+        }
+        ++idx;
+      }
+
+      if (m_priorityManageableLists[nextTurn].Elements.Num() > 0)
+      {
+        m_battleCmdMgr->RegisterWaitList(m_priorityManageableLists[nextTurn].Elements);
+        m_curtTurn = nextTurn;
+        break;
+      }
     }
-
-  } while (!m_priorityManageableLists.Contains(m_curtTurn));
-
-  if (m_battleCmdMgr != nullptr)
-  {
-    int32 idx = 0;
-    while (idx < m_priorityManageableLists[m_curtTurn].Elements.Num())
-    {
-      auto nextTurnObj = m_priorityManageableLists[m_curtTurn].Elements[idx];
-      bool invalid = false;
-      if (nextTurnObj.IsValid())
-      {
-        nextTurnObj->SetCommandSendable(true);
-      }
-      else
-      {
-        invalid = true;
-      }
-
-      if (invalid)
-      {
-        m_priorityManageableLists[m_curtTurn].Elements.RemoveAt(idx);
-        continue;
-      }
-
-      ++idx;
-    }
-    m_battleCmdMgr->RegisterWaitList(m_priorityManageableLists[m_curtTurn].Elements);
-  }
-  
-}
-
-void USmithBattleSubsystem::emptyContainers()
-{
-  m_priorityManageableLists.Empty();
+  } while (nextTurn != prevTurn);
 }
 
 void USmithBattleSubsystem::startExecute()
@@ -202,19 +215,9 @@ void USmithBattleSubsystem::endExecute()
 void USmithBattleSubsystem::Tick(float DeltaTime)
 {
   UTickableWorldSubsystem::Tick(DeltaTime);
-
-  if (m_bCanExecuteCmd) 
+  if (m_bCanExecuteCmd && m_battleCmdMgr != nullptr) 
   {
-    if (m_battleCmdMgr != nullptr)
-    {
-      m_battleCmdMgr->ExecuteCommands(DeltaTime);
-    }
-  }
-
-  if (m_priorityManageableLists.Contains(ETurnPriority::Rival) && m_priorityManageableLists[ETurnPriority::Rival].Elements.Num() == 0)
-  {
-   
-    UGameplayStatics::OpenLevel(GetWorld(), FName(*GetWorld()->GetName()), false);
+    m_battleCmdMgr->ExecuteCommands(DeltaTime);
   }
 }
 

@@ -28,6 +28,7 @@ Encoding : UTF-8
 */
 //---------------------------------------
 class ICanSetOnMap;
+class ISmithMapEvent;
 
 namespace UE::Smith
 {
@@ -90,6 +91,7 @@ namespace UE::Smith
 				/// @param ICanSetOnMap 拾えるオブジェクト
 				///
 				void SetPickable(IPickable*);
+				void SetEvent(ISmithMapEvent*);
 				///
 				/// @brief マップオブジェクトを返す
 				/// @return 何かがいたら	-> ここにいるマップオブジェクトのポインタ
@@ -102,6 +104,7 @@ namespace UE::Smith
 				///					何もなかったら	-> nullptr
 				///
 				IPickable* GetPickable() const;
+				ISmithMapEvent* GetEvent() const;
 				///
 				/// @brief 拾えるオブジェクトを置けるか
 				///	@return 置けたら	-> true 置けなかったら	-> false

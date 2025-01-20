@@ -18,7 +18,7 @@ Encoding : UTF-8
 #include "FormatTransformer.h"
 #include "SmithCommandFormat.h"
 #include "MapCoord.h"
-#include "MoveDirection.h"
+#include "Direction.h"
 #include "FormatType.h"
 
 #include "MLibrary.h"
@@ -51,17 +51,17 @@ namespace UE::Smith
       return mapCoords;
     }
 
-    FSmithCommandFormat FFormatTransformer::GetRotatedFormat(const FSmithCommandFormat& src, EMoveDirection direction)
+    FSmithCommandFormat FFormatTransformer::GetRotatedFormat(const FSmithCommandFormat& src, EDirection direction)
     {
-      if (StaticCast<uint8>(direction) >= StaticCast<uint8>(EMoveDirection::DirectionCount))
+      if (StaticCast<uint8>(direction) >= StaticCast<uint8>(EDirection::DirectionCount))
       {
         return src;
       }
 
       // 上下左右に調整する(斜め回転できない)
-      const EMoveDirection direction_adjust = StaticCast<EMoveDirection>(StaticCast<uint8>(direction) - (StaticCast<uint8>(direction) % 2));
+      const EDirection direction_adjust = StaticCast<EDirection>(StaticCast<uint8>(direction) - (StaticCast<uint8>(direction) % 2));
 
-      if (direction_adjust == EMoveDirection::North)
+      if (direction_adjust == EDirection::North)
       {
         return src;
       }
@@ -71,7 +71,7 @@ namespace UE::Smith
       }
     }
 
-    FSmithCommandFormat FFormatTransformer::getRotatedFormatImpl(const FSmithCommandFormat& src, EMoveDirection direction)
+    FSmithCommandFormat FFormatTransformer::getRotatedFormatImpl(const FSmithCommandFormat& src, EDirection direction)
     {
       const uint64 srcFormatRow = src.GetRow();
       const uint64 srcFormatColumn = src.GetColumn();
@@ -83,7 +83,7 @@ namespace UE::Smith
       TArray<ESmithFormatType> srcData{};
       switch (direction)
       {
-        case EMoveDirection::East:
+        case EDirection::East:
         {
           for (int x = 0; x < srcFormatColumn; ++x)
           {
@@ -96,7 +96,7 @@ namespace UE::Smith
           rotatedFormatColumn = srcFormatRow;
         }
         break;
-        case EMoveDirection::South:
+        case EDirection::South:
         {
           for (int y = srcFormatRow - 1; y >= 0; --y)
           {
@@ -109,7 +109,7 @@ namespace UE::Smith
           rotatedFormatColumn = srcFormatColumn;
         }
         break;
-        case EMoveDirection::West:
+        case EDirection::West:
         {
           for (int x = srcFormatColumn - 1; x >=0; --x)
           {

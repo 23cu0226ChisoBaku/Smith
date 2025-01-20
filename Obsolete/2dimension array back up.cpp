@@ -14,6 +14,7 @@ Version : alpha_1.0.0
 Encoding : UTF-8 
 
 */
+#error
 #pragma once
 
 #ifndef M_DIMENSION_TWO_ARRAY

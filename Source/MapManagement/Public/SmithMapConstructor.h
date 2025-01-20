@@ -69,8 +69,11 @@ namespace UE::Smith
 				/// @param				マップ構築設計図
 				///
 				void ConstructMap(UWorld*, const FSmithRect&, const FSmithMapConstructionBluePrint&);
+				void DestructMap();
 			#pragma endregion FSmithMapConstructor Interface
 			// end of FSmithMapConstructor Interface
+			private:
+				TArray<TWeakObjectPtr<AActor>> m_mapMaterials;
 		};
 	}
 }

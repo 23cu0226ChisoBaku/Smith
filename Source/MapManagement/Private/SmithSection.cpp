@@ -95,7 +95,7 @@ namespace UE::Smith
         }
         bool HasRoom() const
         {
-          return m_room.IsValid();
+          return m_room.IsValid() && m_room->GetWidth() > 1 && m_room->GetHeight() >= 1;
         }
         uint8 GetWidth() const
         {

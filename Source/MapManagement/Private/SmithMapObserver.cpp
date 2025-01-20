@@ -22,6 +22,8 @@ Encoding : UTF-8
 #include "ICanSetOnMap.h"
 #include "SmithMapDataModel.h"
 #include "SmithSection.h"
+#include "Direction.h"
+#include "SmithMapHelperFunc.h"
 #include "MLibrary.h"
 
 // 内部使用(シャッフル)
@@ -51,13 +53,14 @@ namespace UE::Smith
     ///
     class FSmithMapObserver::MapObserverImpl
     {
+      using Model = typename FSmithMapDataModel;
       public:
         MapObserverImpl()
         { }
         ~MapObserverImpl()
         { }
       public:
-        void AssignMap(TSharedPtr<FSmithMapDataModel> pModel, FVector originCoord_World, int32 tileSize)
+        void AssignMap(TSharedPtr<Model> pModel, FVector originCoord_World, int32 tileSize)
         {
           m_model = pModel;
           m_originCoord_World = originCoord_World;
@@ -69,7 +72,7 @@ namespace UE::Smith
 
           // AssignMapをこの前に呼び出す必要がある
           check(m_model.IsValid())
-          if (!m_model.IsValid())
+          if (!m_model.IsValid()) [[unlikely]]
           {
             return;
           }
@@ -86,7 +89,7 @@ namespace UE::Smith
             return;
           }
 
-          TSharedPtr<FSmithMapDataModel> model_shared = m_model.Pin();
+          TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared.IsValid())
           {
             return;
@@ -207,8 +210,451 @@ namespace UE::Smith
           m_player = playerMapObj;
           m_generateBP = generateBP;
         }
+        void ClearMapObjs_IgnorePlayer()
+        {
+          check(m_model.IsValid())
+          if (!m_model.IsValid())
+          {
+            return;
+          }
+
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          for (const auto& onMapObj : model_shared->OnMapObjsCoordTable)
+          {
+            if (!onMapObj.Key.IsValid() || onMapObj.Key.Get() == m_player.Get())
+            {
+              continue;
+            }
+
+            AActor* objActor = Cast<AActor>(onMapObj.Key.GetObject());
+            if (objActor != nullptr)
+            {
+              objActor->Destroy();
+            }
+          }
+        }
+        void InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination)
+        {
+          using namespace UE::Smith::Map::Private;
+
+          check (m_model.IsValid())
+          if (!m_model.IsValid())
+          {
+            MDebug::LogError("failed to InitNextLevelEvent --- model invalid");
+            return;
+          }
+
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          check(model_shared->Map.IsValid())
+          if (!model_shared->Map.IsValid())
+          {
+            MDebug::LogError("failed to InitNextLevelEvent --- map invalid");
+            return;
+          }
+          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+          TArray<uint8> sectionIdx{};
+          sectionIdx.Reserve(map_shared->GetSectionCount());
+
+          check(map_shared->GetSectionCount() > 0)
+          if (map_shared->GetSectionCount() == 0)
+          {
+            MDebug::LogError("failed to InitNextLevelEvent --- map section num invalid");
+            return;
+          }
+
+          outX = 0u;
+          outY = 0u;
+          destination = FVector::ZeroVector;
+
+          for (uint8 i = 0u; i < map_shared->GetSectionCount(); ++i)
+          {
+            sectionIdx.Emplace(i);
+          }
+
+          RandomShuffle(sectionIdx);
+          for(int32 i = 0; i < sectionIdx.Num(); ++i)
+          {
+            const uint8 sectionRow = sectionIdx[i] / map_shared->GetColumn();
+            const uint8 sectionColumn = sectionIdx[i] % map_shared->GetColumn();
+
+            FSmithSection* sectionPtr = map_shared->GetSection(sectionRow, sectionColumn);
+
+            if (sectionPtr == nullptr || !sectionPtr->HasRoom())
+            {
+              continue;
+            }
+
+            if (sectionPtr->GetRoomWidth() <= 2 && sectionPtr->GetRoomHeight() <= 2)
+            {
+              continue;
+            }
+
+            const uint8 sectionRoomLeft = map_shared->GetSectionLeft(sectionColumn) + sectionPtr->GetRoomLeft();
+            const uint8 sectionRoomRight = sectionRoomLeft + sectionPtr->GetRoomWidth() - 1;
+            const uint8 sectionRoomTop = map_shared->GetSectionTop(sectionRow) + sectionPtr->GetRoomTop();
+            const uint8 sectionRoomBottom = sectionRoomTop + sectionPtr->GetRoomHeight() - 1;
+
+            TArray<FMapCoord> eventRandomPlaceCoords{};
+            // 四隅に階段を配置しない
+            eventRandomPlaceCoords.Reserve(StaticCast<int32>(sectionPtr->GetRoomWidth()) * 2 + StaticCast<int32>(sectionPtr->GetRoomHeight()) * 2 - 8);
+            // 部屋の上と下両辺の座標
+            for (uint8 column = sectionRoomLeft + 1u; column < sectionRoomRight; ++column)
+            {
+              eventRandomPlaceCoords.Emplace(FMapCoord{column, sectionRoomTop});
+              eventRandomPlaceCoords.Emplace(FMapCoord{column, sectionRoomBottom});
+            }
+
+            for (uint8 row = sectionRoomTop + 1u; row < sectionRoomBottom; ++row)
+            {
+              eventRandomPlaceCoords.Emplace(FMapCoord{sectionRoomLeft, row});
+              eventRandomPlaceCoords.Emplace(FMapCoord{sectionRoomRight, row});
+            }
+
+            RandomShuffle(eventRandomPlaceCoords);
+            bool success = false;
+            for (int32 j = 0; j < eventRandomPlaceCoords.Num(); ++j)
+            {
+              const FMapCoord mapCoord = eventRandomPlaceCoords[j];
+
+              if (!model_shared->StaySpaceTable.Contains(mapCoord))
+              {
+                continue;
+              }
+
+            if (canPlaceEvent(mapCoord))
+              {
+                success = true;
+                MDebug::Log(FString::FromInt(sectionIdx[i]));
+                outX = mapCoord.x;
+                outY = mapCoord.y;
+                break;
+              }
+            
+            }
+
+            if (success)
+            {
+              destination = FVector{
+                                      StaticCast<double>(outX) * StaticCast<double>(m_mapTileSize) + m_originCoord_World.X,
+                                      StaticCast<double>(outY) * StaticCast<double>(m_mapTileSize) + m_originCoord_World.Y,
+                                      m_originCoord_World.Z,
+                                    };
+              break;
+            }
+          }
+        }
+        bool ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
+        {
+          return ChaseTarget(outChaseDirection, chaser, m_player.Get(), chaseRadius);
+        }
+        bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
+        {
+          outChaseDirection = EDirection::Invalid;
+
+          check(m_model.IsValid())
+          if (!m_model.IsValid())
+          {
+            return false;
+          }
+          // TODO
+          // Chase Player Use Only
+          if (!m_player.IsValid() || m_player != target)
+          {
+            return false;
+          }
+
+          if (!IS_UINTERFACE_VALID(chaser) || !IS_UINTERFACE_VALID(target) || chaseRadius == 0)
+          {
+            return false;
+          }
+
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared.IsValid())
+          {
+            return false;
+          }
+
+          if (!model_shared->OnMapObjsCoordTable.Contains(chaser)
+              || !model_shared->OnMapObjsCoordTable.Contains(target))
+          {
+            return false; 
+          }
+
+          for (uint8 curtRadius = 1u; curtRadius <= chaseRadius; ++curtRadius)
+          {
+            chaseTarget_internal(outChaseDirection, chaser, target, curtRadius);
+            if (outChaseDirection != EDirection::Invalid)
+            {
+              return true;
+            }
+          }
+
+          return false;
+        }
+
       private:
-        TWeakPtr<FSmithMapDataModel> m_model;
+        bool isInSameSection(ICanSetOnMap* chaser, ICanSetOnMap* target)
+        {
+          if (!IS_UINTERFACE_VALID(chaser) || !IS_UINTERFACE_VALID(target)) [[unlikely]]
+          {
+            return false;
+          }
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared->OnMapObjsCoordTable.Contains(chaser)
+              || !model_shared->OnMapObjsCoordTable.Contains(target)) [[unlikely]]
+          {
+            return false; 
+          }
+
+          if (!model_shared->Map.IsValid())
+          {
+            MDebug::LogError("Invalid Map --- SmithMapObserver->isInSameRoom");
+            return false;
+          }
+          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+
+          const uint8 chaserCoordX = model_shared->OnMapObjsCoordTable[chaser].x;
+          const uint8 chaserCoordY = model_shared->OnMapObjsCoordTable[chaser].y;
+          const uint8 targetCoordX = model_shared->OnMapObjsCoordTable[target].x;
+          const uint8 targetCoordY = model_shared->OnMapObjsCoordTable[target].y;
+
+          return FSmithMapHelperFunc::IsInSameSection(map_shared.Get(), chaserCoordX, chaserCoordY, targetCoordX, targetCoordY);
+        }
+        void chaseTarget_internal(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
+        {
+          if (!m_model.IsValid()) [[unlikely]]
+          {
+            MDebug::LogError("model invalid --- chaseTarget_internal");
+            return;
+          } 
+
+          TSharedPtr<FSmithMapDataModel> model_shared = m_model.Pin();
+          if (!model_shared->Map.IsValid()) [[unlikely]]
+          {
+            MDebug::LogError("map invalid --- chaseTarget_internal");
+            return;
+          } 
+          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+
+          const uint8 chaserCoordX = model_shared->OnMapObjsCoordTable[chaser].x;
+          const uint8 chaserCoordY = model_shared->OnMapObjsCoordTable[chaser].y;
+          const uint8 mapWidth = map_shared->GetMapWidth();
+          const uint8 mapHeight = map_shared->GetMapHeight();
+
+          int32 chaseCoordX_Offset = chaseRadius;
+          int32 chaseCoordY_Offset = 0;
+          bool bChaseSucceed = false;
+
+          // TODO Need Comment Immediately
+          while (chaseCoordX_Offset > 0)
+          {
+            {
+              const int32 checkMapCoordX = StaticCast<int32>(chaserCoordX) + chaseCoordX_Offset;
+              const int32 checkMapCoordY = StaticCast<int32>(chaserCoordY) + chaseCoordY_Offset;
+              if ((checkMapCoordX >= 0 && checkMapCoordX < StaticCast<int32>(mapWidth))
+                  && (checkMapCoordY >= 0 && checkMapCoordY < StaticCast<int32>(mapHeight))
+                )
+              {
+                const FMapCoord checkMapCoord{StaticCast<uint8>(checkMapCoordX), StaticCast<uint8>(checkMapCoordY)};  
+                if (model_shared->StaySpaceTable.Contains(checkMapCoord))
+                {
+                  if (model_shared->StaySpaceTable[checkMapCoord]->GetMapObject() == target)
+                  {
+                    bChaseSucceed = true;
+                    break;
+                  }
+                }
+              }
+            }
+
+            {
+              const int32 checkMapCoordX_Reverse = StaticCast<int32>(chaserCoordX) - chaseCoordX_Offset;
+              const int32 checkMapCoordY_Reverse = StaticCast<int32>(chaserCoordY) - chaseCoordY_Offset;
+              
+              if ((checkMapCoordX_Reverse >= 0 && checkMapCoordX_Reverse < StaticCast<int32>(mapWidth))
+                  && (checkMapCoordY_Reverse >= 0 && checkMapCoordY_Reverse < StaticCast<int32>(mapHeight))
+                )
+              {
+                const FMapCoord checkMapCoord_Reverse{StaticCast<uint8>(checkMapCoordX_Reverse), StaticCast<uint8>(checkMapCoordY_Reverse)};  
+                if (model_shared->StaySpaceTable.Contains(checkMapCoord_Reverse))
+                {
+                  if (model_shared->StaySpaceTable[checkMapCoord_Reverse]->GetMapObject() == target)
+                  {
+                    chaseCoordX_Offset *= -1;
+                    chaseCoordY_Offset *= -1;
+                    bChaseSucceed = true;
+                    break;
+                  }
+                }
+              }
+            }
+            --chaseCoordX_Offset;
+            ++chaseCoordY_Offset;
+          }
+
+          if (!bChaseSucceed)
+          {
+            while (chaseCoordX_Offset > -StaticCast<int32>(chaseRadius))
+            {
+              {
+                const int32 checkMapCoordX = StaticCast<int32>(chaserCoordX) + chaseCoordX_Offset;
+                const int32 checkMapCoordY = StaticCast<int32>(chaserCoordY) + chaseCoordY_Offset;
+                if ((checkMapCoordX >= 0 && checkMapCoordX < StaticCast<int32>(mapWidth))
+                    && (checkMapCoordY >= 0 && checkMapCoordY < StaticCast<int32>(mapHeight))
+                  )
+                {
+                  const FMapCoord checkMapCoord{StaticCast<uint8>(checkMapCoordX), StaticCast<uint8>(checkMapCoordY)};  
+                  if (model_shared->StaySpaceTable.Contains(checkMapCoord))
+                  {
+                    if (model_shared->StaySpaceTable[checkMapCoord]->GetMapObject() == target)
+                    {
+                      bChaseSucceed = true;
+                      break;
+                    }
+                  }
+                }
+              }
+
+              {
+                const int32 checkMapCoordX_Reverse = StaticCast<int32>(chaserCoordX) - chaseCoordX_Offset;
+                const int32 checkMapCoordY_Reverse = StaticCast<int32>(chaserCoordY) - chaseCoordY_Offset;
+                
+                if ((checkMapCoordX_Reverse >= 0 && checkMapCoordX_Reverse < StaticCast<int32>(mapWidth))
+                    && (checkMapCoordY_Reverse >= 0 && checkMapCoordY_Reverse < StaticCast<int32>(mapHeight))
+                  )
+                {
+                  const FMapCoord checkMapCoord_Reverse{StaticCast<uint8>(checkMapCoordX_Reverse), StaticCast<uint8>(checkMapCoordY_Reverse)};  
+                  if (model_shared->StaySpaceTable.Contains(checkMapCoord_Reverse))
+                  {
+                    if (model_shared->StaySpaceTable[checkMapCoord_Reverse]->GetMapObject() == target)
+                    {
+                      chaseCoordX_Offset *= -1;
+                      chaseCoordY_Offset *= -1;
+                      bChaseSucceed = true;
+                      break;
+                    }
+                  }
+                }
+              }
+              --chaseCoordX_Offset;
+              --chaseCoordY_Offset;
+            }
+          }
+
+          if (!bChaseSucceed)
+          {
+            outChaseDirection = EDirection::Invalid;
+            return;
+          }
+
+          if (chaseCoordX_Offset > 0)
+          {
+            if (chaseCoordY_Offset > 0)
+            {
+              outChaseDirection = EDirection::NorthEast;
+            }
+            else if (chaseCoordY_Offset < 0)
+            {
+              outChaseDirection = EDirection::NorthWest;
+            }
+            else
+            {
+              outChaseDirection = EDirection::North;
+            }
+          }
+          else if (chaseCoordX_Offset < 0)
+          {
+            if (chaseCoordY_Offset > 0)
+            {
+              outChaseDirection = EDirection::SouthEast;
+            }
+            else if (chaseCoordY_Offset < 0)
+            {
+              outChaseDirection = EDirection::SouthWest;
+            }
+            else
+            {
+              outChaseDirection = EDirection::South;
+            }
+          }
+          else
+          {
+            if (chaseCoordY_Offset > 0)
+            {
+              outChaseDirection = EDirection::East;
+            }
+            else if (chaseCoordY_Offset < 0)
+            {
+              outChaseDirection = EDirection::West;
+            } 
+            else
+            {
+              outChaseDirection = EDirection::Invalid;
+            }
+          }
+        }
+        // TODO need check out of bounds;
+        bool canPlaceEvent(FMapCoord coord, bool bPlaceOnCrossroad = false)
+        {
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (model_shared->StaySpaceTable[coord]->GetMapObject() == nullptr 
+              && model_shared->StaySpaceTable[coord]->GetEvent() == nullptr
+             )
+          {
+            if (!bPlaceOnCrossroad)
+            {
+              // 4だったら交差点
+              int32 crossCount = 0;
+              {
+                const FMapCoord coord_north{coord.x + 1u, coord.y};
+                if (model_shared->StaySpaceTable.Contains(coord_north))
+                {
+                  ++crossCount;
+                }
+              }
+              {
+                const FMapCoord coord_east{coord.x, coord.y + 1u};
+                if (model_shared->StaySpaceTable.Contains(coord_east))
+                {
+                  ++crossCount;
+                }
+              }
+              {
+                const FMapCoord coord_south{coord.x - 1u, coord.y};
+                if (model_shared->StaySpaceTable.Contains(coord_south))
+                {
+                  ++crossCount;
+                }
+              }
+              {
+                const FMapCoord coord_west{coord.x, coord.y - 1u};
+                if (model_shared->StaySpaceTable.Contains(coord_west))
+                {
+                  ++crossCount;
+                }
+              }
+
+              if (crossCount == 4)
+              {
+                return false;
+              }
+              else
+              {
+                return true;
+              }
+            }
+            else
+            {
+              return true;
+            }
+          }
+          else
+          {
+            return false;
+          }
+        }
+      private:
+        TWeakPtr<Model> m_model;
         TWeakInterfacePtr<ICanSetOnMap> m_player;
         FSmithEnemyGenerateBluePrint m_generateBP;
         FVector m_originCoord_World;
@@ -246,13 +692,26 @@ namespace UE::Smith
     {
       m_pImpl->InitMapObj(outMapObjs, world, player, generateBP);
     }
+    void FSmithMapObserver::ClearMapObjs_IgnorePlayer()
+    {
+      m_pImpl->ClearMapObjs_IgnorePlayer();
+    }
+    void FSmithMapObserver::InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination)
+    {
+      m_pImpl->InitNextLevelEvent_Temp(outX, outY, destination);
+    }
+    bool FSmithMapObserver::ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
+    {
+      return m_pImpl->ChasePlayer(outChaseDirection, chaser, chaseRadius);
+    }
     void FSmithMapObserver::GenerateNewEnemy()
     {
 
     }
-    void FSmithMapObserver::ChaseTarget(ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
+    
+    bool FSmithMapObserver::ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
     {
-
+      return m_pImpl->ChaseTarget(outChaseDirection, chaser, target, chaseRadius);
     }
 
   }

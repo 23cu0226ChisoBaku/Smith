@@ -15,9 +15,10 @@ Encoding : UTF-8
 
 */
 
-#include "SmithMapObjDeployDirector.h"
+#include "SmithMapDeployDirector.h"
 #include "SmithMapDataModel.h"
 #include "ICanSetOnMap.h"
+#include "ISmithMapEvent.h"
 #include "MLibrary.h"
 
 namespace UE::Smith
@@ -25,11 +26,12 @@ namespace UE::Smith
   namespace Map
   {
     ///
-    /// @brief FSmithMapObjDeployDirector実装クラス
+    /// @brief FSmithMapDeployDirector
     /// namespace UE::Smith::Map
     ///
-    class FSmithMapObjDeployDirector::DeployDirectorImpl
+    class FSmithMapDeployDirector::DeployDirectorImpl
     {
+      using Model = typename FSmithMapDataModel;
       public:
         DeployDirectorImpl()
           : m_model(nullptr)
@@ -39,7 +41,7 @@ namespace UE::Smith
           m_model.Reset();
         }
       public:
-        void AssignMap(TSharedPtr<FSmithMapDataModel> pModel)
+        void AssignMap(TSharedPtr<Model> pModel)
         {
           m_model = pModel;
         }
@@ -56,7 +58,7 @@ namespace UE::Smith
             return;
           }
 
-          TSharedPtr<FSmithMapDataModel> model_shared = m_model.Pin();
+          TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared.IsValid())
           {
             return;
@@ -84,24 +86,57 @@ namespace UE::Smith
             model_shared->OnMapObjsCoordTable.Emplace(mapObj, FMapCoord{x, y});
           }
         }
+        void DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y)
+        {
+          check(m_model.IsValid())
+          if (!m_model.IsValid())
+          {
+            return;
+          }
 
+          if (!IS_UINTERFACE_VALID(event))
+          {
+            return;
+          }
+
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared.IsValid())
+          {
+            return;
+          }
+
+          const FMapCoord eventCoord(x, y);
+          if (!model_shared->StaySpaceTable.Contains(eventCoord))
+          {
+            MDebug::LogError("cant place event here");
+            return;
+          }
+
+          const auto& staySpaceTileContainer = model_shared->StaySpaceTable[eventCoord];
+
+          if (staySpaceTileContainer->GetEvent() == nullptr
+              && staySpaceTileContainer->GetMapObject() == nullptr)
+          {
+            model_shared->StaySpaceTable[eventCoord]->SetEvent(event);
+          }
+        }
       private:
-        TWeakPtr<FSmithMapDataModel> m_model;
+        TWeakPtr<Model> m_model;
     };
-    FSmithMapObjDeployDirector::FSmithMapObjDeployDirector()
+    FSmithMapDeployDirector::FSmithMapDeployDirector()
       : m_pImpl(::MakeUnique<DeployDirectorImpl>())
     { }
 
-    FSmithMapObjDeployDirector::~FSmithMapObjDeployDirector()
+    FSmithMapDeployDirector::~FSmithMapDeployDirector()
     {
       m_pImpl.Reset();
     }
 
-    FSmithMapObjDeployDirector::FSmithMapObjDeployDirector(FSmithMapObjDeployDirector&& other) noexcept
+    FSmithMapDeployDirector::FSmithMapDeployDirector(FSmithMapDeployDirector&& other) noexcept
       : m_pImpl(::MoveTemp(other.m_pImpl))
     { }
 
-    FSmithMapObjDeployDirector& FSmithMapObjDeployDirector::operator=(FSmithMapObjDeployDirector&& other) noexcept
+    FSmithMapDeployDirector& FSmithMapDeployDirector::operator=(FSmithMapDeployDirector&& other) noexcept
     {
       if (this != &other)
       {
@@ -112,14 +147,19 @@ namespace UE::Smith
       return *this;
     }
 
-    void FSmithMapObjDeployDirector::AssignMap(TSharedPtr<FSmithMapDataModel> pModel)
+    void FSmithMapDeployDirector::AssignMap(TSharedPtr<FSmithMapDataModel> pModel)
     {
       m_pImpl->AssignMap(pModel);
     }
 
-    void FSmithMapObjDeployDirector::DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
+    void FSmithMapDeployDirector::DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
     {
       m_pImpl->DeployMapObj(mapObj, x, y); 
+    }
+
+    void FSmithMapDeployDirector::DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y)
+    {
+      m_pImpl->DeployEvent(event, x, y);
     }
   } 
 }
