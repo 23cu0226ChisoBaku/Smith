@@ -37,32 +37,32 @@ void AHealGolem::Tick(float DeltaTime)
     // {
     //   //SendSkillCommand(this);
     // }
-		if (attack != nullptr)
-		{
-			UE::Smith::Battle::FSmithCommandFormat formatTest;
+		//if (attack != nullptr)
+		//{
+		//	UE::Smith::Battle::FSmithCommandFormat formatTest;
 
-			ESmithFormatType *type = new ESmithFormatType[9];
-			for (int32 i = 0; i < 9; ++i)
-			{
-				if (i != 4)
-				{
-					type[i] = ESmithFormatType::EFFECT;
-				}
-				else
-				{
-					type[i] = ESmithFormatType::CENTER_NO_EFFECT;
-				}
-			}
-			formatTest.SetupFormat(type, 9, 3, 3);
-			SendAttackCommand(m_attackComp, formatTest, AttackHandle{GetName(), m_atk});
+		//	ESmithFormatType *type = new ESmithFormatType[9];
+		//	for (int32 i = 0; i < 9; ++i)
+		//	{
+		//		if (i != 4)
+		//		{
+		//			type[i] = ESmithFormatType::EFFECT;
+		//		}
+		//		else
+		//		{
+		//			type[i] = ESmithFormatType::CENTER_NO_EFFECT;
+		//		}
+		//	}
+		//	formatTest.SetupFormat(type, 9, 3, 3);
+		//	SendAttackCommand(m_attackComp, formatTest, AttackHandle{GetName(), m_atk});
 
-			--m_skillCnt;
-		}
-		else
-		{
-			// 移動の処理
-			SendMoveCommand(m_moveComp, (UE::Smith::Battle::EMoveDirection)MoveDirection(), 1);
-		}
+		//	--m_skillCnt;
+		//}
+		//else
+		//{
+		//	// 移動の処理
+		//	SendMoveCommand(m_moveComp, (UE::Smith::Battle::EMoveDirection)MoveDirection(), 1);
+		//}
 
     m_timer = 0.0f;
   }
