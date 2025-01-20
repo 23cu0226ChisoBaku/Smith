@@ -38,6 +38,7 @@ public:
 
 public:
 	void OnAttack(AttackHandle&&) override final;
+
 	uint8 GetOnMapSizeX() const override final;
 	uint8 GetOnMapSizeY() const override final;
 	EMapObjType GetType() const override final;
@@ -47,6 +48,7 @@ public:
 	UClass* GetMoveDirectorUClass() const override final;
 	void SetMoveDirector(USmithMoveDirector*) override final;
 	uint8 GetChaseRadius() const override final;
+
 
 private:
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))

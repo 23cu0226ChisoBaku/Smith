@@ -39,36 +39,4 @@ System <-- Enemy
 System --> ICommand
 
 
-
-' ' パターン２
-' class System
-' {
-
-    '
-}
-
-' class Enemy
-' {
-    '     - HP
-    '     - ATK
-    '
-}
-
-' class MoveComponent
-' {
-    '     + Execution()
-    '
-}
-
-' class AttackComponent
-' {
-    '     + Execution()
-    '
-}
-' System o- Map
-' System <-- Enemy
-' System --> MoveComponent
-' System --> AttackComponent
-
-
 @enduml
