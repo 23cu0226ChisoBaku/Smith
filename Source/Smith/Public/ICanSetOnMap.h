@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "ICanSetOnMap.generated.h"
 
+enum class EMapObjType : uint8;
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UCanSetOnMap : public UInterface
@@ -24,4 +26,5 @@ class SMITH_API ICanSetOnMap
 public:
 	virtual uint8 GetOnMapSizeX() const = 0;
 	virtual uint8 GetOnMapSizeY() const = 0;
+	virtual EMapObjType GetType() const = 0;
 };

@@ -116,6 +116,7 @@ namespace UE::Smith
 					///													(DANGER!!! UniquePtrの生ポインタを返すため安全性低め)
 					///
 					FSmithSection* GetSection(uint8 rowIdx, uint8 columnIdx) const;
+					FSmithSection* GetSectionByCoord(uint8 x, uint8 y) const;
 					/// 
 					/// @brief									セクションの左座標を取得
 					/// @param									列のインデックス(均等に生成するため)
@@ -128,6 +129,8 @@ namespace UE::Smith
 					/// @return									セクションの上座標
 					///
 					uint8 GetSectionTop(uint8 rowIdx) const;
+					uint8 GetMapWidth() const;
+					uint8 GetMapHeight() const;
 			#pragma endregion FSmithMap Interface
 			// end of FSmithMap Interface
 			private:

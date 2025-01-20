@@ -33,7 +33,7 @@ void ASpawnActorGameMode_Test::StartPlay()
   USmithBattleSubsystem* subsys = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
   if (subsys != nullptr)
   {
-    subsys->StartBattle();
+    //subsys->StartBattle();
   }
   else
   {

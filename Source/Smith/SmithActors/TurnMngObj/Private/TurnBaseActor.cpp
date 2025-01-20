@@ -4,7 +4,7 @@
 #include "TurnBaseActor.h"
 #include "IMoveable.h"
 #include "ICommandMediator.h"
-#include "MoveDirection.h"
+#include "Direction.h"
 #include "SmithAIBehaviorProcessor.h"
 #include "SmithAIStrategy.h"
 
@@ -46,7 +46,7 @@ void ATurnBaseActor::SetCommandMediator(ICommandMediator* mediator)
 	m_commandMediator = mediator;
 }
 
-void ATurnBaseActor::SendMoveCommand(IMoveable* moveable, UE::Smith::Battle::EMoveDirection direction, uint8 moveDistance)
+void ATurnBaseActor::SendMoveCommand(IMoveable* moveable, EDirection direction, uint8 moveDistance)
 {
 	if (!IsCommandSendable())
 	{
@@ -63,7 +63,7 @@ void ATurnBaseActor::SendMoveCommand(IMoveable* moveable, UE::Smith::Battle::EMo
 	}
 }
 
-void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, UE::Smith::Battle::EMoveDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& handle)
+void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& handle)
 {
 	if (!IsCommandSendable())
 	{

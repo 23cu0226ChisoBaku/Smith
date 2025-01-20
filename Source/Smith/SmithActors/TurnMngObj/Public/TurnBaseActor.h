@@ -16,13 +16,13 @@ class IAttackable;
 class USmithAIStrategy;
 class USmithAIBehaviorProcessor;
 struct AttackHandle;
+enum class EDirection : uint8;
 
 namespace UE::Smith
 {
 	namespace Battle
 	{
 		class FSmithCommandFormat;
-		enum class EMoveDirection : uint8;
 	}
 }
 
@@ -54,8 +54,8 @@ public:
 		// end of ICanCommandMediate
 
 protected:
-	void SendMoveCommand(IMoveable*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance);
-	void SendAttackCommand(ICanMakeAttack*, UE::Smith::Battle::EMoveDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&);
+	void SendMoveCommand(IMoveable*, EDirection, uint8 moveDistance);
+	void SendAttackCommand(ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&);
 
 	#pragma endregion Interfaces
 	// end of Interfaces

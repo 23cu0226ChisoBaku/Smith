@@ -12,6 +12,7 @@ DECLARE_MULTICAST_DELEGATE(FOnTurnFinishEvent);
 
 class IBattleCommand;
 class UBattleCommandManager;
+class IEventExecutor;
 
 UCLASS()
 class TURNBATTLESYSTEM_API USmithBattleSubsystem final : public UTickableWorldSubsystem
@@ -23,14 +24,14 @@ public:
 
 /** Implement this for initialization of instances of the system */
 	void Initialize(FSubsystemCollectionBase& Collection) override final;
-
 	/** Implement this for deinitialization of instances of the system */
 	void Deinitialize() override final;
 
 	// TODO Change name
 	/// @brief ITurnManageableを継承したActorを登録
 	/// 新しいマップが読み込まれたら一回呼ばれる
-	void StartBattle();
+	void InitializeBattle();
+	void ResetBattle();
 	
 // start of FTickableObjectBase Interface
 #pragma region FTickableObjectBase Interface
@@ -48,15 +49,14 @@ public:
 #pragma endregion
 // end of FTickableObject Interface
 public:
-	void registerCommand(ITurnManageable*, TSharedPtr<IBattleCommand>);
+	void AssignEventExecutor(IEventExecutor*);
+	void RegisterCommand(ITurnManageable*, TSharedPtr<IBattleCommand>);
 	// TODO
 	void SubscribeOnTurnStartEvent(TDelegate<void()>&);
 	void SubscribeOnTurnFinishEvent(TDelegate<void()>&);
-private:
-	void registerNextTurnObjs();
-	void emptyContainers();
 
 private:
+	void registerNextTurnObjs();
 	void startExecute();
 	void endExecute();
 

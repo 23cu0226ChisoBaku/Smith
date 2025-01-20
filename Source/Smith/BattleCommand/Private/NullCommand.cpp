@@ -12,7 +12,7 @@ namespace UE::Smith::Command
 
   NullCommand::~NullCommand()
   {
-    memset(this, 0, sizeof(this));
+    memset(this, 0, sizeof(*this));
   }
 
   void NullCommand::Start()

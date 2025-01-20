@@ -9,6 +9,7 @@
 
 class IMoveable;
 class ICommandMediator;
+class USmithMoveDirector;
 /**
  * 
  */
@@ -21,7 +22,7 @@ public:
 	USmithTurnBaseAIMoveStrategy(const FObjectInitializer&);
 
 public:
-	void Initialize(ICommandMediator* ,IMoveable*, uint8 moveSpeed);
+	void Initialize(ICommandMediator*, USmithMoveDirector* ,IMoveable*, uint8 moveSpeed);
 	virtual void BeginDestroy() override;
 
 private:
@@ -29,6 +30,7 @@ private:
 
 private:
 	TWeakInterfacePtr<ICommandMediator> m_mediator;
+	TWeakObjectPtr<USmithMoveDirector> m_moveDirector;
 	TWeakInterfacePtr<IMoveable> m_move;
 	uint8 m_moveSpeed;
 
