@@ -17,7 +17,7 @@ class USmithMoveComponent;
  * 
  */
 UCLASS()
-class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap
+class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable
 {
 	GENERATED_BODY()
 
@@ -33,8 +33,6 @@ public:
 
 public:
 	void OnAttack(AttackHandle&&) override final;
-	uint8 GetOnMapSizeX() const override final;
-	uint8 GetOnMapSizeY() const override final;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
