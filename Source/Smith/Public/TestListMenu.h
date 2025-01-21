@@ -4,38 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "LogController.generated.h"
+#include "TestListMenu.generated.h"
 
-class UUserWidget;
-class GameLogMediator;
+class ISmithMenu;
 
 UCLASS()
-class SMITH_API ALogController : public AActor
+class SMITH_API ATestListMenu : public AActor
 {
 	GENERATED_BODY()
-
-public:
+	
+public:	
 	// Sets default values for this actor's properties
-	ALogController();
-
+	ATestListMenu();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:
+public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-private:
-	UPROPERTY()
-	TSubclassOf<UUserWidget> m_widgetClass;
-	UPROPERTY()
-	TObjectPtr<UUserWidget> m_widget;
-	
-	TSharedPtr<GameLogMediator> m_mediator;
-
-private:
-	float timer;
-	int32 cnt;
+	private:
+	int32*** m_plist;
 };

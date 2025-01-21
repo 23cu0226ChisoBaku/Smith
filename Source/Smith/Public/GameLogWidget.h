@@ -4,15 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "TestUserWidget.generated.h"
+#include "IOutPutLog.h"
+#include "GameLogWidget.generated.h"
 
-#define VISIBLE 0	// 表示
+#define VISIBLE 0 // 表示
 #define HIDDEN 2	// 非表示
 /**
  *
  */
 UCLASS()
-class SMITH_API UTestUserWidget : public UUserWidget
+class SMITH_API UGameLogWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -22,9 +23,9 @@ protected:
 
 public:
 	// 引数を渡すときはTEXT()を使用する
-	void SetLogMessage(FString);
+	void AddLogMessage(FString);
 	void OutPutLog();
-	
+
 public:
 	// BP側でログの表示をする（cppでは呼び出しだけ）
 	UFUNCTION(BlueprintImplementableEvent)
