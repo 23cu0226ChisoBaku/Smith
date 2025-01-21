@@ -61,7 +61,7 @@ private:
 	TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_atkComponent;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<USmithMoveComponent> m_moveComponent;
 
 		// Attack Format

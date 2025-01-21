@@ -44,11 +44,12 @@ void USmithBattleSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
   m_startDelegateHandle = m_battleCmdMgr->OnStartExecuteEvent.AddUObject(this, &USmithBattleSubsystem::startExecute);
   m_endDelegateHandle = m_battleCmdMgr->OnEndExecuteEvent.AddUObject(this, &USmithBattleSubsystem::endExecute);
-  
+  m_bIsInitialized = true;
 }
 
 void USmithBattleSubsystem::Deinitialize()
 {
+  m_bIsInitialized = false;
   ResetBattle();
   if (m_battleCmdMgr != nullptr)
   {
@@ -214,6 +215,11 @@ void USmithBattleSubsystem::endExecute()
 
 void USmithBattleSubsystem::Tick(float DeltaTime)
 {
+  if (!m_bIsInitialized)
+  {
+    return;
+  }
+
   UTickableWorldSubsystem::Tick(DeltaTime);
   if (m_bCanExecuteCmd && m_battleCmdMgr != nullptr) 
   {
