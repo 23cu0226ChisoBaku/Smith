@@ -606,32 +606,32 @@ namespace UE::Smith
               // 4だったら交差点
               int32 crossCount = 0;
               {
-                const FMapCoord coord_north{coord.x + 1u, coord.y};
-                if (model_shared->StaySpaceTable.Contains(coord_north))
-                {
-                  ++crossCount;
-                }
+                // const FMapCoord coord_north{coord.x + 1u, coord.y};
+                // if (model_shared->StaySpaceTable.Contains(coord_north))
+                // {
+                //   ++crossCount;
+                // }
               }
               {
-                const FMapCoord coord_east{coord.x, coord.y + 1u};
-                if (model_shared->StaySpaceTable.Contains(coord_east))
-                {
-                  ++crossCount;
-                }
+                // const FMapCoord coord_east{coord.x, coord.y + 1u};
+                // if (model_shared->StaySpaceTable.Contains(coord_east))
+                // {
+                //   ++crossCount;
+                // }
               }
               {
-                const FMapCoord coord_south{coord.x - 1u, coord.y};
-                if (model_shared->StaySpaceTable.Contains(coord_south))
-                {
-                  ++crossCount;
-                }
+                // const FMapCoord coord_south{coord.x - 1u, coord.y};
+                // if (model_shared->StaySpaceTable.Contains(coord_south))
+                // {
+                //   ++crossCount;
+                // }
               }
               {
-                const FMapCoord coord_west{coord.x, coord.y - 1u};
-                if (model_shared->StaySpaceTable.Contains(coord_west))
-                {
-                  ++crossCount;
-                }
+                // const FMapCoord coord_west{coord.x, coord.y - 1u};
+                // if (model_shared->StaySpaceTable.Contains(coord_west))
+                // {
+                //   ++crossCount;
+                // }
               }
 
               if (crossCount == 4)
