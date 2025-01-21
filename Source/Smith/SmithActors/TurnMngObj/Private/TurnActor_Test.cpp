@@ -63,7 +63,6 @@ void ATurnActor_Test::Tick(float DeltaTime)
   {
     m_aiBehaviorProcessor->TickBehaviorProcessor(DeltaTime);
   }
-  //SendMoveCommand(nullptr, UE::Smith::Battle::EMoveDirection::None, 0);
 }
 
 void ATurnActor_Test::OnAttack(AttackHandle&& handle)
