@@ -25,4 +25,5 @@ class SMITH_API IParamAbsorbable
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual FParams GetParam() = 0;
+	virtual void AddParam(FParams) = 0;
 };

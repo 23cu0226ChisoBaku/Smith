@@ -6,13 +6,14 @@
 #include "IBattleCommand.h"
 
 class IMoveable;
+class ISmithAnimator;
 
 namespace UE::Smith::Command
 {
 	class SMITH_API MoveCommand final : public IBattleCommand
 	{
 	public:
-		MoveCommand(IMoveable*);
+		MoveCommand(IMoveable*, ISmithAnimator* = nullptr);
 		~MoveCommand();
 
 	public:

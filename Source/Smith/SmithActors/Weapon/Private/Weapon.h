@@ -4,14 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "SmithActors/Weapon/Private/Weapon_Base.h"
 #include "SmithActors/Weapon/Params.h"
+#include "SmithActors/Weapon/Skill.h"
 #include "Smith/Public/ParamAbsorbable.h"
+#include "SmithActors/Weapon/SKillAbsorbable.h"
 #include "Debug.h"
 #include "Weapon.generated.h"
 
 UCLASS()
-class SMITH_API AWeapon : public AActor, public IParamAbsorbable
+class SMITH_API AWeapon : public AActor, public IParamAbsorbable, public ISkillAbsorbable
 {
 	GENERATED_BODY()
 
@@ -21,15 +22,19 @@ public:
 	void Tick(float DeltaTime);
 
 	virtual FParams GetParam() override;
+	virtual void AddParam(FParams) override;
 
-	void SetParam(FParams);
+	virtual FSkill GetSkills() override;
+	virtual void SetSkills(FSkill*) override;
 
-	void SwapSkill(int, Skill);
+	void SwapSkill(int32, FSkill);
 	void Upgrade(IParamAbsorbable*);
 
 private:
-	//UPROPERTY(EditAnywhere)
-	TArray <Skill> m_skillslots;
-	UPROPERTY(EditAnywhere)
-	FParams m_params;
+	TArray <FSkill> m_skillslots;
+	const FParams m_params;
+	UPROPERTY(EditAnywhere,Category = "Params|Edit")
+	FParams m_currentParams;
+	UPROPERTY(EditAnywhere, Category = "Params|Edit")
+	FString m_name;
 };

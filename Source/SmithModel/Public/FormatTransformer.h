@@ -16,22 +16,35 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
-
-#include "SmithCommandFormat.h"
-#include "MapCoord.h"
-
 #ifndef SMITH_FORMAT_TRANS
 #define SMITH_FORMAT_TRANS
+
+#include "CoreMinimal.h"
+
+struct FMapCoord;
+enum class EDirection : uint8;
+
+namespace UE::MLibrary::MDataStructure
+{
+	template<typename T>
+	class TDimension2Array;
+}
 
 namespace UE::Smith
 {
 	namespace Battle
 	{
+		class FSmithCommandFormat;
+
+
 		class SMITHMODEL_API FFormatTransformer
 		{
 			public:
 				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(const FSmithCommandFormat& format, FMapCoord cnMapCoord);
+				static FSmithCommandFormat GetRotatedFormat(const FSmithCommandFormat& src, EDirection direction);
+
+			private:
+				static FSmithCommandFormat getRotatedFormatImpl(const FSmithCommandFormat& src, EDirection direction);
 		};
 	}
 }

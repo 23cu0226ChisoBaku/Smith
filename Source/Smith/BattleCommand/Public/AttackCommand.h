@@ -7,6 +7,7 @@
 
 class ICanMakeAttack;
 class IAttackable;
+class ISmithAnimator;
 struct AttackHandle;
 
 namespace UE::Smith::Command
@@ -14,7 +15,7 @@ namespace UE::Smith::Command
 	class SMITH_API AttackCommand final: public IBattleCommand
 	{
 	public:
-		AttackCommand(ICanMakeAttack*, IAttackable*, AttackHandle&&);
+		AttackCommand(ICanMakeAttack*, IAttackable*, AttackHandle&&, ISmithAnimator* = nullptr);
 		~AttackCommand();
 
 	public:

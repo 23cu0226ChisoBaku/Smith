@@ -13,13 +13,15 @@ struct SMITH_API FParams
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, Category = "Params|Edit")
+	UPROPERTY(EditAnywhere)
 	int32 HP;
-	UPROPERTY(EditAnywhere, Category = "Params|Edit")
+	UPROPERTY(EditAnywhere)
 	int32 ATK;
-	UPROPERTY(EditAnywhere, Category = "Params|Edit")
+	UPROPERTY(EditAnywhere)
 	int32 DEF;
-	UPROPERTY(EditAnywhere, Category = "Params|Edit")
+	UPROPERTY(EditAnywhere)
 	int32 CRT;
 };
+
+FParams operator+(const FParams& lhs, const FParams& rhs);
 

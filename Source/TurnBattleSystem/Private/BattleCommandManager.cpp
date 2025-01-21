@@ -4,10 +4,16 @@
 #include "BattleCommandManager.h"
 #include "IBattleCommand.h"
 #include "SmithBattleSubsystem.h"
-#include "Debug.h"
+#include "IEventExecutor.h"
+#include "MLibrary.h"
 
 UBattleCommandManager::UBattleCommandManager(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
+  , m_requestCmdWaitList{}
+  , m_commandLists{}
+  , m_eventExecutor(nullptr)
+  , m_bIsExecutingCommand(false)
+  , m_bCanRegister(false)
 {}
 
 void UBattleCommandManager::BeginDestroy()
@@ -17,16 +23,17 @@ void UBattleCommandManager::BeginDestroy()
   OnStartExecuteEvent.Clear();
   OnEndExecuteEvent.Clear();
 
-  m_requestCmdWaitList.Empty();
-  m_commandLists.Empty();
+  Reset();
+}
 
-  m_bIsExecutingCommand = false;
-
+void UBattleCommandManager::AssignEventExecutor(IEventExecutor* eventExecutor)
+{
+  m_eventExecutor = eventExecutor;
 }
 
 void UBattleCommandManager::RegisterWaitList(const TArray<TWeakInterfacePtr<ITurnManageable>>& waitList)
 {
-  for (auto waitObj : waitList)
+  for (const auto& waitObj : waitList)
   {
     if (!waitObj.IsValid())
     {
@@ -40,14 +47,14 @@ void UBattleCommandManager::RegisterWaitList(const TArray<TWeakInterfacePtr<ITur
 void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedPtr<IBattleCommand>&& command)
 {
   // コマンド実行中に登録禁止
-  if (m_bIsExecutingCommand)
+  if (m_bIsExecutingCommand || !m_bCanRegister)
   {
+    MDebug::LogError("Cant register");
     return;
   }
 
-  check((requester != nullptr && ::IsValid(requester->_getUObject())));
-
-  if (requester == nullptr || !::IsValid(requester->_getUObject()))
+  check(IS_UINTERFACE_VALID(requester));
+  if (!IS_UINTERFACE_VALID(requester))
   {
     return;
   }
@@ -62,6 +69,7 @@ void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedP
   else
   {
     MDebug::LogError("Cant Register");
+    return;
   }
 
   if (m_requestCmdWaitList.Num() == 0)
@@ -83,7 +91,7 @@ void UBattleCommandManager::ExecuteCommands(float deltaTime)
 
   for(int32 i = 0; i < m_commandLists.Num(); ++i)
   {
-    const auto command = m_commandLists[i];
+    const auto& command = m_commandLists[i];
     if (command != nullptr)
     {
       command->Execute(deltaTime);
@@ -104,14 +112,21 @@ void UBattleCommandManager::ExecuteCommands(float deltaTime)
     {
       OnEndExecuteEvent.Broadcast();
     }
+
+    if (m_eventExecutor.IsValid() && m_eventExecutor->IsEventInStock())
+    { 
+      m_eventExecutor->ExecuteEvent();
+    }
   }
 }
-
-void UBattleCommandManager::Test()
+void UBattleCommandManager::Initialize()
 {
-  MDebug::LogError("test tick battle command manager");
-  if (OnEndExecuteEvent.IsBound())
-  {
-    OnEndExecuteEvent.Broadcast();
-  }
+  m_bCanRegister = true;
+}
+void UBattleCommandManager::Reset()
+{
+  m_bIsExecutingCommand = false;
+  m_bCanRegister = false;
+  m_requestCmdWaitList.Reset();
+  m_commandLists.Reset();
 }

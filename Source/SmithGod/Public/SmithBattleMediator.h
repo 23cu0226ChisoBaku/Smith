@@ -34,9 +34,9 @@ public:
 	void SetupMediator(USmithBattleSubsystem*, TSharedPtr<MapManager>);
 
 public:
-	void SendMoveCommand(AActor*, IMoveable*, UE::Smith::Battle::EMoveDirection, uint8 moveDistance) override final;
-	void SendAttackCommand(AActor*, ICanMakeAttack*, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&) override final;
-
+	bool SendMoveCommand(AActor*, IMoveable*, EDirection, uint8 moveDistance) override final;
+	bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&, bool bAttackEvenNoTarget) override final;
+	bool SendIdleCommand(AActor*) override final;
 private:
 	UPROPERTY()
 	TWeakObjectPtr<USmithBattleSubsystem> m_battleSys;

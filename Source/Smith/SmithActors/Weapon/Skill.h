@@ -3,13 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SmithCommandFormat.h"
+#include "Skill.generated.h"
 
 /**
  * 
  */
-class SMITH_API Skill
+namespace UE::Smith
 {
+	namespace Battle
+	{
+		class FSmithCommandFormat;
+	}
+}
+
+USTRUCT()
+struct  SMITH_API FSkill
+{
+	GENERATED_BODY()
 public:
-	Skill();
-	~Skill();
+	UPROPERTY(EditAnywhere)
+	FString NAME;
+	UPROPERTY(EditAnywhere)
+	int32 VALUE;
+	TSoftObjectPtr<UDataTable> SkillTable;
 };

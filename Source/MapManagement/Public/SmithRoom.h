@@ -98,7 +98,9 @@ namespace UE::Smith
 			#pragma endregion FSmithRoom Interface
 			// end of FSmithRoom Interface
 			private:
-				/// @brief 実装クラス
+				///
+				/// @brief 実装クラス(pImplイディオム)
+				///
 				class RoomImpl;
 				TUniquePtr<RoomImpl> m_pImpl;
 		};

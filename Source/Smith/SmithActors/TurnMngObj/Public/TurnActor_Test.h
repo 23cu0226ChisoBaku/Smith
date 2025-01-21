@@ -6,13 +6,23 @@
 #include "TurnBaseActor.h"
 #include "IAttackable.h"
 #include "ICanSetOnMap.h"
+#include "IMoveDirector.h"
+#include "ISmithSimpleAIDriven.h"
+#include "MapObjType.h"
 #include "TurnActor_Test.generated.h"
 
+struct FSmithAIStrategyContainer;
+class USmithTurnBaseAIAttackStrategy;
+class USmithTurnBaseAIMoveStrategy;
+class USmithTurnBaseAIIdleStrategy;
+class USmithAttackComponent;
+class USmithMoveComponent;
+class USmithMoveDirector;
 /**
  * 
  */
 UCLASS()
-class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable
+class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap, public IMoveDirector, public ISmithSimpleAIDriven
 {
 	GENERATED_BODY()
 
@@ -29,4 +39,40 @@ public:
 public:
 	void OnAttack(AttackHandle&&) override final;
 
+	uint8 GetOnMapSizeX() const override final;
+	uint8 GetOnMapSizeY() const override final;
+	EMapObjType GetType() const override final;
+	void TurnOnAI() override final;
+
+public:
+	UClass* GetMoveDirectorUClass() const override final;
+	void SetMoveDirector(USmithMoveDirector*) override final;
+	uint8 GetChaseRadius() const override final;
+
+
+private:
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	// TArray<FSmithAIStrategyContainer> AIRegistrationList;
+	UPROPERTY()
+	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
+	UPROPERTY()
+	TObjectPtr<USmithTurnBaseAIMoveStrategy> m_moveStrategy;
+	UPROPERTY()
+	TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
+	UPROPERTY()
+	TObjectPtr<USmithAttackComponent> m_atkComponent;
+	UPROPERTY()
+	TObjectPtr<USmithMoveComponent> m_moveComponent;
+
+		// Attack Format
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
+	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<USmithMoveDirector> MoveDirectorSubclass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
+	uint8 ChaseRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapObjectType, meta = (AllowPrivateAccess = "true"))
+	EMapObjType MapObjectType;
+	UPROPERTY()
+	TObjectPtr<USmithMoveDirector> m_moveDirector;
 };

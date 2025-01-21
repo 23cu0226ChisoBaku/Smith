@@ -31,8 +31,7 @@ if (!!(expression))								\
 
 namespace UE::MLibrary
 {
-
-	inline namespace MDataStructure
+	namespace MDataStructure
 	{
 		///
 		/// @brief 一次元配列

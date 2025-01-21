@@ -10,17 +10,20 @@
 #include "MapGenerateGameMode_Test.generated.h"
 
 class USmithBattleMediator;
+class USmithChasePlayerTracker;
+class USmithBattleSubsystem;
+class USmithEventPublisher;
+class USmithEventSystem;
 namespace UE::Smith
 {
 	namespace Map
 	{
-		class FSmithMap;
 		class FSmithMapManager;
 	}
 }
 
 /**
- * 
+ * ダンジョンゲームモード
  */
 UCLASS()
 class SMITHGOD_API AMapGenerateGameMode_Test : public AGameModeBase
@@ -39,14 +42,32 @@ public:
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	void initializeGame();
+	void startNewLevel();
+	void clearCurrentLevel();
+
+// TODO
+public:
+	void goToNextLevel();
+
+private:
+	/** ダンジョンマップ設計図 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithMapBluePrint MapBluePrint;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithMapConstructionBluePrint MapConstructionBluePrint;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint EnemyGenerateBluePrint;
 	UPROPERTY()
+	TObjectPtr<USmithBattleSubsystem> m_battleSystem;
+	UPROPERTY()
 	TObjectPtr<USmithBattleMediator> m_battleMediator;
+	UPROPERTY()
+	TObjectPtr<USmithEventPublisher> m_eventPublisher;
+	UPROPERTY()
+	TObjectPtr<USmithEventSystem> m_eventSystem;
+	UPROPERTY()
+	TObjectPtr<USmithChasePlayerTracker> m_chasePlayerTracker;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;

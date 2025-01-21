@@ -1,5 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMapDataModel.h
+
+Author : MAI ZHICONG
+
+Description : マップデータ情報モデル
+
+Update History: 2025/01/06 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,6 +24,9 @@
 #include "StaySpaceTileInfoContainer.h"
 #include "ICanSetOnMap.h"
 
+///
+/// @brief TWeakInterfacePtr<ICanSetOnMap>をキーとしてTMapに使う
+///
 #if UE_BUILD_DEBUG
 uint32 GetTypeHash(const TWeakInterfacePtr<ICanSetOnMap>&);
 #else /// @brief optimize by inlining in shipping and development builds
@@ -24,14 +41,33 @@ namespace UE::Smith
 {
 	namespace Map
 	{
+		/// 
+		/// @brief マップデータモデル
+		/// namespace UE::Smith::Map
+		///
 		struct MAPMANAGEMENT_API FSmithMapDataModel
 		{
+			//---------------------------------------
+			/*
+											ctorとdtor
+			*/
+			//---------------------------------------
 			public:
 				FSmithMapDataModel();
 				~FSmithMapDataModel();
+				//---------------------------------------
+				/*
+													ムーブ
+				*/
+				//---------------------------------------
 				FSmithMapDataModel(FSmithMapDataModel&&) noexcept;
 				FSmithMapDataModel& operator=(FSmithMapDataModel&&) noexcept;
 
+			//---------------------------------------
+			/*
+											コピー禁止
+			*/
+			//---------------------------------------
 			private:
 				FSmithMapDataModel(const FSmithMapDataModel&) = delete;
 				FSmithMapDataModel& operator=(const FSmithMapDataModel&) = delete;

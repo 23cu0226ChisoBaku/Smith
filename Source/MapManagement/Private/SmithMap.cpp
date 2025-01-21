@@ -11,8 +11,14 @@
 
 #include <limits>
 
+///
+/// @brief 内部使用構造体
+///
 namespace SmithMap::Private
 {
+  ///
+  /// @brief 部屋の情報
+  /// 
   struct RoomInfo
   {
     uint8 SectionIdx;
@@ -29,12 +35,26 @@ namespace UE::Smith
 {
   namespace Map
   {
-    // FSmithMap実装
+    ///
+    /// @brief FSmithMap実装
+    ///
+    // FSmithMap Implementation
     #pragma region FSmithMap Implementation
     class FSmithMap::MapImpl
     {
+      //---------------------------------------
+      /*
+                　　　　エイリアス
+      */
+      //---------------------------------------
       private:
         using RoomInfo = typename SmithMap::Private::RoomInfo;
+
+      //---------------------------------------
+      /*
+                      ctorとdtor
+      */
+      //---------------------------------------       
       public:
         MapImpl()
           : m_sections{}
@@ -55,37 +75,35 @@ namespace UE::Smith
       public:
         void GenerateMap(uint8 row, uint8 column, uint8 widthPerSection, uint8 heightPerSection, uint8 sectionGap, uint8 defaultValue)
         {
+          // 入力値チェック
           check((row != 0) && (column != 0) && (widthPerSection != 0) && (heightPerSection != 0));
           check(StaticCast<int32>(row) * StaticCast<int32>(column) <= 256);
           check(StaticCast<int32>(widthPerSection) * StaticCast<int32>(column) + StaticCast<int32>((column + 1) * sectionGap) <= 256);
           check(StaticCast<int32>(heightPerSection) * StaticCast<int32>(row) + StaticCast<int32>((row + 1) * sectionGap) <= 256);
 
-          m_row = row;
-          m_column = column;
-          m_sectionGap = sectionGap;
-
           // ギャップを設ける
-          const uint8 widthGap = (m_column + 1) * m_sectionGap;
-          const uint8 heightGap = (m_row + 1) * m_sectionGap;
+          const uint8 widthGap = (column + 1) * sectionGap;
+          const uint8 heightGap = (row + 1) * sectionGap;
 
-          const uint8 mapWidth = m_column * widthPerSection + widthGap;
-          const uint8 mapHeight = m_row * heightPerSection + heightGap;
-          // マップの矩形を作成
-          m_mapRect.GenerateRect(mapWidth, mapHeight, defaultValue);
+          const uint8 mapWidth = column * widthPerSection + widthGap;
+          const uint8 mapHeight = row * heightPerSection + heightGap;
 
-          // 入っている全てのセクションを削除
-          m_sections.Empty();
-          m_sections.Reserve(m_row * m_column);
+          // 一時的なマップ矩形作成
+          FSmithRect tempRect{};
+          tempRect.GenerateRect(mapWidth, mapHeight, defaultValue);
+          // 一時的なセクションコンテナ作成
+          TMap<uint8, TUniquePtr<FSmithSection>> tempSections;
+          tempSections.Reserve(row * column);
 
           // セクションを作成
-          for (uint8 y = 0; y < m_row; ++y)
+          for (uint8 y = 0; y < row; ++y)
           {
-            for (uint8 x = 0; x < m_column; ++x)
+            for (uint8 x = 0; x < column; ++x)
             {
-              const uint8 sectionIdx = y * m_column + x;
+              const uint8 sectionIdx = y * column + x;
 
-              const uint8 gapX = (x + 1) * m_sectionGap;
-              const uint8 gapY = (y + 1) * m_sectionGap;
+              const uint8 gapX = (x + 1) * sectionGap;
+              const uint8 gapY = (y + 1) * sectionGap;
               const uint8 left = x * widthPerSection + gapX;
               const uint8 top = y * heightPerSection + gapY;
               const uint8 right = left + widthPerSection - 1; 
@@ -94,17 +112,25 @@ namespace UE::Smith
               TUniquePtr<FSmithSection> section = ::MakeUnique<FSmithSection>(sectionIdx);
               section->GenerateSection(left, top, right, bottom, defaultValue);
 
-              m_sections.Emplace(sectionIdx, ::MoveTemp(section));
+              tempSections.Emplace(sectionIdx, ::MoveTemp(section));
             }
           }
 
-          // TODO
+          // 例外安全のため最後に代入
+          m_sections.Empty();
+          m_sections.Reserve(row * column);
+          m_sections = ::MoveTemp(tempSections);
+          m_mapRect = ::MoveTemp(tempRect);
+          m_row = row;
+          m_column = column;
+          m_sectionGap = sectionGap;
           m_sectionWidth = widthPerSection;
           m_sectionHeight = heightPerSection;
         }
 
         void GenerateRoom(uint8 sectionIdx, uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue)
-        {    
+        { 
+          // 入力値チェック   
           if (!m_sections.Contains(sectionIdx))
           {
             MDebug::LogError(TEXT("Section Index Error: Can not get section by Index: ") + FString::FromInt(sectionIdx));
@@ -116,6 +142,7 @@ namespace UE::Smith
             MDebug::LogError(TEXT("Section Invalid. Index: ") + FString::FromInt(sectionIdx));
             return;
           }
+
           const uint8 sectionWidth = m_sections[sectionIdx]->GetWidth();
           const uint8 sectionHeight = m_sections[sectionIdx]->GetHeight();
 
@@ -140,14 +167,13 @@ namespace UE::Smith
 
           m_sections[sectionIdx]->GenerateRoom(left, top, right, bottom, defaultValue);
 
-          // TODO TestCode
+          // TODO マップ矩形にデータを書き込む
           FSmithRect sectionRect = m_sections[sectionIdx]->GetSectionRect();
           const uint8 sectionRow = sectionIdx / m_column;
           const uint8 sectionColumn = sectionIdx % m_column;
           const uint8 xOffset = sectionColumn * (m_sections[sectionIdx]->GetWidth() + m_sectionGap) + m_sectionGap;
           const uint8 yOffset = sectionRow * (m_sections[sectionIdx]->GetHeight() + m_sectionGap) + m_sectionGap;
 
-          // マップの矩形に部屋の情報を入れる
           for (int y = 0; y < sectionRect.GetHeight(); ++y)
           {
             for (int x = 0; x < sectionRect.GetWidth(); ++x)
@@ -158,11 +184,13 @@ namespace UE::Smith
         }
         void ConnectRooms(uint8 corridorData)
         {
+          // 内部状態チェック
           if (m_sections.Num() == 0)
           {
             MDebug::LogError("Generate room before connect!!!");
             return;
           }
+
           TArray<RoomInfo> roomInfos;
           roomInfos.Reserve(m_sections.Num());
 
@@ -194,25 +222,17 @@ namespace UE::Smith
           // 通路の座標を入れるコンテナ
           TArray<FUint32Vector2> corridorCoords;
 
-          // Test code
-          FString test{};
-          test.Append(FString::FromInt(currentRoom.SectionIdx));
-          test.Append(TEXT("->"));
-          
           // 始点から一番近い部屋を探して、通路を繋げていく
           while (roomInfos.Num() > 0)
           {
             RoomInfo closestRoom = findClosestRoomTo(roomInfos, currentRoom);
             roomInfos.Remove(closestRoom);
 
-            test.Append(FString::FromInt(closestRoom.SectionIdx));
-            test.Append(TEXT("->"));
             appendCorridorIndex(corridorCoords, currentRoom, closestRoom);
             currentRoom = closestRoom;
           }
 
-          MDebug::LogWarning(test);
-
+          // 通路状態をマップに書き込む
           for(const auto& corridorCoord : corridorCoords)
           {
             m_mapRect.SetRect(StaticCast<uint8>(corridorCoord.X), StaticCast<uint8>(corridorCoord.Y), corridorData);
@@ -236,6 +256,7 @@ namespace UE::Smith
         }
         FSmithSection* GetSection(uint8 rowIdx, uint8 columnIdx) const
         {
+          // 入力値チェック
           if (rowIdx >= m_row || columnIdx >= m_column)
           {
             return nullptr;
@@ -243,6 +264,7 @@ namespace UE::Smith
 
           const uint8 sectionIdx = rowIdx * m_column + columnIdx;
 
+          // 入力値チェック
           if (!m_sections.Contains(sectionIdx))
           {
             return nullptr;
@@ -251,9 +273,37 @@ namespace UE::Smith
           return m_sections[sectionIdx].Get();
         }
 
-        // TODO
+        FSmithSection* GetSectionByCoord(uint8 x, uint8 y) const
+        {
+          // 入力値チェック
+          if (x >= m_mapRect.GetWidth() || y >= m_mapRect.GetHeight())
+          {
+            return nullptr;
+          }
+
+          // 座標がギャップの範囲内にあるか（あったらnullptr返し）
+          if ((x % (m_sectionWidth + m_sectionGap)) < m_sectionGap 
+              || (y % (m_sectionHeight + m_sectionGap)) < m_sectionGap)
+          {
+            return nullptr;
+          }
+
+          const uint8 sectionRow = y / (m_sectionHeight + m_sectionGap);
+          const uint8 sectionColumn = x / (m_sectionWidth + m_sectionGap);
+          const uint8 sectionIdx = sectionRow * m_column + sectionColumn;
+
+          // セクションIDが存在しない場合
+          if (!m_sections.Contains(sectionIdx))
+          {
+            return nullptr;
+          }
+
+          return m_sections[sectionIdx].Get();
+        }
+
         uint8 GetSectionLeft(uint8 columnIdx) const
         {          
+          // 入力値チェック（無効値255u）
           if (columnIdx >= m_column)
           {
             return 0xffu;
@@ -265,6 +315,7 @@ namespace UE::Smith
         // TODO
         uint8 GetSectionTop(uint8 rowIdx) const
         {
+          // 入力値チェック（無効値255u）
           if (rowIdx >= m_row)
           {
             return 0xffu;
@@ -272,6 +323,14 @@ namespace UE::Smith
 
           const uint8 sectionTop = rowIdx * m_sectionHeight + (rowIdx + 1) * m_sectionGap;  
           return sectionTop;
+        }
+        uint8 GetMapWidth() const
+        {
+          return m_mapRect.GetWidth();
+        }
+        uint8 GetMapHeight() const
+        {
+          return m_mapRect.GetHeight();
         }
       // TODO プライベート関数にする意味がない
       private:
@@ -304,7 +363,6 @@ namespace UE::Smith
           }
           return RoomInfo{closestRoomSectionIdx, closest};
         }
-        // TODO 同上
         ///
         /// @brief              二つの部屋を繋げていく道路座標を取得
         /// @param outCoordArr  通路座標を入れるコンテナ（Out）
@@ -400,10 +458,9 @@ namespace UE::Smith
         uint8 m_row;
         uint8 m_column;
         uint8 m_sectionGap;
-
-        // TODO
         uint8 m_sectionWidth;
         uint8 m_sectionHeight;
+
     };
     #pragma endregion FSmithMap Implementation
     // end of FSmithMap Implementation
@@ -449,6 +506,10 @@ namespace UE::Smith
     {
       return m_pImpl->GetSection(rowIdx, columnIdx);
     }
+    FSmithSection* FSmithMap::GetSectionByCoord(uint8 x, uint8 y) const
+    {
+      return m_pImpl->GetSectionByCoord(x, y);
+    }
     uint8 FSmithMap::GetSectionLeft(uint8 columnIdx) const
     {
       return m_pImpl->GetSectionLeft(columnIdx);
@@ -456,6 +517,14 @@ namespace UE::Smith
     uint8 FSmithMap::GetSectionTop(uint8 rowIdx) const
     {
       return m_pImpl->GetSectionTop(rowIdx);
+    }
+    uint8 FSmithMap::GetMapWidth() const
+    {
+      return m_pImpl->GetMapWidth();
+    }
+    uint8 FSmithMap::GetMapHeight() const
+    {
+      return m_pImpl->GetMapHeight();
     }
     #pragma endregion FSmithMap Interface
     // end of FSmithMap Interface

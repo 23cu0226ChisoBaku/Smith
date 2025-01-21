@@ -2,11 +2,3 @@
 
 
 #include "SmithActors/Weapon/Skill.h"
-
-Skill::Skill()
-{
-}
-
-Skill::~Skill()
-{
-}

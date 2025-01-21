@@ -1,5 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+TileInfoContainer.cpp
+
+Author : MAI ZHICONG
+
+Description : マップタイルの情報コンテナ実装
+
+Update History: 2025/01/05 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "TileInfoContainer.h"
 
@@ -45,19 +59,17 @@ namespace UE::Smith
       return isAbleToStayOn_Impl();
     }
 
-    bool FTileInfoContainer::isAbleToStayOn_Impl() const
-    {
-      return true;
-    }
-
     void FTileInfoContainer::Reset()
     {
       reset_Impl();
     }
 
-    void FTileInfoContainer::reset_Impl()
+    bool FTileInfoContainer::isAbleToStayOn_Impl() const
     {
-      
+      return true;
     }
+
+    void FTileInfoContainer::reset_Impl()
+    { }
   }
 }

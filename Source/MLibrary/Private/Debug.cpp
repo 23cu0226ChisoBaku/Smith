@@ -22,139 +22,144 @@ Encoding : UTF-8
 namespace UE::MLibrary
 {
   float Debug::gLogTime = 15.0f;
-// Log 
-#pragma region Log
+  // Log 
+  #pragma region Log
 
-  const DebugFormat Debug::LOG_FORMAT = { TEXT("[Log]:"), FColor::White };
+    const DebugFormat Debug::LOG_FORMAT = { TEXT("[Log]:"), FColor::White };
 
-  void Debug::Log(const char* msg)
-  {
-    log_impl(append_impl(LOG_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::Log(const wchar_t* msg)
-  {
-    log_impl(append_impl(LOG_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::Log(const std::string& msg)
-  {
-    log_impl(append_impl(LOG_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::Log(const std::wstring& msg)
-  {
-    log_impl(append_impl(LOG_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::Log(const FString& msg)
-  {
-    log_impl(append_impl(LOG_FORMAT.LogHeaderString, msg));
-  }
-  
-  void Debug::log_impl(const FString& log)
-  {
-    if (GEngine != nullptr)
+    void Debug::Log(const char* msg)
     {
-      GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_FORMAT.LogColor, log);  
+      log_impl(MLIB_DEBUG_LEVEL::Log, append_impl(LOG_FORMAT.LogHeaderString, msg));
     }
-  }
-
-#pragma endregion
-// endregion of log
-
-// Log Warning
-#pragma region Log Warning
-
-  const DebugFormat Debug::LOG_WARNING_FORMAT = { TEXT("[Warning]:"), FColor::Yellow };
-
-  void Debug::LogWarning(const char* msg)
-  {
-    log_warning_impl(append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::LogWarning(const wchar_t* msg)
-  {
-    log_warning_impl(append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::LogWarning(const std::string& msg)
-  {
-    log_warning_impl(append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::LogWarning(const std::wstring& msg)
-  {
-    log_warning_impl(append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::LogWarning(const FString& msg)
-  {
-    log_warning_impl(append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
-  }
-
-  void Debug::log_warning_impl(const FString& log)
-  {
-    if (GEngine != nullptr)
+    void Debug::Log(const wchar_t* msg)
     {
-      GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_WARNING_FORMAT.LogColor, log);  
+      log_impl(MLIB_DEBUG_LEVEL::Log, append_impl(LOG_FORMAT.LogHeaderString, msg));
     }
-  }
-#pragma endregion
-// endregion of Log Warning
-
-// Log Error
-#pragma region Log Error
-
-  const DebugFormat Debug::LOG_ERROR_FORMAT = { TEXT("[Error]:"), FColor::Red };
-
-  void Debug::LogError(const char* msg)
-  {
-    log_error_impl(append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::LogError(const wchar_t* msg)
-  {
-    log_error_impl(append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::LogError(const std::string& msg)
-  {
-    log_error_impl(append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::LogError(const std::wstring& msg)
-  {
-    log_error_impl(append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
-  }
-  void Debug::LogError(const FString& msg)
-  {
-    log_error_impl(append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
-  }
-
-  void Debug::log_error_impl(const FString& log)
-  {
-    if (GEngine != nullptr)
+    void Debug::Log(const std::string& msg)
     {
-      GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_ERROR_FORMAT.LogColor, log);  
+      log_impl(MLIB_DEBUG_LEVEL::Log, append_impl(LOG_FORMAT.LogHeaderString, msg));
     }
-  }
-#pragma endregion
-// endregion of Log Error
+    void Debug::Log(const std::wstring& msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Log, append_impl(LOG_FORMAT.LogHeaderString, msg));
+    }
+    void Debug::Log(const FString& msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Log, append_impl(LOG_FORMAT.LogHeaderString, msg));
+    }
 
-// Append Implementation
-#pragma region Append Impl
-  FString Debug::append_impl(const FString& logFormat, const char* msg)
-  {
-    return logFormat + msg;
-  }
-  FString Debug::append_impl(const FString& logFormat, const wchar_t* msg)
-  {
-    return logFormat + msg;
-  }
-  FString Debug::append_impl(const FString& logFormat, const std::string& msg)
-  {
-    return logFormat + msg.c_str();
-  }
-  FString Debug::append_impl(const FString& logFormat, const std::wstring& msg)
-  {
-    return logFormat + msg.c_str();
-  }
-  FString Debug::append_impl(const FString& logFormat, const FString& msg)
-  {
-    return logFormat + msg;
-  }
-#pragma endregion
-// endregion of Append Implementation
+    void Debug::log_impl(MLIB_DEBUG_LEVEL debugLevel, const FString& log)
+    {
+      if (GEngine == nullptr)
+      {
+        return;
+      }
+
+      switch (debugLevel)
+      {
+        case MLIB_DEBUG_LEVEL::Log:
+        {
+          GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_FORMAT.LogColor, log);
+        }
+        break;
+        case MLIB_DEBUG_LEVEL::Warning:
+        {
+          GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_WARNING_FORMAT.LogColor, log); 
+        }
+        break;
+        case MLIB_DEBUG_LEVEL::Error:
+        {
+          GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_ERROR_FORMAT.LogColor, log); 
+        }
+        break;
+      }
+    }
+
+  #pragma endregion
+  // endregion of log
+
+  // Log Warning
+  #pragma region Log Warning
+
+    const DebugFormat Debug::LOG_WARNING_FORMAT = { TEXT("[Warning]:"), FColor::Yellow };
+
+    void Debug::LogWarning(const char* msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Warning, append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
+    }
+    void Debug::LogWarning(const wchar_t* msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Warning, append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
+    }
+    void Debug::LogWarning(const std::string& msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Warning, append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
+    }
+    void Debug::LogWarning(const std::wstring& msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Warning, append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
+    }
+    void Debug::LogWarning(const FString& msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Warning, append_impl(LOG_WARNING_FORMAT.LogHeaderString, msg));
+    }
+
+  #pragma endregion
+  // endregion of Log Warning
+
+  // Log Error
+  #pragma region Log Error
+
+    const DebugFormat Debug::LOG_ERROR_FORMAT = { TEXT("[Error]:"), FColor::Red };
+
+    void Debug::LogError(const char* msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Error, append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
+    }
+    void Debug::LogError(const wchar_t* msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Error, append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
+    }
+    void Debug::LogError(const std::string& msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Error, append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
+    }
+    void Debug::LogError(const std::wstring& msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Error, append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
+    }
+    void Debug::LogError(const FString& msg)
+    {
+      log_impl(MLIB_DEBUG_LEVEL::Error, append_impl(LOG_ERROR_FORMAT.LogHeaderString, msg));
+    }
+
+  #pragma endregion
+  // endregion of Log Error
+
+  // Append Implementation
+  #pragma region Append Impl
+    FString Debug::append_impl(const FString& logFormat, const char* msg)
+    {
+      return logFormat + msg;
+    }
+    FString Debug::append_impl(const FString& logFormat, const wchar_t* msg)
+    {
+      return logFormat + msg;
+    }
+    FString Debug::append_impl(const FString& logFormat, const std::string& msg)
+    {
+      return logFormat + msg.c_str();
+    }
+    FString Debug::append_impl(const FString& logFormat, const std::wstring& msg)
+    {
+      return logFormat + msg.c_str();
+    }
+    FString Debug::append_impl(const FString& logFormat, const FString& msg)
+    {
+      return logFormat + msg;
+    }
+  #pragma endregion
+  // endregion of Append Implementation
 }
 
 

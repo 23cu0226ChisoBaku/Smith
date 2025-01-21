@@ -15,7 +15,8 @@
 #include "NullCommand.h"
 
 #include "SmithCommandFormat.h"
-#include "MoveDirection.h"
+#include "FormatTransformer.h"
+#include "Direction.h"
 
 #include "InvalidValues.h"
 
@@ -45,78 +46,116 @@ void USmithBattleMediator::SetupMediator(USmithBattleSubsystem* battleSys, TShar
   
 }
 
-void USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, UE::Smith::Battle::EMoveDirection moveDirection, uint8 moveDistance)
+bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, EDirection moveDirection, uint8 moveDistance)
 {
   if (!m_mapMgr.IsValid() || !m_battleSys.IsValid())
   {
     MDebug::LogError("System INVALID!!!");
-    return;
+    return false;
   }
 
   if (!::IsValid(requester) || !IS_UINTERFACE_VALID(move))
   {
     MDebug::LogError("Request INVALID!!!");
     // TODO
-    m_battleSys->registerCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::NullCommand>());
-    return;
+    return false;
   }
 
   FVector destinationVector;
   auto mapMgrSharedPtr = m_mapMgr.Pin();
-  if (mapMgrSharedPtr.IsValid())
+  if (!mapMgrSharedPtr.IsValid())
   {
-    mapMgrSharedPtr->MoveMapObj(Cast<ICanSetOnMap>(requester), moveDirection, moveDistance, destinationVector);
-
-    if (destinationVector.Equals(InvalidValues::MapInvalidCoord))
-    {
-      return;
-    }
-    else
-    {
-      move->SetDestination(destinationVector);
-      m_battleSys->registerCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::MoveCommand>(move));
-    }
+    return false;
   }
 
+  mapMgrSharedPtr->MoveMapObj(Cast<ICanSetOnMap>(requester), moveDirection, moveDistance, destinationVector);
+
+  if (destinationVector.Equals(InvalidValues::MapInvalidCoord_World))
+  {
+    MDebug::LogError("Can not move");
+    return false;
+  }
+  else
+  {
+    move->SetDestination(destinationVector);
+    m_battleSys->RegisterCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::MoveCommand>(move));
+    return true;
+  }
 }
 
-void USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle)
+bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle, bool bAttackEvenNoTarget)
 {
-  if (!::IsValid(requester))
-  {
-    MDebug::LogError("Requester INVALID!!!");
-    return;
-  }
-
   if (!m_mapMgr.IsValid() || !m_battleSys.IsValid())
   {
     MDebug::LogError("System INVALID!!!");
-    return;
+    return false;
+  }
+
+  if (!::IsValid(requester))
+  {
+    MDebug::LogError("Requester INVALID!!!");
+    return false;
+  }
+
+  if (format.GetRow() == 0 || format.GetColumn() == 0)
+  {
+    MDebug::LogError("Format INVALID");
+    return false;
   }
 
   auto mapMgrSharedPtr = m_mapMgr.Pin();
-  if (mapMgrSharedPtr.IsValid())
+  if (!mapMgrSharedPtr.IsValid())
   {
-    TArray<IAttackable*> attackables{};
-    // TODO Safe Cast may cause performance issue
-    mapMgrSharedPtr->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), format);
-
-    ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
-    if (attackables.Num() > 0)
-    {
-      MDebug::LogError("found attack target");
-      for(auto target : attackables)
-      {
-        // TODO Safe Cast may cause performance issue
-        m_battleSys->registerCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(atkHandle)));
-      }
-    }
-    else
-    {
-      MDebug::LogError("Not found attack target");
-      m_battleSys->registerCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, nullptr, ::MoveTemp(atkHandle)));
-    }
+    return false;
   }
+
+  // TODO
+  UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, direction);
+  TArray<IAttackable*> attackables{};
+  mapMgrSharedPtr->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
+
+  // TODO Safe Cast may cause performance issue
+  ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
+  if (attackables.Num() > 0)
+  {
+    for(auto target : attackables)
+    {
+      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(atkHandle)));
+    }
+    return true;
+  }
+
+  if (bAttackEvenNoTarget)
+  {
+    m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, nullptr, ::MoveTemp(atkHandle)));
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool USmithBattleMediator::SendIdleCommand(AActor* requester)
+{
+  if (!m_battleSys.IsValid())
+  {
+    return false;
+  }
+  
+  if (!::IsValid(requester))
+  {
+    return false;
+  }
+
+  ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
+  if (!IS_UINTERFACE_VALID(requesterTurnManageable))
+  {
+    return false;
+  }
+
+  m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::NullCommand>());
+  return true;
 
 }
 

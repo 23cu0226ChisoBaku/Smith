@@ -91,6 +91,9 @@ namespace UE::Smith
 				/// @return             部屋がある-> true 部屋がない-> false
         ///
 				bool HasRoom() const;
+
+				// Deprecated Interface
+				#pragma region Deprecated Interface
 				///
 				/// @brief							他のセクションと繋がっているか（通路があるか）を調べる
 				/// @return							繋がっている -> true 繋がっていない -> false
@@ -101,6 +104,9 @@ namespace UE::Smith
 				/// @param connection   通路情報
 				///
 				void AddConnection(FSmithConnection connection);
+				#pragma endregion Deprecated Interface
+				// end of Deprecated Interface
+				
         ///
         /// @brief              セクションの横幅を取得
         /// @return             横幅
@@ -120,8 +126,6 @@ namespace UE::Smith
         /// @brief              セクションにある部屋の縦幅を取得
         /// @return             部屋があったら部屋の縦幅、なかったら０
         ///
-
-        // TODO このインターフェース要る？
 				uint8 GetRoomHeight() const;
         ///
         /// @brief              セクションにある部屋の横座標を返す（セクションのローカル座標）
@@ -151,7 +155,9 @@ namespace UE::Smith
 			#pragma endregion FSmithSection Interface
 			// end of FSmithSection Interface
 			private:
-        /// @brief 実装クラス
+				///
+        /// @brief 実装クラス(pImplイディオム)
+				///
 				class SectionImpl;
 				TUniquePtr<SectionImpl> m_pImpl;
 		};
