@@ -7,7 +7,9 @@
 #include "LogController.generated.h"
 
 class UUserWidget;
+class UGameLogWidget;
 class GameLogMediator;
+class ISendableLog;
 
 UCLASS()
 class SMITH_API ALogController : public AActor
@@ -31,8 +33,8 @@ private:
 	UPROPERTY()
 	TSubclassOf<UUserWidget> m_widgetClass;
 	UPROPERTY()
-	TObjectPtr<UUserWidget> m_widget;
-	
+	TObjectPtr<UGameLogWidget> m_widget;
+	TSharedPtr<ISendableLog> m_testSend;
 	TSharedPtr<GameLogMediator> m_mediator;
 
 private:

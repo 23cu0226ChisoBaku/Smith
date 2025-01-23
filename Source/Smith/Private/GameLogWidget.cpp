@@ -45,7 +45,7 @@ void UGameLogWidget::OutPutLog()
 
   for (auto str : m_logArray)
   {
-    log.Append(str + TEXT("\n"));
+    log.Append(str);
   }
 
   m_outPutLog = log;
