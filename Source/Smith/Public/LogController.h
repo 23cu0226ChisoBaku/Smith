@@ -7,6 +7,9 @@
 #include "LogController.generated.h"
 
 class UUserWidget;
+class UGameLogWidget;
+class GameLogMediator;
+class ISendableLog;
 
 UCLASS()
 class SMITH_API ALogController : public AActor
@@ -16,6 +19,7 @@ class SMITH_API ALogController : public AActor
 public:
 	// Sets default values for this actor's properties
 	ALogController();
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -29,7 +33,9 @@ private:
 	UPROPERTY()
 	TSubclassOf<UUserWidget> m_widgetClass;
 	UPROPERTY()
-	TObjectPtr<UUserWidget> m_widget;
+	TObjectPtr<UGameLogWidget> m_widget;
+	TSharedPtr<ISendableLog> m_testSend;
+	TSharedPtr<GameLogMediator> m_mediator;
 
 private:
 	float timer;
