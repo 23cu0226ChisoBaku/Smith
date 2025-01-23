@@ -190,7 +190,6 @@ namespace UE::Smith
           const uint8 moveDirectionCheck_bitsIdx = StaticCast<uint8>(moveDirection);
           if (moveDirectionCheck_bitsIdx >= StaticCast<uint8>(EDirection::DirectionCount))
           {
-            MDebug::LogError("Invalid Direction --- MoveMapObj");
             return;
           }
 

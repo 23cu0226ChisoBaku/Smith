@@ -13,13 +13,16 @@
 #include "ICanCommandMediate.h"
 #include "ICanSetOnMap.h"
 #include "IMoveDirector.h"
+#include "ICanUseEnhanceSystem.h"
 #include "TurnActor_Test.h"
 #include "SmithBattleMediator.h"
 #include "SmithChasePlayerTracker.h"
 #include "SmithBattleSubsystem.h"
+#include "SmithEnhanceSubsystem.h"
 #include "SmithEventPublisher.h"
 #include "SmithEventSystem.h"
 #include "ISmithSimpleAIDriven.h"
+#include "IEnhanceSystem.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -62,10 +65,12 @@ void AMapGenerateGameMode_Test::startNewLevel()
   check(m_battleSystem != nullptr);
   check(m_battleMediator != nullptr); 
   check(m_chasePlayerTracker != nullptr);
+  check(m_enhanceSystem != nullptr);
 
   APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
   ICanSetOnMap* mapPlayer = Cast<ICanSetOnMap>(playerPawn);
   check(mapPlayer != nullptr);
+
 
   m_chasePlayerTracker->SetupTracker(m_mapMgr, mapPlayer);
 
@@ -150,7 +155,10 @@ void AMapGenerateGameMode_Test::clearCurrentLevel()
 
 void AMapGenerateGameMode_Test::initializeGame()
 {
-  m_battleSystem = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
+  UWorld* world = GetWorld();
+  check(world != nullptr);
+
+  m_battleSystem = world->GetSubsystem<USmithBattleSubsystem>();
   check(m_battleSystem != nullptr);
   
   m_battleMediator = NewObject<USmithBattleMediator>(this);
@@ -172,6 +180,14 @@ void AMapGenerateGameMode_Test::initializeGame()
 
   m_mapMgr->AssignEventRegister(m_eventSystem);
   m_battleSystem->AssignEventExecutor(m_eventSystem);
+
+  m_enhanceSystem = world->GetSubsystem<USmithEnhanceSubsystem>();
+  check(m_enhanceSystem != nullptr);
+
+  APawn* playerPawn = UGameplayStatics::GetPlayerPawn(world, 0);
+  ICanUseEnhanceSystem* enhanceUser = Cast<ICanUseEnhanceSystem>(playerPawn);
+  check(enhanceUser != nullptr);
+  enhanceUser->SetEnhanceSystem(m_enhanceSystem);
 }
 
 void AMapGenerateGameMode_Test::goToNextLevel()

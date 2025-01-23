@@ -56,14 +56,15 @@ bool USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
   }
 
   IEventTriggerable* eventTriggerable = Cast<IEventTriggerable>(mapObj);
-  if (eventTriggerable != nullptr)
+  if (eventTriggerable == nullptr)
   {
-    eventTriggerable->OnTriggerEvent(this);
+    return false;
   }
 
+  eventTriggerable->OnTriggerEvent(this);
   MDebug::LogWarning("Trigger Next Level Event");
   OnNextLevel.ExecuteIfBound();
-  return true;
+  return true;  
 }
 
 void USmithNextLevelEvent::DiscardEvent()

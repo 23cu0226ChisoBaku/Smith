@@ -324,7 +324,6 @@ namespace UE::Smith
             if (canPlaceEvent(mapCoord))
               {
                 success = true;
-                MDebug::Log(FString::FromInt(sectionIdx[i]));
                 outX = mapCoord.x;
                 outY = mapCoord.y;
                 break;

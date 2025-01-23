@@ -10,7 +10,7 @@
 #include "IEventExecutor.h"
 #include "SmithTurnBattleWorldSettings.h"
 
-#include "Debug.h"
+#include "MLibrary.h"
 
 bool USmithBattleSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {

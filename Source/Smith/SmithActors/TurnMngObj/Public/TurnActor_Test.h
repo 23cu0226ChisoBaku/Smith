@@ -9,6 +9,7 @@
 #include "IMoveDirector.h"
 #include "ISmithSimpleAIDriven.h"
 #include "MapObjType.h"
+#include "../Weapon/Params.h"
 #include "TurnActor_Test.generated.h"
 
 struct FSmithAIStrategyContainer;
@@ -18,6 +19,7 @@ class USmithTurnBaseAIIdleStrategy;
 class USmithAttackComponent;
 class USmithMoveComponent;
 class USmithMoveDirector;
+class USmithPickable;
 /**
  * 
  */
@@ -51,8 +53,6 @@ public:
 
 
 private:
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
-	// TArray<FSmithAIStrategyContainer> AIRegistrationList;
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
 	UPROPERTY()
@@ -62,7 +62,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_atkComponent;
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<USmithMoveComponent> m_moveComponent;
+	TObjectPtr<USmithMoveComponent> MoveComponent;
 
 		// Attack Format
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
@@ -75,4 +75,11 @@ private:
 	EMapObjType MapObjectType;
 	UPROPERTY()
 	TObjectPtr<USmithMoveDirector> m_moveDirector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = DropItemTable, meta = (AllowPrivateAccess = "true"))
+	TMap<FString,TObjectPtr<USmithPickable>> DropUpgradeTable; 
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
+	FParams EnemyParam;
 };

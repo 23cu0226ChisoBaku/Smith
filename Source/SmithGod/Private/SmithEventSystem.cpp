@@ -47,9 +47,11 @@ void USmithEventSystem::ExecuteEvent()
       continue;
     }
 
-    eventHandle.Event->TriggerEvent(eventHandle.EventReceiver.Get());
-    // TODO
-    eventHandle.Event->DiscardEvent();
+    if (eventHandle.Event->TriggerEvent(eventHandle.EventReceiver.Get()))
+    {
+      // TODO
+      eventHandle.Event->DiscardEvent();
+    }
 
     ++idx;
   }

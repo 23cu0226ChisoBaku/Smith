@@ -25,6 +25,7 @@ Encoding : UTF-8
 #include "ICanCommandMediate.h"
 #include "ICanSetOnMap.h"
 #include "IEventTriggerable.h"
+#include "ICanUseEnhanceSystem.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -39,6 +40,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class USmithMoveComponent;
 class USmithAttackComponent;
+class USmithInventoryComponent;
 
 // Unreal Enhanced Input
 class UInputMappingContext;
@@ -51,6 +53,9 @@ class IBattleCommand;
 // SmithActor Module
 struct AttackHandle;
 enum class EDirection : uint8;
+
+class USmithWeapon;
+class IEnhanceSystem;
 
 namespace UE::Smith
 {
@@ -69,6 +74,7 @@ UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
 																			 , public IAttackable, public ICanCommandMediate
 																			 , public ICanSetOnMap, public IEventTriggerable
+																			 , public ICanUseEnhanceSystem
 {
 	GENERATED_BODY()
 
@@ -143,6 +149,9 @@ public:
 	public:
 		void OnTriggerEvent(USmithNextLevelEvent*) override final;
 
+	public:
+		void SetEnhanceSystem(IEnhanceSystem*);
+
 #pragma endregion Interfaces Override
 // end of Interfaces Override
 
@@ -153,6 +162,7 @@ private:
 	void attackImpl();
 	void changeFwdImpl(EDir_Test);
 	void updateCamImpl(EDir_Test);
+	void enhanceImpl();
 	bool registerAttackFormat(const FString&, const UDataTable*);
 
 private:
@@ -161,6 +171,7 @@ private:
 	void Attack_Input(const FInputActionValue&);
 	void Look_Input(const FInputActionValue&);
 	void Debug_SelfDamage_Input(const FInputActionValue&);
+	void Enhance_Input(const FInputActionValue&);
 #pragma endregion Private Functions
 // end of Private Functions
 
@@ -183,6 +194,8 @@ private:
 	TObjectPtr<USmithMoveComponent> MoveComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USmithAttackComponent> AttackComponent;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USmithInventoryComponent> InventoryComponent;
 
 	// Enhanced Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
@@ -199,15 +212,24 @@ private:
 	/** デバッグ専用！！ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> DebugAction;
+	/** 強化インプットアクション */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> EnhanceAction;
 	
 	/** 攻撃フォーマット */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
 	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
 
+	//
+	UPROPERTY(EditAnywhere,Instanced,Category = Weapon)
+	TObjectPtr<USmithWeapon> Weapon;
+
 	TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
 
 	// コマンドを送る時に使う仲介
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
+	// 強化
+	TWeakInterfacePtr<IEnhanceSystem> m_enhanceSystem;
 #pragma endregion UProperties
 // end of UProperties
 //---------------------------------------

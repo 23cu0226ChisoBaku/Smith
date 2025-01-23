@@ -190,9 +190,6 @@ namespace UE::Smith
             FVector nextLevelEventDestination = FVector::ZeroVector;
 
             m_mapObserver->InitNextLevelEvent_Temp(nextLevelEventCoordX, nextLevelEventCoordY, nextLevelEventDestination);
-            MDebug::Log(FString::FromInt(nextLevelEventCoordX));
-            MDebug::Log(FString::FromInt(nextLevelEventCoordY));
-
             nextLevelEvent->SetEventCoord(nextLevelEventCoordX, nextLevelEventCoordY);
             nextLevelEvent->InitializeEvent(nextLevelEventDestination);
             m_deployDirector->DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY);

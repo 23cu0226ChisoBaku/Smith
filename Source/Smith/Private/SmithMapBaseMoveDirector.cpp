@@ -38,10 +38,7 @@ EDirection USmithMapBaseMoveDirector::getNextDirectionImpl()
     return trackResult;
   }
 
-  if(!m_targetTracker->TrackTarget(trackResult, m_chaser.Get(), m_chaseRadius))
-  {
-    MDebug::Log("Chase failed");
-  }
+  m_targetTracker->TrackTarget(trackResult, m_chaser.Get(), m_chaseRadius);
 
   return trackResult;
 }
