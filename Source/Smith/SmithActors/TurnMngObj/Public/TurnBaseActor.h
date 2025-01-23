@@ -54,8 +54,8 @@ public:
 		// end of ICanCommandMediate
 
 protected:
-	void SendMoveCommand(IMoveable*, EDirection, uint8 moveDistance);
-	void SendAttackCommand(ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&);
+	//void SendMoveCommand(IMoveable*, EDirection, uint8 moveDistance);
+	//void SendAttackCommand(ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&);
 
 	#pragma endregion Interfaces
 	// end of Interfaces

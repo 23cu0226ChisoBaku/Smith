@@ -9,6 +9,7 @@
 
 class USmithMoveComponent;
 class USmithAttackComponent;
+class UHPWidgetComponent;
 
 /**
  *
@@ -27,11 +28,23 @@ public:
 	virtual void OnAttack(AttackHandle &&) override;
 	void OnHeal(int32);
 
+public:
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnUpdateHp();
+
+public:
+	UPROPERTY(BluePrintReadOnly)
+	int32 Max_HP;
+	UPROPERTY(BluePrintReadOnly)
+	int32 Current_HP;
+
 protected:
 	UPROPERTY()
 	TObjectPtr<USmithMoveComponent> m_moveComp;
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_attackComp;
+	// UPROPERTY()
+	// TObjectPtr<UHPWidgetComponent> m_hpComp;
 
 protected:
 	// 数を整数値にする//

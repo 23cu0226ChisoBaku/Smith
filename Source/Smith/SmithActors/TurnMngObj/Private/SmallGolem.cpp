@@ -54,7 +54,7 @@ void ASmallGolem::Tick(float DeltaTime)
 			}
 		}
 		formatTest.SetupFormat(type, 9, 3, 3);
-		SendAttackCommand(m_attackComp, formatTest, AttackHandle{GetName(), m_atk});
+		//SendAttackCommand(m_attackComp, formatTest, AttackHandle{GetName(), m_atk});
 
 		--m_skillCnt;
 		delete type;
@@ -62,7 +62,7 @@ void ASmallGolem::Tick(float DeltaTime)
 		else
 		{
 			// 移動の処理
-			SendMoveCommand(m_moveComp,(UE::Smith::Battle::EMoveDirection)MoveDirection(),1);
+			//SendMoveCommand(m_moveComp,(UE::Smith::Battle::EMoveDirection)MoveDirection(),1);
 		}
 
 		m_timer = 0.0f;
