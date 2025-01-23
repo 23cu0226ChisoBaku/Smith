@@ -202,6 +202,10 @@ namespace UE::Smith
         {
           m_deployDirector->DeployMapObj(mapObj, x, y);
         }
+        void DeployEvent(ISmithMapEvent* mapEvent, uint8 x, uint8 y)
+        {
+          m_deployDirector->DeployEvent(mapEvent, x, y);
+        }
         void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
         {
           m_mapOperator->FindAttackableMapObjs(outActors, mapObj, format);
@@ -213,6 +217,10 @@ namespace UE::Smith
         bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
         {
           return m_mapObserver->ChasePlayer(outChaseDirection, chaser, chaseRadius);
+        }
+        bool GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& x, uint8& y)
+        {
+          return m_mapObserver->GetMapObjectCoord(mapObj, x, y);
         }
         void Reset()
         {
@@ -273,6 +281,10 @@ namespace UE::Smith
     {
       m_pImpl->DeployMapObj(mapObj, x, y);
     }
+    void FSmithMapManager::DeployEvent(ISmithMapEvent* mapEvent, uint8 x, uint8 y)
+    {
+      m_pImpl->DeployEvent(mapEvent, x, y);
+    }
     void FSmithMapManager::FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj,const FSmithCommandFormat& format)
     {
       m_pImpl->FindAttackableMapObjs(outActors, mapObj, format);
@@ -284,6 +296,10 @@ namespace UE::Smith
     bool FSmithMapManager::ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
     {
       return m_pImpl->ChasePlayerTarget(outChaseDirection, chaser, chaseRadius);
+    }
+    bool FSmithMapManager::GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& x, uint8& y)
+    {
+      return m_pImpl->GetMapObjectCoord(mapObj, x, y);
     }
     void FSmithMapManager::Reset()
     {

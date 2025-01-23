@@ -10,6 +10,7 @@
 #include "ISmithSimpleAIDriven.h"
 #include "MapObjType.h"
 #include "../Weapon/Params.h"
+#include "ICanRequestEventPublishment.h"
 #include "TurnActor_Test.generated.h"
 
 struct FSmithAIStrategyContainer;
@@ -24,7 +25,9 @@ class USmithPickable;
  * 
  */
 UCLASS()
-class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap, public IMoveDirector, public ISmithSimpleAIDriven
+class SMITH_API ATurnActor_Test final: 	public ATurnBaseActor, public IAttackable, 
+																				public ICanSetOnMap, public IMoveDirector, 
+																				public ISmithSimpleAIDriven, public ICanRequestEventPublishment
 {
 	GENERATED_BODY()
 
@@ -50,7 +53,7 @@ public:
 	UClass* GetMoveDirectorUClass() const override final;
 	void SetMoveDirector(USmithMoveDirector*) override final;
 	uint8 GetChaseRadius() const override final;
-
+	void SetEventPublishMediator(IEventPublishMediator*) override;
 
 private:
 	UPROPERTY()
@@ -82,4 +85,6 @@ private:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
 	FParams EnemyParam;
+
+	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
 };

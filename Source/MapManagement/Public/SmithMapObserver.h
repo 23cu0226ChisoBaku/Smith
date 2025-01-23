@@ -95,6 +95,7 @@ namespace UE::Smith
 				void ClearMapObjs_IgnorePlayer();
 				void InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination);
 				bool ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
+				bool GetMapObjectCoord(ICanSetOnMap*, uint8& outX, uint8& outY);
 				/// @brief 未使用
 				void GenerateNewEnemy();
 				/// @brief 未使用

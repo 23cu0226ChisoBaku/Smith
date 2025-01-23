@@ -2,6 +2,8 @@
 
 
 #include "SmithUpgradeMaterial.h"
+#include "ICanPick.h"
+#include "MLibrary.h"
 
 USmithUpgradeMaterial::USmithUpgradeMaterial(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -23,4 +25,14 @@ FParams USmithUpgradeMaterial::GetParam()
 void USmithUpgradeMaterial::AddParam(FParams)
 {
   unimplemented();
+}
+
+void USmithUpgradeMaterial::onPickImpl(ICanPick* picker)
+{
+  if (!IS_UINTERFACE_VALID(picker))
+  {
+    return;
+  }
+
+  picker->PickUpMaterial(this);
 }

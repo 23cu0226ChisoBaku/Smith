@@ -114,8 +114,9 @@ namespace UE::Smith
 
           const auto& staySpaceTileContainer = model_shared->StaySpaceTable[eventCoord];
 
+          // TODO
           if (staySpaceTileContainer->GetEvent() == nullptr
-              && staySpaceTileContainer->GetMapObject() == nullptr)
+              /*&& staySpaceTileContainer->GetMapObject() == nullptr*/)
           {
             model_shared->StaySpaceTable[eventCoord]->SetEvent(event);
           }

@@ -14,6 +14,7 @@
 #include "FormatInfo_Import.h"
 #include "SmithMoveDirector.h"
 #include "SmithPickable.h"
+#include "IEventPublishMediator.h"
 #include "MLibrary.h"
 
 ATurnActor_Test::ATurnActor_Test()
@@ -79,9 +80,15 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
   if(EnemyParam.HP <= 0)
   {
     MDebug::LogError(GetName() + " Dead");
+    if (m_eventMediator.IsValid())
+    {
+      if (DropUpgradeTable.Num() > 0)
+      {
+        const auto& tableArray = DropUpgradeTable.Array();
+        m_eventMediator->PublishPickUpEvent(this, tableArray[0].Value);
+      }
+    }
     Destroy();
-
-    OnDestroyed.Broadcast();
   }
 }
 
@@ -155,4 +162,9 @@ void ATurnActor_Test::TurnOnAI()
     m_aiBehaviorProcessor->RegisterAIStrategy(2, m_idleStrategy);   
 		m_aiBehaviorProcessor->RunBehaviorProcessor();
   }
+}
+
+void ATurnActor_Test::SetEventPublishMediator(IEventPublishMediator* eventMediator)
+{
+  m_eventMediator = eventMediator;
 }

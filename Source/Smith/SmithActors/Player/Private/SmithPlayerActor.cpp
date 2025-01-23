@@ -21,6 +21,7 @@
 #include "FormatInfo_Import.h"
 #include "MapObjType.h"
 #include "SmithNextLevelEvent.h"
+#include "SmithPickUpItemEvent.h"
 
 #include "ICommandMediator.h"
 #include "IEnhanceSystem.h"
@@ -157,14 +158,6 @@ void ASmithPlayerActor::BeginPlay()
 		m_hp += Weapon->GetParam().HP;
 	}
 
-	if (::IsValid(InventoryComponent))
-	{
-		for (int32 i = 0 ; i < 5; ++i)
-		{
-			USmithUpgradeMaterial* testItem = NewObject<USmithUpgradeMaterial>(InventoryComponent->GetOwner());
-			InventoryComponent->Insert(TEXT("UpgradeMaterial"), testItem);
-		}
-	}
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -545,5 +538,37 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 	}
 
 	MDebug::Log("Player TRIGGERED next level event");
+
+}
+
+void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
+{
+	if (!::IsValid(event))
+	{
+		return;
+	}
+
+	MDebug::Log("Player TRIGGERED pick up item event");
+}
+
+void ASmithPlayerActor::PickUpConsume(USmithConsumeItem* consume)
+{
+
+}
+
+void ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
+{
+	if (!::IsValid(upgrade))
+	{
+		MDebug::LogError("can not pick --- material invalid");
+		return;
+	}
+	if (!::IsValid(InventoryComponent))
+	{
+		MDebug::LogError("can not pick --- Inventory invalid");
+		return;
+	}
+
+	InventoryComponent->Insert(TEXT("UpgradeMaterial"), upgrade);
 
 }

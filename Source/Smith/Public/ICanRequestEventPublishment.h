@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "IEventTriggerable.generated.h"
+#include "ICanRequestEventPublishment.generated.h"
 
-class USmithNextLevelEvent;
-class USmithPickUpItemEvent;
+class IEventPublishMediator;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UEventTriggerable : public UInterface
+class UCanRequestEventPublishment : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -19,12 +18,11 @@ class UEventTriggerable : public UInterface
 /**
  * 
  */
-class SMITH_API IEventTriggerable
+class SMITH_API ICanRequestEventPublishment
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void OnTriggerEvent(USmithNextLevelEvent*) = 0;
-	virtual void OnTriggerEvent(USmithPickUpItemEvent*) = 0;
+	virtual void SetEventPublishMediator(IEventPublishMediator*) = 0;
 };

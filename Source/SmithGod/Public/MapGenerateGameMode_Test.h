@@ -15,6 +15,7 @@ class USmithBattleSubsystem;
 class USmithEventPublisher;
 class USmithEventSystem;
 class USmithEnhanceSubsystem;
+class USmithEventPublishMediator;
 
 namespace UE::Smith
 {
@@ -72,6 +73,8 @@ private:
 	TObjectPtr<USmithChasePlayerTracker> m_chasePlayerTracker;
 	UPROPERTY()
 	TObjectPtr<USmithEnhanceSubsystem> m_enhanceSystem;
+	UPROPERTY()
+	TObjectPtr<USmithEventPublishMediator> m_eventMediator;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;

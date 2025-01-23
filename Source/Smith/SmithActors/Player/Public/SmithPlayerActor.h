@@ -25,6 +25,7 @@ Encoding : UTF-8
 #include "ICanCommandMediate.h"
 #include "ICanSetOnMap.h"
 #include "IEventTriggerable.h"
+#include "ICanPick.h"
 #include "ICanUseEnhanceSystem.h"
 #include "SmithPlayerActor.generated.h"
 
@@ -74,7 +75,7 @@ UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
 																			 , public IAttackable, public ICanCommandMediate
 																			 , public ICanSetOnMap, public IEventTriggerable
-																			 , public ICanUseEnhanceSystem
+																			 , public ICanUseEnhanceSystem, public ICanPick
 {
 	GENERATED_BODY()
 
@@ -148,7 +149,12 @@ public:
 
 	public:
 		void OnTriggerEvent(USmithNextLevelEvent*) override final;
+		void OnTriggerEvent(USmithPickUpItemEvent*) override final;
 
+	public:
+		void PickUpConsume(USmithConsumeItem*) override final;
+		void PickUpMaterial(USmithUpgradeMaterial*) override final;
+		
 	public:
 		void SetEnhanceSystem(IEnhanceSystem*);
 

@@ -342,6 +342,34 @@ namespace UE::Smith
             }
           }
         }
+        bool GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& outX, uint8& outY)
+        {
+          outX = 0;
+          outY = 0;
+
+          check(m_model.IsValid())
+          if (!m_model.IsValid())
+          {
+            return false;
+          }
+
+          if (!IS_UINTERFACE_VALID(mapObj))
+          {
+            return false;
+          }
+
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared->OnMapObjsCoordTable.Contains(mapObj))
+          {
+            MDebug::LogError("Can not get Coord --- invalid mapObj");
+            return false;
+          }
+
+          const FMapCoord mapCoord = model_shared->OnMapObjsCoordTable[mapObj];
+          outX = mapCoord.x;
+          outY = mapCoord.y;
+          return true;
+        }
         bool ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
         {
           return ChaseTarget(outChaseDirection, chaser, m_player.Get(), chaseRadius);
@@ -702,6 +730,10 @@ namespace UE::Smith
     bool FSmithMapObserver::ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
     {
       return m_pImpl->ChasePlayer(outChaseDirection, chaser, chaseRadius);
+    }
+    bool FSmithMapObserver::GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& outX, uint8& outY)
+    {
+      return m_pImpl->GetMapObjectCoord(mapObj, outX, outY);
     }
     void FSmithMapObserver::GenerateNewEnemy()
     {
