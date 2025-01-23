@@ -76,6 +76,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<USmithEventPublishMediator> m_eventMediator;
 
+	UPROPERTY(EditAnywhere, Category = TEST)
+	TSubclassOf<AActor> TEST_ACTOR;
+
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
 };

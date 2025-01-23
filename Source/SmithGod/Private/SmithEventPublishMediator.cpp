@@ -10,8 +10,8 @@
 
 USmithEventPublishMediator::USmithEventPublishMediator(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
-  , m_mapMgr(nullptr)
   , m_eventPublisher(nullptr)
+  , m_mapMgr(nullptr)
 { }
 
 void USmithEventPublishMediator::BeginDestroy()
@@ -50,12 +50,33 @@ void USmithEventPublishMediator::PublishPickUpEvent(ICanSetOnMap* mapObj, USmith
       MDebug::LogError("publish event failed --- can not CREATE event!!!");
       return;
     }
+
     // TODO 
-    pickEvent->AssignPickable(pickable, nullptr);
+    AActor* temp = nullptr;
+    if (TEST_ACTOR != nullptr)
+    {
+      UWorld* world = GetWorld();
+      if (::IsValid(world))
+      {
+        FActorSpawnParameters spawnParams{};
+        spawnParams.Template = TEST_ACTOR;
+        temp = world->SpawnActor<AActor>(TEST_ACTOR->GetClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+      }
+    }
+    pickEvent->AssignPickable(pickable, temp);
     mgr_shared->DeployEvent(pickEvent, publishCoordX, publishCoordY);
   }
   else
   {
     MDebug::LogError("Can not get map Object Coord");
+  }
+}
+
+void USmithEventPublishMediator::ACTOR_TEST(AActor* TEST)
+{
+  TEST_ACTOR = TEST;
+  if (::IsValid(TEST_ACTOR))
+  {
+    TEST_ACTOR->SetActorHiddenInGame(true);
   }
 }

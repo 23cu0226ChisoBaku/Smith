@@ -29,6 +29,7 @@ public:
 
 public:
 	void Initialize(USmithEventPublisher*, TSharedPtr<UE::Smith::Map::FSmithMapManager>);
+	void ACTOR_TEST(AActor*);
 
 public:
 	virtual void PublishPickUpEvent(ICanSetOnMap*, USmithPickable*) override;
@@ -36,4 +37,7 @@ public:
 private:
 	TWeakObjectPtr<USmithEventPublisher> m_eventPublisher;
 	TWeakPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
+	// TODO
+	UPROPERTY()
+	TObjectPtr<AActor> TEST_ACTOR;
 };

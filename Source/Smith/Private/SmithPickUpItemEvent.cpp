@@ -24,6 +24,7 @@ void USmithPickUpItemEvent::InitializeEvent(const FVector& location)
   if (m_pickableAppearence != nullptr)
   {
     m_pickableAppearence->SetActorLocation(location);
+    m_pickableAppearence->SetActorHiddenInGame(false);
   }
 }
 
@@ -53,7 +54,6 @@ bool USmithPickUpItemEvent::TriggerEvent(ICanSetOnMap* mapObj)
   }
 
   m_pickable->OnPick(picker);
-  
   return true;
 }
 
@@ -66,6 +66,8 @@ void USmithPickUpItemEvent::DiscardEvent()
 
   m_pickableObject = nullptr;
   m_pickable.Reset();
+
+  MarkAsGarbage();
 }
 
 void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearance)
@@ -83,5 +85,10 @@ void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearan
   m_pickable = pickable;
   m_pickableObject = pickable->_getUObject();
   m_pickableAppearence = appearance;
+
+  if (m_pickableAppearence != nullptr)
+  {
+    m_pickableAppearence->SetActorHiddenInGame(true);
+  }
   
 }

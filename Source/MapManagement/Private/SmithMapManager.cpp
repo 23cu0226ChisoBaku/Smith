@@ -117,6 +117,9 @@ namespace UE::Smith
             return;
           }
 
+          tempModel->OriginWorldCoord = constructionBP.OriginCoordinate;
+          tempModel->MapTileSize = constructionBP.TileSize;
+
           // マネージャーを更新
           m_map.Reset();
           m_map = ::MoveTemp(temp);
@@ -190,8 +193,6 @@ namespace UE::Smith
             FVector nextLevelEventDestination = FVector::ZeroVector;
 
             m_mapObserver->InitNextLevelEvent_Temp(nextLevelEventCoordX, nextLevelEventCoordY, nextLevelEventDestination);
-            nextLevelEvent->SetEventCoord(nextLevelEventCoordX, nextLevelEventCoordY);
-            nextLevelEvent->InitializeEvent(nextLevelEventDestination);
             m_deployDirector->DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY);
 
             m_mapEvents.Emplace(nextLevelEvent);
