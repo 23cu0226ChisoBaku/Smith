@@ -11,6 +11,7 @@
 #include "SmithBattleSubsystem.h"
 #include "SmithMoveComponent.h"
 #include "SmithAttackComponent.h"
+#include "SmithInventoryComponent.h"
 #include "AttackCommand.h"
 #include "MoveCommand.h"
 #include "AttackHandle.h"
@@ -20,8 +21,14 @@
 #include "FormatInfo_Import.h"
 #include "MapObjType.h"
 #include "SmithNextLevelEvent.h"
+#include "SmithPickUpItemEvent.h"
 
 #include "ICommandMediator.h"
+#include "IEnhanceSystem.h"
+#include "SmithHPItem.h"
+#include "SmithUpgradeMaterial.h"
+
+#include "SmithWeapon.h"
 
 #include "MLibrary.h"
 
@@ -54,7 +61,9 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, Camera(nullptr)
 	, MoveComponent(nullptr)
 	, AttackComponent(nullptr)
+	, InventoryComponent(nullptr)
 	, m_commandMediator(nullptr)
+	, m_enhanceSystem(nullptr)
 	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
 	, m_rotateSpeed(720.0f)
 	, m_rotatingDirection(0)
@@ -94,10 +103,13 @@ ASmithPlayerActor::ASmithPlayerActor()
 	SetTurnPriority(ETurnPriority::PlayerSelf);
 
 	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
-	check((MoveComponent != nullptr));
+	check(::IsValid(MoveComponent));
 
 	AttackComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Smith AttackComponent"));
-	check((AttackComponent != nullptr));
+	check(::IsValid(AttackComponent));
+
+	InventoryComponent = CreateDefaultSubobject<USmithInventoryComponent>(TEXT("Smith InventoryComponent"));
+	check(::IsValid(InventoryComponent));
 
 }
 
@@ -130,6 +142,24 @@ void ASmithPlayerActor::BeginPlay()
 
 		registerAttackFormat(pair.Key, pair.Value.Get());
 	}
+
+	// TODO
+	if (Weapon == nullptr)
+	{
+		Weapon = NewObject<USmithWeapon>(this);
+		check(Weapon != nullptr);
+		if (Weapon != nullptr)
+		{
+			Weapon->SetParam(FParams{50, 10, 10, 10});
+		}
+	}
+	
+	Weapon->Rename(nullptr, this);
+
+	{
+		m_hp += Weapon->GetParam().HP;
+	}
+
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -189,16 +219,22 @@ void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	if (::IsValid(inputComp))
 	{
-		inputComp->BindAction(MoveAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Move_Input);
+		inputComp->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASmithPlayerActor::Move_Input);
 		inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Look_Input);
 		inputComp->BindAction(AttackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack_Input);
 		inputComp->BindAction(DebugAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Debug_SelfDamage_Input);
+		inputComp->BindAction(EnhanceAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Enhance_Input);
 	}
 }
 
 void ASmithPlayerActor::SetCommandMediator(ICommandMediator* mediator)
 {
 	m_commandMediator = mediator;
+}
+
+void ASmithPlayerActor::SetEnhanceSystem(IEnhanceSystem* enhanceSystem)
+{
+	m_enhanceSystem = enhanceSystem;
 }
 
 void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
@@ -279,12 +315,22 @@ void ASmithPlayerActor::Look_Input(const FInputActionValue& value)
 	updateCamImpl(StaticCast<EDir_Test>(newDir % DirectionCnt));
 }
 
+void ASmithPlayerActor::Enhance_Input(const FInputActionValue& value)
+{
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
+	enhanceImpl();
+}
+
 void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 {
 	OnAttack(
 						{ 
 							TEXT("God"),		// Attack
-						  10,							// Damage
+						  1000,							// Damage
 						}
 					);
 }
@@ -316,7 +362,9 @@ void ASmithPlayerActor::attackImpl()
 
 		if (m_normalAttackFormatBuffer.Contains(attackKey) && m_normalAttackFormatBuffer[attackKey].IsValid())
 		{
-			m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{GetName(), 3});
+			FParams attackParam = Weapon->GetParam();
+			const int32 atk = attackParam.ATK;
+			m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{GetName(), atk});
 		}
 	}
 }
@@ -404,6 +452,34 @@ bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTab
 	return true;
 }
 
+void ASmithPlayerActor::enhanceImpl()
+{
+	if (m_enhanceSystem == nullptr || m_commandMediator == nullptr || InventoryComponent == nullptr)
+	{
+		return;
+	}
+
+	UObject* material = InventoryComponent->Get(TEXT("UpgradeMaterial"), 0);
+	if (material == nullptr)
+	{
+		return;
+	}
+
+	{
+		IParamAbsorbable* absorbItem = Cast<IParamAbsorbable>(material);
+		if (absorbItem == nullptr)
+		{
+			return;
+		}
+
+		MDebug::Log("Enhance Succeed!!!!!!!");
+		m_enhanceSystem->Enhance(Weapon, absorbItem);
+		InventoryComponent->Remove(TEXT("UpgradeMaterial"), 0);
+		m_commandMediator->SendIdleCommand(this);
+	}
+	
+}
+
 void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 {
 	m_hp -= attack.AttackPower;
@@ -464,5 +540,37 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 	}
 
 	MDebug::Log("Player TRIGGERED next level event");
+
+}
+
+void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
+{
+	if (!::IsValid(event))
+	{
+		return;
+	}
+
+	MDebug::Log("Player TRIGGERED pick up item event");
+}
+
+void ASmithPlayerActor::PickUpConsume(USmithConsumeItem* consume)
+{
+
+}
+
+void ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
+{
+	if (!::IsValid(upgrade))
+	{
+		MDebug::LogError("can not pick --- material invalid");
+		return;
+	}
+	if (!::IsValid(InventoryComponent))
+	{
+		MDebug::LogError("can not pick --- Inventory invalid");
+		return;
+	}
+
+	InventoryComponent->Insert(TEXT("UpgradeMaterial"), upgrade);
 
 }

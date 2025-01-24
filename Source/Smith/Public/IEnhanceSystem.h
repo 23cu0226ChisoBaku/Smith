@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "SmithActors/Weapon/Params.h"
 #include "IEnhanceSystem.generated.h"
 
-class IEnahceable;
+class IEnhanceable;
+class IParamAbsorbable;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
@@ -26,6 +26,6 @@ class SMITH_API IEnhanceSystem
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 // 引数はあとでWeponとItemのポインタに変える
-virtual void Enhance(IEnhanceable*,FParams) = 0;
+virtual void Enhance(IEnhanceable*,IParamAbsorbable*) = 0;
 
 };

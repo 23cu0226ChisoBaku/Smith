@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "ISmithMapEvent.h"
+#include "IPickable.h"
 #include "MLibrary.h"
 #include "SmithEventPublisher.generated.h"
 
@@ -30,9 +31,10 @@ public:
 			return nullptr;
 		}
 
+		// TODO
 		if (!inEventStaticClass->ImplementsInterface(USmithMapEvent::StaticClass()))
 		{
-			MDebug::Log("Not child");
+			MDebug::Log("Not child ----");
 			return nullptr;
 		}
 

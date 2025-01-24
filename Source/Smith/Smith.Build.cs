@@ -23,6 +23,7 @@ public class Smith : ModuleRules
 																							"Smith/SmithActors/TurnMngObj/Public",
 																							"Smith/SmithActors/Interfaces",
 																							"Smith/SmithActors",
+																							"Smith/SmithActors/Weapon",
 																							"Smith",
 																						});
 

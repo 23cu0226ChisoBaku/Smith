@@ -8,7 +8,6 @@
 /**
  * 
  */
-
 namespace UE::Smith::Command
 {
 	class SMITH_API NullCommand final: public IBattleCommand

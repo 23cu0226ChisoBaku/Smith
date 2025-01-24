@@ -23,7 +23,10 @@
 		{
 			"Name": "TurnBattleSystem",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"CoreUObject"
+			]
 		},
 		{
 			"Name": "MapManagement",

@@ -25,6 +25,7 @@ public:
 	void RegisterMapEvent(ICanSetOnMap*, ISmithMapEvent*) override final;
 	void ExecuteEvent() override final;
 	bool IsEventInStock() const override final;
+	void Reset();
 private:
 	struct SmithEventHandle
 	{

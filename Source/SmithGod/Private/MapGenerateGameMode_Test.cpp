@@ -13,13 +13,18 @@
 #include "ICanCommandMediate.h"
 #include "ICanSetOnMap.h"
 #include "IMoveDirector.h"
+#include "ICanUseEnhanceSystem.h"
 #include "TurnActor_Test.h"
 #include "SmithBattleMediator.h"
 #include "SmithChasePlayerTracker.h"
 #include "SmithBattleSubsystem.h"
+#include "SmithEnhanceSubsystem.h"
 #include "SmithEventPublisher.h"
 #include "SmithEventSystem.h"
 #include "ISmithSimpleAIDriven.h"
+#include "IEnhanceSystem.h"
+#include "ICanRequestEventPublishment.h"
+#include "SmithEventPublishMediator.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -34,6 +39,7 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   , m_eventPublisher(nullptr)
   , m_eventSystem(nullptr)
   , m_chasePlayerTracker(nullptr)
+  , m_eventMediator(nullptr)
   , m_mapMgr(nullptr)
 {
   static ConstructorHelpers::FClassFinder<APawn> PlayerBP(TEXT("/Game/BP/BP_TestMapGeneratePawn"));
@@ -62,6 +68,8 @@ void AMapGenerateGameMode_Test::startNewLevel()
   check(m_battleSystem != nullptr);
   check(m_battleMediator != nullptr); 
   check(m_chasePlayerTracker != nullptr);
+  check(m_enhanceSystem != nullptr);
+  check(m_eventMediator != nullptr);
 
   APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
   ICanSetOnMap* mapPlayer = Cast<ICanSetOnMap>(playerPawn);
@@ -121,6 +129,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
       }
     }
   }
+
   {
     TArray<AActor*> aiDrivenActors;
     UGameplayStatics::GetAllActorsWithInterface(GetWorld(), USmithSimpleAIDriven::StaticClass(), aiDrivenActors);
@@ -134,6 +143,22 @@ void AMapGenerateGameMode_Test::startNewLevel()
       }
     }
   }
+
+  {
+    TArray<AActor*> eventPublishObjs;
+    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UCanRequestEventPublishment::StaticClass(), eventPublishObjs);
+
+    if (eventPublishObjs.Num() > 0)
+    {
+      for (const auto& actor : eventPublishObjs)
+      {
+        ICanRequestEventPublishment* publishRequester = Cast<ICanRequestEventPublishment>(actor);
+        publishRequester->SetEventPublishMediator(m_eventMediator);
+      }
+    }
+  }
+
+  m_eventSystem->Reset();
 }
 
 void AMapGenerateGameMode_Test::clearCurrentLevel()
@@ -150,7 +175,10 @@ void AMapGenerateGameMode_Test::clearCurrentLevel()
 
 void AMapGenerateGameMode_Test::initializeGame()
 {
-  m_battleSystem = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
+  UWorld* world = GetWorld();
+  check(world != nullptr);
+
+  m_battleSystem = world->GetSubsystem<USmithBattleSubsystem>();
   check(m_battleSystem != nullptr);
   
   m_battleMediator = NewObject<USmithBattleMediator>(this);
@@ -172,6 +200,22 @@ void AMapGenerateGameMode_Test::initializeGame()
 
   m_mapMgr->AssignEventRegister(m_eventSystem);
   m_battleSystem->AssignEventExecutor(m_eventSystem);
+
+  m_enhanceSystem = world->GetSubsystem<USmithEnhanceSubsystem>();
+  check(m_enhanceSystem != nullptr);
+
+  APawn* playerPawn = UGameplayStatics::GetPlayerPawn(world, 0);
+  ICanUseEnhanceSystem* enhanceUser = Cast<ICanUseEnhanceSystem>(playerPawn);
+  check(enhanceUser != nullptr);
+  enhanceUser->SetEnhanceSystem(m_enhanceSystem);
+
+  m_eventMediator = NewObject<USmithEventPublishMediator>(this);
+  check(m_eventMediator != nullptr)
+
+  m_eventMediator->Initialize(m_eventPublisher, m_mapMgr);
+  AActor* actor = world->SpawnActor<AActor>(TEST_ACTOR, FVector::ZeroVector, FRotator::ZeroRotator);
+  check(::IsValid(actor));
+  m_eventMediator->ACTOR_TEST(actor);
 }
 
 void AMapGenerateGameMode_Test::goToNextLevel()

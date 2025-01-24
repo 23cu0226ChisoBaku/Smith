@@ -19,17 +19,15 @@ public:
 	USmithMoveComponent();
 
 public:
-	virtual void Move() override;
+	virtual void Move(float deltaTime) override;
 	virtual void SetDestination(FVector) override;
+	virtual bool IsReachDestination() const override;
 	void SetTerminusPos(FVector pos) ;
-	void SetMoveSpeed(float speed)
-	{
-		MOVE_DISTANCE = speed;
-	}
-public:
-	UPROPERTY(EditAnywhere)
-	float MOVE_DISTANCE;
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MoveParameter, meta = (AllowPrivateAccess = "true"))
+	double MoveSpeed;
 
 private:
 	FVector m_terminus;
+	uint8 m_bCanMove : 1;
 };

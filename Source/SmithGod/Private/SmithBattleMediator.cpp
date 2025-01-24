@@ -72,7 +72,6 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, E
 
   if (destinationVector.Equals(InvalidValues::MapInvalidCoord_World))
   {
-    MDebug::LogError("Can not move");
     return false;
   }
   else
