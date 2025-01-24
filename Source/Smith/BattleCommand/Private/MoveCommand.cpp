@@ -37,18 +37,10 @@ namespace UE::Smith::Command
       }
       void Update(float deltaTime)
       {
-        FString moveStr{};
         if (m_moveable.IsValid())
         {
-          moveStr.Append(m_moveable->_getUObject()->GetName());
-          m_moveable->Move();
+          m_moveable->Move(deltaTime);
         }
-        else
-        {
-          moveStr.Append(TEXT("EMPTY OBJECT"));
-        }
-
-        moveStr.Append(TEXT(" Move Command"));
 
         if (m_animator.IsValid())
         {
@@ -64,7 +56,7 @@ namespace UE::Smith::Command
       }
       bool IsFinish() const
       {
-        return m_animator.IsValid() ? m_animator->IsAnimationFinish() : true;
+        return m_moveable.IsValid() ? m_moveable->IsReachDestination() : true;
       }
     private:
       TWeakInterfacePtr<IMoveable> m_moveable;

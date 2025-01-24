@@ -13,12 +13,14 @@ USmithTurnBaseAIAttackStrategy::USmithTurnBaseAIAttackStrategy(const FObjectInit
   , OnChangeDirectionDelegate{}
   , m_mediator(nullptr)
   , m_attacker(nullptr)
+  , m_atk(0)
 { }
 
-void USmithTurnBaseAIAttackStrategy::Initialize(ICanMakeAttack* attacker, ICommandMediator* mediator)
+void USmithTurnBaseAIAttackStrategy::Initialize(ICanMakeAttack* attacker, ICommandMediator* mediator, int32 attackPower)
 {
   m_mediator = mediator;
   m_attacker = attacker;
+  m_atk = attackPower;
 }
 
 void USmithTurnBaseAIAttackStrategy::BeginDestroy()
@@ -54,7 +56,7 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
     for (uint8 i = 0u; i < 4u; ++i)
     {
       EDirection atkDir = StaticCast<EDirection>(i * 2u);
-      bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *format.Value, AttackHandle{GetName(), 1}, false);
+      bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *format.Value, AttackHandle{GetName(), m_atk}, false);
       if (success)
       {
         return true;
@@ -62,7 +64,6 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
     }
   }
 
-  MDebug::LogError("Attack failed");
   return false;
 }
 

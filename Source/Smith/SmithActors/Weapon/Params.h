@@ -8,7 +8,7 @@
 /**
  * 
  */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct SMITH_API FParams
 {
 	GENERATED_BODY()
@@ -21,6 +21,9 @@ public:
 	int32 DEF;
 	UPROPERTY(EditAnywhere)
 	int32 CRT;
+
+public:
+	FParams& operator+=(const FParams&);
 };
 
 FParams operator+(const FParams& lhs, const FParams& rhs);

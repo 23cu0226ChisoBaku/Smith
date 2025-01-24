@@ -30,6 +30,7 @@ Encoding : UTF-8
 class IAttackable;
 class ICanSetOnMap;
 class IEventRegister;
+class ISmithMapEvent;
 class USmithEventPublisher;
 namespace UE::Smith
 {
@@ -120,6 +121,7 @@ namespace UE::Smith
         /// @param y                              Y座標
         ///
         void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
+        void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y);
         ///
         /// @brief                                攻撃できるオブジェクトを探す                      
         /// @param outActors                      攻撃できるオブジェクトコンテナ(OUT)
@@ -136,6 +138,7 @@ namespace UE::Smith
         ///
         void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
         bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
+        bool GetMapObjectCoord(ICanSetOnMap*, uint8& outX, uint8& outY);
         void Reset();
 			#pragma endregion FSmithMapManager Interface
 			// end of FSmithMapManager Interface

@@ -2,6 +2,15 @@
 
 
 #include "SmithActors/Weapon/Params.h"
+FParams& FParams::operator+=(const FParams& other)
+{
+	HP += other.HP;
+	ATK += other.ATK;
+	DEF += other.DEF;
+	CRT += other.CRT;
+
+	return *this;
+}
 
 FParams operator+(const FParams& lhs, const FParams& rhs)
 {

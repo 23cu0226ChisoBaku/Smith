@@ -114,10 +114,18 @@ namespace UE::Smith
 
           const auto& staySpaceTileContainer = model_shared->StaySpaceTable[eventCoord];
 
+          // TODO
           if (staySpaceTileContainer->GetEvent() == nullptr
-              && staySpaceTileContainer->GetMapObject() == nullptr)
+              /*&& staySpaceTileContainer->GetMapObject() == nullptr*/)
           {
             model_shared->StaySpaceTable[eventCoord]->SetEvent(event);
+            const double eventInitLocationX = StaticCast<double>(x) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.X;
+            const double eventInitLocationY = StaticCast<double>(y) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.Y;
+            const double eventInitLocationZ = model_shared->OriginWorldCoord.Z;
+            const FVector eventInitLocation = FVector{ eventInitLocationX, eventInitLocationY,eventInitLocationZ};
+
+            event->SetEventCoord(x, y);
+            event->InitializeEvent(eventInitLocation);
           }
         }
       private:

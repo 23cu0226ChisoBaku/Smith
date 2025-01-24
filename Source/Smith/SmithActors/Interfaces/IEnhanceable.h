@@ -7,7 +7,6 @@
 #include "IEnhanceable.generated.h"
 
 class IParamAbsorbable;
-
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UEnhanceable : public UInterface
@@ -24,5 +23,5 @@ class SMITH_API IEnhanceable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Upgrade(IParamAbsorbable*) = 0;
+	virtual void Upgrade(IParamAbsorbable*) = 0 ;
 };

@@ -66,7 +66,7 @@ namespace UE::Smith::Command
   SkillCommand::~SkillCommand()
   {
     m_skillImpl.Reset();
-    memset(this, 0, sizeof(this));
+    memset(this, 0, sizeof(*this));
   }
 
   void SkillCommand::Start()

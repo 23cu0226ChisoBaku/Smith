@@ -117,6 +117,9 @@ namespace UE::Smith
             return;
           }
 
+          tempModel->OriginWorldCoord = constructionBP.OriginCoordinate;
+          tempModel->MapTileSize = constructionBP.TileSize;
+
           // マネージャーを更新
           m_map.Reset();
           m_map = ::MoveTemp(temp);
@@ -129,6 +132,16 @@ namespace UE::Smith
           m_mapOperator->AssignMap(m_model, constructionBP.OriginCoordinate, constructionBP.TileSize);
           m_deployDirector->AssignMap(m_model);
           m_mapObserver->AssignMap(m_model, constructionBP.OriginCoordinate, constructionBP.TileSize);
+
+          for (auto& event : m_mapEvents)
+          {
+            if (IS_UINTERFACE_VALID(event))
+            {
+              event->DiscardEvent();
+            }
+          }
+
+          m_mapEvents.Reset();
         }
         void InitMapObjs(UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
         {
@@ -190,11 +203,6 @@ namespace UE::Smith
             FVector nextLevelEventDestination = FVector::ZeroVector;
 
             m_mapObserver->InitNextLevelEvent_Temp(nextLevelEventCoordX, nextLevelEventCoordY, nextLevelEventDestination);
-            MDebug::Log(FString::FromInt(nextLevelEventCoordX));
-            MDebug::Log(FString::FromInt(nextLevelEventCoordY));
-
-            nextLevelEvent->SetEventCoord(nextLevelEventCoordX, nextLevelEventCoordY);
-            nextLevelEvent->InitializeEvent(nextLevelEventDestination);
             m_deployDirector->DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY);
 
             m_mapEvents.Emplace(nextLevelEvent);
@@ -204,6 +212,15 @@ namespace UE::Smith
         void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
         {
           m_deployDirector->DeployMapObj(mapObj, x, y);
+        }
+        void DeployEvent(ISmithMapEvent* mapEvent, uint8 x, uint8 y)
+        {
+          m_deployDirector->DeployEvent(mapEvent, x, y);
+          
+          if (IS_UINTERFACE_VALID(mapEvent))
+          {
+            m_mapEvents.Emplace(mapEvent);
+          }
         }
         void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
         {
@@ -216,6 +233,10 @@ namespace UE::Smith
         bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
         {
           return m_mapObserver->ChasePlayer(outChaseDirection, chaser, chaseRadius);
+        }
+        bool GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& x, uint8& y)
+        {
+          return m_mapObserver->GetMapObjectCoord(mapObj, x, y);
         }
         void Reset()
         {
@@ -247,7 +268,7 @@ namespace UE::Smith
         TUniquePtr<FSmithMapObserver> m_mapObserver;
         TSharedPtr<Model> m_model;
         TSharedPtr<FSmithMap> m_map;
-        TArray<const ISmithMapEvent*> m_mapEvents;
+        TArray<ISmithMapEvent*> m_mapEvents;
     };
     FSmithMapManager::FSmithMapManager()
       : m_pImpl(::MakeUnique<MapMgrImpl>())
@@ -276,6 +297,10 @@ namespace UE::Smith
     {
       m_pImpl->DeployMapObj(mapObj, x, y);
     }
+    void FSmithMapManager::DeployEvent(ISmithMapEvent* mapEvent, uint8 x, uint8 y)
+    {
+      m_pImpl->DeployEvent(mapEvent, x, y);
+    }
     void FSmithMapManager::FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj,const FSmithCommandFormat& format)
     {
       m_pImpl->FindAttackableMapObjs(outActors, mapObj, format);
@@ -287,6 +312,10 @@ namespace UE::Smith
     bool FSmithMapManager::ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
     {
       return m_pImpl->ChasePlayerTarget(outChaseDirection, chaser, chaseRadius);
+    }
+    bool FSmithMapManager::GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& x, uint8& y)
+    {
+      return m_pImpl->GetMapObjectCoord(mapObj, x, y);
     }
     void FSmithMapManager::Reset()
     {

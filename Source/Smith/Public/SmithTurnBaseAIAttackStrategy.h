@@ -21,19 +21,19 @@ class SMITH_API USmithTurnBaseAIAttackStrategy final: public USmithAIAttackStrat
 {
 	GENERATED_BODY()	
 	
-	public:
-		USmithTurnBaseAIAttackStrategy(const FObjectInitializer&);
-		void Initialize(ICanMakeAttack*, ICommandMediator*);
-		void BeginDestroy() override final;
+public:
+	USmithTurnBaseAIAttackStrategy(const FObjectInitializer&);
+	void Initialize(ICanMakeAttack*, ICommandMediator*, int32 attackPower);
+	void BeginDestroy() override final;
 
-	private:
-		bool executeImpl() override final;
+private:
+	bool executeImpl() override final;
 
-	public:
-		FOnChangeFaceDirectionEvent OnChangeDirectionDelegate;
+public:
+	FOnChangeFaceDirectionEvent OnChangeDirectionDelegate;
 
-	private:
-		TWeakInterfacePtr<ICommandMediator> m_mediator;
-		TWeakInterfacePtr<ICanMakeAttack> m_attacker;
-
+private:
+	TWeakInterfacePtr<ICommandMediator> m_mediator;
+	TWeakInterfacePtr<ICanMakeAttack> m_attacker;
+	int32 m_atk;
 };

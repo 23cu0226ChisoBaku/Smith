@@ -47,17 +47,25 @@ void USmithEventSystem::ExecuteEvent()
       continue;
     }
 
-    eventHandle.Event->TriggerEvent(eventHandle.EventReceiver.Get());
-    // TODO
-    eventHandle.Event->DiscardEvent();
-
+    if (eventHandle.Event->TriggerEvent(eventHandle.EventReceiver.Get()))
+    {
+      if (eventHandle.Event.IsValid())
+      {
+        eventHandle.Event->DiscardEvent();
+      }
+    }
     ++idx;
   }
 
-  m_eventHandleContainer.Reset();
+  Reset();
 }
 
 bool USmithEventSystem::IsEventInStock() const
 {
   return m_eventHandleContainer.Num() > 0;
+}
+
+void USmithEventSystem::Reset()
+{
+  m_eventHandleContainer.Reset();
 }

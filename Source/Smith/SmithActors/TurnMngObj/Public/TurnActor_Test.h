@@ -9,6 +9,8 @@
 #include "IMoveDirector.h"
 #include "ISmithSimpleAIDriven.h"
 #include "MapObjType.h"
+#include "../Weapon/Params.h"
+#include "ICanRequestEventPublishment.h"
 #include "TurnActor_Test.generated.h"
 
 struct FSmithAIStrategyContainer;
@@ -18,11 +20,14 @@ class USmithTurnBaseAIIdleStrategy;
 class USmithAttackComponent;
 class USmithMoveComponent;
 class USmithMoveDirector;
+class USmithPickable;
 /**
  * 
  */
 UCLASS()
-class SMITH_API ATurnActor_Test final: public ATurnBaseActor, public IAttackable, public ICanSetOnMap, public IMoveDirector, public ISmithSimpleAIDriven
+class SMITH_API ATurnActor_Test final: 	public ATurnBaseActor, public IAttackable, 
+																				public ICanSetOnMap, public IMoveDirector, 
+																				public ISmithSimpleAIDriven, public ICanRequestEventPublishment
 {
 	GENERATED_BODY()
 
@@ -48,11 +53,9 @@ public:
 	UClass* GetMoveDirectorUClass() const override final;
 	void SetMoveDirector(USmithMoveDirector*) override final;
 	uint8 GetChaseRadius() const override final;
-
+	void SetEventPublishMediator(IEventPublishMediator*) override;
 
 private:
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
-	// TArray<FSmithAIStrategyContainer> AIRegistrationList;
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
 	UPROPERTY()
@@ -61,8 +64,8 @@ private:
 	TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_atkComponent;
-	UPROPERTY()
-	TObjectPtr<USmithMoveComponent> m_moveComponent;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USmithMoveComponent> MoveComponent;
 
 		// Attack Format
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
@@ -75,4 +78,13 @@ private:
 	EMapObjType MapObjectType;
 	UPROPERTY()
 	TObjectPtr<USmithMoveDirector> m_moveDirector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = DropItemTable, meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<USmithPickable>> DropUpgradeTable; 
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
+	FParams EnemyParam;
+
+	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
 };

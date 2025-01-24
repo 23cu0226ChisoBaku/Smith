@@ -17,10 +17,18 @@ ASmithEnemy::ASmithEnemy()
  m_moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno Enemy Move Component"));
  check((m_moveComp != nullptr));
 
-  m_moveComp->SetMoveSpeed(250.0f);
+  //m_moveComp->SetMoveSpeed(250.0f);
   MOVE_DISTANCE = 100.0f;
 
   m_attackComp = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Konno Enemy Attack Component"));
+
+  Max_HP = m_hp;
+  // m_hpComp = CreateDefaultSubobject<UHPWidgetComponent>(TEXT("konno Enemy HP Component"));
+
+  // if(m_hpComp == nullptr)
+  // {
+  //   MDebug::LogError(TEXT("HPComponentが作成できない"));
+  // }
 }
 
 void ASmithEnemy::BeginPlay()
@@ -44,12 +52,15 @@ void ASmithEnemy::BeginPlay()
 void ASmithEnemy::OnAttack(AttackHandle &&handle)
 {
   m_hp -= handle.AttackPower;
+  Current_HP = m_hp;
   MDebug::LogError(GetName() + TEXT(" left HP:") + FString::FromInt(m_hp));
 
   if (m_hp <= 0.0f)
   {
     Destroy();
   }
+
+  OnUpdateHp();
 }
 
 void ASmithEnemy::OnHeal(int32 heal)

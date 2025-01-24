@@ -13,6 +13,8 @@
 #include "SmithMoveComponent.h"
 #include "FormatInfo_Import.h"
 #include "SmithMoveDirector.h"
+#include "SmithPickable.h"
+#include "IEventPublishMediator.h"
 #include "MLibrary.h"
 
 ATurnActor_Test::ATurnActor_Test()
@@ -20,7 +22,7 @@ ATurnActor_Test::ATurnActor_Test()
   , m_moveStrategy(nullptr)
   , m_idleStrategy(nullptr)
   , m_atkComponent(nullptr)
-  , m_moveComponent(nullptr)
+  , MoveComponent(nullptr)
 {
   PrimaryActorTick.bCanEverTick = true;
   SetTurnPriority(ETurnPriority::Rival);
@@ -28,8 +30,8 @@ ATurnActor_Test::ATurnActor_Test()
   m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
   check(m_atkComponent != nullptr);
 
-  m_moveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
-  check(m_moveComponent != nullptr);
+  MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
+  check(MoveComponent != nullptr);
 
 }
 
@@ -59,17 +61,36 @@ void ATurnActor_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ATurnActor_Test::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
+  if (!IsCommandSendable())
+  {
+    return;
+  }
+
   if (m_aiBehaviorProcessor != nullptr)
   {
     m_aiBehaviorProcessor->TickBehaviorProcessor(DeltaTime);
   }
-  //SendMoveCommand(nullptr, UE::Smith::Battle::EMoveDirection::None, 0);
 }
 
 void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 {
-  MDebug::LogError("Get Attack by" + handle.AttackName);
-  Destroy();
+  EnemyParam.HP -= handle.AttackPower;
+
+  MDebug::LogWarning(GetName() + " left HP:" + FString::FromInt(EnemyParam.HP));
+  if(EnemyParam.HP <= 0)
+  {
+    MDebug::LogError(GetName() + " Dead");
+    if (m_eventMediator.IsValid())
+    {
+      if (DropUpgradeTable.Num() > 0)
+      {
+        m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[0]);
+        DropUpgradeTable.RemoveAt(0);
+      }
+    }
+    Destroy();
+    DropUpgradeTable.Reset();
+  }
 }
 
 uint8 ATurnActor_Test::GetOnMapSizeX() const
@@ -107,7 +128,7 @@ void ATurnActor_Test::TurnOnAI()
   if (m_attackStrategy != nullptr)
   {
     m_attackStrategy->SetOwner(this);
-    m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get());
+    m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get(), EnemyParam.ATK);
   }
 
 	for (auto& pair : AttackFormatTables)
@@ -126,7 +147,7 @@ void ATurnActor_Test::TurnOnAI()
   if (m_moveStrategy != nullptr)
   {
     m_moveStrategy->SetOwner(this);
-    m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, m_moveComponent, 1);
+    m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, MoveComponent, 1);
   }
 
   if (m_idleStrategy != nullptr)
@@ -142,4 +163,9 @@ void ATurnActor_Test::TurnOnAI()
     m_aiBehaviorProcessor->RegisterAIStrategy(2, m_idleStrategy);   
 		m_aiBehaviorProcessor->RunBehaviorProcessor();
   }
+}
+
+void ATurnActor_Test::SetEventPublishMediator(IEventPublishMediator* eventMediator)
+{
+  m_eventMediator = eventMediator;
 }

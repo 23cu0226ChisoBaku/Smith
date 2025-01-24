@@ -25,7 +25,7 @@ public:
 	int32 GetLevel() const;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintType, Category = WeaponParameter, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = WeaponParameter, meta = (AllowPrivateAccess = "true"))
 	FParams WeaponParam;
 	int32 m_weaponLevel;
 	

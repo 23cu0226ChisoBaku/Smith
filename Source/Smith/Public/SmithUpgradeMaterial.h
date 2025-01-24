@@ -28,6 +28,6 @@ private:
 	void onPickImpl(ICanPick*) override;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintType, Category = Parameter, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Parameter, meta = (AllowPrivateAccess = "true"))
 	FParams Param;
 };
