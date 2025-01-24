@@ -27,6 +27,7 @@ Encoding : UTF-8
 #include "IEventTriggerable.h"
 #include "ICanPick.h"
 #include "ICanUseEnhanceSystem.h"
+#include "ISmithAnimator.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -42,6 +43,7 @@ class UCameraComponent;
 class USmithMoveComponent;
 class USmithAttackComponent;
 class USmithInventoryComponent;
+class USmithAnimationComponent;
 
 // Unreal Enhanced Input
 class UInputMappingContext;
@@ -76,6 +78,7 @@ class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
 																			 , public IAttackable, public ICanCommandMediate
 																			 , public ICanSetOnMap, public IEventTriggerable
 																			 , public ICanUseEnhanceSystem, public ICanPick
+																			 , public ISmithAnimator
 {
 	GENERATED_BODY()
 
@@ -154,6 +157,11 @@ public:
 	public:
 		void PickUpConsume(USmithConsumeItem*) override final;
 		void PickUpMaterial(USmithUpgradeMaterial*) override final;
+
+	public:
+		void SwitchAnimation(uint8 animationState) override final;
+		void UpdateAnimation(float deltaTime) override final;
+		bool IsAnimationFinish() const override final;
 		
 	public:
 		void SetEnhanceSystem(IEnhanceSystem*);
@@ -202,6 +210,8 @@ private:
 	TObjectPtr<USmithAttackComponent> AttackComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USmithInventoryComponent> InventoryComponent;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USmithAnimationComponent> AnimationComponent;
 
 	// Enhanced Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
@@ -226,9 +236,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
 	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
 
-	//
-	UPROPERTY(EditAnywhere,Instanced,Category = Weapon)
+	// TODO
+	UPROPERTY(EditAnywhere, Instanced, Category = Weapon)
 	TObjectPtr<USmithWeapon> Weapon;
+
 
 	TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
 

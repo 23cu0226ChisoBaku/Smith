@@ -12,6 +12,7 @@
 #include "SmithMoveComponent.h"
 #include "SmithAttackComponent.h"
 #include "SmithInventoryComponent.h"
+#include "SmithAnimationComponent.h"
 #include "AttackCommand.h"
 #include "MoveCommand.h"
 #include "AttackHandle.h"
@@ -62,6 +63,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, MoveComponent(nullptr)
 	, AttackComponent(nullptr)
 	, InventoryComponent(nullptr)
+	, AnimationComponent(nullptr)
 	, m_commandMediator(nullptr)
 	, m_enhanceSystem(nullptr)
 	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
@@ -110,6 +112,9 @@ ASmithPlayerActor::ASmithPlayerActor()
 
 	InventoryComponent = CreateDefaultSubobject<USmithInventoryComponent>(TEXT("Smith InventoryComponent"));
 	check(::IsValid(InventoryComponent));
+
+	AnimationComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("Smith AnimationComponent"));
+	check(AnimationComponent != nullptr);
 
 }
 
@@ -573,4 +578,54 @@ void ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
 
 	InventoryComponent->Insert(TEXT("UpgradeMaterial"), upgrade);
 
+}
+
+void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
+{
+	if (AnimationComponent == nullptr)
+	{
+		return;
+	}
+
+	using namespace UE::Smith;
+	FName StateName;
+	float durationTime;
+
+	switch (animationState)
+	{
+	case SMITH_ANIM_IDLE:
+		StateName = TEXT("Idle");
+		break;
+	case	SMITH_ANIM_WALK:
+		StateName = TEXT("Walk");
+		break;
+	case SMITH_ANIM_ATTACK:
+		StateName = TEXT("Attack");
+		durationTime = 1.0f;
+		break;
+	case SMITH_ANIM_DAMAGED:
+		StateName = TEXT("Damaged");
+		break;
+	case SMITH_ANIM_DEAD:
+		StateName = TEXT("Dead");
+		break;
+	default:
+		break;
+	}
+	AnimationComponent->SwitchAnimState(StateName, durationTime);
+}
+
+void ASmithPlayerActor::UpdateAnimation(float deltaTime)
+{
+	if (AnimationComponent == nullptr)
+	{
+		return;
+	}
+
+	AnimationComponent->UpdateAnim(deltaTime);
+}
+
+bool ASmithPlayerActor::IsAnimationFinish() const
+{
+	return AnimationComponent == nullptr ? true : AnimationComponent->IsCurrentAnimationFinish();
 }

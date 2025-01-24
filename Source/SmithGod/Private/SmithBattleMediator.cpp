@@ -17,6 +17,7 @@
 #include "SmithCommandFormat.h"
 #include "FormatTransformer.h"
 #include "Direction.h"
+#include "ISmithAnimator.h"
 
 #include "InvalidValues.h"
 
@@ -76,8 +77,9 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, E
   }
   else
   {
+    ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
     move->SetDestination(destinationVector);
-    m_battleSys->RegisterCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::MoveCommand>(move));
+    m_battleSys->RegisterCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::MoveCommand>(move, animator));
     return true;
   }
 }
@@ -117,16 +119,18 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
   ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
   if (attackables.Num() > 0)
   {
+    ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
     for(auto target : attackables)
     {
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(atkHandle)));
+      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(atkHandle), animator));
     }
     return true;
   }
 
   if (bAttackEvenNoTarget)
   {
-    m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, nullptr, ::MoveTemp(atkHandle)));
+    ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
+    m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, nullptr, ::MoveTemp(atkHandle), animator));
     return true;
   }
   else

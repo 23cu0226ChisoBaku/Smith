@@ -8,10 +8,12 @@
 
 // Sets default values for this component's properties
 USmithAnimationComponent::USmithAnimationComponent()
+	: m_curtAnimationTimeInterval(0.0f)
+	, m_animationPlayTimeCnt(0.0f)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -24,7 +26,7 @@ void USmithAnimationComponent::BeginPlay()
 
 	MontageToPlay = LoadObject<UAnimMontage>(nullptr, *objectPass);
 	AActor* OwnerActor = GetOwner();
-	if (OwnerActor)
+	if (OwnerActor != nullptr)
 	{
 		USkeletalMeshComponent* skeltalmeshcomp = OwnerActor->FindComponentByClass<USkeletalMeshComponent>();
 		if (skeltalmeshcomp)
@@ -32,10 +34,10 @@ void USmithAnimationComponent::BeginPlay()
 			AnimInstance = skeltalmeshcomp->GetAnimInstance();
 		}
 	}
-	// モンタージュ終了のイベント登録
-	if (AnimInstance)
+
+	if (AnimInstance != nullptr && MontageToPlay != nullptr)
 	{
-		//AnimInstance->OnMontageEnded(this, OnMontageEnded);
+		AnimInstance->Montage_Play(MontageToPlay);
 	}
 
 }
@@ -45,26 +47,45 @@ void USmithAnimationComponent::BeginPlay()
 void USmithAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	return;
 	// ...
 }
 
-void USmithAnimationComponent::SwitchAnimState(FName m_Anim)
+void USmithAnimationComponent::SwitchAnimState(FName nextStateName, float animationDuration)
 {
-	// 現在のモンタージュを取得
 	if (AnimInstance == nullptr)
 	{
 		return;
 	}
 
 	UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
-	FName CurrentSection = AnimInstance->Montage_GetCurrentSection(CurrentMontage);
+	if (CurrentMontage == nullptr)
+	{
+		return;
+	}
 
-	// 現在のモンタージュが再生中かどうかを確認
-	if (CurrentSection == m_Anim) { return; }
-	// 新しいモンタージュを再生
+	FName CurrentSectionName = AnimInstance->Montage_GetCurrentSection(CurrentMontage);
+
+	if (CurrentSectionName == nextStateName) 
+	{ 
+		return; 
+	}
+
+	m_curtAnimationTimeInterval = animationDuration;
+	m_animationPlayTimeCnt = 0.0f;
+
 	AnimInstance->Montage_Play(MontageToPlay);
-	AnimInstance->Montage_JumpToSection(m_Anim, MontageToPlay);
+	AnimInstance->Montage_JumpToSection(nextStateName, MontageToPlay);
+}
+
+void USmithAnimationComponent::UpdateAnim(float deltaTime)
+{
+	m_animationPlayTimeCnt += deltaTime;
+}
+
+bool USmithAnimationComponent::IsCurrentAnimationFinish() const
+{
+	return m_animationPlayTimeCnt >= m_curtAnimationTimeInterval;
 }
 
 void USmithAnimationComponent::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
