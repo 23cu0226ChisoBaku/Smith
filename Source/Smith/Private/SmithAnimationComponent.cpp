@@ -4,6 +4,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "SmithAnimationComponent.h"
+#include "Debug.h"
 
 // Sets default values for this component's properties
 USmithAnimationComponent::USmithAnimationComponent()
@@ -48,28 +49,22 @@ void USmithAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	// ...
 }
 
-void USmithAnimationComponent::AnimManager()
+void USmithAnimationComponent::SwitchAnimState(FName m_Anim)
 {
 	// 現在のモンタージュを取得
+	if (AnimInstance == nullptr)
+	{
+		return;
+	}
+
 	UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
 	FName CurrentSection = AnimInstance->Montage_GetCurrentSection(CurrentMontage);
 
-	FName m_Anim;
-
 	// 現在のモンタージュが再生中かどうかを確認
 	if (CurrentSection == m_Anim) { return; }
-	else if (m_Anim == "Walk")		//歩きのアニメーション再生
-	{
-		// 新しいモンタージュを再生
-		AnimInstance->Montage_Play(MontageToPlay);
-		AnimInstance->Montage_JumpToSection(FName("Walk"), MontageToPlay);
-	}
-	else if (m_Anim == "Attack")		//攻撃のアニメーション再生
-	{
-		// 新しいモンタージュを再生
-		AnimInstance->Montage_Play(MontageToPlay, 1.5f);
-		AnimInstance->Montage_JumpToSection(FName("Attack"), MontageToPlay);
-	}
+	// 新しいモンタージュを再生
+	AnimInstance->Montage_Play(MontageToPlay);
+	AnimInstance->Montage_JumpToSection(m_Anim, MontageToPlay);
 }
 
 void USmithAnimationComponent::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)

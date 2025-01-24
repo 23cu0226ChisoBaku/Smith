@@ -6,9 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
-
-
-
 #include "SmithAnimationComponent.generated.h"
 
 
@@ -32,14 +29,15 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// アニメーション管理
-	void AnimManager();
+	void SwitchAnimState(FName);
 
 	// アニメーションモンタージュの終了を検知するためのデリゲート
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-
+	UPROPERTY(VisibleAnywhere)
 	UAnimMontage* MontageToPlay;
+	UPROPERTY(VisibleAnywhere)
 	UAnimInstance* AnimInstance;
 
 	UPROPERTY(EditAnywhere)
