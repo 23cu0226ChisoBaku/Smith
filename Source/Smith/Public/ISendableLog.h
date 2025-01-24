@@ -4,13 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "IEnhanceable.generated.h"
-
-class IParamAbsorbable;
+#include "ISendableLog.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UEnhanceable : public UInterface
+class USendableLog : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -18,11 +16,12 @@ class UEnhanceable : public UInterface
 /**
  * 
  */
-class SMITH_API IEnhanceable
+class SMITH_API ISendableLog
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Upgrade(IParamAbsorbable*) = 0;
+	virtual	FString GetName() = 0;
+	virtual FColor GetColor() = 0;
 };

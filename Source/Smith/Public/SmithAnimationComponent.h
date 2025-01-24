@@ -4,9 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
+
+
+
 #include "SmithAnimationComponent.generated.h"
 
-class UMeshComponent;
+
+class USkeltalMeshComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SMITH_API USmithAnimationComponent : public UActorComponent
@@ -24,6 +30,13 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	// アニメーション管理
+	void AnimManager();
+
+	// アニメーションモンタージュの終了を検知するためのデリゲート
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 
 	UAnimMontage* MontageToPlay;

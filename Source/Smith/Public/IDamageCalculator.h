@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "IEnhanceable.generated.h"
+#include "IDamageCalculator.generated.h"
 
-class IParamAbsorbable;
+struct ParamHandle;
+struct DamageHandle;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UEnhanceable : public UInterface
+class UDamageCalculator : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -18,11 +19,11 @@ class UEnhanceable : public UInterface
 /**
  * 
  */
-class SMITH_API IEnhanceable
+class SMITH_API IDamageCalculator
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Upgrade(IParamAbsorbable*) = 0;
+	virtual DamageHandle CalculateDamage(ParamHandle attacker, ParamHandle defender) const = 0;
 };

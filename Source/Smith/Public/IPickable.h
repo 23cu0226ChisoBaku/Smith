@@ -4,13 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "IEnhanceable.generated.h"
+#include "IPickable.generated.h"
 
-class IParamAbsorbable;
-
+class ICanPick;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UEnhanceable : public UInterface
+class UPickable : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -18,11 +17,12 @@ class UEnhanceable : public UInterface
 /**
  * 
  */
-class SMITH_API IEnhanceable
+class SMITH_API IPickable
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Upgrade(IParamAbsorbable*) = 0;
+	virtual void OnPick(ICanPick*) = 0;
+	virtual FString GetPickType() const = 0;
 };
