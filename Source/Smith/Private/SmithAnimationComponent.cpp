@@ -20,8 +20,8 @@ void USmithAnimationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//MontageToPlay = LoadObject<UAnimMontage>(nullptr, objectPass);
-	//AnimInstance = GetMesh()->GetAnimInstance();
+	MontageToPlay = LoadObject<UAnimMontage>(nullptr, objectPass);
+	AnimInstance = GetMesh()->GetAnimInstance();
 	
 }
 
