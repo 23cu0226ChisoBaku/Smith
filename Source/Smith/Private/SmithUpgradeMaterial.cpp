@@ -15,6 +15,8 @@ USmithUpgradeMaterial::USmithUpgradeMaterial(const FObjectInitializer& ObjectIni
 void USmithUpgradeMaterial::BeginDestroy()
 {
   Super::BeginDestroy();
+
+  MDebug::LogError("Upgrade Material Destroy");
 }
 
 FParams USmithUpgradeMaterial::GetParam()

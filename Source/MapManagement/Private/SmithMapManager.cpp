@@ -132,6 +132,16 @@ namespace UE::Smith
           m_mapOperator->AssignMap(m_model, constructionBP.OriginCoordinate, constructionBP.TileSize);
           m_deployDirector->AssignMap(m_model);
           m_mapObserver->AssignMap(m_model, constructionBP.OriginCoordinate, constructionBP.TileSize);
+
+          for (auto& event : m_mapEvents)
+          {
+            if (IS_UINTERFACE_VALID(event))
+            {
+              event->DiscardEvent();
+            }
+          }
+
+          m_mapEvents.Reset();
         }
         void InitMapObjs(UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
         {
@@ -206,6 +216,11 @@ namespace UE::Smith
         void DeployEvent(ISmithMapEvent* mapEvent, uint8 x, uint8 y)
         {
           m_deployDirector->DeployEvent(mapEvent, x, y);
+          
+          if (IS_UINTERFACE_VALID(mapEvent))
+          {
+            m_mapEvents.Emplace(mapEvent);
+          }
         }
         void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
         {
@@ -253,7 +268,7 @@ namespace UE::Smith
         TUniquePtr<FSmithMapObserver> m_mapObserver;
         TSharedPtr<Model> m_model;
         TSharedPtr<FSmithMap> m_map;
-        TArray<const ISmithMapEvent*> m_mapEvents;
+        TArray<ISmithMapEvent*> m_mapEvents;
     };
     FSmithMapManager::FSmithMapManager()
       : m_pImpl(::MakeUnique<MapMgrImpl>())

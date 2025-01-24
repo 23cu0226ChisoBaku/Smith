@@ -153,6 +153,8 @@ void ASmithPlayerActor::BeginPlay()
 			Weapon->SetParam(FParams{50, 10, 10, 10});
 		}
 	}
+	
+	Weapon->Rename(nullptr, this);
 
 	{
 		m_hp += Weapon->GetParam().HP;

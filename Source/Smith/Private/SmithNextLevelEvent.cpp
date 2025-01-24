@@ -19,7 +19,7 @@ void USmithNextLevelEvent::BeginDestroy()
   {
     m_eventAppearance->Destroy();
   }
-
+  MDebug::LogError("Next level event destroy");
   Super::BeginDestroy();
 }
 

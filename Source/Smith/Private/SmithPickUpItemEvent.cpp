@@ -16,7 +16,6 @@ USmithPickUpItemEvent::USmithPickUpItemEvent(const FObjectInitializer& ObjectIni
 void USmithPickUpItemEvent::BeginDestroy()
 {
   Super::BeginDestroy();
-  DiscardEvent();
 }
 
 void USmithPickUpItemEvent::InitializeEvent(const FVector& location)
@@ -84,6 +83,7 @@ void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearan
 
   m_pickable = pickable;
   m_pickableObject = pickable->_getUObject();
+  m_pickableObject->Rename(nullptr, this);
   m_pickableAppearence = appearance;
 
   if (m_pickableAppearence != nullptr)

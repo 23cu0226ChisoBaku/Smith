@@ -80,7 +80,7 @@ private:
 	TObjectPtr<USmithMoveDirector> m_moveDirector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = DropItemTable, meta = (AllowPrivateAccess = "true"))
-	TMap<FString,TObjectPtr<USmithPickable>> DropUpgradeTable; 
+	TArray<TObjectPtr<USmithPickable>> DropUpgradeTable; 
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))

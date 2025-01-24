@@ -84,11 +84,12 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
     {
       if (DropUpgradeTable.Num() > 0)
       {
-        const auto& tableArray = DropUpgradeTable.Array();
-        m_eventMediator->PublishPickUpEvent(this, tableArray[0].Value);
+        m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[0]);
+        DropUpgradeTable.RemoveAt(0);
       }
     }
     Destroy();
+    DropUpgradeTable.Reset();
   }
 }
 

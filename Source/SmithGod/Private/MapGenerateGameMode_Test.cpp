@@ -157,6 +157,8 @@ void AMapGenerateGameMode_Test::startNewLevel()
       }
     }
   }
+
+  m_eventSystem->Reset();
 }
 
 void AMapGenerateGameMode_Test::clearCurrentLevel()
