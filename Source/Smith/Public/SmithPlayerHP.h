@@ -4,24 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "HPWidget.generated.h"
-
-class UProgressBar;
+#include "SmithPlayerHP.generated.h"
 
 /**
  *
  */
 UCLASS()
-class SMITH_API UHPWidget : public UUserWidget
+class SMITH_API USmithPlayerHP : public UUserWidget
 {
 	GENERATED_BODY()
 
-protected:
-	virtual void NativeConstruct() override;
-
 public:
 	void SetHP(float);
+	
+public:
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateHP();
 
-private:
-	UProgressBar* m_progressBar;
+public:
+	UPROPERTY(BluePrintReadOnly)
+	float percent;
 };

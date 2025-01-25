@@ -10,9 +10,9 @@ void UHPWidget::NativeConstruct()
   m_progressBar = nullptr;
 }
 
-void UHPWidget::SetHP(UUserWidget* widget,float percent)
+void UHPWidget::SetHP(float percent)
 {
-  m_progressBar = Cast<UProgressBar>(widget);
+  m_progressBar = Cast<UProgressBar>(this);
   if(m_progressBar != nullptr)
   {
     m_progressBar->SetPercent(percent);
