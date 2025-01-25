@@ -22,6 +22,7 @@ class SMITH_API IMoveable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Move() = 0;
+	virtual void Move(float deltaTime) = 0;
 	virtual void SetDestination(FVector) = 0;
+	virtual bool IsReachDestination() const = 0;
 };

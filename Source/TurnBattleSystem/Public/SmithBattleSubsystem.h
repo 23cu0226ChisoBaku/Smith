@@ -71,4 +71,5 @@ private:
 	FDelegateHandle m_endDelegateHandle;
 	ETurnPriority m_curtTurn;
 	uint8 m_bCanExecuteCmd : 1;
+	uint8 m_bIsInitialized : 1 = false;
 };

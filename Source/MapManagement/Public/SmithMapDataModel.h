@@ -77,6 +77,8 @@ namespace UE::Smith
         TMap<TWeakInterfacePtr<ICanSetOnMap>, FMapCoord> OnMapObjsCoordTable;
         TMap<FMapCoord, TSharedPtr<FObstacleTileInfoContainer>> ObstacleTable;
         TMap<FMapCoord, TSharedPtr<FStaySpaceTileInfoContainer>> StaySpaceTable;
+				FVector OriginWorldCoord;
+				int32 MapTileSize;
 		};
 	}
 }

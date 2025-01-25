@@ -14,10 +14,10 @@ ASmithEnemy::ASmithEnemy()
   SetTurnPriority(ETurnPriority::Rival);
   PrimaryActorTick.bCanEverTick = false;
 
-  m_moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno Enemy Move Component"));
-  check((m_moveComp != nullptr));
+ m_moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno Enemy Move Component"));
+ check((m_moveComp != nullptr));
 
-  m_moveComp->SetMoveSpeed(250.0f);
+  //m_moveComp->SetMoveSpeed(250.0f);
   MOVE_DISTANCE = 100.0f;
 
   m_attackComp = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Konno Enemy Attack Component"));

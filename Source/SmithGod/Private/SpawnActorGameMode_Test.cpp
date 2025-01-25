@@ -31,13 +31,10 @@ void ASpawnActorGameMode_Test::StartPlay()
 
   // バトルシステム初期化
   USmithBattleSubsystem* subsys = GetWorld()->GetSubsystem<USmithBattleSubsystem>();
-  if (subsys != nullptr)
-  {
-    //subsys->StartBattle();
-  }
-  else
+  if (subsys == nullptr)
   {
     UE_LOG(LogTemp, Warning, TEXT("Can not init Battle System"));
+    return;
   }
 
   m_battleMediator = NewObject<USmithBattleMediator>();

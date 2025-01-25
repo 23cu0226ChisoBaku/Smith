@@ -27,6 +27,8 @@ namespace UE::Smith
       , OnMapObjsCoordTable{}
       , ObstacleTable{}
       , StaySpaceTable{}
+      , OriginWorldCoord(FVector::ZeroVector)
+      , MapTileSize(0)
     { }
 
     FSmithMapDataModel::~FSmithMapDataModel()
@@ -41,6 +43,8 @@ namespace UE::Smith
       , OnMapObjsCoordTable(::MoveTemp(other.OnMapObjsCoordTable))
       , ObstacleTable(::MoveTemp(other.ObstacleTable))
       , StaySpaceTable(::MoveTemp(other.StaySpaceTable))
+      , OriginWorldCoord(::MoveTemp(other.OriginWorldCoord))
+      , MapTileSize(other.MapTileSize)
     { }
 
     FSmithMapDataModel& FSmithMapDataModel::operator=(FSmithMapDataModel&& other) noexcept
@@ -51,6 +55,8 @@ namespace UE::Smith
         OnMapObjsCoordTable = ::MoveTemp(other.OnMapObjsCoordTable);
         ObstacleTable = ::MoveTemp(other.ObstacleTable);
         StaySpaceTable = ::MoveTemp(other.StaySpaceTable);
+        OriginWorldCoord = ::MoveTemp(other.OriginWorldCoord);
+        MapTileSize = other.MapTileSize;
       }
 
       return *this;
