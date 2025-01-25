@@ -44,6 +44,7 @@ class USmithMoveComponent;
 class USmithAttackComponent;
 class USmithInventoryComponent;
 class USmithAnimationComponent;
+class UHPUIComponent;
 
 // Unreal Enhanced Input
 class UInputMappingContext;
@@ -215,6 +216,9 @@ private:
 	TObjectPtr<USmithInventoryComponent> InventoryComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USmithAnimationComponent> AnimationComponent;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UHPUIComponent> HPComponent;
+
 
 	// Enhanced Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
@@ -252,6 +256,9 @@ private:
 	TWeakInterfacePtr<IEnhanceSystem> m_enhanceSystem;
 #pragma endregion UProperties
 // end of UProperties
+
+public:
+	TDelegate<void()> OnDead;
 //---------------------------------------
 /*
             プライベートプロパティ
@@ -260,7 +267,8 @@ private:
 // Private Properties
 #pragma region Private Properties
 private:
-	int32 m_hp;
+	int32 m_curtHP;
+	int32 m_maxHP;
 	float m_rotateSpeed;
 	int32 m_rotatingDirection;
 	EDir_Test m_camDir;

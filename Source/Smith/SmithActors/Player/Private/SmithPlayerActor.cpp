@@ -29,6 +29,9 @@
 #include "SmithHPItem.h"
 #include "SmithUpgradeMaterial.h"
 
+#include "HPUIComponent.h"
+#include "SmithPlayerHP.h"
+
 #include "SmithWeapon.h"
 
 #include "MLibrary.h"
@@ -66,7 +69,8 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, AnimationComponent(nullptr)
 	, m_commandMediator(nullptr)
 	, m_enhanceSystem(nullptr)
-	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
+	, m_curtHP(0)
+	, m_maxHP(SmithPlayerActor::Private::PlayerHP_Temp)
 	, m_rotateSpeed(720.0f)
 	, m_rotatingDirection(0)
 	, m_camDir(North)
@@ -116,6 +120,8 @@ ASmithPlayerActor::ASmithPlayerActor()
 	AnimationComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("Smith AnimationComponent"));
 	check(AnimationComponent != nullptr);
 
+	HPComponent = CreateDefaultSubobject<UHPUIComponent>(TEXT("HP UI Component"));
+	check(HPComponent != nullptr);
 }
 
 // Called when the game starts or when spawned
@@ -162,8 +168,17 @@ void ASmithPlayerActor::BeginPlay()
 	Weapon->Rename(nullptr, this);
 
 	{
-		m_hp += Weapon->GetParam().HP;
+		m_maxHP += Weapon->GetParam().HP;
+		m_curtHP = m_maxHP;
+
+		if (HPComponent != nullptr)
+		{
+			HPComponent->CreateHP(playerCtrl);
+			HPComponent->SetHP(1.0f);
+		}
 	}
+
+	
 
 }
 
@@ -178,8 +193,9 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// HPがなくなったらTickを停める
-	if (m_hp <= 0)
+	if (m_curtHP <= 0)
 	{
+
 		PrimaryActorTick.bCanEverTick = false;
 		return;
 	}
@@ -487,17 +503,29 @@ void ASmithPlayerActor::enhanceImpl()
 
 void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 {
-	m_hp -= attack.AttackPower;
+	if (attack.AttackPower <= 0)
+	{
+		return;
+	}
+	
+	m_curtHP -= attack.AttackPower;
+	if (HPComponent != nullptr && m_maxHP > 0)
+	{
+		const float curtHPPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
+		HPComponent->SetHP(curtHPPercentage);
+	}
 
 	FString msg{};
 	msg.Append(GetName());
 	msg.Append(TEXT(" left HP:"));
-	msg.Append(FString::FromInt(m_hp));
+	msg.Append(FString::FromInt(m_curtHP));
 	MDebug::LogError(msg);
 
-	if (m_hp <= 0)
+	if (m_curtHP <= 0)
 	{
 		MDebug::LogError(TEXT("Player is dead"));
+
+		OnDead.ExecuteIfBound();
 
 		UWorld* world = GetWorld();
 		if (::IsValid(world))
@@ -556,6 +584,7 @@ void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 	}
 
 	MDebug::Log("Player TRIGGERED pick up item event");
+
 }
 
 void ASmithPlayerActor::PickUpConsume(USmithConsumeItem* consume)
