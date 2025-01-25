@@ -51,7 +51,7 @@ namespace UE::Smith::Command
       {
         if (m_animator.IsValid())
         {
-          m_animator->SwitchAnimation(SMITH_ANIM_IDLE);
+          m_animator->SwitchAnimationDelay(SMITH_ANIM_IDLE, 0.2f);
         }
       }
       bool IsFinish() const

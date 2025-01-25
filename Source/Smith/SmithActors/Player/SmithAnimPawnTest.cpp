@@ -68,6 +68,11 @@ void ASmithAnimPawnTest::SwitchAnimation(uint8 animationState)
 	AnimationComp->SwitchAnimState(StateName,0);
 }
 
+void ASmithAnimPawnTest::SwitchAnimationDelay(uint8, float)
+{
+	
+}
+
 void ASmithAnimPawnTest::UpdateAnimation(float deltaTime)
 {
 

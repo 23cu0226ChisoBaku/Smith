@@ -160,9 +160,12 @@ public:
 
 	public:
 		void SwitchAnimation(uint8 animationState) override final;
+		void SwitchAnimationDelay(uint8 animationState, float delay) override final;
 		void UpdateAnimation(float deltaTime) override final;
 		bool IsAnimationFinish() const override final;
-		
+	
+	private:
+		void convertAnimState(uint8 animationState, FName& outName, float& outDurationTime);
 	public:
 		void SetEnhanceSystem(IEnhanceSystem*);
 

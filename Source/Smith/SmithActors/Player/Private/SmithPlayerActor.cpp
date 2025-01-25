@@ -587,32 +587,24 @@ void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
 		return;
 	}
 
-	using namespace UE::Smith;
 	FName StateName;
 	float durationTime;
+	convertAnimState(animationState, StateName, durationTime);
 
-	switch (animationState)
-	{
-	case SMITH_ANIM_IDLE:
-		StateName = TEXT("Idle");
-		break;
-	case	SMITH_ANIM_WALK:
-		StateName = TEXT("Walk");
-		break;
-	case SMITH_ANIM_ATTACK:
-		StateName = TEXT("Attack");
-		durationTime = 1.0f;
-		break;
-	case SMITH_ANIM_DAMAGED:
-		StateName = TEXT("Damaged");
-		break;
-	case SMITH_ANIM_DEAD:
-		StateName = TEXT("Dead");
-		break;
-	default:
-		break;
-	}
 	AnimationComponent->SwitchAnimState(StateName, durationTime);
+}
+
+void ASmithPlayerActor::SwitchAnimationDelay(uint8 animationState, float delay)
+{
+	if (AnimationComponent == nullptr)
+	{
+		return;
+	}
+
+	FName StateName;
+	float dummy;
+	convertAnimState(animationState, StateName, dummy);
+	AnimationComponent->SwitchAnimStateDelay(StateName, delay);
 }
 
 void ASmithPlayerActor::UpdateAnimation(float deltaTime)
@@ -628,4 +620,33 @@ void ASmithPlayerActor::UpdateAnimation(float deltaTime)
 bool ASmithPlayerActor::IsAnimationFinish() const
 {
 	return AnimationComponent == nullptr ? true : AnimationComponent->IsCurrentAnimationFinish();
+}
+
+void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName, float& outDurationTime)
+{
+	using namespace UE::Smith;
+	outName = TEXT("");
+	outDurationTime = 0.0f;
+
+	switch (animationState)
+	{
+		case SMITH_ANIM_IDLE:
+			outName = TEXT("Idle");
+			break;
+		case	SMITH_ANIM_WALK:
+			outName = TEXT("Walk");
+			break;
+		case SMITH_ANIM_ATTACK:
+			outName = TEXT("Attack");
+			outDurationTime = 1.0f;
+			break;
+		case SMITH_ANIM_DAMAGED:
+			outName = TEXT("Damaged");
+			break;
+		case SMITH_ANIM_DEAD:
+			outName = TEXT("Dead");
+			break;
+		default:
+			break;
+	}
 }
