@@ -43,8 +43,8 @@ protected:
 	TObjectPtr<USmithMoveComponent> m_moveComp;
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_attackComp;
-	// UPROPERTY()
-	// TObjectPtr<UHPWidgetComponent> m_hpComp;
+	UPROPERTY()
+	TObjectPtr<UHPWidgetComponent> m_hpComp;
 
 protected:
 	// 数を整数値にする//

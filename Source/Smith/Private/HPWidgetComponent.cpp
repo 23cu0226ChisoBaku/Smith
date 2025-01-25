@@ -7,23 +7,22 @@
 
 UHPWidgetComponent::UHPWidgetComponent()
 {
-  m_widget = NewObject<UHPWidget>();
-
-  if(m_widget == nullptr)
-  {
-    MDebug::LogError(TEXT("HPWidgetが生成できない"));
-  }
+  // WidgetClass = UHPWidget::StaticClass();
+  // Space = (EWidgetSpace)1;
+  // if(WidgetClass == nullptr)
+  // {
+  //   MDebug::LogError(TEXT("HPWidgetが生成できない"));
+  // }
 }
-
 void UHPWidgetComponent::SetHP(float percent)
 {
-  UUserWidget* widget = Cast<UUserWidget>(m_widget);
-  if(widget != nullptr)
-  {
-    m_widget->SetHP(widget,percent);
-  }
-  else
-  {
-    MDebug::LogError(TEXT("UserWidgetにキャスト失敗"));
-  }
+  // if(WidgetClass == UHPWidget::StaticClass())
+  // {
+  //   //ここでHPのセットをしたい。
+  //   //WidgetClass->SetHP(percent);
+  // }
+  // else
+  // {
+  //   MDebug::LogError(TEXT("UserWidgetにキャスト失敗"));
+  // }
 }
