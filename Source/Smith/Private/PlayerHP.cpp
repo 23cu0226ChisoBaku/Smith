@@ -2,6 +2,8 @@
 
 
 #include "PlayerHP.h"
+#include "Blueprint/UserWidget.h"
+#include "HPUIComponent.h"
 #include "Debug.h"
 
 APlayerHP::APlayerHP()
@@ -56,7 +58,7 @@ void APlayerHP::OnHP()
 	if(m_currentHp <= 0)
 	{
 		MDebug::LogError(TEXT("HP減らせないよ"));
-		m_hpComp->SetUIHP(m_widget,0.0f);
+		m_hpComp->SetHP(0.0f);
 		return;
 	}
 
@@ -67,5 +69,5 @@ void APlayerHP::OnHP()
 	}
 
 	float percent = (float)m_currentHp / (float)m_maxHp;
-	m_hpComp->SetUIHP(m_widget,percent);
+	m_hpComp->SetHP(percent);
 }

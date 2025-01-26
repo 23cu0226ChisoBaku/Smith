@@ -4,6 +4,7 @@
 #include "HPUIComponent.h"
 #include "Components/ProgressBar.h"
 #include "SmithPlayerHP.h"
+#include "Kismet/GameplayStatics.h"
 #include "Debug.h"
 
 // Sets default values for this component's properties
@@ -12,6 +13,7 @@ UHPUIComponent::UHPUIComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
+
 
 	// ...
 }
@@ -23,7 +25,7 @@ void UHPUIComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+
 }
 
 
@@ -35,17 +37,50 @@ void UHPUIComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	// ...
 }
 
-void UHPUIComponent::SetUIHP(UUserWidget* widget,float percent)
+void UHPUIComponent::CreateHP(APlayerController* playerCtrl)
 {
-	USmithPlayerHP* hp = Cast<USmithPlayerHP>(widget);
-	if(hp != nullptr)
+	if (m_playerHPWidget != nullptr)
 	{
-		hp->SetHP(percent);
-		MDebug::LogError(TEXT("キャスト成功"));
+		return;
 	}
-	else
+
+	if (!::IsValid(playerCtrl))
 	{
-		MDebug::LogError(TEXT("キャスト失敗"));
+		return;
 	}
+
+	AActor* owner = GetOwner();
+	if (owner == StaticCast<AActor*>(playerCtrl->GetPawn()))
+	{
+		if (HPWidgetSubclass == nullptr)
+		{
+			HPWidgetSubclass = TSoftClassPtr<UUserWidget>(FSoftObjectPath("/Game/TestLevel/BP/BP_SmithPlayerHP.BP_SmithPlayerHP_C")).LoadSynchronous();
+		}
+
+		m_playerHPWidget = CreateWidget<USmithPlayerHP>(GetWorld(), HPWidgetSubclass, TEXT("Player HP UI"));
+		check(m_playerHPWidget != nullptr);
+
+		m_playerHPWidget->AddToViewport();
+	}
+	
+}
+
+void UHPUIComponent::SetHP(float percentage)
+{
+	if(m_playerHPWidget != nullptr)
+	{
+		m_playerHPWidget->SetHP(percentage);
+	}
+}
+
+void UHPUIComponent::SetWidgetVisibility(bool bIsVisible)
+{
+	if (m_playerHPWidget == nullptr)
+	{
+		return;
+	}
+
+	ESlateVisibility visibility = bIsVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	m_playerHPWidget->SetVisibility(visibility);
 }
 

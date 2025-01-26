@@ -12,7 +12,9 @@
 				"Engine",
 				"CoreUObject",
 				"AIModule",
-				"UMG"
+				"UMG",
+				"Slate",
+				"SlateCore"
 			]
 		},
 		{
