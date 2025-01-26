@@ -7,6 +7,9 @@
 #include "IAttackable.h"
 #include "ICanSetOnMap.h"
 #include "IMoveDirector.h"
+
+#include "ISmithAnimator.h"
+
 #include "ISmithSimpleAIDriven.h"
 #include "MapObjType.h"
 #include "../Weapon/Params.h"
@@ -21,13 +24,15 @@ class USmithAttackComponent;
 class USmithMoveComponent;
 class USmithMoveDirector;
 class USmithPickable;
+
+class USmithAnimationComponent;
 /**
  * 
  */
 UCLASS()
 class SMITH_API ATurnActor_Test final: 	public ATurnBaseActor, public IAttackable, 
 																				public ICanSetOnMap, public IMoveDirector, 
-																				public ISmithSimpleAIDriven, public ICanRequestEventPublishment
+																				public ISmithSimpleAIDriven, public ICanRequestEventPublishment,public ISmithAnimator
 {
 	GENERATED_BODY()
 
@@ -55,6 +60,10 @@ public:
 	uint8 GetChaseRadius() const override final;
 	void SetEventPublishMediator(IEventPublishMediator*) override;
 
+	void SwitchAnimation(uint8 animationState) override;
+	void UpdateAnimation(float deltaTime) override;
+	bool IsAnimationFinish() const override;
+
 private:
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
@@ -66,6 +75,8 @@ private:
 	TObjectPtr<USmithAttackComponent> m_atkComponent;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USmithMoveComponent> MoveComponent;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USmithAnimationComponent> AnimComponent;
 
 		// Attack Format
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
