@@ -93,8 +93,8 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 		{
 			if (DropUpgradeTable.Num() > 0)
 			{
-				m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[0]);
-				DropUpgradeTable.RemoveAt(0);
+        int32 idx = FMath::RandRange(0, DropUpgradeTable.Num() - 1);
+				m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[idx]);
 			}
 		}
 		Destroy();

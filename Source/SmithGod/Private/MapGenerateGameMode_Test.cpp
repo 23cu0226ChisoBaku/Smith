@@ -42,11 +42,7 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   , m_eventMediator(nullptr)
   , m_mapMgr(nullptr)
 {
-  static ConstructorHelpers::FClassFinder<APawn> PlayerBP(TEXT("/Game/BP/BP_TestMapGeneratePawn"));
-  if (PlayerBP.Class != nullptr)
-  {
-    DefaultPawnClass = PlayerBP.Class;
-  }
+
 }
 
 void AMapGenerateGameMode_Test::StartPlay()

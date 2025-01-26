@@ -695,7 +695,6 @@ void ASmithPlayerActor::PickUpConsume(USmithConsumeItem* consume)
 
 void ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
 {
-	MDebug::LogError(FString::FromInt((int64)upgrade));
 	if (!::IsValid(upgrade))
 	{
 		MDebug::LogError("can not pick --- material invalid");

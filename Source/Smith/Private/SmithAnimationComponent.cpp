@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "SmithAnimationComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
-#include "SmithAnimationComponent.h"
 #include "Debug.h"
 
 // Sets default values for this component's properties
@@ -97,8 +97,6 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName, float animat
 
 		SetComponentTickEnabled(false);
 	}
-
-	MDebug::LogError(nextStateName.ToString());
 
 	AnimInstance->Montage_Play(MontageToPlay);
 	AnimInstance->Montage_JumpToSection(nextStateName, MontageToPlay);

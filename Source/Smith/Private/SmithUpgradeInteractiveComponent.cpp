@@ -92,13 +92,11 @@ void USmithUpgradeInteractiveComponent::SelectNextItem(ESelectDirection directio
 	{
 		case ESelectDirection::Up:
 		{
-			MDebug::Log("Up");
 			m_upgradeWidget->SelectUp();
 		}
 		break;
 		case ESelectDirection::Down:
 		{
-			MDebug::Log("Down");
 			m_upgradeWidget->SelectDown();
 		}
 		break;

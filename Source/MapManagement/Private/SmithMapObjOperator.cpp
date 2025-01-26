@@ -394,7 +394,6 @@ namespace UE::Smith
                 ISmithMapEvent* event = model_shared->StaySpaceTable[fillTileCoord]->GetEvent();
                 if (IS_UINTERFACE_VALID(event))
                 {
-                  MDebug::LogWarning("Register Event");
                   m_eventRegister->RegisterMapEvent(mapObj, event);
                 }
               }

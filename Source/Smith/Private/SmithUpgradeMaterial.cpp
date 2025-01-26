@@ -16,8 +16,6 @@ void USmithUpgradeMaterial::BeginDestroy()
 {
   Super::BeginDestroy();
 
-  MDebug::LogError("Upgrade Material Destroy");
-  MDebug::LogError(FString::FromInt((int64)this));
 }
 
 FParams USmithUpgradeMaterial::GetParam()
