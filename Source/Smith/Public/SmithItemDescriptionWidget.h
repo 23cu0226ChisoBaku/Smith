@@ -10,7 +10,7 @@ class UTextBlock;
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class SMITH_API USmithItemDescriptionWidget : public UUserWidget
 {
 	GENERATED_BODY()
@@ -24,6 +24,7 @@ protected:
 
 public:
 	void SetItemInformation(const FString& ItemName, const FString& ItemDescription);
+	void ResetWidget();
 
 private:
 	UPROPERTY(meta = (BindWidget))

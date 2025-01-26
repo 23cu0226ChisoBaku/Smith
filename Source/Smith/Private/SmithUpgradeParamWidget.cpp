@@ -19,6 +19,7 @@ USmithUpgradeParamWidget::USmithUpgradeParamWidget(const FObjectInitializer& Obj
 void USmithUpgradeParamWidget::NativeConstruct()
 { 
   Super::NativeConstruct();
+  ResetWidget();
 }
 
 void USmithUpgradeParamWidget::UpdateParam(FParams newParam)
@@ -36,5 +37,23 @@ void USmithUpgradeParamWidget::UpdateParam(FParams newParam)
   HealthPointTextBlock->SetText(FText::FromString(healthText));
   AttackPowerTextBlock->SetText(FText::FromString(attackText));
   CriticalTextBlock->SetText(FText::FromString(criticalText));
+}
+
+void USmithUpgradeParamWidget::ResetWidget()
+{
+  if (HealthPointTextBlock != nullptr)
+  {
+    HealthPointTextBlock->SetText(FText{});
+  }
+  if (AttackPowerTextBlock != nullptr)
+  {
+    AttackPowerTextBlock->SetText(FText{});
+  }
+  if (CriticalTextBlock != nullptr)
+  {
+    CriticalTextBlock->SetText(FText{});
+  }
+
+  
 }
 

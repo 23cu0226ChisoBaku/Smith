@@ -19,6 +19,7 @@ class SMITH_API USmithUpgradeParamWidget : public UUserWidget
 public:
 	USmithUpgradeParamWidget(const FObjectInitializer&);
 	void UpdateParam(FParams);
+	void ResetWidget();
 protected:
 	virtual void NativeConstruct() override;
 

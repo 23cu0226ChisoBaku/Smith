@@ -73,3 +73,14 @@ void UHPUIComponent::SetHP(float percentage)
 	}
 }
 
+void UHPUIComponent::SetWidgetVisibility(bool bIsVisible)
+{
+	if (m_playerHPWidget == nullptr)
+	{
+		return;
+	}
+
+	ESlateVisibility visibility = bIsVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	m_playerHPWidget->SetVisibility(visibility);
+}
+

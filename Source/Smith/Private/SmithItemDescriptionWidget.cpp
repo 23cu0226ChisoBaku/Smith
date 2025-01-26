@@ -12,20 +12,12 @@ void USmithItemDescriptionWidget::NativeConstruct()
 {
   Super::NativeConstruct();
   
-  if (ItemNameTextBlock != nullptr)
-  {
-    ItemNameTextBlock->SetText(FText::FromString(TEXT("アイテム名")));
-  }
-
-  if (ItemDescriptionTextBlock != nullptr)
-  {
-    ItemNameTextBlock->SetText(FText::FromString(TEXT("アイテム説明")));
-  }
+  ResetWidget();
 }
 
 void USmithItemDescriptionWidget::NativeDestruct()
 {
-
+  Super::NativeDestruct();
 }
 
 void USmithItemDescriptionWidget::SetItemInformation(const FString& ItemName, const FString& ItemDescription)
@@ -38,5 +30,18 @@ void USmithItemDescriptionWidget::SetItemInformation(const FString& ItemName, co
   if (ItemDescriptionTextBlock != nullptr)
   {
     ItemDescriptionTextBlock->SetText(FText::FromString(ItemDescription));
+  }
+}
+
+void USmithItemDescriptionWidget::ResetWidget()
+{
+  if (ItemNameTextBlock != nullptr)
+  {
+    ItemNameTextBlock->SetText(FText());
+  }
+
+  if (ItemDescriptionTextBlock != nullptr)
+  {
+    ItemDescriptionTextBlock->SetText(FText());
   }
 }

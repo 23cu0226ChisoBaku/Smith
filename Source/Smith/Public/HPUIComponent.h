@@ -28,6 +28,7 @@ public:
 public:
 	void CreateHP(APlayerController*);
 	void SetHP(float percentage);
+	void SetWidgetVisibility(bool bIsVisible);
 
 private:
 	UPROPERTY(EditAnywhere)

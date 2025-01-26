@@ -6,7 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "SmithItemInformationWindow.generated.h"
 
-class UVerticalBox;
+class USmithItemDescriptionWidget;
+class USmithUpgradeParamWidget;
+struct FParams;
 /**
  * 
  */
@@ -15,10 +17,16 @@ class SMITH_API USmithItemInformationWindow : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	void SetDescription(const FString& name, const FString& description);
+	void SetParamText(const FParams&);
+	void ResetWidget();
 protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UVerticalBox> SmithItemInfomationWindow;
+	TObjectPtr<USmithItemDescriptionWidget> SmithItemDescription;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<USmithUpgradeParamWidget> SmithUpgradeParam;
 	
 };

@@ -8,6 +8,7 @@
 
 class UImage;
 class UTextBlock;
+class UTexture2D;
 /**
  * 
  */
@@ -17,6 +18,13 @@ class SMITH_API USmithUpgradeInformationWindow : public UUserWidget
 	GENERATED_BODY()
 public:
 	USmithUpgradeInformationWindow(const FObjectInitializer&);
+
+	void SetEnhancableEquipmentLabel(const FString&);
+	void SetEnhancableEquipmentImage(UTexture2D*);
+	void SetParamAbsorbableMaterialLabel(const FString&);
+	void SetParamAbsorbableMaterialImage(UTexture2D*);
+
+	void ResetWidget();
 
 protected:
 	virtual void NativeConstruct() override;

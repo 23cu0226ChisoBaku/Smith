@@ -17,11 +17,27 @@ class SMITH_API USmithUIInventoryPanel : public UUserWidget
 
 public:
 	USmithUIInventoryPanel(const FObjectInitializer&);
+	void SetEntryItems(const TArray<UObject*>&);
+	void SelectNext();
+	void SelectPrevious();
+	void ResetWidget();
+	int32 GetSelectingItemIdx() const;
+
+private:
+	void OnBeginVisible();
+	void OnItemSelectionChangedInternal(UObject* itemObject);
+	void updateSelecting();
 
 protected:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UListView> InventoryListView;
+
+	int32 m_curtSelectingIdx;
+	int32 m_curtMaxItemNum;
+
+public:
+	TDelegate<void(UObject*)> OnChangeItem;
 	
 };

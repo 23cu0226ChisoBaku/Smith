@@ -19,10 +19,14 @@ class SMITH_API USmithUIInventoryEntry : public UUserWidget, public IUserObjectL
 
 public:
 	USmithUIInventoryEntry(const FObjectInitializer&);
+	void SetSelecting(bool bSelecting);
 
 protected:
 	virtual void NativeOnListItemObjectSet(UObject* listItemObject) override;
+	virtual void NativeOnItemSelectionChanged(bool bIsSelected) override;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> SelectArrow;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> ItemIconImage;
 	UPROPERTY(meta = (BindWidget))

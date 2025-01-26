@@ -45,6 +45,7 @@ class USmithAttackComponent;
 class USmithInventoryComponent;
 class USmithAnimationComponent;
 class UHPUIComponent;
+class USmithUpgradeInteractiveComponent;
 
 // Unreal Enhanced Input
 class UInputMappingContext;
@@ -180,7 +181,8 @@ private:
 	void attackImpl();
 	void changeFwdImpl(EDir_Test);
 	void updateCamImpl(EDir_Test);
-	void enhanceImpl();
+	void enhanceImpl(int32 idx);
+	void switchMenuStateImpl();
 	bool registerAttackFormat(const FString&, const UDataTable*);
 
 private:
@@ -189,7 +191,10 @@ private:
 	void Attack_Input(const FInputActionValue&);
 	void Look_Input(const FInputActionValue&);
 	void Debug_SelfDamage_Input(const FInputActionValue&);
-	void Enhance_Input(const FInputActionValue&);
+	void Menu_Input(const FInputActionValue&);
+	void Menu_Input_Select(const FInputActionValue&);
+	void Menu_Input_Interact(const FInputActionValue&);
+	
 #pragma endregion Private Functions
 // end of Private Functions
 
@@ -218,11 +223,15 @@ private:
 	TObjectPtr<USmithAnimationComponent> AnimationComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHPUIComponent> HPComponent;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USmithUpgradeInteractiveComponent> UpgradeInteractiveComponent;
 
 
 	// Enhanced Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> MappingCtx;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputMappingContext> MappingCtx_Menu;
 	/** 移動インプットアクション */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> MoveAction;
@@ -235,9 +244,12 @@ private:
 	/** デバッグ専用！！ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> DebugAction;
-	/** 強化インプットアクション */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> EnhanceAction;
+	TObjectPtr<UInputAction> MenuAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> SelectMenuAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> InteractMenuAction;
 	
 	/** 攻撃フォーマット */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
@@ -276,6 +288,7 @@ private:
 	uint8 m_bCanMove : 1;
 	uint8 m_bCanAttack : 1;
 	uint8 m_bRotatingCamera : 1;
+	uint8 m_bIsInMenu : 1;
 	
 
 #pragma endregion Private Properties
