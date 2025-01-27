@@ -16,6 +16,9 @@ class USmithEventPublisher;
 class USmithEventSystem;
 class USmithEnhanceSubsystem;
 class USmithEventPublishMediator;
+class USmithBattleLogWorldSubsystem;
+
+class UGameLogWidget;
 
 namespace UE::Smith
 {
@@ -61,6 +64,9 @@ private:
 	FSmithMapConstructionBluePrint MapConstructionBluePrint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint EnemyGenerateBluePrint;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UGameLogWidget> LogWidgetSub;
+
 	UPROPERTY()
 	TObjectPtr<USmithBattleSubsystem> m_battleSystem;
 	UPROPERTY()
@@ -75,6 +81,8 @@ private:
 	TObjectPtr<USmithEnhanceSubsystem> m_enhanceSystem;
 	UPROPERTY()
 	TObjectPtr<USmithEventPublishMediator> m_eventMediator;
+	UPROPERTY()
+	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSubsystem;
 
 	UPROPERTY(EditAnywhere, Category = TEST)
 	TSubclassOf<AActor> TEST_ACTOR;

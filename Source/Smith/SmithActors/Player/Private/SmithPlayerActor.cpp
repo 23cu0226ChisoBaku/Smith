@@ -624,9 +624,12 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 
 	if (m_curtHP <= 0)
 	{
-		MDebug::LogError(TEXT("Player is dead"));
 
 		OnDead.ExecuteIfBound();
+		if (AnimationComponent!= nullptr)
+		{
+			AnimationComponent->SwitchAnimState(TEXT("Dead"), 0.0f);
+		}
 
 		UWorld* world = GetWorld();
 		if (::IsValid(world))
@@ -636,18 +639,26 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 			UGameplayStatics::OpenLevel(world, FName(*(world->GetName())), false);
 			DisableInput(Cast<APlayerController>(Controller));
 		}
-		else
-		{
-			#if WITH_EDITOR
-				if (GEngine != nullptr)
-				{
-					UKismetSystemLibrary::QuitEditor();
-				}		
-			#else
-				//UKismetSystemLibrary::QuitGame();
-			#endif
-		}
 
+		// else
+		// {
+		// 	#if WITH_EDITOR
+		// 		if (GEngine != nullptr)
+		// 		{
+		// 			UKismetSystemLibrary::QuitEditor();
+		// 		}		
+		// 	#else
+		// 		//UKismetSystemLibrary::QuitGame();
+		// 	#endif
+		// }
+	}
+	else
+	{
+		if (AnimationComponent != nullptr)
+		{
+			AnimationComponent->SwitchAnimState(TEXT("Damaged"),0.0f);
+			AnimationComponent->SwitchAnimStateDelay(TEXT("Idle"), 0.5f);
+		}
 	}
 }
 

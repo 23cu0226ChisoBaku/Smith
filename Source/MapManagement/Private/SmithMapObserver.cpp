@@ -358,6 +358,7 @@ namespace UE::Smith
             return false;
           }
 
+          TQueue<int32> a;
           TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared->OnMapObjsCoordTable.Contains(mapObj))
           {

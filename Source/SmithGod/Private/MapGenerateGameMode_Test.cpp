@@ -25,11 +25,16 @@
 #include "IEnhanceSystem.h"
 #include "ICanRequestEventPublishment.h"
 #include "SmithEventPublishMediator.h"
+#include "SmithBattleLogWorldSubsystem.h"
+
+#include "SmithTurnBattleWorldSettings.h"
 
 #include "Kismet/GameplayStatics.h"
 
 #include "SmithPlayerActor.h"
 #include "SmithMapBaseMoveDirector.h"
+
+#include "GameLogWidget.h"
 
 #include "MLibrary.h"
 
@@ -39,7 +44,9 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   , m_eventPublisher(nullptr)
   , m_eventSystem(nullptr)
   , m_chasePlayerTracker(nullptr)
+  , m_enhanceSystem(nullptr)
   , m_eventMediator(nullptr)
+  , m_logSubsystem(nullptr)
   , m_mapMgr(nullptr)
 {
 
@@ -173,45 +180,59 @@ void AMapGenerateGameMode_Test::initializeGame()
 {
   UWorld* world = GetWorld();
   check(world != nullptr);
+  ASmithTurnBattleWorldSettings* worldSettings = Cast<ASmithTurnBattleWorldSettings>(world->GetWorldSettings());
 
-  m_battleSystem = world->GetSubsystem<USmithBattleSubsystem>();
-  check(m_battleSystem != nullptr);
-  
-  m_battleMediator = NewObject<USmithBattleMediator>(this);
-  check((m_battleMediator != nullptr));
+  if (worldSettings != nullptr && worldSettings->IsBattleLevel())
+  {
+    m_battleSystem = world->GetSubsystem<USmithBattleSubsystem>();
+    check(m_battleSystem != nullptr);
+    
+    m_battleMediator = NewObject<USmithBattleMediator>(this);
+    check((m_battleMediator != nullptr));
 
-  m_eventPublisher = NewObject<USmithEventPublisher>(this);
-  check(m_eventPublisher != nullptr);
+    m_eventPublisher = NewObject<USmithEventPublisher>(this);
+    check(m_eventPublisher != nullptr);
 
-  m_eventSystem = NewObject<USmithEventSystem>(this);
-  check(m_eventSystem != nullptr);
+    m_eventSystem = NewObject<USmithEventSystem>(this);
+    check(m_eventSystem != nullptr);
 
-  m_chasePlayerTracker = NewObject<USmithChasePlayerTracker>(this);
-  check(m_chasePlayerTracker != nullptr);
-  
-  m_mapMgr = ::MakeShared<UE::Smith::Map::FSmithMapManager>();
-  check(m_mapMgr.IsValid());
+    m_chasePlayerTracker = NewObject<USmithChasePlayerTracker>(this);
+    check(m_chasePlayerTracker != nullptr);
+    
+    m_mapMgr = ::MakeShared<UE::Smith::Map::FSmithMapManager>();
+    check(m_mapMgr.IsValid());
 
-  m_battleMediator->SetupMediator(m_battleSystem, m_mapMgr);
+    m_battleMediator->SetupMediator(m_battleSystem, m_mapMgr);
 
-  m_mapMgr->AssignEventRegister(m_eventSystem);
-  m_battleSystem->AssignEventExecutor(m_eventSystem);
+    m_mapMgr->AssignEventRegister(m_eventSystem);
+    m_battleSystem->AssignEventExecutor(m_eventSystem);
 
-  m_enhanceSystem = world->GetSubsystem<USmithEnhanceSubsystem>();
-  check(m_enhanceSystem != nullptr);
+    m_enhanceSystem = world->GetSubsystem<USmithEnhanceSubsystem>();
+    check(m_enhanceSystem != nullptr);
 
-  APawn* playerPawn = UGameplayStatics::GetPlayerPawn(world, 0);
-  ICanUseEnhanceSystem* enhanceUser = Cast<ICanUseEnhanceSystem>(playerPawn);
-  check(enhanceUser != nullptr);
-  enhanceUser->SetEnhanceSystem(m_enhanceSystem);
+    APawn* playerPawn = UGameplayStatics::GetPlayerPawn(world, 0);
+    ICanUseEnhanceSystem* enhanceUser = Cast<ICanUseEnhanceSystem>(playerPawn);
+    check(enhanceUser != nullptr);
+    enhanceUser->SetEnhanceSystem(m_enhanceSystem);
 
-  m_eventMediator = NewObject<USmithEventPublishMediator>(this);
-  check(m_eventMediator != nullptr)
+    m_eventMediator = NewObject<USmithEventPublishMediator>(this);
+    check(m_eventMediator != nullptr)
 
-  m_eventMediator->Initialize(m_eventPublisher, m_mapMgr);
-  AActor* actor = world->SpawnActor<AActor>(TEST_ACTOR, FVector::ZeroVector, FRotator::ZeroRotator);
-  check(::IsValid(actor));
-  m_eventMediator->ACTOR_TEST(actor);
+    m_eventMediator->Initialize(m_eventPublisher, m_mapMgr);
+    AActor* actor = world->SpawnActor<AActor>(TEST_ACTOR, FVector::ZeroVector, FRotator::ZeroRotator);
+    check(::IsValid(actor));
+    m_eventMediator->ACTOR_TEST(actor);
+
+    m_logSubsystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
+    check(m_logSubsystem != nullptr);
+
+    if (LogWidgetSub != nullptr)
+    {
+      UGameLogWidget* logWidget = CreateWidget<UGameLogWidget>(world, LogWidgetSub);
+      m_logSubsystem->SetLogWidget(logWidget);
+    }
+  }
+
 }
 
 void AMapGenerateGameMode_Test::goToNextLevel()
