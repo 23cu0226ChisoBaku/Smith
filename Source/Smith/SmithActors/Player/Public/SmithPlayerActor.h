@@ -28,6 +28,7 @@ Encoding : UTF-8
 #include "ICanPick.h"
 #include "ICanUseEnhanceSystem.h"
 #include "ISmithAnimator.h"
+#include "ISmithBattleLogger.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -80,7 +81,7 @@ class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
 																			 , public IAttackable, public ICanCommandMediate
 																			 , public ICanSetOnMap, public IEventTriggerable
 																			 , public ICanUseEnhanceSystem, public ICanPick
-																			 , public ISmithAnimator
+																			 , public ISmithAnimator, public ISmithBattleLogger
 {
 	GENERATED_BODY()
 
@@ -165,6 +166,10 @@ public:
 		void SwitchAnimationDelay(uint8 animationState, float delay) override final;
 		void UpdateAnimation(float deltaTime) override final;
 		bool IsAnimationFinish() const override final;
+
+	public:
+		FString GetName_Log() const override;
+		EBattleLogType GetType_Log() const override;
 	
 	private:
 		void convertAnimState(uint8 animationState, FName& outName, float& outDurationTime);

@@ -4,6 +4,8 @@
 #include "SmithBattleLogWorldSubsystem.h"
 #include "SmithTurnBattleWorldSettings.h"
 #include "GameLogWidget.h"
+#include "ISmithBattleLogger.h"
+#include "ISmithEventLogger.h"
 
 bool USmithBattleLogWorldSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -72,13 +74,26 @@ void USmithBattleLogWorldSubsystem::SetLogWidget(UGameLogWidget* logWidget)
   m_logWidget = logWidget;
   if (m_logWidget != nullptr)
   {
-    m_logWidget->SetVisibility(ESlateVisibility::Hidden);
+    m_logWidget->AddToViewport();
+    //m_logWidget->SetVisibility(ESlateVisibility::Hidden);
   }
 }
 
 void USmithBattleLogWorldSubsystem::SendAttackLog(ISmithBattleLogger* attacker, ISmithBattleLogger* defender)
 {
+  if (m_logWidget == nullptr)
+  {
+    return;
+  }
 
+  if (attacker == nullptr || defender == nullptr)
+  {
+    return;
+  }
+
+  FString resultLog = attacker->GetName_Log() + TEXT("が") + defender->GetName_Log() + TEXT("に攻撃\n");
+  m_logWidget->AddLogMessage(resultLog);
+  m_logWidget->OutPutLog(); 
 }
 
 

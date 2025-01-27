@@ -34,6 +34,8 @@
 #include "ISmithItemWidgetParameterizable.h"
 #include "SmithUpgradeItemHandle.h"
 
+#include "SmithBattleLogWorldSubsystem.h"
+
 #include "MLibrary.h"
 
 namespace SmithPlayerActor::Private
@@ -195,6 +197,13 @@ void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ASmithPlayerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// TODO
+	USmithBattleLogWorldSubsystem* l = GetWorld()->GetSubsystem<USmithBattleLogWorldSubsystem>(); 
+	if (l)
+	{
+		l->SendAttackLog(this, this);
+	}
 
 	// HPがなくなったらTickを停める
 	if (m_curtHP <= 0)
@@ -790,4 +799,14 @@ void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName, f
 		default:
 			break;
 	}
+}
+
+FString ASmithPlayerActor::GetName_Log() const
+{
+	return TEXT("鍛冶師");
+}
+
+EBattleLogType ASmithPlayerActor::GetType_Log() const
+{
+	return EBattleLogType::Player;
 }
