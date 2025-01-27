@@ -78,6 +78,13 @@ void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedP
     if (OnStartExecuteEvent.IsBound())
     {
       OnStartExecuteEvent.Broadcast();
+      for (auto& registeredCmd : m_commandLists)
+      {
+        if (registeredCmd.IsValid())
+        {
+          registeredCmd->Start();
+        }
+      }
     }
   }
 }

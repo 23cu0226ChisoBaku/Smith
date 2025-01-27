@@ -29,6 +29,8 @@ public:
 	void Remove(const FString&, int32 idx);
 	UObject* Get(const FString&, int32 idx) const;
 
+	int32 GetAll(const FString&, TArray<UObject*>& outItemList) const;
+
 private:
 	bool check_Internal(const FString&, UObject*) const;
 	bool check_Internal(const FString&, int32 idx) const;

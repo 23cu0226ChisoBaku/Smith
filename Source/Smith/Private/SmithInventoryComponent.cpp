@@ -113,6 +113,20 @@ bool USmithInventoryComponent::check_Internal(const FString& inventoryCategoryNa
 	return true;
 }
 
+int32 USmithInventoryComponent::GetAll(const FString& categoryName, TArray<UObject*>& outItemList) const
+{
+	outItemList.Reset();
+	if (InventoryContainers.Contains(categoryName))
+	{
+		for(const auto& item : InventoryContainers[categoryName].ObjectContainer)
+		{
+			outItemList.Emplace(item);
+		}
+	}
+	return outItemList.Num();
+}
+
+
 bool USmithInventoryComponent::check_Internal(const FString& inventoryCategoryName, int32 idx) const
 {
 	if (!InventoryContainers.Contains(inventoryCategoryName))

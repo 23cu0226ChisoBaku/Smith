@@ -20,7 +20,7 @@ public:
 public:
 	void SetHP(float);
 
-private:
-	UPROPERTY()
-	TObjectPtr<UHPWidget> m_widget;
+	public:
+	UPROPERTY(BlueprintReadOnly)
+	float Percent;
 };

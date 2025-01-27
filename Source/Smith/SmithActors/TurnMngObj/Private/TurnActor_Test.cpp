@@ -52,6 +52,8 @@ void ATurnActor_Test::BeginPlay()
 	check(m_moveStrategy != nullptr);
 	m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
 	check(m_idleStrategy != nullptr);
+
+  AnimComponent->SwitchAnimState(TEXT("Idle"), 0.0f);
 }
 
 void ATurnActor_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -214,6 +216,33 @@ void ATurnActor_Test::SwitchAnimation(uint8 animationState)
 void ATurnActor_Test::UpdateAnimation(float deltaTime)
 {
 	AnimComponent->UpdateAnim(deltaTime);
+}
+
+void ATurnActor_Test::SwitchAnimationDelay(uint8 animationState, float delay)
+{
+  using namespace UE::Smith;
+	FName StateName;
+	switch (animationState)
+	{
+	case SMITH_ANIM_IDLE:
+		StateName = TEXT("Idle");
+		break;
+	case	SMITH_ANIM_WALK:
+		StateName = TEXT("Walk");
+		break;
+	case SMITH_ANIM_ATTACK:
+		StateName = TEXT("Attack");
+		break;
+	case SMITH_ANIM_DAMAGED:
+		StateName = TEXT("Damaged");
+		break;
+	case SMITH_ANIM_DEAD:
+		StateName = TEXT("Dead");
+		break;
+	default:
+		break;
+	}
+  AnimComponent->SwitchAnimStateDelay(StateName, delay);
 }
 
 bool ATurnActor_Test::IsAnimationFinish() const

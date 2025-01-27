@@ -20,7 +20,7 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
-	void SetHP(UUserWidget*,float);
+	void SetHP(float);
 
 private:
 	UProgressBar* m_progressBar;

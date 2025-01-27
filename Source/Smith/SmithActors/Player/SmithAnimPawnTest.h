@@ -31,6 +31,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void SwitchAnimation(uint8 animationState) override;
+	virtual void SwitchAnimationDelay(uint8,float) override;
 	virtual void UpdateAnimation(float deltaTime) override;
 	virtual bool IsAnimationFinish() const override;
 

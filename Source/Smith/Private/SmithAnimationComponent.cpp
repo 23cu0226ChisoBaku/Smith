@@ -51,7 +51,7 @@ void USmithAnimationComponent::BeginPlay()
 void USmithAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
 	// ...
 	if (m_delayNextSectionName.IsNone())
 	{
@@ -80,15 +80,15 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName, float animat
 	}
 
 	FName CurrentSectionName = AnimInstance->Montage_GetCurrentSection(CurrentMontage);
-	if (CurrentSectionName == nextStateName)
-	{
-		return;
+	if (CurrentSectionName == nextStateName) 
+	{ 
+		return; 
 	}
 
 	m_curtAnimationTimeInterval = animationDuration;
 	m_animationPlayTimeCnt = 0.0f;
 
-	// delay‚ª‚ ‚Á‚½‚ç
+	// delayãŒã‚ã£ãŸã‚‰
 	if (m_animationSwitchDelayTimeInterval > 0.0f)
 	{
 		m_animationSwitchDelayTimeInterval = 0.0f;
@@ -118,9 +118,9 @@ void USmithAnimationComponent::SwitchAnimStateDelay(FName nextStateName, float d
 	}
 
 	FName CurrentSectionName = AnimInstance->Montage_GetCurrentSection(CurrentMontage);
-	if (CurrentSectionName == nextStateName)
-	{
-		return;
+	if (CurrentSectionName == nextStateName) 
+	{ 
+		return; 
 	}
 
 	m_delayNextSectionName = nextStateName;

@@ -11,6 +11,23 @@
 #include "Debug.h"
 #include "Weapon.generated.h"
 
+class UTexture2D;
+
+struct SmithWeaponInfoHandle
+{
+	FString Name;
+	UTexture2D* Image2D;
+
+	SmithWeaponInfoHandle()
+		: Name{}
+		, Image2D(nullptr)
+	{ }
+	SmithWeaponInfoHandle(FString name, UTexture2D* image2D)
+		: Name(name)
+		, Image2D(image2D)
+	{ }
+};
+
 UCLASS()
 class SMITH_API AWeapon : public AActor, public IParamAbsorbable, public ISkillAbsorbable
 {
@@ -30,6 +47,12 @@ public:
 	void SwapSkill(int32, FSkill);
 	void Upgrade(IParamAbsorbable*);
 
+	SmithWeaponInfoHandle GetHandle() const
+	{
+		SmithWeaponInfoHandle handle(m_name, WeaponImage2D);
+		return handle;
+	}
+
 private:
 	TArray <FSkill> m_skillslots;
 	const FParams m_params;
@@ -37,4 +60,6 @@ private:
 	FParams m_currentParams;
 	UPROPERTY(EditAnywhere, Category = "Params|Edit")
 	FString m_name;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> WeaponImage2D;
 };
