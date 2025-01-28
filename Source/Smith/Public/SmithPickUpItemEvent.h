@@ -6,6 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "ISmithMapEvent.h"
+#include "ISmithEventLogger.h"
 #include "SmithPickUpItemEvent.generated.h"
 
 class IPickable;
@@ -14,7 +15,7 @@ class IPickable;
  * 
  */
 UCLASS()
-class SMITH_API USmithPickUpItemEvent : public UObject, public ISmithMapEvent
+class SMITH_API USmithPickUpItemEvent : public UObject, public ISmithMapEvent, public ISmithEventLogger
 {
 	GENERATED_BODY()
 
@@ -26,6 +27,11 @@ public:
 	virtual void InitializeEvent(const FVector&) override;
 	virtual bool TriggerEvent(ICanSetOnMap*) override;
 	virtual void DiscardEvent() override;
+
+	ISmithBattleLogger* GetEventEntityLogger() const override;
+	FString GetEventName() const override;
+	FString GetSucceedMessage() const override;
+	FString GetFailedMessage() const override;
 
 public:
 	void AssignPickable(IPickable*, AActor*);

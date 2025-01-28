@@ -29,7 +29,7 @@ void UGameLogWidget::AddLogMessage(FString message)
   m_logArray.Add(message);
 }
 
-void UGameLogWidget::OutPutLog()
+void UGameLogWidget::OutputLog()
 {
   if (m_maxVisibleQuantity <= m_logArray.Num())
   {

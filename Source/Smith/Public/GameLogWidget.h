@@ -24,7 +24,7 @@ protected:
 public:
 	// 引数を渡すときはTEXT()を使用する
 	void AddLogMessage(FString);
-	void OutPutLog();
+	void OutputLog();
 
 public:
 	// BP側でログの表示をする（cppでは呼び出しだけ）

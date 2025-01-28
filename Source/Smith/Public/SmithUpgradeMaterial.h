@@ -8,6 +8,7 @@
 #include "ParamAbsorbable.h"
 #include "ISmithItemWidgetParameterizable.h"
 #include "ISmithBattleParameterizable.h"
+#include "ISmithBattleLogger.h"
 #include "SmithUpgradeMaterial.generated.h"
 
 /**
@@ -16,6 +17,7 @@
 UCLASS(EditInlineNew,CollapseCategories)
 class SMITH_API USmithUpgradeMaterial : public USmithPickable, public IParamAbsorbable
 																			, public ISmithItemWidgetParameterizable, public ISmithBattleParameterizable
+																			, public ISmithBattleLogger
 {
 	GENERATED_BODY()
 
@@ -33,9 +35,13 @@ public:
 	FString GetDescription() const override;
 
 public:
+	FString GetName_Log() const override;
+	EBattleLogType GetType_Log() const override;
+
+public:
 	FParams GetParam_Interface() const override;
 private:
-	void onPickImpl(ICanPick*) override;
+	bool onPickImpl(ICanPick*) override;
 
 private:
 	UPROPERTY(EditAnywhere, Category = ItemWidgetParameter)

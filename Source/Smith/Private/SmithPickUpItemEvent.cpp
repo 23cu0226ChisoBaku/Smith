@@ -5,6 +5,7 @@
 #include "IPickable.h"
 #include "ICanPick.h"
 #include "ICanSetOnMap.h"
+#include "ISmithBattleLogger.h"
 #include "MLibrary.h"
 USmithPickUpItemEvent::USmithPickUpItemEvent(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -52,8 +53,7 @@ bool USmithPickUpItemEvent::TriggerEvent(ICanSetOnMap* mapObj)
     return false;
   }
 
-  m_pickable->OnPick(picker);
-  return true;
+  return m_pickable->OnPick(picker);
 }
 
 void USmithPickUpItemEvent::DiscardEvent()
@@ -91,4 +91,24 @@ void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearan
     m_pickableAppearence->SetActorHiddenInGame(true);
   }
   
+}
+
+ISmithBattleLogger* USmithPickUpItemEvent::GetEventEntityLogger() const
+{
+  return Cast<ISmithBattleLogger>(m_pickable.Get());
+}
+
+FString USmithPickUpItemEvent::GetEventName() const
+{
+  return m_pickable.IsValid() ? m_pickable->GetPickType() : TEXT("とあるアイテム");
+}
+
+FString USmithPickUpItemEvent::GetSucceedMessage() const
+{
+  return TEXT("を手に入れた");
+}
+
+FString USmithPickUpItemEvent::GetFailedMessage() const
+{
+  return TEXT("の上に乗った");
 }

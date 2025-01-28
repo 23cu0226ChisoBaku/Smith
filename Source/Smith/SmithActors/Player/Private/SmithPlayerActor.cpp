@@ -71,6 +71,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, AnimationComponent(nullptr)
 	, m_commandMediator(nullptr)
 	, m_enhanceSystem(nullptr)
+	, m_logSystem(nullptr)
 	, m_curtHP(0)
 	, m_maxHP(SmithPlayerActor::Private::PlayerHP_Temp)
 	, m_rotateSpeed(720.0f)
@@ -128,6 +129,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 
 	UpgradeInteractiveComponent = CreateDefaultSubobject<USmithUpgradeInteractiveComponent>(TEXT("Smith UpgradeInteractiveComponent"));
 	check(UpgradeInteractiveComponent != nullptr);
+
 }
 
 // Called when the game starts or when spawned
@@ -184,7 +186,13 @@ void ASmithPlayerActor::BeginPlay()
 		}
 	}
 
-	
+	{
+		UWorld* world = GetWorld();
+		if (world != nullptr)
+		{
+			m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
+		}
+	}
 
 }
 
@@ -197,13 +205,6 @@ void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ASmithPlayerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// TODO
-	USmithBattleLogWorldSubsystem* l = GetWorld()->GetSubsystem<USmithBattleLogWorldSubsystem>(); 
-	if (l)
-	{
-		l->SendAttackLog(this, this);
-	}
 
 	// HPがなくなったらTickを停める
 	if (m_curtHP <= 0)
@@ -355,8 +356,8 @@ void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 {
 	OnAttack(
 						{ 
-							TEXT("God"),		// Attack
-						  1000,							// Damage
+							this,		// Logger
+							1000,		// Damage
 						}
 					);
 }
@@ -446,7 +447,7 @@ void ASmithPlayerActor::attackImpl()
 		{
 			FParams attackParam = Weapon->GetParam();
 			const int32 atk = attackParam.ATK;
-			m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{GetName(), atk});
+			m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{this, atk});
 		}
 	}
 }
@@ -613,27 +614,32 @@ void ASmithPlayerActor::enhanceImpl(int32 idx)
 
 void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 {
-	if (attack.AttackPower <= 0)
+	if (attack.AttackPower > 0)
+	{
+		m_curtHP -= attack.AttackPower;
+		if (HPComponent != nullptr && m_maxHP > 0)
+		{
+			const float curtHPPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
+			HPComponent->SetHP(curtHPPercentage);
+		}
+
+		if (m_logSystem != nullptr)
+		{
+			m_logSystem->SendAttackLog(attack.Attacker, this);
+			m_logSystem->SendDamageLog(this, attack.AttackPower);
+		}
+
+	}
+	else
 	{
 		return;
 	}
 	
-	m_curtHP -= attack.AttackPower;
-	if (HPComponent != nullptr && m_maxHP > 0)
-	{
-		const float curtHPPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
-		HPComponent->SetHP(curtHPPercentage);
-	}
-
-	FString msg{};
-	msg.Append(GetName());
-	msg.Append(TEXT(" left HP:"));
-	msg.Append(FString::FromInt(m_curtHP));
-	MDebug::LogError(msg);
 
 	if (m_curtHP <= 0)
 	{
 
+		// TODO
 		OnDead.ExecuteIfBound();
 		if (AnimationComponent!= nullptr)
 		{
@@ -692,9 +698,6 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 	{
 		return;
 	}
-
-	MDebug::Log("Player TRIGGERED next level event");
-
 }
 
 void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
@@ -704,30 +707,32 @@ void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 		return;
 	}
 
-	MDebug::Log("Player TRIGGERED pick up item event");
-
+	if (m_logSystem != nullptr)
+	{
+		m_logSystem->SendInteractEventLog(this, event, true);
+	}
 }
 
-void ASmithPlayerActor::PickUpConsume(USmithConsumeItem* consume)
+bool ASmithPlayerActor::PickUpConsume(USmithConsumeItem* consume)
 {
-
+	unimplemented();
+	return false;
 }
 
-void ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
+bool ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
 {
 	if (!::IsValid(upgrade))
 	{
 		MDebug::LogError("can not pick --- material invalid");
-		return;
+		return false;
 	}
 	if (!::IsValid(InventoryComponent))
 	{
 		MDebug::LogError("can not pick --- Inventory invalid");
-		return;
+		return false;
 	}
 
-	InventoryComponent->Insert(TEXT("UpgradeMaterial"), upgrade);
-
+	return InventoryComponent->Insert(TEXT("UpgradeMaterial"), upgrade);
 }
 
 void ASmithPlayerActor::SwitchAnimation(uint8 animationState)

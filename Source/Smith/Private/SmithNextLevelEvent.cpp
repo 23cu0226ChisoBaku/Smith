@@ -62,7 +62,6 @@ bool USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
   }
 
   eventTriggerable->OnTriggerEvent(this);
-  MDebug::LogWarning("Trigger Next Level Event");
   OnNextLevel.ExecuteIfBound();
   return true;  
 }

@@ -75,7 +75,7 @@ void USmithBattleLogWorldSubsystem::SetLogWidget(UGameLogWidget* logWidget)
   if (m_logWidget != nullptr)
   {
     m_logWidget->AddToViewport();
-    //m_logWidget->SetVisibility(ESlateVisibility::Hidden);
+    m_logWidget->SetVisibility(ESlateVisibility::Hidden);
   }
 }
 
@@ -86,29 +86,112 @@ void USmithBattleLogWorldSubsystem::SendAttackLog(ISmithBattleLogger* attacker, 
     return;
   }
 
-  if (attacker == nullptr || defender == nullptr)
-  {
-    return;
-  }
+  FString attackerLog = attacker != nullptr ? attacker->GetName_Log() : TEXT("とある人物");
+  const EBattleLogType attackerLogType = attacker != nullptr ? attacker->GetType_Log() : EBattleLogType::None;
+  FString defenderLog = defender != nullptr ? defender->GetName_Log() : TEXT("とある対象");
+  const EBattleLogType defenderLogType = defender != nullptr ? defender->GetType_Log() : EBattleLogType::None;
 
-  FString resultLog = attacker->GetName_Log() + TEXT("が") + defender->GetName_Log() + TEXT("に攻撃\n");
+  convertLogColor(attackerLog, attackerLogType);
+  convertLogColor(defenderLog, defenderLogType);
+
+  attackerLog.Append(TEXT("が"));
+  defenderLog.Append(TEXT("に攻撃\n"));
+
+  const FString resultLog = attackerLog + defenderLog;
+
   m_logWidget->AddLogMessage(resultLog);
-  m_logWidget->OutPutLog(); 
+  m_logWidget->OutputLog(); 
 }
 
 
 
 void USmithBattleLogWorldSubsystem::SendDamageLog(ISmithBattleLogger* defender, int32 damage)
 {
+  if (m_logWidget == nullptr)
+  {
+    return;
+  }
+
+  FString defenderLog = defender != nullptr ? defender->GetName_Log() : TEXT("とある対象");
+  const EBattleLogType defenderLogType = defender != nullptr ? defender->GetType_Log() : EBattleLogType::None;
+
+  convertLogColor(defenderLog, defenderLogType);
+  const FString damageLog = TEXT("は") + FString::FromInt(damage) + TEXT("ダメージを受けた\n");
+
+  const FString resultLog = defenderLog + damageLog;
+  m_logWidget->AddLogMessage(resultLog);
+  m_logWidget->OutputLog();
 
 }
 
 void USmithBattleLogWorldSubsystem::SendDefeatedLog(ISmithBattleLogger* downed)
 {
+  if (m_logWidget == nullptr)
+  {
+    return;
+  }
+
+  FString downedLog = downed != nullptr ? downed->GetName_Log() : TEXT("とある対象");
+  const EBattleLogType downedLogType = downed != nullptr ? downed->GetType_Log() : EBattleLogType::None;
+
+  convertLogColor(downedLog, downedLogType);
+
+  const FString defeatedLog = TEXT("が倒れた\n");
+  const FString resultLog = downedLog + defeatedLog;
+
+  m_logWidget->AddLogMessage(resultLog);
+  m_logWidget->OutputLog();
 
 }
 
 void USmithBattleLogWorldSubsystem::SendInteractEventLog(ISmithBattleLogger* interacter, ISmithEventLogger* event, bool bIsInteractSuccess)
 {
-  
+  if (m_logWidget == nullptr)
+  {
+    return;
+  }
+
+  if (event == nullptr)
+  {
+    return;
+  }
+
+  FString interacterLog = interacter != nullptr ? interacter->GetName_Log() : TEXT("とある人物");
+  const EBattleLogType interacterType = interacter != nullptr ? interacter->GetType_Log() : EBattleLogType::None;
+
+  convertLogColor(interacterLog, interacterType);
+
+  const FString eventName = event->GetEventName();
+  const FString eventResultLog = bIsInteractSuccess ? event->GetSucceedMessage() : event->GetFailedMessage(); 
+
+}
+
+void USmithBattleLogWorldSubsystem::convertLogColor(FString& outLog, EBattleLogType logType)
+{
+  switch (logType)
+  {
+    case EBattleLogType::Player:
+    {
+      outLog = TEXT("<LogColorStyle.Player>") + outLog;
+    }
+    break;
+    case EBattleLogType::Enemy:
+    {
+      outLog = TEXT("<LogColorStyle.Enemy>") + outLog;
+    }
+    break;
+    case EBattleLogType::Item:
+    {
+      outLog = TEXT("<LogColorStyle.Item>") + outLog;
+    }
+    break;
+    default:
+    {
+      outLog = TEXT("<LogColorStyle.None>") + outLog;
+    }
+    break;
+  }
+
+  outLog.Append(TEXT("</>"));
+
 }

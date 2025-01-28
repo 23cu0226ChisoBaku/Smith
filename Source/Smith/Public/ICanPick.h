@@ -24,6 +24,6 @@ class SMITH_API ICanPick
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void PickUpConsume(USmithConsumeItem*) = 0;
-	virtual void PickUpMaterial(USmithUpgradeMaterial*) = 0;
+	virtual bool PickUpConsume(USmithConsumeItem*) = 0;
+	virtual bool PickUpMaterial(USmithUpgradeMaterial*) = 0;
 };

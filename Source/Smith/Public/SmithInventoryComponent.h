@@ -25,7 +25,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	void Insert(const FString&, UObject*);
+	[[nodiscard]] bool Insert(const FString&, UObject*);
 	void Remove(const FString&, int32 idx);
 	UObject* Get(const FString&, int32 idx) const;
 

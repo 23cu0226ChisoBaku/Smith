@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "ISmithEventLogger.generated.h"
 
+class ISmithBattleLogger;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class USmithEventLogger : public UInterface
@@ -22,6 +23,7 @@ class SMITH_API ISmithEventLogger
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	virtual ISmithBattleLogger* GetEventEntityLogger() const;
 	virtual FString GetEventName() const;
 	virtual FString GetSucceedMessage() const;
 	virtual FString GetFailedMessage() const;

@@ -18,6 +18,7 @@
 #include "SmithMoveDirector.h"
 #include "SmithPickable.h"
 #include "IEventPublishMediator.h"
+#include "SmithBattleLogWorldSubsystem.h"
 #include "MLibrary.h"
 
 ATurnActor_Test::ATurnActor_Test()
@@ -54,6 +55,12 @@ void ATurnActor_Test::BeginPlay()
 	check(m_idleStrategy != nullptr);
 
   AnimComponent->SwitchAnimState(TEXT("Idle"), 0.0f);
+
+	UWorld* world = GetWorld();
+	if (world != nullptr)
+	{
+		m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
+	}
 }
 
 void ATurnActor_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -83,17 +90,34 @@ void ATurnActor_Test::Tick(float DeltaTime)
 
 void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 {
-	EnemyParam.HP -= handle.AttackPower;
+	if (handle.AttackPower > 0)
+	{
+		EnemyParam.HP -= handle.AttackPower;
 
-	MDebug::LogWarning(GetName() + " left HP:" + FString::FromInt(EnemyParam.HP));
+		if (m_logSystem != nullptr)
+		{
+			m_logSystem->SendAttackLog(handle.Attacker, this);
+			m_logSystem->SendDamageLog(this,handle.AttackPower);
+		}
+
+	}
+	else
+	{
+		return;
+	}
+
 	if (EnemyParam.HP <= 0)
 	{
-		MDebug::LogError(GetName() + " Dead");
+		if (m_logSystem != nullptr)
+		{
+			m_logSystem->SendDefeatedLog(this);
+		}
+
 		if (m_eventMediator.IsValid())
 		{
 			if (DropUpgradeTable.Num() > 0)
 			{
-        int32 idx = FMath::RandRange(0, DropUpgradeTable.Num() - 1);
+				int32 idx = FMath::RandRange(0, DropUpgradeTable.Num() - 1);
 				m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[idx]);
 			}
 		}
@@ -248,4 +272,14 @@ void ATurnActor_Test::SwitchAnimationDelay(uint8 animationState, float delay)
 bool ATurnActor_Test::IsAnimationFinish() const
 {
 	return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
+}
+
+FString ATurnActor_Test::GetName_Log() const
+{
+	return TEXT("豆腐");
+}
+
+EBattleLogType ATurnActor_Test::GetType_Log() const
+{
+	return EBattleLogType::Enemy;
 }

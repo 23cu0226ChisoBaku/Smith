@@ -48,6 +48,9 @@ class USmithAnimationComponent;
 class UHPUIComponent;
 class USmithUpgradeInteractiveComponent;
 
+// TODO インターフェースにする
+class USmithBattleLogWorldSubsystem;
+
 // Unreal Enhanced Input
 class UInputMappingContext;
 class UInputAction;
@@ -158,8 +161,8 @@ public:
 		void OnTriggerEvent(USmithPickUpItemEvent*) override final;
 
 	public:
-		void PickUpConsume(USmithConsumeItem*) override final;
-		void PickUpMaterial(USmithUpgradeMaterial*) override final;
+		bool PickUpConsume(USmithConsumeItem*) override final;
+		bool PickUpMaterial(USmithUpgradeMaterial*) override final;
 
 	public:
 		void SwitchAnimation(uint8 animationState) override final;
@@ -271,6 +274,12 @@ private:
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
 	// 強化
 	TWeakInterfacePtr<IEnhanceSystem> m_enhanceSystem;
+
+	// TODO インターフェースにしてより柔軟性のいい設計
+	UPROPERTY()
+	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
+
+
 #pragma endregion UProperties
 // end of UProperties
 

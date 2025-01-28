@@ -47,7 +47,8 @@ void USmithEventSystem::ExecuteEvent()
       continue;
     }
 
-    if (eventHandle.Event->TriggerEvent(eventHandle.EventReceiver.Get()))
+    bool success = eventHandle.Event->TriggerEvent(eventHandle.EventReceiver.Get());
+    if (success)
     {
       if (eventHandle.Event.IsValid())
       {

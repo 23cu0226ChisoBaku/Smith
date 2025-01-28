@@ -3,7 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SmithCommandFormat.h"
+#include "ISmithBattleLogger.h"
+
 
 /**
  * 
@@ -16,7 +17,7 @@ struct SMITH_API AttackHandle
 {
 	static const AttackHandle NullHandle;
 
-	FString AttackName;
+	ISmithBattleLogger* Attacker;
 	int32 AttackPower;
 };
 

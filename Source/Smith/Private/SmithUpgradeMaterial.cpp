@@ -48,12 +48,22 @@ FString USmithUpgradeMaterial::GetDescription() const
   return Description;
 }
 
-void USmithUpgradeMaterial::onPickImpl(ICanPick* picker)
+bool USmithUpgradeMaterial::onPickImpl(ICanPick* picker)
 {
   if (!IS_UINTERFACE_VALID(picker))
   {
-    return;
+    return false;
   }
 
-  picker->PickUpMaterial(this);
+  return picker->PickUpMaterial(this);
+}
+
+FString USmithUpgradeMaterial::GetName_Log() const
+{
+  return Name;
+}
+
+EBattleLogType USmithUpgradeMaterial::GetType_Log() const
+{
+  return EBattleLogType::Item;
 }

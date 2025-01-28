@@ -9,6 +9,8 @@
 class UGameLogWidget;
 class ISmithBattleLogger;
 class ISmithEventLogger;
+
+enum class EBattleLogType : uint8;
 /**
  * 
  */
@@ -46,6 +48,9 @@ public:
 	void SendDamageLog(ISmithBattleLogger* defender, int32 damage);
 	void SendDefeatedLog(ISmithBattleLogger* downed);
 	void SendInteractEventLog(ISmithBattleLogger* interacter, ISmithEventLogger* event, bool bIsInteractSuccess);
+
+private:
+	void convertLogColor(FString& outLog, EBattleLogType);
 private:
 	UPROPERTY()
 	TObjectPtr<UGameLogWidget> m_logWidget;

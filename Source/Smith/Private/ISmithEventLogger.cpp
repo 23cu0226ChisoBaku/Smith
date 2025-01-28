@@ -2,6 +2,7 @@
 
 
 #include "ISmithEventLogger.h"
+#include "ISmithBattleLogger.h"
 
 // Add default functionality here for any ISmithEventLogger functions that are not pure virtual.
 
@@ -18,4 +19,9 @@ FString ISmithEventLogger::GetSucceedMessage() const
 FString ISmithEventLogger::GetFailedMessage() const
 {
   return TEXT("発動失敗");
+}
+
+ISmithBattleLogger* ISmithEventLogger::GetEventEntityLogger() const
+{
+  return nullptr;
 }

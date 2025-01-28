@@ -38,24 +38,24 @@ void USmithInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	// ...
 }
 
-void USmithInventoryComponent::Insert(const FString& inventoryCategoryName, UObject* itemObject)
+bool USmithInventoryComponent::Insert(const FString& inventoryCategoryName, UObject* itemObject)
 {
 	if (!check_Internal(inventoryCategoryName, itemObject))
 	{
 		MDebug::LogError("Failed To Insert");
-		return;
+		return false;
 	}
 
 	if (InventoryContainers[inventoryCategoryName].ObjectContainer.Num() > InventoryContainers[inventoryCategoryName].InventoryCapacity)
 	{
 		MDebug::LogError("Can not insert item to inventory. --- inventory full");
-		return;
+		return false;
 	}
 
 	// Outerを変更（生存期間管理者変更）
 	itemObject->Rename(nullptr, GetOwner());
 	InventoryContainers[inventoryCategoryName].ObjectContainer.Emplace(itemObject);
-	
+	return true;
 }
 
 void USmithInventoryComponent::Remove(const FString& inventoryCategoryName, int32 idx)
