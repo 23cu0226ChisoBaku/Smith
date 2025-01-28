@@ -11,6 +11,7 @@ USmithNextLevelEvent::USmithNextLevelEvent(const FObjectInitializer& ObjectIniti
   : Super(ObjectInitializer)
   , OnNextLevel{}
   , m_eventAppearance(nullptr)
+  , m_isTriggered(false)
 { }
 
 void USmithNextLevelEvent::BeginDestroy()
@@ -19,7 +20,7 @@ void USmithNextLevelEvent::BeginDestroy()
   {
     m_eventAppearance->Destroy();
   }
-  MDebug::LogError("Next level event destroy");
+
   Super::BeginDestroy();
 }
 
@@ -43,27 +44,25 @@ void USmithNextLevelEvent::InitializeEvent(const FVector& location)
   }
 }
 
-bool USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
+void USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
 {
   if (!IS_UINTERFACE_VALID(mapObj))
   {
-    return false;
+    return;
   }
 
   if (mapObj->GetType() != EMapObjType::Player)
   {
-    return false;
+    return;
   }
 
   IEventTriggerable* eventTriggerable = Cast<IEventTriggerable>(mapObj);
   if (eventTriggerable == nullptr)
   {
-    return false;
+    return;
   }
 
   eventTriggerable->OnTriggerEvent(this);
-  OnNextLevel.ExecuteIfBound();
-  return true;  
 }
 
 void USmithNextLevelEvent::DiscardEvent()
@@ -74,4 +73,15 @@ void USmithNextLevelEvent::DiscardEvent()
   }
 
   MarkAsGarbage();
+}
+
+void USmithNextLevelEvent::RaiseEvent()
+{
+  OnNextLevel.ExecuteIfBound();
+  m_isTriggered = true;
+}
+
+bool USmithNextLevelEvent::IsDisposed() const
+{ 
+  return m_isTriggered;
 }

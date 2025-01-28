@@ -102,7 +102,6 @@ ASmithPlayerActor::ASmithPlayerActor()
 	CameraBoom->bEnableCameraRotationLag = false;
 	CameraBoom->SetUsingAbsoluteRotation(true);
 	CameraBoom->SetWorldRotation(FRotator::ZeroRotator);
-	CameraBoom->TargetArmLength = 1500.0f;
 
 	const FVector actorFwd = GetActorLocation().GetUnsafeNormal();
 	if (actorFwd != FVector::ZeroVector)
@@ -137,12 +136,6 @@ void ASmithPlayerActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// TODO BPで設定できるようにする
-	if (::IsValid(CameraBoom))
-	{
-		CameraBoom->SetWorldRotation(FRotator{300.0, 0.0, 0.0});
-	}
-
 	// Mapping Contextを設定
 	APlayerController* playerCtrl = Cast<APlayerController>(Controller);
 	check((playerCtrl != nullptr));
@@ -257,6 +250,7 @@ void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		inputComp->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASmithPlayerActor::Move_Input);
 		inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Look_Input);
 		inputComp->BindAction(AttackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack_Input);
+		inputComp->BindAction(ChangeForwardAction, ETriggerEvent::Started, this, &ASmithPlayerActor::ChangeForward_Input);
 		inputComp->BindAction(DebugAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Debug_SelfDamage_Input);
 		inputComp->BindAction(MenuAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Menu_Input);
 		inputComp->BindAction(SelectMenuAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Menu_Input_Select);
@@ -328,28 +322,61 @@ void ASmithPlayerActor::Look_Input(const FInputActionValue& value)
 		return;
 	}
 
-	FVector2D lookInput = value.Get<FVector2D>();
-	lookInput.Normalize();
-	if (lookInput.IsNearlyZero())
-	{
-		return;
-	}
+	float lookInput = value.Get<float>();
 
 	uint8 newDir = StaticCast<uint8>(m_camDir);
 
 	// TODO
-	if (lookInput.X > 0.9f)
+	MDebug::Log(FString::SanitizeFloat(lookInput));
+	if (lookInput > 0.0f)
 	{
 		newDir += East;
 		m_rotatingDirection = 1;
 	}
-	else if (lookInput.X < -0.9f)
+	else if (lookInput < 0.0f)
 	{
 		newDir += West;
 		m_rotatingDirection = -1;
 	}
 
 	updateCamImpl(StaticCast<EDir_Test>(newDir % DirectionCnt));
+}
+
+void ASmithPlayerActor::ChangeForward_Input(const FInputActionValue& value)
+{
+	// TODO 同じ処理のため修正
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
+	using namespace SmithPlayerActor::Private;
+
+	FVector2D movementInput = value.Get<FVector2D>();
+	movementInput.Normalize();
+	if (movementInput.IsNearlyZero())
+	{
+		return;
+	}
+
+	// カメラの角度で回転ベクトルを計算する
+	const double cameraAngle = FMath::DegreesToRadians(StaticCast<double>(m_camDir) * Angle_Per_Direction);
+	double directionX = movementInput.Y * cos(cameraAngle) - movementInput.X * sin(cameraAngle);
+	double directionY = movementInput.Y * sin(cameraAngle) + movementInput.X * cos(cameraAngle);
+
+	// TODO ゼロ補正
+	if (FMath::IsNearlyZero(directionX))
+	{
+		directionX = 0.0;
+	}
+
+	if (FMath::IsNearlyZero(directionY))
+	{
+		directionY = 0.0;
+	}
+
+	const EDir_Test newDir = VectorDirToEDir(FVector{directionX, directionY, 0.0});
+	changeFwdImpl(newDir);
 }
 
 void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
@@ -601,7 +628,6 @@ void ASmithPlayerActor::enhanceImpl(int32 idx)
 			return;
 		}
 
-		MDebug::Log("Enhance Succeed!!!!!!!");
 		m_enhanceSystem->Enhance(Weapon, absorbItem);
 		InventoryComponent->Remove(TEXT("UpgradeMaterial"), idx);
 		m_commandMediator->SendIdleCommand(this);
@@ -698,6 +724,9 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 	{
 		return;
 	}
+
+	// TODO?
+	event->RaiseEvent();
 }
 
 void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
@@ -707,9 +736,27 @@ void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 		return;
 	}
 
+	if (InventoryComponent == nullptr)
+	{
+		return;
+	}
+
+	FString itemType = event->GetPickUpItemType();
+	bool success = InventoryComponent->ContainsCategory(itemType) && !InventoryComponent->IsReachCapacity(itemType);
+
 	if (m_logSystem != nullptr)
 	{
-		m_logSystem->SendInteractEventLog(this, event, true);
+		m_logSystem->SendInteractEventLog(this, event, success);
+	}
+
+	if (success)
+	{
+		IPickable* pickable = event->GetPickable();
+		if (pickable != nullptr)
+		{
+			pickable->OnPick(this);
+			event->RaiseEvent();
+		}
 	}
 }
 
@@ -724,11 +771,6 @@ bool ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
 	if (!::IsValid(upgrade))
 	{
 		MDebug::LogError("can not pick --- material invalid");
-		return false;
-	}
-	if (!::IsValid(InventoryComponent))
-	{
-		MDebug::LogError("can not pick --- Inventory invalid");
 		return false;
 	}
 

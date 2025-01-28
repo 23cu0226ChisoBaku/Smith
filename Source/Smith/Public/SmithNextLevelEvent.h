@@ -25,8 +25,10 @@ public:
 	
 public:
 	void InitializeEvent(const FVector&) override final;
-	bool TriggerEvent(ICanSetOnMap*) override final;
+	void TriggerEvent(ICanSetOnMap*) override final;
 	void DiscardEvent() override final;
+	void RaiseEvent() override final;
+	bool IsDisposed() const override final;
 
 public:
 	FOnTriggerEvent OnNextLevel;
@@ -34,5 +36,6 @@ public:
 private:
 	UPROPERTY()
 	TObjectPtr<AActor> m_eventAppearance;
+	uint8 m_isTriggered : 1;
 
 };

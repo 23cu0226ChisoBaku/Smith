@@ -19,11 +19,11 @@ public:
 	virtual void BeginDestroy() override;
 
 public:
-	bool OnPick(ICanPick*) override final;
+	void OnPick(ICanPick*) override final;
 	FString GetPickType() const override final;
 
 private:
-	virtual bool onPickImpl(ICanPick*) PURE_VIRTUAL(USmithPickable::onPickImpl, return false;);
+	virtual void onPickImpl(ICanPick*) PURE_VIRTUAL(USmithPickable::onPickImpl);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PickableInfomation, meta = (AllowPrivateAccess = "true"))

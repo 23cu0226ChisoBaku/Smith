@@ -156,13 +156,21 @@ void USmithBattleLogWorldSubsystem::SendInteractEventLog(ISmithBattleLogger* int
     return;
   }
 
-  FString interacterLog = interacter != nullptr ? interacter->GetName_Log() : TEXT("とある人物");
+  FString interacterName = interacter != nullptr ? interacter->GetName_Log() : TEXT("とある人物");
   const EBattleLogType interacterType = interacter != nullptr ? interacter->GetType_Log() : EBattleLogType::None;
 
-  convertLogColor(interacterLog, interacterType);
+  convertLogColor(interacterName, interacterType);
 
-  const FString eventName = event->GetEventName();
-  const FString eventResultLog = bIsInteractSuccess ? event->GetSucceedMessage() : event->GetFailedMessage(); 
+  ISmithBattleLogger* eventEntityLogger = event->GetEventEntityLogger();
+  FString eventEntityName = eventEntityLogger != nullptr ? eventEntityLogger->GetName_Log() : TEXT("とあるもの");
+  const EBattleLogType eventEntityType = eventEntityLogger != nullptr ? eventEntityLogger->GetType_Log() : EBattleLogType::None;
+  convertLogColor(eventEntityName, eventEntityType);
+  const FString eventResultLog = bIsInteractSuccess ? event->GetSucceedMessage() : event->GetFailedMessage();
+
+  const FString resultLog = interacterName + TEXT("は") + eventEntityName + eventResultLog + TEXT("\n"); 
+
+  m_logWidget->AddLogMessage(resultLog);
+  m_logWidget->OutputLog();
 
 }
 

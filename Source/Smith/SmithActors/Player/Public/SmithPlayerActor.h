@@ -202,6 +202,7 @@ private:
 	void Menu_Input(const FInputActionValue&);
 	void Menu_Input_Select(const FInputActionValue&);
 	void Menu_Input_Interact(const FInputActionValue&);
+	void ChangeForward_Input(const FInputActionValue&);
 	
 #pragma endregion Private Functions
 // end of Private Functions
@@ -249,6 +250,8 @@ private:
 	/** カメラ移動インプットアクション */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> CameraAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> ChangeForwardAction;
 	/** デバッグ専用！！ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> DebugAction;

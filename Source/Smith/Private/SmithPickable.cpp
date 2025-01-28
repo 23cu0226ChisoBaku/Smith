@@ -13,9 +13,9 @@ void USmithPickable::BeginDestroy()
   Super::BeginDestroy();
 }
 
-bool USmithPickable::OnPick(ICanPick* picker)
+void USmithPickable::OnPick(ICanPick* picker)
 {
-  return onPickImpl(picker);
+  onPickImpl(picker);
 }
 
 FString USmithPickable::GetPickType() const

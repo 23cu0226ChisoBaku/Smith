@@ -47,10 +47,10 @@ void USmithEventSystem::ExecuteEvent()
       continue;
     }
 
-    bool success = eventHandle.Event->TriggerEvent(eventHandle.EventReceiver.Get());
-    if (success)
+    eventHandle.Event->TriggerEvent(eventHandle.EventReceiver.Get());
+    if (eventHandle.Event.IsValid())
     {
-      if (eventHandle.Event.IsValid())
+      if (eventHandle.Event->IsDisposed())
       {
         eventHandle.Event->DiscardEvent();
       }

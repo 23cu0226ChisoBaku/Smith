@@ -6,12 +6,14 @@
 #include "ICanPick.h"
 #include "ICanSetOnMap.h"
 #include "ISmithBattleLogger.h"
+#include "IEventTriggerable.h"
 #include "MLibrary.h"
 USmithPickUpItemEvent::USmithPickUpItemEvent(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
   , m_pickableAppearence(nullptr)
   , m_pickableObject(nullptr)
   , m_pickable(nullptr)
+  , m_isPicked(true)
 { }
 
 void USmithPickUpItemEvent::BeginDestroy()
@@ -28,32 +30,33 @@ void USmithPickUpItemEvent::InitializeEvent(const FVector& location)
   }
 }
 
-bool USmithPickUpItemEvent::TriggerEvent(ICanSetOnMap* mapObj)
+void USmithPickUpItemEvent::TriggerEvent(ICanSetOnMap* mapObj)
 { 
   if (!m_pickable.IsValid())
   {
     DiscardEvent();
-    return false;
+    return;
   }
 
   if (m_pickableObject == nullptr || !m_pickableObject->IsValidLowLevel())
   {
     DiscardEvent();
-    return false;
+    return;
   }
 
   if (!IS_UINTERFACE_VALID(mapObj))
   {
-    return false;
+    return;
   }
 
-  ICanPick* picker = Cast<ICanPick>(mapObj);
-  if (picker == nullptr)
+  IEventTriggerable* eventTriggerable = Cast<IEventTriggerable>(mapObj);
+  if (eventTriggerable == nullptr)
   {
-    return false;
+    return;
   }
 
-  return m_pickable->OnPick(picker);
+  eventTriggerable->OnTriggerEvent(this);
+
 }
 
 void USmithPickUpItemEvent::DiscardEvent()
@@ -67,6 +70,21 @@ void USmithPickUpItemEvent::DiscardEvent()
   m_pickable.Reset();
 
   MarkAsGarbage();
+}
+
+void USmithPickUpItemEvent::RaiseEvent()
+{
+  
+  m_isPicked = true;
+  if (m_pickableAppearence != nullptr)
+  {
+    m_pickableAppearence->SetActorHiddenInGame(true);
+  }
+}
+
+bool USmithPickUpItemEvent::IsDisposed() const
+{
+  return m_isPicked;
 }
 
 void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearance)
@@ -90,7 +108,19 @@ void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearan
   {
     m_pickableAppearence->SetActorHiddenInGame(true);
   }
+
+  m_isPicked = false;
   
+}
+
+IPickable* USmithPickUpItemEvent::GetPickable() const
+{
+  return m_pickable.Get();
+}
+
+FString USmithPickUpItemEvent::GetPickUpItemType() const
+{
+  return m_pickable.IsValid() ? m_pickable->GetPickType() : TEXT("INVALID");
 }
 
 ISmithBattleLogger* USmithPickUpItemEvent::GetEventEntityLogger() const

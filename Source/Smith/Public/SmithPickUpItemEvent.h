@@ -25,8 +25,10 @@ public:
 
 public:
 	virtual void InitializeEvent(const FVector&) override;
-	virtual bool TriggerEvent(ICanSetOnMap*) override;
+	virtual void TriggerEvent(ICanSetOnMap*) override;
 	virtual void DiscardEvent() override;
+	virtual void RaiseEvent() override;
+	virtual bool IsDisposed() const override;
 
 	ISmithBattleLogger* GetEventEntityLogger() const override;
 	FString GetEventName() const override;
@@ -35,6 +37,8 @@ public:
 
 public:
 	void AssignPickable(IPickable*, AActor*);
+	IPickable* GetPickable() const;
+	FString GetPickUpItemType() const;
 	
 private:
 	UPROPERTY()
@@ -42,4 +46,5 @@ private:
 	UPROPERTY()
 	TObjectPtr<UObject> m_pickableObject;
 	TWeakInterfacePtr<IPickable> m_pickable;
+	uint8 m_isPicked : 1;
 };

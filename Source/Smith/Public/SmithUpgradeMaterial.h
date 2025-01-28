@@ -41,7 +41,7 @@ public:
 public:
 	FParams GetParam_Interface() const override;
 private:
-	bool onPickImpl(ICanPick*) override;
+	void onPickImpl(ICanPick*) override;
 
 private:
 	UPROPERTY(EditAnywhere, Category = ItemWidgetParameter)

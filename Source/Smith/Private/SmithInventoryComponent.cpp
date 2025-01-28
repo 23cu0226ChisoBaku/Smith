@@ -46,13 +46,13 @@ bool USmithInventoryComponent::Insert(const FString& inventoryCategoryName, UObj
 		return false;
 	}
 
-	if (InventoryContainers[inventoryCategoryName].ObjectContainer.Num() > InventoryContainers[inventoryCategoryName].InventoryCapacity)
+	if (InventoryContainers[inventoryCategoryName].ObjectContainer.Num() >= InventoryContainers[inventoryCategoryName].InventoryCapacity)
 	{
 		MDebug::LogError("Can not insert item to inventory. --- inventory full");
 		return false;
 	}
 
-	// Outerを変更（生存期間管理者変更）
+	// Outerを変更
 	itemObject->Rename(nullptr, GetOwner());
 	InventoryContainers[inventoryCategoryName].ObjectContainer.Emplace(itemObject);
 	return true;
@@ -142,6 +142,21 @@ bool USmithInventoryComponent::check_Internal(const FString& inventoryCategoryNa
 	}
 
 	return true;
+}
+
+bool USmithInventoryComponent::ContainsCategory(const FString& category) const
+{
+	return InventoryContainers.Contains(category);
+}
+
+bool USmithInventoryComponent::IsReachCapacity(const FString& category) const
+{
+	if (!ContainsCategory(category))
+	{
+		return true;
+	}
+	const auto& inventory = InventoryContainers[category];
+	return inventory.ObjectContainer.Num() >= inventory.InventoryCapacity;
 }
 
 
