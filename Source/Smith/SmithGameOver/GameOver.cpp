@@ -25,9 +25,9 @@ void AGameOver::Tick(float DeltaTime)
 
 }
 
-void AGameOver::TriggerdGameOver()
+void AGameOver::TriggerdEvent()
 {
-	GameOverEventDispatcher.Broadcast();
+	//GameOverEventDispatcher.Broadcast();
 }
 
 

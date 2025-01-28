@@ -7,7 +7,7 @@
 #include "GameOver.generated.h"
 
 //ÉfÉäÉQÅ[Ég
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGameOverEventDispatcher);
+DECLARE_DELEGATE(FGameOverEventDispatcher);
 
 UCLASS()
 class SMITH_API AGameOver : public AActor
@@ -18,11 +18,9 @@ public:
 	// Sets default values for this actor's properties
 	AGameOver();
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FGameOverEventDispatcher GameOverEventDispatcher;
-
-	UFUNCTION(BlueprintCallable)
-	void TriggerdGameOver();
+	//void InitializeEvent() override final;
+	//bool TriggerEvent() override final;
+	void TriggerdEvent();
 
 
 protected:
@@ -33,4 +31,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
+	//UPROPERTY(BlueprintAssignable, Category = "Events")
+	FGameOverEventDispatcher GameOverEventDispatcher;
 };
