@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "Smith/SmithGameOver/gameover_test.h"
+
 #include "GameOver_TestPawn.generated.h"
 
-
+class Ugameover_test;
 
 UCLASS()
 class SMITH_API AGameOver_TestPawn : public APawn
@@ -28,6 +28,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void OnDead();
 
 	Ugameover_test* GameOverObject;
 

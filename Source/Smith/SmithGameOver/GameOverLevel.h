@@ -4,18 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "gameover_test.generated.h"
+#include "GameOverLevel.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SMITH_API Ugameover_test : public UObject
+class SMITH_API UGameOverLevel : public UObject
 {
 	GENERATED_BODY()
-
-public:
-
-	void LoadLevel();
 	
 };

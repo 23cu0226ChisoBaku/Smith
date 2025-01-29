@@ -2,6 +2,7 @@
 
 
 #include "SmithGameOver/GameOver_TestPawn.h"
+#include "Smith/SmithGameOver/gameover_test.h"
 
 // Sets default values
 AGameOver_TestPawn::AGameOver_TestPawn()
@@ -15,11 +16,7 @@ AGameOver_TestPawn::AGameOver_TestPawn()
 void AGameOver_TestPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	GameOverObject = LoadObject<Ugameover_test>(nullptr, TEXT("/Script/CoreUObject.Class/Script/Smith.gameover_test"));
-	if (GameOverObject != nullptr)
-	{
-		//GameOverObject->GameOverEventdispatcher.BindUObject(this, &Ugameover_test::TriggerEvent);
-	}
+	
 }
 
 // Called every frame
@@ -29,7 +26,8 @@ void AGameOver_TestPawn::Tick(float DeltaTime)
 
 	if (gameover == true)
 	{
-		GameOverObject->GameOverEventdispatcher.ExecuteIfBound();
+		OnDead();
+		
 	}
 
 }
@@ -38,6 +36,11 @@ void AGameOver_TestPawn::Tick(float DeltaTime)
 void AGameOver_TestPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+}
+
+void AGameOver_TestPawn::OnDead()
+{
 
 }
 

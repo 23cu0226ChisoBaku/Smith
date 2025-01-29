@@ -6,9 +6,9 @@
 #include "Misc/PackageName.h"
 #include "Kismet/GameplayStatics.h"
 
-void Ugameover_test::TriggerEvent()
+void Ugameover_test::LoadLevel()
 {
-	FString levelpath = TEXT(" / Game / TestLevel / ueno / GameOver_test");
+	FString levelpath = TEXT("/Game/TestLevel/ueno/GameOver_test");
 	if (FPackageName::DoesPackageExist(levelpath))
 	{
 		UGameplayStatics::OpenLevel(GetWorld(), FName(*levelpath));
