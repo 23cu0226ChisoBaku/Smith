@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "Smith/SmithGameOver/GameOver.h"
+#include "Smith/SmithGameOver/gameover_test.h"
 #include "GameOver_TestPawn.generated.h"
 
 
@@ -29,4 +29,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	Ugameover_test* GameOverObject;
+
+	UPROPERTY(EditAnywhere)
+	bool gameover;
 };
