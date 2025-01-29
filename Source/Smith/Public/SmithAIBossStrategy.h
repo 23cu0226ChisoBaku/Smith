@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SmithAIStrategy.h"
-#include "SmithAIAttackStrategy.generated.h"
+#include "SmithAIBossStrategy.generated.h"
 
 namespace UE::Smith
 {
@@ -15,21 +15,19 @@ namespace UE::Smith
 }
 
 UCLASS(Abstract)
-class SMITH_API USmithAIAttackStrategy : public USmithAIStrategy
+class SMITH_API USmithAIBossStrategy : public USmithAIStrategy
 {
 	GENERATED_BODY()
 
-public:
-	USmithAIAttackStrategy(const FObjectInitializer&);
+	USmithAIBossStrategy(const FObjectInitializer &);
 	virtual void BeginDestroy() override;
 
 public:
-	bool RegisterAttackFormat(const FString& name, const UDataTable* formatTable);
+	bool RegisterAttackFormat(const FString &name, const UDataTable *formatTable);
 
 private:
 	virtual bool executeImpl() PURE_VIRTUAL(USmithAIAttackStrategy::executeImpl, return false;);
 
 protected:
 	TMap<FString, TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_attackFormatTables;
-	
 };
