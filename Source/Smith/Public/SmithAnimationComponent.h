@@ -28,10 +28,11 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// アニメーション管理
-	void SwitchAnimState(FName);
+	void SwitchAnimState(FName, float animationDuration);
+	void SwitchAnimStateDelay(FName, float delay);
+	void UpdateAnim(float);
+	bool IsCurrentAnimationFinish() const;
 
-	// アニメーションモンタージュの終了を検知するためのデリゲート
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
@@ -42,5 +43,13 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FString objectPass;
+
+	// TODO update
+	float m_curtAnimationTimeInterval;
+	float m_animationPlayTimeCnt;
+	// TODO
+	float m_animationSwitchDelayTimeInterval;
+	float m_animationSwitchDelayTimeCnt;
+	FName m_delayNextSectionName;
 		
 };

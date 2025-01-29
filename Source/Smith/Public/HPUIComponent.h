@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HPUIComponent.generated.h"
 
-class UUserWidget;
+class USmithPlayerHP;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SMITH_API UHPUIComponent : public UActorComponent
@@ -26,6 +26,13 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	void SetUIHP(UUserWidget*,float);
-		
+	void CreateHP(APlayerController*);
+	void SetHP(float percentage);
+	void SetWidgetVisibility(bool bIsVisible);
+
+private:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<USmithPlayerHP> HPWidgetSubclass;
+	UPROPERTY()
+	TObjectPtr<USmithPlayerHP> m_playerHPWidget;		
 };

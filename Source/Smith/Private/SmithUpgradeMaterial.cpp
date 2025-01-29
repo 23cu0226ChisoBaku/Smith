@@ -17,6 +17,7 @@ void USmithUpgradeMaterial::BeginDestroy()
   Super::BeginDestroy();
 
   MDebug::LogError("Upgrade Material Destroy");
+  MDebug::LogError(FString::FromInt((int64)this));
 }
 
 FParams USmithUpgradeMaterial::GetParam()
@@ -24,9 +25,29 @@ FParams USmithUpgradeMaterial::GetParam()
   return Param;
 }
 
+FParams USmithUpgradeMaterial::GetParam_Interface() const
+{
+  return Param;
+}
+
 void USmithUpgradeMaterial::AddParam(FParams)
 {
   unimplemented();
+}
+
+UTexture2D* USmithUpgradeMaterial::GetIconImage() const
+{
+  return Icon;
+}
+
+FString USmithUpgradeMaterial::GetName() const
+{
+  return Name;
+}
+
+FString USmithUpgradeMaterial::GetDescription() const
+{
+  return Description;
 }
 
 void USmithUpgradeMaterial::onPickImpl(ICanPick* picker)

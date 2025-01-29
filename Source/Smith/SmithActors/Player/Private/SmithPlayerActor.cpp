@@ -7,16 +7,14 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "SmithBattleSubsystem.h"
 #include "SmithMoveComponent.h"
 #include "SmithAttackComponent.h"
 #include "SmithInventoryComponent.h"
-#include "AttackCommand.h"
-#include "MoveCommand.h"
+#include "SmithAnimationComponent.h"
+#include "SmithUpgradeInteractiveComponent.h"
 #include "AttackHandle.h"
 #include "SmithCommandFormat.h"
-#include "FormatType.h"
 #include "Direction.h"
 #include "FormatInfo_Import.h"
 #include "MapObjType.h"
@@ -28,7 +26,13 @@
 #include "SmithHPItem.h"
 #include "SmithUpgradeMaterial.h"
 
+#include "HPUIComponent.h"
+#include "SmithPlayerHP.h"
 #include "SmithWeapon.h"
+
+#include "ISmithBattleParameterizable.h"
+#include "ISmithItemWidgetParameterizable.h"
+#include "SmithUpgradeItemHandle.h"
 
 #include "MLibrary.h"
 
@@ -62,9 +66,11 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, MoveComponent(nullptr)
 	, AttackComponent(nullptr)
 	, InventoryComponent(nullptr)
+	, AnimationComponent(nullptr)
 	, m_commandMediator(nullptr)
 	, m_enhanceSystem(nullptr)
-	, m_hp(SmithPlayerActor::Private::PlayerHP_Temp)
+	, m_curtHP(0)
+	, m_maxHP(SmithPlayerActor::Private::PlayerHP_Temp)
 	, m_rotateSpeed(720.0f)
 	, m_rotatingDirection(0)
 	, m_camDir(North)
@@ -72,6 +78,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, m_bCanMove(true)
 	, m_bCanAttack(true)
 	, m_bRotatingCamera(false)
+	, m_bIsInMenu(false)
 {
 	using namespace SmithPlayerActor::Private;
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -111,6 +118,14 @@ ASmithPlayerActor::ASmithPlayerActor()
 	InventoryComponent = CreateDefaultSubobject<USmithInventoryComponent>(TEXT("Smith InventoryComponent"));
 	check(::IsValid(InventoryComponent));
 
+	AnimationComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("Smith AnimationComponent"));
+	check(AnimationComponent != nullptr);
+
+	HPComponent = CreateDefaultSubobject<UHPUIComponent>(TEXT("HP UI Component"));
+	check(HPComponent != nullptr);
+
+	UpgradeInteractiveComponent = CreateDefaultSubobject<USmithUpgradeInteractiveComponent>(TEXT("Smith UpgradeInteractiveComponent"));
+	check(UpgradeInteractiveComponent != nullptr);
 }
 
 // Called when the game starts or when spawned
@@ -157,8 +172,17 @@ void ASmithPlayerActor::BeginPlay()
 	Weapon->Rename(nullptr, this);
 
 	{
-		m_hp += Weapon->GetParam().HP;
+		m_maxHP += Weapon->GetParam().HP;
+		m_curtHP = m_maxHP;
+
+		if (HPComponent != nullptr)
+		{
+			HPComponent->CreateHP(playerCtrl);
+			HPComponent->SetHP(1.0f);
+		}
 	}
+
+	
 
 }
 
@@ -173,8 +197,9 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// HPがなくなったらTickを停める
-	if (m_hp <= 0)
+	if (m_curtHP <= 0)
 	{
+
 		PrimaryActorTick.bCanEverTick = false;
 		return;
 	}
@@ -223,7 +248,9 @@ void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Look_Input);
 		inputComp->BindAction(AttackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack_Input);
 		inputComp->BindAction(DebugAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Debug_SelfDamage_Input);
-		inputComp->BindAction(EnhanceAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Enhance_Input);
+		inputComp->BindAction(MenuAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Menu_Input);
+		inputComp->BindAction(SelectMenuAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Menu_Input_Select);
+		inputComp->BindAction(InteractMenuAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Menu_Input_Interact);
 	}
 }
 
@@ -315,16 +342,6 @@ void ASmithPlayerActor::Look_Input(const FInputActionValue& value)
 	updateCamImpl(StaticCast<EDir_Test>(newDir % DirectionCnt));
 }
 
-void ASmithPlayerActor::Enhance_Input(const FInputActionValue& value)
-{
-	if (!IsCommandSendable())
-	{
-		return;
-	}
-
-	enhanceImpl();
-}
-
 void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 {
 	OnAttack(
@@ -333,6 +350,62 @@ void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
 						  1000,							// Damage
 						}
 					);
+}
+
+void ASmithPlayerActor::Menu_Input(const FInputActionValue& value)
+{
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
+	if (UpgradeInteractiveComponent == nullptr)
+	{
+		return;
+	}
+
+	switchMenuStateImpl();
+}
+
+void ASmithPlayerActor::Menu_Input_Select(const FInputActionValue& value)
+{
+	if (UpgradeInteractiveComponent == nullptr)
+	{
+		return;
+	}
+
+	double inputValue = value.Get<float>();
+
+	if (inputValue < 0)
+	{
+		UpgradeInteractiveComponent->SelectNextItem(ESelectDirection::Up);
+	}
+	else if (inputValue > 0)
+	{
+		UpgradeInteractiveComponent->SelectNextItem(ESelectDirection::Down);
+	}
+	else
+	{
+		MDebug::LogWarning("No input");
+	}
+}
+
+void ASmithPlayerActor::Menu_Input_Interact(const FInputActionValue& value)
+{
+
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
+	if (UpgradeInteractiveComponent == nullptr || !m_bIsInMenu)
+	{
+		return;
+	}
+
+	int32 idx = UpgradeInteractiveComponent->GetSelectingItemIdx();
+
+	enhanceImpl(idx);
 }
 
 void ASmithPlayerActor::moveImpl(EDirection direction)
@@ -403,6 +476,52 @@ void ASmithPlayerActor::updateCamImpl(EDir_Test newDirection)
 
 }
 
+void ASmithPlayerActor::switchMenuStateImpl()
+{
+	m_bIsInMenu = !m_bIsInMenu;
+
+	APlayerController* playerCtrl = Cast<APlayerController>(Controller);
+	check((playerCtrl != nullptr));
+
+	UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerCtrl->GetLocalPlayer());
+	check((enhancedInputSubsystem != nullptr));
+	
+	if (m_bIsInMenu)
+	{
+		enhancedInputSubsystem->RemoveMappingContext(MappingCtx);
+		enhancedInputSubsystem->AddMappingContext(MappingCtx_Menu, 0);
+		if (Weapon != nullptr)
+		{
+			UpgradeInteractiveComponent->SetWeaponInfo(Weapon->GetHandle());
+		}
+
+		if (InventoryComponent != nullptr)
+		{
+			TArray<UObject*> itemList;
+			int32 cnt = InventoryComponent->GetAll(TEXT("UpgradeMaterial"), itemList);
+			if (cnt > 0)
+			{
+				UpgradeInteractiveComponent->SetUpgradeItems(itemList);
+			}
+		} 
+		UpgradeInteractiveComponent->ActivateUpgradeMenu();
+
+	}
+	else
+	{
+		enhancedInputSubsystem->RemoveMappingContext(MappingCtx_Menu);
+		enhancedInputSubsystem->AddMappingContext(MappingCtx, 0);
+
+		UpgradeInteractiveComponent->DeactivateUpgradeMenu();
+
+	}
+
+	if (HPComponent != nullptr)
+	{
+		HPComponent->SetWidgetVisibility(!m_bIsInMenu);
+	}
+}
+
 bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTable* formatTable)
 {
 	if (m_normalAttackFormatBuffer.Contains(name))
@@ -452,14 +571,14 @@ bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTab
 	return true;
 }
 
-void ASmithPlayerActor::enhanceImpl()
+void ASmithPlayerActor::enhanceImpl(int32 idx)
 {
 	if (m_enhanceSystem == nullptr || m_commandMediator == nullptr || InventoryComponent == nullptr)
 	{
 		return;
 	}
 
-	UObject* material = InventoryComponent->Get(TEXT("UpgradeMaterial"), 0);
+	UObject* material = InventoryComponent->Get(TEXT("UpgradeMaterial"), idx);
 	if (material == nullptr)
 	{
 		return;
@@ -474,25 +593,40 @@ void ASmithPlayerActor::enhanceImpl()
 
 		MDebug::Log("Enhance Succeed!!!!!!!");
 		m_enhanceSystem->Enhance(Weapon, absorbItem);
-		InventoryComponent->Remove(TEXT("UpgradeMaterial"), 0);
+		InventoryComponent->Remove(TEXT("UpgradeMaterial"), idx);
 		m_commandMediator->SendIdleCommand(this);
+
+		// TODO
+		switchMenuStateImpl();
 	}
 	
 }
 
 void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 {
-	m_hp -= attack.AttackPower;
+	if (attack.AttackPower <= 0)
+	{
+		return;
+	}
+	
+	m_curtHP -= attack.AttackPower;
+	if (HPComponent != nullptr && m_maxHP > 0)
+	{
+		const float curtHPPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
+		HPComponent->SetHP(curtHPPercentage);
+	}
 
 	FString msg{};
 	msg.Append(GetName());
 	msg.Append(TEXT(" left HP:"));
-	msg.Append(FString::FromInt(m_hp));
+	msg.Append(FString::FromInt(m_curtHP));
 	MDebug::LogError(msg);
 
-	if (m_hp <= 0)
+	if (m_curtHP <= 0)
 	{
 		MDebug::LogError(TEXT("Player is dead"));
+
+		OnDead.ExecuteIfBound();
 
 		UWorld* world = GetWorld();
 		if (::IsValid(world))
@@ -551,6 +685,7 @@ void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 	}
 
 	MDebug::Log("Player TRIGGERED pick up item event");
+
 }
 
 void ASmithPlayerActor::PickUpConsume(USmithConsumeItem* consume)
@@ -560,6 +695,7 @@ void ASmithPlayerActor::PickUpConsume(USmithConsumeItem* consume)
 
 void ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
 {
+	MDebug::LogError(FString::FromInt((int64)upgrade));
 	if (!::IsValid(upgrade))
 	{
 		MDebug::LogError("can not pick --- material invalid");
@@ -573,4 +709,75 @@ void ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
 
 	InventoryComponent->Insert(TEXT("UpgradeMaterial"), upgrade);
 
+}
+
+void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
+{
+	if (AnimationComponent == nullptr)
+	{
+		return;
+	}
+
+	FName StateName;
+	float durationTime;
+	convertAnimState(animationState, StateName, durationTime);
+
+	AnimationComponent->SwitchAnimState(StateName, durationTime);
+}
+
+void ASmithPlayerActor::SwitchAnimationDelay(uint8 animationState, float delay)
+{
+	if (AnimationComponent == nullptr)
+	{
+		return;
+	}
+
+	FName StateName;
+	float dummy;
+	convertAnimState(animationState, StateName, dummy);
+	AnimationComponent->SwitchAnimStateDelay(StateName, delay);
+}
+
+void ASmithPlayerActor::UpdateAnimation(float deltaTime)
+{
+	if (AnimationComponent == nullptr)
+	{
+		return;
+	}
+
+	AnimationComponent->UpdateAnim(deltaTime);
+}
+
+bool ASmithPlayerActor::IsAnimationFinish() const
+{
+	return AnimationComponent == nullptr ? true : AnimationComponent->IsCurrentAnimationFinish();
+}
+
+void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName, float& outDurationTime)
+{
+	using namespace UE::Smith;
+	outName = TEXT("");
+	outDurationTime = 0.0f;
+
+	switch (animationState)
+	{
+		case SMITH_ANIM_IDLE:
+			outName = TEXT("Idle");
+			break;
+		case	SMITH_ANIM_WALK:
+			outName = TEXT("Walk");
+			break;
+		case SMITH_ANIM_ATTACK:
+			outName = TEXT("Attack");
+			outDurationTime = 1.0f;
+			break;
+		case SMITH_ANIM_DAMAGED:
+			outName = TEXT("Damaged");
+			break;
+		case SMITH_ANIM_DEAD:
+			outName = TEXT("Dead");
+			break;
+		default:
+			break;
+	}
 }

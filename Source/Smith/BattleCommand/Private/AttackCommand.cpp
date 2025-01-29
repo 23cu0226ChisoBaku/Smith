@@ -37,18 +37,6 @@ namespace UE::Smith::Command
       }
       void Update(float deltaTime)
       {
-        FString attackStr{};
-        if (m_attacker.IsValid())
-        {
-          attackStr.Append(m_attacker->_getUObject()->GetName());
-          m_attacker->Attack();
-        }
-        else
-        {
-          attackStr.Append(TEXT("EMPTY OBJECT"));
-        }
-        attackStr.Append(TEXT(" Attack"));
-
         if (m_animator.IsValid())
         {
           m_animator->UpdateAnimation(deltaTime);
@@ -56,6 +44,10 @@ namespace UE::Smith::Command
       }
       void End()
       {
+        if (m_attacker.IsValid())
+        {
+          m_attacker->Attack();
+        }
         if (m_animator.IsValid())
         {
           m_animator->SwitchAnimation(SMITH_ANIM_IDLE);
