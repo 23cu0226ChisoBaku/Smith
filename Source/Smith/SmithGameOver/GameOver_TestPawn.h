@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-
+#include "SmithGameOver/ICallable.h"
 #include "GameOver_TestPawn.generated.h"
 
 class Ugameover_test;
 
+
 UCLASS()
-class SMITH_API AGameOver_TestPawn : public APawn
+class SMITH_API AGameOver_TestPawn : public APawn,public IICallable
 {
 	GENERATED_BODY()
 
@@ -30,6 +31,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void OnDead();
+
+	void OnGameOver() override;
 
 	Ugameover_test* GameOverObject;
 

@@ -7,11 +7,14 @@
 #include "GameOverLevel.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class SMITH_API UGameOverLevel : public UObject
 {
 	GENERATED_BODY()
-	
+
+public:
+	void OpenLevel();
+
 };
