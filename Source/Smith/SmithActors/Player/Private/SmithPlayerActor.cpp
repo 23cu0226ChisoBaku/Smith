@@ -635,7 +635,6 @@ void ASmithPlayerActor::enhanceImpl(int32 idx)
 		// TODO
 		switchMenuStateImpl();
 	}
-	
 }
 
 void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
