@@ -9,6 +9,8 @@
 /**
  * 
  */
+
+
 UCLASS(Abstract,EditInlineNew)
 class SMITH_API USmithAIStrategy : public UObject
 {

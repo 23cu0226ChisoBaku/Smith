@@ -21,6 +21,9 @@ class SMITH_API ASmithEnemy : public ATurnBaseActor, public IAttackable
 public:
 	ASmithEnemy();
 
+public:
+	void Tick(float DeltaTime) override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -43,8 +46,6 @@ protected:
 	TObjectPtr<USmithMoveComponent> m_moveComp;
 	UPROPERTY()
 	TObjectPtr<USmithAttackComponent> m_attackComp;
-	UPROPERTY()
-	TObjectPtr<UHPWidgetComponent> m_hpComp;
 
 protected:
 	// 数を整数値にする//
