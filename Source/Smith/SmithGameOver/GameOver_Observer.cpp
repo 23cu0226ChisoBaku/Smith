@@ -15,6 +15,9 @@ AGameOver_Observer::AGameOver_Observer()
 void AGameOver_Observer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	gameOverLevel=NewObject<UGameOverLevel>(this);
+	callObejct.AddUOvject(&UGameOverLevel::OpenLevel);
 	
 }
 
@@ -23,5 +26,13 @@ void AGameOver_Observer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AGameOver_Observer::OnGameOver()
+{
+	if(GameOverEvent.IsBound())
+	{
+		GameOverEvent.Execute();
+	}
 }
 

@@ -34,8 +34,6 @@ public:
 
 	void OnGameOver() override;
 
-	Ugameover_test* GameOverObject;
-
 	UPROPERTY(EditAnywhere)
 	bool gameover;
 };

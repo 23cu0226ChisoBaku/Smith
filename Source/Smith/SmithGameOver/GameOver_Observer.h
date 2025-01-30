@@ -4,10 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "SmithGameOver/GameOver_TestPawn.h"
+#include "SmithGameOver/GameOverLevel.h"
 #include "GameOver_Observer.generated.h"
 
+DECLARE_DELEGATE(FGameOverEvent);
+
+
 UCLASS()
-class SMITH_API AGameOver_Observer : public AActor
+class SMITH_API AGameOver_Observer : public AActor,public IICallable
 {
 	GENERATED_BODY()
 	
@@ -20,7 +25,17 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+
+	virtual void OnGameOver() override final;
+
+
+
+public:
+	FGameOverEvent GameOverEvent;
+
+	AGameOver_TestPawn* callOvject; 
+
+	UGameOverLevel* gameOverLevel;
+	
 
 };

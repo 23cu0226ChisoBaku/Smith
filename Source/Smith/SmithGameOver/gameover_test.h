@@ -6,8 +6,6 @@
 #include "UObject/NoExportTypes.h"
 #include "gameover_test.generated.h"
 
-DECLARE_DELEGATE(FGameOverEvent);
-
 /**
  * 
  */
@@ -17,8 +15,5 @@ class SMITH_API Ugameover_test : public UObject
 	GENERATED_BODY()
 
 public:
-	FGameOverEvent GameOverEvent;
-
 	
-
 };

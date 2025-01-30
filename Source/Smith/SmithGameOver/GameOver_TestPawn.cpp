@@ -16,8 +16,6 @@ AGameOver_TestPawn::AGameOver_TestPawn()
 void AGameOver_TestPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	GameOverObject = NewObject<Ugameover_test>(this);
 
 }
 
@@ -44,13 +42,5 @@ void AGameOver_TestPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 void AGameOver_TestPawn::OnDead()
 {
 	OnGameOver();
-}
-
-void AGameOver_TestPawn::OnGameOver()
-{
-	if (GameOverObject != nullptr)
-	{
-
-	}
 }
 
