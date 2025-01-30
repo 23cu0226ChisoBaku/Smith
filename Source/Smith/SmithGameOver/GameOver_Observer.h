@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "SmithGameOver/GameOver_TestPawn.h"
 #include "SmithGameOver/GameOverLevel.h"
+#include "SmithGameOver/ICallable.h"
 #include "GameOver_Observer.generated.h"
 
 DECLARE_DELEGATE(FGameOverEvent);
 
 
 UCLASS()
-class SMITH_API AGameOver_Observer : public AActor,public IICallable
+class SMITH_API AGameOver_Observer : public AActor
 {
 	GENERATED_BODY()
 	
@@ -24,18 +24,16 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	
+
 public:	
 
-	virtual void OnGameOver() override final;
+	virtual void Tick(float DeltaTime) override;
 
-
+	void OnGameOver();
 
 public:
 	FGameOverEvent GameOverEvent;
-
-	AGameOver_TestPawn* callOvject; 
-
-	UGameOverLevel* gameOverLevel;
-	
-
+	UPROPERTY(EditAnywhere)
+	AGameOverLevel* gameOverLevel;
 };

@@ -5,13 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "SmithGameOver/ICallable.h"
+#include "SmithGameOver/GameOver_Observer.h"
 #include "GameOver_TestPawn.generated.h"
 
-class Ugameover_test;
-
-
 UCLASS()
-class SMITH_API AGameOver_TestPawn : public APawn,public IICallable
+class SMITH_API AGameOver_TestPawn : public APawn
 {
 	GENERATED_BODY()
 
@@ -32,8 +30,10 @@ public:
 
 	void OnDead();
 
-	void OnGameOver() override;
-
 	UPROPERTY(EditAnywhere)
 	bool gameover;
+
+	UPROPERTY(EditAnywhere)
+	AGameOver_Observer* GameOverActor;
+
 };

@@ -2,6 +2,7 @@
 
 
 #include "SmithGameOver/GameOver_Observer.h"
+#include "Debug.h"
 
 // Sets default values
 AGameOver_Observer::AGameOver_Observer()
@@ -16,9 +17,15 @@ void AGameOver_Observer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	gameOverLevel=NewObject<UGameOverLevel>(this);
-	callObejct.AddUOvject(&UGameOverLevel::OpenLevel);
-	
+	gameOverLevel = NewObject<AGameOverLevel>(this);
+	if (gameOverLevel != nullptr)
+	{
+		GameOverEvent.BindUObject(gameOverLevel, &AGameOverLevel::LoadLevel);
+	}
+	else
+	{
+		MDebug::LogError("GameOverLevel error");
+	}
 }
 
 // Called every frame

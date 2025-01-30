@@ -6,7 +6,30 @@
 #include "Misc/PackageName.h"
 #include "Kismet/GameplayStatics.h"
 
-void UGameOverLevel::OpenLevel()
+
+// Sets default values
+AGameOverLevel::AGameOverLevel()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+}
+
+// Called when the game starts or when spawned
+void AGameOverLevel::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+// Called every frame
+void AGameOverLevel::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+void AGameOverLevel::LoadLevel()
 {
 	FString levelpath = TEXT("/Game/TestLevel/ueno/GameOver_test");
 	if (FPackageName::DoesPackageExist(levelpath))

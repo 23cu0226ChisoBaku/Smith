@@ -2,7 +2,7 @@
 
 
 #include "SmithGameOver/GameOver_TestPawn.h"
-#include "Smith/SmithGameOver/gameover_test.h"
+#include "Debug.h"
 
 // Sets default values
 AGameOver_TestPawn::AGameOver_TestPawn()
@@ -17,6 +17,12 @@ void AGameOver_TestPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GameOverActor = NewObject<AGameOver_Observer>(this);
+	if (GameOverActor == nullptr)
+	{
+		MDebug::LogError("GameOverActor error");
+	}
+
 }
 
 // Called every frame
@@ -27,9 +33,7 @@ void AGameOver_TestPawn::Tick(float DeltaTime)
 	if (gameover == true)
 	{
 		OnDead();
-		
 	}
-
 }
 
 // Called to bind functionality to input
@@ -41,6 +45,9 @@ void AGameOver_TestPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void AGameOver_TestPawn::OnDead()
 {
-	OnGameOver();
+	if(GameOverActor!= nullptr)
+	{
+		GameOverActor->OnGameOver();
+	}
 }
 

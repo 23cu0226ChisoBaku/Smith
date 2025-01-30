@@ -3,18 +3,26 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "GameFramework/Actor.h"
 #include "GameOverLevel.generated.h"
 
-/**
- *
- */
 UCLASS()
-class SMITH_API UGameOverLevel : public UObject
+class SMITH_API AGameOverLevel : public AActor
 {
 	GENERATED_BODY()
+	
+public:	
+	// Sets default values for this actor's properties
+	AGameOverLevel(
+);
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
-public:
-	void OpenLevel();
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	void LoadLevel();
 
 };
