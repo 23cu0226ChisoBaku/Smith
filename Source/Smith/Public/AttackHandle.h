@@ -36,7 +36,6 @@ struct SMITH_API AttackHandle
 	int32 AttackPower;
 };
 
-const AttackHandle AttackHandle::NullHandle{};
 
 #endif
 

@@ -2,4 +2,6 @@
 
 #include "AttackHandle.h"
 
+const AttackHandle AttackHandle::NullHandle{};
+
 const FAttackHandle FAttackHandle::NullHandle{};
