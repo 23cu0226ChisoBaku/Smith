@@ -36,6 +36,8 @@
 
 #include "SmithBattleLogWorldSubsystem.h"
 
+#include "BattleParamHandle.h"
+
 #include "MLibrary.h"
 
 namespace SmithPlayerActor::Private
@@ -456,7 +458,6 @@ void ASmithPlayerActor::moveImpl(EDirection direction)
 
 void ASmithPlayerActor::attackImpl()
 {
-	// TODO deep nest is bad
 	if (m_commandMediator.IsValid())
 	{
 		FString attackKey = TEXT("");
@@ -474,7 +475,14 @@ void ASmithPlayerActor::attackImpl()
 		{
 			FParams attackParam = Weapon->GetParam();
 			const int32 atk = attackParam.ATK;
-			m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], AttackHandle{this, atk});
+
+			FAttackHandle paramHandle;
+			paramHandle.Attacker = this;
+			paramHandle.AttackPower = attackParam.ATK;
+			paramHandle.CriticalPower = attackParam.CRT;
+			paramHandle.Level = Weapon->GetLevel();
+			paramHandle.MotionValue = 1.0;
+			m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], paramHandle);
 		}
 	}
 }

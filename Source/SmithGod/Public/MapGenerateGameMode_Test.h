@@ -18,6 +18,9 @@ class USmithEnhanceSubsystem;
 class USmithEventPublishMediator;
 class USmithBattleLogWorldSubsystem;
 
+// Damage
+class USmithDungeonDamageCalculator;
+
 class UGameLogWidget;
 
 namespace UE::Smith
@@ -83,9 +86,14 @@ private:
 	TObjectPtr<USmithEventPublishMediator> m_eventMediator;
 	UPROPERTY()
 	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSubsystem;
+	UPROPERTY()
+	TObjectPtr<USmithDungeonDamageCalculator> m_damageCalculator;
 
 	UPROPERTY(EditAnywhere, Category = TEST)
 	TSubclassOf<AActor> TEST_ACTOR;
+
+	UPROPERTY(EditAnywhere)
+	double TEST_DAMAGE_CALCULATOR_CONSTANT;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;

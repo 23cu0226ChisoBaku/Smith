@@ -4,6 +4,7 @@
 #include "SmithDungeonDamageCalculator.h"
 #include "BattleParamHandle.h"
 #include "BattleResult.h"
+#include "MLibrary.h"
 
 USmithDungeonDamageCalculator::USmithDungeonDamageCalculator(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -18,10 +19,13 @@ FBattleResult USmithDungeonDamageCalculator::CalculateDamage( const FBattleAttac
                                                               const FBattleDefenseParamHandle& defender) const
 {
   int32 levelDifference = attacker.Level - defender.Level;
-  // 攻撃力　＊　定数^(攻撃者レベル　ー　攻撃を喰らう者のレベル)
-  int32 damage = FMath::CeilToInt32(StaticCast<double>(attacker.AttackPoint) * FMath::Pow(m_constant, StaticCast<double>(levelDifference))); 
+  // 攻撃力　＊　定数^(攻撃者レベル　ー　攻撃を喰らう者のレベル) 小数点切り捨て
+  int32 damage = FMath::FloorToInt32(StaticCast<double>(attacker.AttackPoint) * FMath::Pow(m_constant, StaticCast<double>(levelDifference))); 
 
   FBattleResult result;
   result.Damage = damage;
+
+  MDebug::Log("Calculate Damage");
+  MDebug::Log(FString::FromInt(damage));
   return result;
 } 

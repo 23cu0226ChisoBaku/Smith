@@ -36,6 +36,8 @@
 
 #include "GameLogWidget.h"
 
+#include "SmithDungeonDamageCalculator.h"
+
 #include "MLibrary.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
@@ -47,6 +49,7 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   , m_enhanceSystem(nullptr)
   , m_eventMediator(nullptr)
   , m_logSubsystem(nullptr)
+  , m_damageCalculator(nullptr)
   , m_mapMgr(nullptr)
 {
 
@@ -202,7 +205,11 @@ void AMapGenerateGameMode_Test::initializeGame()
     m_mapMgr = ::MakeShared<UE::Smith::Map::FSmithMapManager>();
     check(m_mapMgr.IsValid());
 
-    m_battleMediator->SetupMediator(m_battleSystem, m_mapMgr);
+    m_damageCalculator = NewObject<USmithDungeonDamageCalculator>(this);
+    check(m_damageCalculator != nullptr);
+    m_damageCalculator->SetConstantNumber(TEST_DAMAGE_CALCULATOR_CONSTANT);
+
+    m_battleMediator->SetupMediator(m_battleSystem, m_damageCalculator, m_mapMgr);
 
     m_mapMgr->AssignEventRegister(m_eventSystem);
     m_battleSystem->AssignEventExecutor(m_eventSystem);
@@ -231,6 +238,7 @@ void AMapGenerateGameMode_Test::initializeGame()
       UGameLogWidget* logWidget = CreateWidget<UGameLogWidget>(world, LogWidgetSub);
       m_logSubsystem->SetLogWidget(logWidget);
     }
+
   }
 
 }

@@ -164,19 +164,22 @@ namespace UE::MLibrary
 		*/
 		//---------------------------------------
 			public:
-
+				///
 				/// @brief 二次元配列の値を返す(読み込み専用)
 				/// @param row 行のインデックス
 				/// @param column 列のインデックス
 				/// @return 配列[行のインデックス][列のインデックス]のコンスト参照
+				///
 				const ElementType& At_ReadOnly(uint64 row, uint64 column) const &
 				{
 					return at_impl(row, column);
 				}
+				///
 				/// @brief 二次元配列の値を返す(読み込み専用)
 				/// @param row 行のインデックス
 				/// @param column 列のインデックス
 				/// @return 配列[行のインデックス][列のインデックス]のコンスト参照
+				///
 				const ElementType& At(uint64 row, uint64 column) const &
 				{
 					return at_impl(row, column);

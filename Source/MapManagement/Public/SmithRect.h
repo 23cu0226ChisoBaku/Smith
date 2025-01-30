@@ -5,9 +5,10 @@ SmithRect.h
 
 Author : MAI ZHICONG
 
-Description : Smith モジュール専用矩形
+Description : MapManagement モジュール専用矩形
 
 Update History: 2024/12/29 作成
+								2025/01/30 Description修正
 
 Version : alpha_1.0.0
 
