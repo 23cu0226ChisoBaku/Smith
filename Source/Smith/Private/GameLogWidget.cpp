@@ -8,6 +8,7 @@ void UGameLogWidget::NativeConstruct()
 {
   Super::NativeConstruct();
   m_isVisibility = false;
+  m_currentAlpha = GetColorAndOpacity();
 }
 
 void UGameLogWidget::NativeTick(const FGeometry &MyGeometry, float InDeltaTime)
@@ -18,9 +19,17 @@ void UGameLogWidget::NativeTick(const FGeometry &MyGeometry, float InDeltaTime)
   if ((m_visibleTime <= m_timer) && (m_isVisibility))
   {
     // 非表示にする
-    SetVisibility((ESlateVisibility)HIDDEN);
-    m_timer = 0.0f;
-    m_isVisibility = false;
+    m_currentAlpha.A -= m_alphaSubtractionSpeed;
+    if(m_currentAlpha.A <= 0.0f)
+    {
+      // リセット処理
+      m_timer = 0.0f;
+      m_currentAlpha.A = 0.0f;
+      m_isVisibility = false;
+      SetVisibility((ESlateVisibility)HIDDEN);
+    }
+    // カラー（アルファ）をセット
+    SetColorAndOpacity(m_currentAlpha);
   }
 }
 
@@ -54,7 +63,8 @@ void UGameLogWidget::OutPutLog()
 
   // 表示する
   SetVisibility((ESlateVisibility)VISIBLE);
-
+  m_currentAlpha.A = 1.0f;
+  SetColorAndOpacity(m_currentAlpha);
   m_isVisibility = true;
   m_timer = 0.0f;
 }

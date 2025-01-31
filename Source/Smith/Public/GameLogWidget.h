@@ -41,10 +41,14 @@ private:
 	// 表示するログの数
 	UPROPERTY(EditAnyWhere)
 	int32 m_maxVisibleQuantity;
+	// アルファを下げるスピード
+	UPROPERTY(EditAnyWhere)
+	float m_alphaSubtractionSpeed;
 
 private:
 	// ログを保存しておく
 	TArray<FString> m_logArray;
+	FLinearColor m_currentAlpha;
 	float m_timer;
 	bool m_isVisibility;
 };
