@@ -15,7 +15,6 @@
 #include "SmithUpgradeInteractiveComponent.h"
 #include "AttackHandle.h"
 #include "SmithCommandFormat.h"
-#include "Direction.h"
 #include "FormatInfo_Import.h"
 #include "MapObjType.h"
 #include "SmithNextLevelEvent.h"
@@ -42,26 +41,8 @@
 
 namespace SmithPlayerActor::Private
 {
-	#define DIRECTION_ENUM ASmithPlayerActor::EDir_Test
 	constexpr int32 PlayerHP_Temp = 30;
-
-	// 方向の数につき隣の方向の間の角度
-	constexpr double Angle_Per_Direction = 360.0 / (double)DIRECTION_ENUM::DirectionCnt;
-
-	// ベクトルを方向列挙に変換する(X,Yだけ,Zは無視)
-	DIRECTION_ENUM VectorDirToEDir(const FVector& direction)
-	{
-		const double dot = direction.Dot(FVector::ForwardVector);
-		const FVector cross = direction.Cross(FVector::ForwardVector);
-
-		const double angle = FMath::RadiansToDegrees(acos(dot));
-		// (1,0,0)(※EDir_Test::Northを表すベクトル)から時計回りに回転しdirectionまで回転した角度を計算
-		const double angleClockwise =  cross.Z > 0.0 ? (360.0 - angle) : angle; 
-		const DIRECTION_ENUM dir = StaticCast<DIRECTION_ENUM>(StaticCast<uint8>(round(angleClockwise / Angle_Per_Direction)) % DIRECTION_ENUM::DirectionCnt);
-		return dir;
-	}
-	
-	#undef DIRECTION_ENUM
+	constexpr double ANGLE_PER_DIRECTION = 360.0 / (double)EDirection::DirectionCount;
 }
 
 ASmithPlayerActor::ASmithPlayerActor()
@@ -78,14 +59,13 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, m_maxHP(SmithPlayerActor::Private::PlayerHP_Temp)
 	, m_rotateSpeed(720.0f)
 	, m_rotatingDirection(0)
-	, m_camDir(North)
-	, m_actorFaceDir(North)
+	, m_camDir(EDirection::North)
+	, m_actorFaceDir(EDirection::North)
 	, m_bCanMove(true)
 	, m_bCanAttack(true)
 	, m_bRotatingCamera(false)
 	, m_bIsInMenu(false)
 {
-	using namespace SmithPlayerActor::Private;
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -105,11 +85,6 @@ ASmithPlayerActor::ASmithPlayerActor()
 	CameraBoom->SetUsingAbsoluteRotation(true);
 	CameraBoom->SetWorldRotation(FRotator::ZeroRotator);
 
-	const FVector actorFwd = GetActorLocation().GetUnsafeNormal();
-	if (actorFwd != FVector::ZeroVector)
-	{
-		m_camDir = VectorDirToEDir(actorFwd);
-	}
 
 	SetTurnPriority(ETurnPriority::PlayerSelf);
 
@@ -138,14 +113,6 @@ void ASmithPlayerActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// Mapping Contextを設定
-	APlayerController* playerCtrl = Cast<APlayerController>(Controller);
-	check((playerCtrl != nullptr));
-
-	UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerCtrl->GetLocalPlayer());
-	check((enhancedInputSubsystem != nullptr));
-
-	enhancedInputSubsystem->AddMappingContext(MappingCtx, 0);
 	// TODO
 	for (auto& pair : AttackFormatTables)
 	{
@@ -176,6 +143,9 @@ void ASmithPlayerActor::BeginPlay()
 
 		if (HPComponent != nullptr)
 		{
+			// TODO
+			APlayerController* playerCtrl = Cast<APlayerController>(Controller);
+			check((playerCtrl != nullptr));
 			HPComponent->CreateHP(playerCtrl);
 			HPComponent->SetHP(1.0f);
 		}
@@ -200,42 +170,16 @@ void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ASmithPlayerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	// HPがなくなったらTickを停める
 	if (m_curtHP <= 0)
 	{
-
 		PrimaryActorTick.bCanEverTick = false;
 		return;
 	}
 
 	if (m_bRotatingCamera)
 	{
-		using namespace SmithPlayerActor::Private;
-		FRotator springArmNewRotator = CameraBoom->GetComponentRotation();
-		const double targetAngle = StaticCast<double>(m_camDir) * Angle_Per_Direction;
-		if (springArmNewRotator.Yaw < 0.0)
-		{
-			springArmNewRotator.Yaw += 360.0;
-		}
-
-		double leftAngle = targetAngle - springArmNewRotator.Yaw;
-		if (FMath::Abs(leftAngle) > 90.0)
-		{
-			leftAngle += 360.0 * StaticCast<double>(m_rotatingDirection);
-		}
-
-		float rotateAngle = m_rotateSpeed * DeltaTime * StaticCast<float>(m_rotatingDirection);
-		if (FMath::Abs(rotateAngle) > FMath::Abs(leftAngle))
-		{
-			rotateAngle = leftAngle;
-			m_bRotatingCamera = false;
-			m_rotatingDirection = 0;
-			EnableInput(Cast<APlayerController>(Controller));
-		}
-
-		springArmNewRotator.Yaw += StaticCast<double>(rotateAngle);
-		CameraBoom->SetWorldRotation(springArmNewRotator);
+		updateCamera(DeltaTime);
 	}
 
 }
@@ -244,20 +188,6 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 void ASmithPlayerActor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-
-	if (::IsValid(inputComp))
-	{
-		inputComp->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASmithPlayerActor::Move_Input);
-		inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Look_Input);
-		inputComp->BindAction(AttackAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Attack_Input);
-		inputComp->BindAction(ChangeForwardAction, ETriggerEvent::Started, this, &ASmithPlayerActor::ChangeForward_Input);
-		inputComp->BindAction(DebugAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Debug_SelfDamage_Input);
-		inputComp->BindAction(MenuAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Menu_Input);
-		inputComp->BindAction(SelectMenuAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Menu_Input_Select);
-		inputComp->BindAction(InteractMenuAction, ETriggerEvent::Started, this, &ASmithPlayerActor::Menu_Input_Interact);
-	}
 }
 
 void ASmithPlayerActor::SetCommandMediator(ICommandMediator* mediator)
@@ -270,130 +200,14 @@ void ASmithPlayerActor::SetEnhanceSystem(IEnhanceSystem* enhanceSystem)
 	m_enhanceSystem = enhanceSystem;
 }
 
-void ASmithPlayerActor::Move_Input(const FInputActionValue& value)
+void ASmithPlayerActor::SelectNextMenuItem(float selectDirection)
 {
 	if (!IsCommandSendable())
 	{
 		return;
 	}
 
-	using namespace SmithPlayerActor::Private;
-
-	FVector2D movementInput = value.Get<FVector2D>();
-	movementInput.Normalize();
-	if (movementInput.IsNearlyZero())
-	{
-		return;
-	}
-
-	// カメラの角度で回転ベクトルを計算する
-	const double cameraAngle = FMath::DegreesToRadians(StaticCast<double>(m_camDir) * Angle_Per_Direction);
-	double directionX = movementInput.Y * cos(cameraAngle) - movementInput.X * sin(cameraAngle);
-	double directionY = movementInput.Y * sin(cameraAngle) + movementInput.X * cos(cameraAngle);
-
-	// TODO ゼロ補正
-	if (FMath::IsNearlyZero(directionX))
-	{
-		directionX = 0.0;
-	}
-
-	if (FMath::IsNearlyZero(directionY))
-	{
-		directionY = 0.0;
-	}
-
-	const EDir_Test newDir = VectorDirToEDir(FVector{directionX, directionY, 0.0});
-	changeFwdImpl(newDir);
-	moveImpl(StaticCast<EDirection>(newDir));
-}
-
-void ASmithPlayerActor::Attack_Input(const FInputActionValue& value)
-{
-	if (!IsCommandSendable())
-	{
-		return;
-	}
-
-	attackImpl();
-}
-
-void ASmithPlayerActor::Look_Input(const FInputActionValue& value)
-{
-	if (!IsCommandSendable())
-	{
-		return;
-	}
-
-	float lookInput = value.Get<float>();
-
-	uint8 newDir = StaticCast<uint8>(m_camDir);
-
-	// TODO
-	MDebug::Log(FString::SanitizeFloat(lookInput));
-	if (lookInput > 0.0f)
-	{
-		newDir += East;
-		m_rotatingDirection = 1;
-	}
-	else if (lookInput < 0.0f)
-	{
-		newDir += West;
-		m_rotatingDirection = -1;
-	}
-
-	updateCamImpl(StaticCast<EDir_Test>(newDir % DirectionCnt));
-}
-
-void ASmithPlayerActor::ChangeForward_Input(const FInputActionValue& value)
-{
-	// TODO 同じ処理のため修正
-	if (!IsCommandSendable())
-	{
-		return;
-	}
-
-	using namespace SmithPlayerActor::Private;
-
-	FVector2D movementInput = value.Get<FVector2D>();
-	movementInput.Normalize();
-	if (movementInput.IsNearlyZero())
-	{
-		return;
-	}
-
-	// カメラの角度で回転ベクトルを計算する
-	const double cameraAngle = FMath::DegreesToRadians(StaticCast<double>(m_camDir) * Angle_Per_Direction);
-	double directionX = movementInput.Y * cos(cameraAngle) - movementInput.X * sin(cameraAngle);
-	double directionY = movementInput.Y * sin(cameraAngle) + movementInput.X * cos(cameraAngle);
-
-	// TODO ゼロ補正
-	if (FMath::IsNearlyZero(directionX))
-	{
-		directionX = 0.0;
-	}
-
-	if (FMath::IsNearlyZero(directionY))
-	{
-		directionY = 0.0;
-	}
-
-	const EDir_Test newDir = VectorDirToEDir(FVector{directionX, directionY, 0.0});
-	changeFwdImpl(newDir);
-}
-
-void ASmithPlayerActor::Debug_SelfDamage_Input(const FInputActionValue& value)
-{
-	OnAttack(
-						{ 
-							this,		// Logger
-							1000,		// Damage
-						}
-					);
-}
-
-void ASmithPlayerActor::Menu_Input(const FInputActionValue& value)
-{
-	if (!IsCommandSendable())
+	if (!m_bIsInMenu)
 	{
 		return;
 	}
@@ -403,66 +217,62 @@ void ASmithPlayerActor::Menu_Input(const FInputActionValue& value)
 		return;
 	}
 
-	switchMenuStateImpl();
-}
-
-void ASmithPlayerActor::Menu_Input_Select(const FInputActionValue& value)
-{
-	if (UpgradeInteractiveComponent == nullptr)
-	{
-		return;
-	}
-
-	double inputValue = value.Get<float>();
-
-	if (inputValue < 0)
+	// 上のアイテムを選択
+	if (selectDirection < 0)
 	{
 		UpgradeInteractiveComponent->SelectNextItem(ESelectDirection::Up);
 	}
-	else if (inputValue > 0)
+	// 下のアイテムを選択
+	else if (selectDirection > 0)
 	{
 		UpgradeInteractiveComponent->SelectNextItem(ESelectDirection::Down);
 	}
-	else
-	{
-		MDebug::LogWarning("No input");
-	}
 }
-
-void ASmithPlayerActor::Menu_Input_Interact(const FInputActionValue& value)
+bool ASmithPlayerActor::InteractMenu()
 {
-
 	if (!IsCommandSendable())
 	{
-		return;
+		return false;
 	}
 
 	if (UpgradeInteractiveComponent == nullptr || !m_bIsInMenu)
 	{
-		return;
+		return false;
 	}
 
 	int32 idx = UpgradeInteractiveComponent->GetSelectingItemIdx();
 
-	enhanceImpl(idx);
+	return enhanceImpl(idx);
 }
 
-void ASmithPlayerActor::moveImpl(EDirection direction)
+void ASmithPlayerActor::Move(EDirection newDirection)
 {
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
+	// 移動する前に向きを変える
+	ChangeForward(newDirection);
 	// 移動コマンドを出す
 	if (::IsValid(MoveComponent) && m_commandMediator.IsValid())
 	{
-		m_commandMediator->SendMoveCommand(this, MoveComponent, direction, 1);
+		m_commandMediator->SendMoveCommand(this, MoveComponent, newDirection, 1);
 	}
 }
 
-void ASmithPlayerActor::attackImpl()
+void ASmithPlayerActor::Attack()
 {
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
 	if (m_commandMediator.IsValid())
 	{
 		FString attackKey = TEXT("");
 		// 斜めだったら
-		if (m_actorFaceDir % 2 == 1)
+		if (StaticCast<uint8>(m_actorFaceDir) % 2 == 1)
 		{
 			attackKey = TEXT("AttackDiagonal");
 		}
@@ -487,10 +297,14 @@ void ASmithPlayerActor::attackImpl()
 	}
 }
 
-void ASmithPlayerActor::changeFwdImpl(EDir_Test newDirection)
+void ASmithPlayerActor::ChangeForward(EDirection newDirection)
 {
-	using namespace SmithPlayerActor::Private;
+	if (!IsCommandSendable())
+	{
+		return;
+	}
 
+	using namespace SmithPlayerActor::Private;
 	// 今の向きと変えようとする向きが同じだったら処理しない
 	if (m_actorFaceDir == newDirection)
 	{
@@ -498,43 +312,48 @@ void ASmithPlayerActor::changeFwdImpl(EDir_Test newDirection)
 	}
 
 	m_actorFaceDir = newDirection;
-	const double newYaw = StaticCast<double>(m_actorFaceDir) * Angle_Per_Direction;
+	const double newYaw = StaticCast<double>(m_actorFaceDir) * ANGLE_PER_DIRECTION;
 	SetActorRelativeRotation(FRotator(0.0, newYaw, 0.0));
 }
 
-void ASmithPlayerActor::updateCamImpl(EDir_Test newDirection)
+void ASmithPlayerActor::ChangeCameraDirection(EDirection newDirection, bool bIsClockwise)
 {
-	using namespace SmithPlayerActor::Private;
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
 	if (!::IsValid(CameraBoom))
 	{
 		return;
 	}
 
-	if (m_camDir == newDirection)
+	m_rotatingDirection = bIsClockwise ? 1 : -1;
+	m_bRotatingCamera = true;
+	m_camDir = newDirection;
+	
+	if (OnStartCameraRotation.IsBound())
+	{
+		OnStartCameraRotation.Broadcast();
+	}
+
+}
+
+void ASmithPlayerActor::OpenMenu()
+{
+	if (!IsCommandSendable())
 	{
 		return;
 	}
 
-	m_bRotatingCamera = true;
-	m_camDir = newDirection;
-	DisableInput(Cast<APlayerController>(Controller));
-
-}
-
-void ASmithPlayerActor::switchMenuStateImpl()
-{
-	m_bIsInMenu = !m_bIsInMenu;
-
-	APlayerController* playerCtrl = Cast<APlayerController>(Controller);
-	check((playerCtrl != nullptr));
-
-	UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerCtrl->GetLocalPlayer());
-	check((enhancedInputSubsystem != nullptr));
-	
-	if (m_bIsInMenu)
+	if (UpgradeInteractiveComponent == nullptr)
 	{
-		enhancedInputSubsystem->RemoveMappingContext(MappingCtx);
-		enhancedInputSubsystem->AddMappingContext(MappingCtx_Menu, 0);
+		return;
+	}
+
+	if (!m_bIsInMenu)
+	{
+		m_bIsInMenu = true;
 		if (Weapon != nullptr)
 		{
 			UpgradeInteractiveComponent->SetWeaponInfo(Weapon->GetHandle());
@@ -550,15 +369,30 @@ void ASmithPlayerActor::switchMenuStateImpl()
 			}
 		} 
 		UpgradeInteractiveComponent->ActivateUpgradeMenu();
-
 	}
-	else
+
+	if (HPComponent != nullptr)
 	{
-		enhancedInputSubsystem->RemoveMappingContext(MappingCtx_Menu);
-		enhancedInputSubsystem->AddMappingContext(MappingCtx, 0);
+		HPComponent->SetWidgetVisibility(!m_bIsInMenu);
+	}
+}
 
+void ASmithPlayerActor::CloseMenu()
+{
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
+	if (UpgradeInteractiveComponent == nullptr)
+	{
+		return;
+	}
+
+	if (m_bIsInMenu)
+	{
+		m_bIsInMenu = false;
 		UpgradeInteractiveComponent->DeactivateUpgradeMenu();
-
 	}
 
 	if (HPComponent != nullptr)
@@ -616,33 +450,66 @@ bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTab
 	return true;
 }
 
-void ASmithPlayerActor::enhanceImpl(int32 idx)
+bool ASmithPlayerActor::enhanceImpl(int32 idx)
 {
 	if (m_enhanceSystem == nullptr || m_commandMediator == nullptr || InventoryComponent == nullptr)
 	{
-		return;
+		return false;
 	}
 
 	UObject* material = InventoryComponent->Get(TEXT("UpgradeMaterial"), idx);
 	if (material == nullptr)
 	{
-		return;
+		return false;
 	}
 
+	IParamAbsorbable* absorbItem = Cast<IParamAbsorbable>(material);
+	if (absorbItem == nullptr)
 	{
-		IParamAbsorbable* absorbItem = Cast<IParamAbsorbable>(material);
-		if (absorbItem == nullptr)
-		{
-			return;
-		}
-
-		m_enhanceSystem->Enhance(Weapon, absorbItem);
-		InventoryComponent->Remove(TEXT("UpgradeMaterial"), idx);
-		m_commandMediator->SendIdleCommand(this);
-
-		// TODO
-		switchMenuStateImpl();
+		return false;
 	}
+
+	// TODO
+	CloseMenu();
+
+	m_enhanceSystem->Enhance(Weapon, absorbItem);
+	InventoryComponent->Remove(TEXT("UpgradeMaterial"), idx);
+	m_commandMediator->SendIdleCommand(this);
+
+	return true;
+	
+}
+
+void ASmithPlayerActor::updateCamera(float deltaTime)
+{
+	using namespace SmithPlayerActor::Private;
+	FRotator springArmNewRotator = CameraBoom->GetComponentRotation();
+	const double targetAngle = StaticCast<double>(m_camDir) * ANGLE_PER_DIRECTION;
+	if (springArmNewRotator.Yaw < 0.0)
+	{
+		springArmNewRotator.Yaw += 360.0;
+	}
+
+	double leftAngle = targetAngle - springArmNewRotator.Yaw;
+	if (FMath::Abs(leftAngle) > 90.0)
+	{
+		leftAngle += 360.0 * StaticCast<double>(m_rotatingDirection);
+	}
+
+	float rotateAngle = m_rotateSpeed * deltaTime * StaticCast<float>(m_rotatingDirection);
+	if (FMath::Abs(rotateAngle) > FMath::Abs(leftAngle))
+	{
+		rotateAngle = leftAngle;
+		m_bRotatingCamera = false;
+		m_rotatingDirection = 0;
+		if (OnFinishCameraRotation.IsBound())
+		{
+			OnFinishCameraRotation.Broadcast();
+		}
+	}
+
+	springArmNewRotator.Yaw += StaticCast<double>(rotateAngle);
+	CameraBoom->SetWorldRotation(springArmNewRotator);		
 }
 
 void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
@@ -863,4 +730,14 @@ FString ASmithPlayerActor::GetName_Log() const
 EBattleLogType ASmithPlayerActor::GetType_Log() const
 {
 	return EBattleLogType::Player;
+}
+
+EDirection ASmithPlayerActor::GetCameraDirection() const
+{
+	return m_camDir;
+}
+
+void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
+{
+	m_curtHP -= damage;
 }

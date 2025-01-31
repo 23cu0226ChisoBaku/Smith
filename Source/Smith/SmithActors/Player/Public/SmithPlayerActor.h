@@ -20,6 +20,7 @@ Encoding : UTF-8
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "UObject/WeakInterfacePtr.h"
+#include "Direction.h"
 #include "ITurnManageable.h"
 #include "IAttackable.h"
 #include "ICanCommandMediate.h"
@@ -87,22 +88,6 @@ class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
 																			 , public ISmithAnimator, public ISmithBattleLogger
 {
 	GENERATED_BODY()
-
-// TODO Test用方向列挙
-public:
-	enum EDir_Test : uint8
-	{
-		North = 0,						// 上方向
-		NorthEast = 1,				// 右上
-		East = 2,							// 右
-		SouthEast = 3,				// 右下
-		South = 4,						// 下
-		SouthWest = 5,				// 左下
-		West = 6,							// 左
-		NorthWest = 7,				// 左上
-
-		DirectionCnt,					// 選べられる方向の数
-	};
 
 //---------------------------------------
 /*
@@ -182,28 +167,27 @@ public:
 #pragma endregion Interfaces Override
 // end of Interfaces Override
 
+public:
+	EDirection GetCameraDirection() const;
+
+public:
+	void Move(EDirection);
+	void Attack();
+	void ChangeForward(EDirection);
+	void ChangeCameraDirection(EDirection, bool bIsClockwise);
+	void OpenMenu();
+	void CloseMenu();
+	void SelectNextMenuItem(float direction);
+	bool InteractMenu();
+	bool registerAttackFormat(const FString&, const UDataTable*);
+
+	void SelfDamage_Debug(int32);
+
 // Private Functions
 #pragma region Private Functions
 private:
-	void moveImpl(EDirection);
-	void attackImpl();
-	void changeFwdImpl(EDir_Test);
-	void updateCamImpl(EDir_Test);
-	void enhanceImpl(int32 idx);
-	void switchMenuStateImpl();
-	bool registerAttackFormat(const FString&, const UDataTable*);
-
-private:
-	// Input bind Functions
-	void Move_Input(const FInputActionValue&);
-	void Attack_Input(const FInputActionValue&);
-	void Look_Input(const FInputActionValue&);
-	void Debug_SelfDamage_Input(const FInputActionValue&);
-	void Menu_Input(const FInputActionValue&);
-	void Menu_Input_Select(const FInputActionValue&);
-	void Menu_Input_Interact(const FInputActionValue&);
-	void ChangeForward_Input(const FInputActionValue&);
-	
+	bool enhanceImpl(int32 idx);
+	void updateCamera(float deltaTime);
 #pragma endregion Private Functions
 // end of Private Functions
 
@@ -234,33 +218,6 @@ private:
 	TObjectPtr<UHPUIComponent> HPComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USmithUpgradeInteractiveComponent> UpgradeInteractiveComponent;
-
-
-	// Enhanced Input
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputMappingContext> MappingCtx;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputMappingContext> MappingCtx_Menu;
-	/** 移動インプットアクション */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> MoveAction;
-	/** 攻撃インプットアクション */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> AttackAction;
-	/** カメラ移動インプットアクション */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> CameraAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> ChangeForwardAction;
-	/** デバッグ専用！！ */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> DebugAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> MenuAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> SelectMenuAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> InteractMenuAction;
 	
 	/** 攻撃フォーマット */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
@@ -288,6 +245,8 @@ private:
 
 public:
 	TDelegate<void()> OnDead;
+	TMulticastDelegate<void()> OnStartCameraRotation;
+	TMulticastDelegate<void()> OnFinishCameraRotation;
 //---------------------------------------
 /*
             プライベートプロパティ
@@ -300,8 +259,8 @@ private:
 	int32 m_maxHP;
 	float m_rotateSpeed;
 	int32 m_rotatingDirection;
-	EDir_Test m_camDir;
-	EDir_Test m_actorFaceDir;
+	EDirection m_camDir;
+	EDirection m_actorFaceDir;
 	uint8 m_bCanMove : 1;
 	uint8 m_bCanAttack : 1;
 	uint8 m_bRotatingCamera : 1;

@@ -24,8 +24,5 @@ FBattleResult USmithDungeonDamageCalculator::CalculateDamage( const FBattleAttac
 
   FBattleResult result;
   result.Damage = damage;
-
-  MDebug::Log("Calculate Damage");
-  MDebug::Log(FString::FromInt(damage));
   return result;
 } 
