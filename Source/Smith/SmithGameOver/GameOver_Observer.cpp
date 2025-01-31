@@ -12,6 +12,7 @@ AGameOver_Observer::AGameOver_Observer()
 
 }
 
+
 // Called when the game starts or when spawned
 void AGameOver_Observer::BeginPlay()
 {
