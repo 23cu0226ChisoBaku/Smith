@@ -163,6 +163,8 @@ namespace UE::Smith
           TMap<FMapCoord, ICanSetOnMap*> deployMapObjs{};
           m_mapObserver->InitMapObj(deployMapObjs, world, player, generateBP);
 
+          MDebug::Log(FString::FromInt(deployMapObjs.Num()));
+
           for(const auto& deployPair : deployMapObjs)
           {
             m_deployDirector->DeployMapObj(deployPair.Value, deployPair.Key.x, deployPair.Key.y);
@@ -182,7 +184,7 @@ namespace UE::Smith
           {
             return;
           }
-          auto nextLevelEvent = eventPublisher->PublishMapEvent<USmithNextLevelEvent>(USmithNextLevelEvent::StaticClass());
+          USmithNextLevelEvent* nextLevelEvent = eventPublisher->PublishMapEvent<USmithNextLevelEvent>(USmithNextLevelEvent::StaticClass());
           if (nextLevelEvent == nullptr)
           {
             MDebug::LogError("Publish failed");
@@ -201,9 +203,10 @@ namespace UE::Smith
             uint8 nextLevelEventCoordX = 0;
             uint8 nextLevelEventCoordY = 0;
             FVector nextLevelEventDestination = FVector::ZeroVector;
+            FRotator nextLevelEventRotation = FRotator::ZeroRotator;
 
-            m_mapObserver->InitNextLevelEvent_Temp(nextLevelEventCoordX, nextLevelEventCoordY, nextLevelEventDestination);
-            m_deployDirector->DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY);
+            m_mapObserver->InitNextLevelEvent_Temp(nextLevelEventCoordX, nextLevelEventCoordY, nextLevelEventDestination, nextLevelEventRotation);
+            m_deployDirector->DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY, nextLevelEventRotation);
 
             m_mapEvents.Emplace(nextLevelEvent);
           }

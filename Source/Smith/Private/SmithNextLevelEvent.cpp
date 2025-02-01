@@ -24,7 +24,7 @@ void USmithNextLevelEvent::BeginDestroy()
   Super::BeginDestroy();
 }
 
-void USmithNextLevelEvent::InitializeEvent(const FVector& location)
+void USmithNextLevelEvent::InitializeEvent(const FVector& location, const FRotator& rotation)
 {  
   if (m_eventAppearance == nullptr)
   {
@@ -39,7 +39,7 @@ void USmithNextLevelEvent::InitializeEvent(const FVector& location)
         return;
       }
 
-      m_eventAppearance = world->SpawnActor<AActor>(subClass.Get(), location, FRotator::ZeroRotator);
+      m_eventAppearance = world->SpawnActor<AActor>(subClass.Get(), location, rotation);
     }
   }
 }

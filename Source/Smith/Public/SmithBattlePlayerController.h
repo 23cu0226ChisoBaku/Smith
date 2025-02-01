@@ -45,6 +45,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = PlayerInputAction)
 	TObjectPtr<UInputAction> ChangeForwardAction;
 	UPROPERTY(EditDefaultsOnly, Category = PlayerInputAction)
+	TObjectPtr<UInputAction> UseRecoveryAction;
+	UPROPERTY(EditDefaultsOnly, Category = PlayerInputAction)
 	TObjectPtr<UInputAction> OpenMenuAction;
 	UPROPERTY(EditDefaultsOnly, Category = PlayerInputAction)
 	TObjectPtr<UInputAction> CloseMenuAction;
@@ -65,6 +67,7 @@ private:
 	void Debug_SelfDamage(const FInputActionValue&);
 	void OpenMenu(const FInputActionValue&);
 	void CloseMenu(const FInputActionValue&);
+	void UseRecovery(const FInputActionValue&);
 	void InMenuSelect(const FInputActionValue&);
 	void InMenuInteract(const FInputActionValue&);
 

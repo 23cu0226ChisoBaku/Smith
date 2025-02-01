@@ -93,7 +93,7 @@ namespace UE::Smith
 				///
 				void InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
 				void ClearMapObjs_IgnorePlayer();
-				void InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination);
+				void InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination, FRotator& rotation);
 				bool ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
 				bool GetMapObjectCoord(ICanSetOnMap*, uint8& outX, uint8& outY);
 				/// @brief 未使用

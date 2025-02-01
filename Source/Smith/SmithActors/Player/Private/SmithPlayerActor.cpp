@@ -159,6 +159,16 @@ void ASmithPlayerActor::BeginPlay()
 		}
 	}
 
+	if (InventoryComponent != nullptr)
+	{
+		for (int32 i = 0; i < 3; ++i)
+		{
+			USmithHPItem* item = NewObject<USmithHPItem>();
+			item->SetRecoveryPercentage(0.2);
+			bool insertResult = InventoryComponent->Insert(TEXT("ConsumeItem"), item);
+		}
+	}
+
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -401,6 +411,35 @@ void ASmithPlayerActor::CloseMenu()
 	}
 }
 
+void ASmithPlayerActor::RecoverHealth()
+{
+	if (!IsCommandSendable())
+	{
+		return;
+	}
+
+	if (InventoryComponent == nullptr)
+	{
+		return;
+	}
+
+	UObject* consume = InventoryComponent->Get(TEXT("ConsumeItem"), 0);
+	USmithConsumeItem* consumeItem = Cast<USmithConsumeItem>(consume);
+	if (consumeItem == nullptr)
+	{
+		return;
+	}
+
+	consumeItem->Use(this);
+	InventoryComponent->Remove(TEXT("ConsumeItem"), 0);
+
+	if (m_commandMediator.IsValid())
+	{
+		m_commandMediator->SendIdleCommand(this);
+	}
+	
+}
+
 bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTable* formatTable)
 {
 	if (m_normalAttackFormatBuffer.Contains(name))
@@ -626,29 +665,12 @@ void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 	if (success)
 	{
 		IPickable* pickable = event->GetPickable();
-		if (pickable != nullptr)
+		if (IS_UINTERFACE_VALID(pickable))
 		{
-			pickable->OnPick(this);
+			InventoryComponent->Insert(pickable->GetPickType(), pickable->_getUObject());
 			event->RaiseEvent();
 		}
 	}
-}
-
-bool ASmithPlayerActor::PickUpConsume(USmithConsumeItem* consume)
-{
-	unimplemented();
-	return false;
-}
-
-bool ASmithPlayerActor::PickUpMaterial(USmithUpgradeMaterial* upgrade)
-{
-	if (!::IsValid(upgrade))
-	{
-		MDebug::LogError("can not pick --- material invalid");
-		return false;
-	}
-
-	return InventoryComponent->Insert(TEXT("UpgradeMaterial"), upgrade);
 }
 
 void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
@@ -663,6 +685,29 @@ void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
 	convertAnimState(animationState, StateName, durationTime);
 
 	AnimationComponent->SwitchAnimState(StateName, durationTime);
+}
+
+void ASmithPlayerActor::UseItem(USmithHPItem* item)
+{
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	const double recoveryPercentage = item->GetRecoveryPercentage();
+	const int32 recovery = StaticCast<int32>(StaticCast<double>(m_maxHP) * recoveryPercentage);
+
+	m_curtHP += recovery;
+	if (m_curtHP > m_maxHP)
+	{
+		m_curtHP = m_maxHP;
+	}
+
+	const float curtHPPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
+	if (HPComponent != nullptr)
+	{
+		HPComponent->SetHP(curtHPPercentage);
+	}
 }
 
 void ASmithPlayerActor::SwitchAnimationDelay(uint8 animationState, float delay)

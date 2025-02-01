@@ -67,6 +67,11 @@ private:
 	FSmithMapConstructionBluePrint MapConstructionBluePrint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint EnemyGenerateBluePrint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
+	FSmithMapBluePrint BossMapBluePrint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
+	FSmithEnemyGenerateBluePrint BossGenerateBluePrint;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UGameLogWidget> LogWidgetSub;
 
@@ -97,4 +102,5 @@ private:
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
+	uint8 m_curtLevel;
 };

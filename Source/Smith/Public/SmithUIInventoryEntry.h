@@ -7,7 +7,7 @@
 #include "Blueprint/IUserObjectListEntry.h"
 #include "SmithUIInventoryEntry.generated.h"
 
-class UTextBlock;
+class URichTextBlock;
 class UImage;
 /**
  * 
@@ -30,6 +30,6 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> ItemIconImage;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> ItemNameLabel;
+	TObjectPtr<URichTextBlock> ItemNameLabel;
 	
 };

@@ -25,7 +25,7 @@ class SMITH_API ISmithMapEvent
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void InitializeEvent(const FVector&) = 0;
+	virtual void InitializeEvent(const FVector&, const FRotator& = FRotator::ZeroRotator) = 0;
 	virtual void TriggerEvent(ICanSetOnMap*) = 0;
 	virtual void DiscardEvent() = 0;
 	virtual void RaiseEvent() = 0;

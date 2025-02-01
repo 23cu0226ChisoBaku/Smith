@@ -117,54 +117,63 @@ namespace UE::Smith
           }
 
           // オブジェクトの中心座標
-          const FMapCoord mapObjOriginCoord = model_shared->OnMapObjsCoordTable[mapObj];
 
-          const EMapObjType trackerType = mapObj->GetType();
-
-          // 攻撃フォーマットをマップオブジェクトの中心座標でマップ座標に変換
-          using namespace UE::MLibrary::MDataStructure;
-          TDimension2Array<FMapCoord> mapCoords = FFormatTransformer::FormatToMapCoord(format, mapObjOriginCoord);
-
-          for (uint64 y = 0; y < format.GetRow(); ++y)
+          const uint8 mapObjSizeX = mapObj->GetOnMapSizeX();
+          const uint8 mapObjSizeY = mapObj->GetOnMapSizeY();
+          for (uint8 coordX = 0u; coordX < mapObjSizeX; ++coordX)
           {
-            for (uint64 x = 0; x < format.GetColumn(); ++x)
+            for (uint8 coordY = 0u; coordY < mapObjSizeY; ++coordY)
             {
-              ESmithFormatType formatType = format.GetFormatData(x, y);
-              // 効果がないマスだったら無視する
-              if (formatType != ESmithFormatType::EFFECT)
-              {
-                continue;
-              }
+              const FMapCoord mapObjOriginCoord = model_shared->OnMapObjsCoordTable[mapObj] + FMapCoord(coordX, coordY);
 
-              // マス座標がものを置ける座標じゃないと飛ばす
-              const FMapCoord mapCoord = mapCoords.At_ReadOnly(y, x);
-              if (!model_shared->StaySpaceTable.Contains(mapCoord))
-              {
-                continue;
-              }
+              const EMapObjType trackerType = mapObj->GetType();
 
-              // 座標にマップオブジェクトがないと飛ばす
-              ICanSetOnMap* coordMapObj = model_shared->StaySpaceTable[mapCoord]->GetMapObject();
-              if (coordMapObj == nullptr || coordMapObj == mapObj)
-              {
-                continue;
-              }
+              // 攻撃フォーマットをマップオブジェクトの中心座標でマップ座標に変換
+              using namespace UE::MLibrary::MDataStructure;
+              TDimension2Array<FMapCoord> mapCoords = FFormatTransformer::FormatToMapCoord(format, mapObjOriginCoord);
 
-              if (coordMapObj->GetType() == trackerType)
+              for (uint64 y = 0; y < format.GetRow(); ++y)
               {
-                continue;
-              }
+                for (uint64 x = 0; x < format.GetColumn(); ++x)
+                {
+                  ESmithFormatType formatType = format.GetFormatData(x, y);
+                  // 効果がないマスだったら無視する
+                  if (formatType != ESmithFormatType::EFFECT)
+                  {
+                    continue;
+                  }
 
-              // TODO Safe Cast may cause performance issue
-              // マップオブジェクトが攻撃できないと飛ばす
-              IAttackable* attackable = Cast<IAttackable>(coordMapObj);
-              if (!IS_UINTERFACE_VALID(attackable))
-              {
-                continue;
-              }
+                  // マス座標がものを置ける座標じゃないと飛ばす
+                  const FMapCoord mapCoord = mapCoords.At_ReadOnly(y, x);
+                  if (!model_shared->StaySpaceTable.Contains(mapCoord))
+                  {
+                    continue;
+                  }
 
-              outActors.Add(attackable);
-            }
+                  // 座標にマップオブジェクトがないと飛ばす
+                  ICanSetOnMap* coordMapObj = model_shared->StaySpaceTable[mapCoord]->GetMapObject();
+                  if (coordMapObj == nullptr || coordMapObj == mapObj)
+                  {
+                    continue;
+                  }
+
+                  if (coordMapObj->GetType() == trackerType)
+                  {
+                    continue;
+                  }
+
+                  // TODO Safe Cast may cause performance issue
+                  // マップオブジェクトが攻撃できないと飛ばす
+                  IAttackable* attackable = Cast<IAttackable>(coordMapObj);
+                  if (!IS_UINTERFACE_VALID(attackable))
+                  {
+                    continue;
+                  }
+
+                  outActors.Add(attackable);
+                }
+              }
+            } 
           }
         }
         void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
@@ -405,13 +414,23 @@ namespace UE::Smith
           const int32 newMapObjOriginCoordY = StaticCast<int32>(mapObjOriginCoord.y) + distanceY;
           const FMapCoord newMapObjOriginCoord(StaticCast<uint8>(newMapObjOriginCoordX), StaticCast<uint8>(newMapObjOriginCoordY));
           model_shared->OnMapObjsCoordTable[mapObj] = newMapObjOriginCoord;
-
+          
+          const uint8 mapSizeX = mapObj->GetOnMapSizeX();
+          const uint8 mapSizeY = mapObj->GetOnMapSizeY();
+          const FVector mapObjoffset = FVector(
+                                      StaticCast<double>((mapSizeX - 1u) * m_mapTileSize) * 0.5,
+                                      StaticCast<double>((mapSizeY - 1u) * m_mapTileSize) * 0.5,
+                                      0.0
+                                    );
           // TODO
-          destination = m_originCoord_World + FVector(
-                                                      newMapObjOriginCoordX * m_mapTileSize, 
-                                                      newMapObjOriginCoordY * m_mapTileSize, 
-                                                      0.0
-                                                     );
+          destination = m_originCoord_World 
+                      + FVector(
+                                newMapObjOriginCoordX * m_mapTileSize, 
+                                newMapObjOriginCoordY * m_mapTileSize, 
+                                0.0
+                                )
+                      + mapObjoffset;
+
         }
       private:
         TWeakPtr<Model> m_model;

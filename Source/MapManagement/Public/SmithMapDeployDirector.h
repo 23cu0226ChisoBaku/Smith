@@ -91,7 +91,7 @@ namespace UE::Smith
 				/// @param	y												Y座標
 				///
 				void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
-				void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y);
+				void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y, const FRotator& = FRotator::ZeroRotator);
 			#pragma endregion FSmithMapDeployDirector Interface
 			// end of FSmithMapDeployDirector Interface
 			private:

@@ -30,6 +30,7 @@ Encoding : UTF-8
 #include "ICanUseEnhanceSystem.h"
 #include "ISmithAnimator.h"
 #include "ISmithBattleLogger.h"
+#include "IItemUseable.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -84,8 +85,8 @@ UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
 																			 , public IAttackable, public ICanCommandMediate
 																			 , public ICanSetOnMap, public IEventTriggerable
-																			 , public ICanUseEnhanceSystem, public ICanPick
-																			 , public ISmithAnimator, public ISmithBattleLogger
+																			 , public ICanUseEnhanceSystem, public ISmithAnimator
+																			 , public ISmithBattleLogger, public IItemUseable
 {
 	GENERATED_BODY()
 
@@ -146,10 +147,6 @@ public:
 		void OnTriggerEvent(USmithPickUpItemEvent*) override final;
 
 	public:
-		bool PickUpConsume(USmithConsumeItem*) override final;
-		bool PickUpMaterial(USmithUpgradeMaterial*) override final;
-
-	public:
 		void SwitchAnimation(uint8 animationState) override final;
 		void SwitchAnimationDelay(uint8 animationState, float delay) override final;
 		void UpdateAnimation(float deltaTime) override final;
@@ -158,6 +155,9 @@ public:
 	public:
 		FString GetName_Log() const override;
 		EBattleLogType GetType_Log() const override;
+
+	public:
+		void UseItem(USmithHPItem*);
 	
 	private:
 		void convertAnimState(uint8 animationState, FName& outName, float& outDurationTime);
@@ -179,6 +179,7 @@ public:
 	void CloseMenu();
 	void SelectNextMenuItem(float direction);
 	bool InteractMenu();
+	void RecoverHealth();
 	bool registerAttackFormat(const FString&, const UDataTable*);
 
 	void SelfDamage_Debug(int32);

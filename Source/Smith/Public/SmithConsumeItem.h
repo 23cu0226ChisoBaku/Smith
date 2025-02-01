@@ -6,6 +6,8 @@
 #include "SmithPickable.h"
 #include "SmithConsumeItem.generated.h"
 
+class IItemUseable;
+
 /**
  * 
  */
@@ -19,9 +21,11 @@ public:
 	virtual void BeginDestroy() override;
 	
 public:
-	void Use();
+	void Use(IItemUseable*);
 
 private:
-	virtual void useImpl() PURE_VIRTUAL(USmithConsumeItem::useImpl);
+	virtual void useImpl(IItemUseable*) PURE_VIRTUAL(USmithConsumeItem::useImpl);
 	
+public:
+	EBattleLogType GetType_Log() const override final;
 };

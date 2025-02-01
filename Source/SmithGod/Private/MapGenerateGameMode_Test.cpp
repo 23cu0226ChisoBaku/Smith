@@ -51,6 +51,7 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   , m_logSubsystem(nullptr)
   , m_damageCalculator(nullptr)
   , m_mapMgr(nullptr)
+  , m_curtLevel(0)
 {
 
 }
@@ -83,9 +84,18 @@ void AMapGenerateGameMode_Test::startNewLevel()
 
   m_chasePlayerTracker->SetupTracker(m_mapMgr, mapPlayer);
 
-  m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
-  m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
-  m_mapMgr->InitMapEvents(GetWorld(), m_eventPublisher);
+  if (m_curtLevel % 5 == 0)
+  {
+    m_mapMgr->InitMap(GetWorld(), BossMapBluePrint, MapConstructionBluePrint);
+    m_mapMgr->InitMapObjs(GetWorld(), playerPawn, BossGenerateBluePrint);
+  }
+  else
+  {
+    m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
+    m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
+    m_mapMgr->InitMapEvents(GetWorld(), m_eventPublisher);
+  }
+
   m_battleSystem->InitializeBattle();
 
   {
@@ -238,13 +248,15 @@ void AMapGenerateGameMode_Test::initializeGame()
       UGameLogWidget* logWidget = CreateWidget<UGameLogWidget>(world, LogWidgetSub);
       m_logSubsystem->SetLogWidget(logWidget);
     }
-
   }
+
+  m_curtLevel = 1u;
 
 }
 
 void AMapGenerateGameMode_Test::goToNextLevel()
 {
   clearCurrentLevel();
+  ++m_curtLevel;
   startNewLevel();
 }

@@ -21,11 +21,12 @@ void USmithPickUpItemEvent::BeginDestroy()
   Super::BeginDestroy();
 }
 
-void USmithPickUpItemEvent::InitializeEvent(const FVector& location)
+void USmithPickUpItemEvent::InitializeEvent(const FVector& location, const FRotator& rotation)
 {
   if (m_pickableAppearence != nullptr)
   {
     m_pickableAppearence->SetActorLocation(location);
+    m_pickableAppearence->SetActorRotation(rotation);
     m_pickableAppearence->SetActorHiddenInGame(false);
   }
 }

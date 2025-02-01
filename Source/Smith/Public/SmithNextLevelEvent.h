@@ -24,7 +24,7 @@ public:
 	virtual void BeginDestroy() override;
 	
 public:
-	void InitializeEvent(const FVector&) override final;
+	void InitializeEvent(const FVector&, const FRotator&) override final;
 	void TriggerEvent(ICanSetOnMap*) override final;
 	void DiscardEvent() override final;
 	void RaiseEvent() override final;

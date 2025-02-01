@@ -17,7 +17,6 @@
 UCLASS(EditInlineNew,CollapseCategories)
 class SMITH_API USmithUpgradeMaterial : public USmithPickable, public IParamAbsorbable
 																			, public ISmithItemWidgetParameterizable, public ISmithBattleParameterizable
-																			, public ISmithBattleLogger
 {
 	GENERATED_BODY()
 
@@ -35,19 +34,14 @@ public:
 	FString GetDescription() const override;
 
 public:
-	FString GetName_Log() const override;
-	EBattleLogType GetType_Log() const override;
+	EBattleLogType GetType_Log() const override final;
 
 public:
 	FParams GetParam_Interface() const override;
-private:
-	void onPickImpl(ICanPick*) override;
 
 private:
 	UPROPERTY(EditAnywhere, Category = ItemWidgetParameter)
 	TObjectPtr<UTexture2D> Icon;
-	UPROPERTY(EditAnywhere, Category = ItemWidgetParameter)
-	FString Name;
 	UPROPERTY(EditAnywhere, Category = ItemWidgetParameter)
 	FString Description;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Parameter, meta = (AllowPrivateAccess = "true"))

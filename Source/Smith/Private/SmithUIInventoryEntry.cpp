@@ -2,7 +2,7 @@
 
 
 #include "SmithUIInventoryEntry.h"
-#include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Components/Image.h"
 #include "ISmithItemWidgetParameterizable.h"
 

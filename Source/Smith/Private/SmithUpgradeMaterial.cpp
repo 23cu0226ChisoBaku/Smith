@@ -40,27 +40,12 @@ UTexture2D* USmithUpgradeMaterial::GetIconImage() const
 
 FString USmithUpgradeMaterial::GetName() const
 {
-  return Name;
+  return GetName_Log();
 }
 
 FString USmithUpgradeMaterial::GetDescription() const
 {
   return Description;
-}
-
-void USmithUpgradeMaterial::onPickImpl(ICanPick* picker)
-{
-  if (!IS_UINTERFACE_VALID(picker))
-  {
-    return;
-  }
-
-  picker->PickUpMaterial(this);
-}
-
-FString USmithUpgradeMaterial::GetName_Log() const
-{
-  return Name;
 }
 
 EBattleLogType USmithUpgradeMaterial::GetType_Log() const

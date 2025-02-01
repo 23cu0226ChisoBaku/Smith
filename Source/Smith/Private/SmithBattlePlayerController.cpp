@@ -94,6 +94,7 @@ void ASmithBattlePlayerController::SetupInputComponent()
 		inputComp->BindAction(ChangeForwardAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::ChangeForward);
 		inputComp->BindAction(OpenMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::OpenMenu);
 		inputComp->BindAction(CloseMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::CloseMenu);
+    inputComp->BindAction(UseRecoveryAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::UseRecovery);
 		inputComp->BindAction(SelectMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::InMenuSelect);
 		inputComp->BindAction(InteractMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::InMenuInteract);
 		inputComp->BindAction(DebugAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::Debug_SelfDamage);
@@ -203,6 +204,16 @@ void ASmithBattlePlayerController::CloseMenu(const FInputActionValue& inputValue
   }
 
   m_player->CloseMenu();
+}
+
+void ASmithBattlePlayerController::UseRecovery(const FInputActionValue& inputValue)
+{
+  if (m_player == nullptr)
+  {
+    return;
+  }
+
+  m_player->RecoverHealth();
 }
 void ASmithBattlePlayerController::InMenuSelect(const FInputActionValue& inputValue)
 {
