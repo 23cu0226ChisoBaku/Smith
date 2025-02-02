@@ -4,6 +4,9 @@
 #include "SmithUpgradeInformationWindow.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "SmithUpgradeParamWidget.h"
+#include "SmithRichUpgradeParam.h"
+#include "../Weapon/Params.h"
 
 USmithUpgradeInformationWindow::USmithUpgradeInformationWindow(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -15,13 +18,26 @@ void USmithUpgradeInformationWindow::NativeConstruct()
   ResetWidget();
 }
 
-void USmithUpgradeInformationWindow::SetEnhancableEquipmentLabel(const FString& labelName)
+void USmithUpgradeInformationWindow::SetEnhancableEquipmentLabel(const FString& labelName, int32 level)
 {
   if (EnhancableEquipmentLabel == nullptr)
   {
     return;
   }
-  EnhancableEquipmentLabel->SetText(FText::FromString(labelName));
+
+  FString convertedName = labelName;
+  if (level > 1)
+  {
+    convertedName.Append(TEXT(" + "));
+    convertedName.Append(FString::FromInt(level - 1));
+  }
+  else if (level < 1)
+  {
+    convertedName.Append(TEXT(" - "));
+    convertedName.Append(FString::FromInt(level - 1));
+  }
+
+  EnhancableEquipmentLabel->SetText(FText::FromString(convertedName));
 }
 
 void USmithUpgradeInformationWindow::SetEnhancableEquipmentImage(UTexture2D* texture)
@@ -36,21 +52,49 @@ void USmithUpgradeInformationWindow::SetEnhancableEquipmentImage(UTexture2D* tex
 
 void USmithUpgradeInformationWindow::SetParamAbsorbableMaterialLabel(const FString& labelName)
 {
-  if (ParamAbsorbableMaterialLabel != nullptr)
-  {
-    ParamAbsorbableMaterialLabel->SetText(FText::FromString(labelName));
-  }
+
 }
 
 
 void USmithUpgradeInformationWindow::SetParamAbsorbableMaterialImage(UTexture2D* texture)
 {
-  if (ParamAbsorbableMaterialImage == nullptr || !::IsValid(texture))
+
+}
+
+void USmithUpgradeInformationWindow::SetUpgradeParams(FParams beforeParam, FParams upgradeParam)
+{
+  if (BeforeUpgradeParam != nullptr)
   {
-    return;
+    BeforeUpgradeParam->UpdateParam(beforeParam, FParams{});
   }
 
-  ParamAbsorbableMaterialImage->SetBrushFromTexture(texture);
+  if (AfterUpgradeParam != nullptr)
+  {
+    AfterUpgradeParam->UpdateParam(beforeParam, upgradeParam);
+  }
+}
+
+void USmithUpgradeInformationWindow::SetUpgradeButtonVisibility(bool bIsVisible)
+{
+  ESlateVisibility visibility;
+  if (bIsVisible)
+  {
+    visibility = ESlateVisibility::Visible;
+  }
+  else
+  {
+    visibility = ESlateVisibility::Hidden;
+  }
+
+  if (UpgradeButton != nullptr)
+  {
+    UpgradeButton->SetVisibility(visibility);
+  }
+
+  if (ButtonFadeEffect != nullptr)
+  {
+    ButtonFadeEffect->SetVisibility(visibility);
+  }
 }
 
 void USmithUpgradeInformationWindow::ResetWidget()
@@ -65,14 +109,16 @@ void USmithUpgradeInformationWindow::ResetWidget()
     EnhancableEquipmentImage->SetBrushFromTexture(nullptr);
   }
 
-  if (ParamAbsorbableMaterialLabel != nullptr)
+  if (BeforeUpgradeParam != nullptr)
   {
-    ParamAbsorbableMaterialLabel->SetText(FText::FromString(TEXT("強化素材を選ぶ。")));
+    BeforeUpgradeParam->ResetWidget();
   }
 
-  if (ParamAbsorbableMaterialImage != nullptr)
+  if (AfterUpgradeParam != nullptr)
   {
-    ParamAbsorbableMaterialImage->SetBrushFromTexture(nullptr);
+    AfterUpgradeParam->ResetWidget();
   }
+
+  SetUpgradeButtonVisibility(false);  
 }
 

@@ -13,14 +13,20 @@ class UTexture2D;
 struct FSmithWeaponInfoHandle
 {
 	FString Name;
+	FParams Param;
+	int32 Level;
 	UTexture2D* Image2D;
 
 	FSmithWeaponInfoHandle()
 		: Name{}
+		, Param{}
+		, Level(1)
 		, Image2D(nullptr)
 	{ }
-	FSmithWeaponInfoHandle(FString name, UTexture2D* image2D)
+	FSmithWeaponInfoHandle(FString name, FParams param, int32 level, UTexture2D* image2D)
 		: Name(name)
+		, Param(param)
+		, Level(level)
 		, Image2D(image2D)
 	{ }
 };
@@ -41,7 +47,7 @@ public:
 	int32 GetLevel() const;
 	FSmithWeaponInfoHandle GetHandle() const
 	{
-		FSmithWeaponInfoHandle handle(Name, WeaponImage2D);
+		FSmithWeaponInfoHandle handle(Name, WeaponParam, m_weaponLevel, WeaponImage2D);
 		return handle;
 	}
 

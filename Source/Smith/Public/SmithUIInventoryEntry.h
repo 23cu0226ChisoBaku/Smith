@@ -30,6 +30,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> ItemIconImage;
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> LabelBackground;
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<URichTextBlock> ItemNameLabel;
 	
 };

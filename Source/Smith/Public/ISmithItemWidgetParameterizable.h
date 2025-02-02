@@ -23,6 +23,7 @@ class SMITH_API ISmithItemWidgetParameterizable
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual UTexture2D* GetIconImage() const = 0;
+	virtual FColor GetLabelColor() const = 0;
 	virtual FString GetName() const = 0;
 	virtual FString GetDescription() const = 0;
 };

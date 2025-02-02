@@ -12,6 +12,8 @@ USmithUpgradeMaterial::USmithUpgradeMaterial(const FObjectInitializer& ObjectIni
   Param = FParams{0,3,0,0};
 }
 
+
+
 void USmithUpgradeMaterial::BeginDestroy()
 {
   Super::BeginDestroy();
@@ -36,6 +38,39 @@ void USmithUpgradeMaterial::AddParam(FParams)
 UTexture2D* USmithUpgradeMaterial::GetIconImage() const
 {
   return Icon;
+}
+
+FColor USmithUpgradeMaterial::GetLabelColor() const
+{
+  int32 maxParam = -999;
+  FColor resultColor = FColor::Black;
+
+  if (maxParam < Param.HP)
+  {
+    maxParam = Param.HP;
+    resultColor = FColor::Green;  
+  }
+
+  if (maxParam < Param.ATK)
+  {
+    maxParam = Param.ATK;
+    resultColor = FColor::Red;
+  }
+
+  if (maxParam < Param.DEF)
+  {
+    maxParam = Param.DEF;
+    resultColor = FColor::Blue;
+  }
+
+  if (maxParam < Param.CRT)
+  {
+    maxParam = Param.CRT;
+    resultColor = FColor::Yellow;
+  }
+
+  resultColor.A = StaticCast<uint8>(255.0 * 0.9);
+  return resultColor;
 }
 
 FString USmithUpgradeMaterial::GetName() const

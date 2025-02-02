@@ -30,6 +30,7 @@ public:
 	
 public:
 	UTexture2D* GetIconImage() const override;
+	FColor GetLabelColor() const override;
 	FString GetName() const override;
 	FString GetDescription() const override;
 
@@ -42,7 +43,7 @@ public:
 private:
 	UPROPERTY(EditAnywhere, Category = ItemWidgetParameter)
 	TObjectPtr<UTexture2D> Icon;
-	UPROPERTY(EditAnywhere, Category = ItemWidgetParameter)
+	UPROPERTY(EditAnywhere, Category = ItemWidgetParameter, meta = (MultiLine = true))
 	FString Description;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Parameter, meta = (AllowPrivateAccess = "true"))
 	FParams Param;

@@ -22,6 +22,7 @@ void USmithUIInventoryEntry::NativeOnListItemObjectSet(UObject* listItemObject)
   if (itemParam != nullptr)
   {
     ItemNameLabel->SetText(FText::FromString(itemParam->GetName()));
+    LabelBackground->SetBrushTintColor(itemParam->GetLabelColor());
     ItemIconImage->SetBrushFromTexture(itemParam->GetIconImage());
     SelectArrow->SetVisibility(ESlateVisibility::Hidden);
   }
