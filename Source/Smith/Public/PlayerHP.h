@@ -35,6 +35,8 @@ public:
 public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UUserWidget> m_widget;
+	UPROPERTY(BlueprintReadOnly)
+	float m_percent;
 
 private:
 	UPROPERTY()

@@ -31,5 +31,5 @@ private:
 
 protected:
 	TMap<FString, TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_attackFormatTables;
-
+	
 };
