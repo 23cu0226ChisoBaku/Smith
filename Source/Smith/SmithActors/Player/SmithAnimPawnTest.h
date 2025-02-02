@@ -35,6 +35,9 @@ public:
 	virtual void UpdateAnimation(float deltaTime) override;
 	virtual bool IsAnimationFinish() const override;
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Events")
+	void OpenGameOverUI();
+
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USmithAnimationComponent>AnimationComp;
 

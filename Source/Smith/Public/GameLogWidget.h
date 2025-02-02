@@ -9,6 +9,9 @@
 
 #define VISIBLE 0 // 表示
 #define HIDDEN 2	// 非表示
+
+class URichTextBlock;
+class UBorder;
 /**
  *
  */
@@ -30,21 +33,49 @@ public:
 	// BP側でログの表示をする（cppでは呼び出しだけ）
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnLog_BP();
+	UFUNCTION(BlueprintImplementableEvent)
+	void AddLog_BP();
+
+public:
+	// BP側の変数とバインド（処理が終わっているのでプロジェクトが終わったら改善する）
+	UPROPERTY(BluePrintReadWrite,meta = (BindWidget))
+	URichTextBlock* RichText1;
+	UPROPERTY(BluePrintReadWrite,meta = (BindWidget))
+	URichTextBlock* RichText2;
+	UPROPERTY(BluePrintReadWrite,meta = (BindWidget))
+	URichTextBlock* RichText3;
+	UPROPERTY(BluePrintReadWrite,meta = (BindWidget))
+	URichTextBlock* RichText4;
+
+	UPROPERTY(BluePrintReadWrite,meta = (BindWidget))
+	UBorder* Border1;
+	UPROPERTY(BluePrintReadWrite,meta = (BindWidget))
+	UBorder* Border2;
+	UPROPERTY(BluePrintReadWrite,meta = (BindWidget))
+	UBorder* Border3;
+	UPROPERTY(BluePrintReadWrite,meta = (BindWidget))
+	UBorder* Border4;
 
 private:
 	// この変数に文字列を格納してBP側で使う
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TestGameLog", meta = (AllowPrivateAccess = "true"))
-	FString m_outPutLog;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "TestGameLog", meta = (AllowPrivateAccess = "true"))
+	TArray<FString> m_outputLogArr;
+	// 超過した分保存しておく
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "TestGameLog", meta = (AllowPrivateAccess = "true"))
+	TArray<FString> m_logStorage;
 	// ログを非表示にするタイム
 	UPROPERTY(EditAnyWhere)
 	float m_visibleTime;
 	// 表示するログの数
-	UPROPERTY(EditAnyWhere)
+	UPROPERTY(EditAnyWhere,BluePrintReadOnly,meta = (AllowPrivateAccess = "true") )
 	int32 m_maxVisibleQuantity;
+	// アルファを下げるスピード
+	UPROPERTY(EditAnyWhere)
+	float m_alphaSubtractionSpeed;
 
 private:
-	// ログを保存しておく
-	TArray<FString> m_logArray;
+	TArray<UBorder*> m_borderArr;
+	FLinearColor m_currentAlpha;
 	float m_timer;
 	bool m_isVisibility;
 };
