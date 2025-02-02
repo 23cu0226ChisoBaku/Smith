@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SmithAIAttackStrategy.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "SmithAIConditionAttackStrategy.generated.h"
 
 class ICommandMediator;

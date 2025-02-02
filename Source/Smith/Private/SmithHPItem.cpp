@@ -2,6 +2,7 @@
 
 
 #include "SmithHPItem.h"
+#include "IItemUseable.h"
 #include "MLibrary.h"
 
 USmithHPItem::USmithHPItem(const FObjectInitializer& ObjectInitializer)
@@ -13,11 +14,24 @@ USmithHPItem::USmithHPItem(const FObjectInitializer& ObjectInitializer)
 void USmithHPItem::BeginDestroy()
 {
   Super::BeginDestroy();
-
-  MDebug::LogWarning("HP Item Destroyed");
 }
 
-void USmithHPItem::useImpl()
+void USmithHPItem::useImpl(IItemUseable* user)
 {
-  MDebug::Log("Use HP ITem");
+  if (user == nullptr)
+  {
+    return;
+  }
+
+  user->UseItem(this);
+}
+
+void USmithHPItem::SetRecoveryPercentage(double percentage)
+{
+  RecoveryPercentage = percentage;
+}
+
+double USmithHPItem::GetRecoveryPercentage() const
+{
+  return RecoveryPercentage;
 }

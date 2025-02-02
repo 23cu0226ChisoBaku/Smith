@@ -16,6 +16,13 @@ class USmithEventPublisher;
 class USmithEventSystem;
 class USmithEnhanceSubsystem;
 class USmithEventPublishMediator;
+class USmithBattleLogWorldSubsystem;
+class UUI_CurrentLevel;
+
+// Damage
+class USmithDungeonDamageCalculator;
+
+class UGameLogWidget;
 
 namespace UE::Smith
 {
@@ -61,6 +68,14 @@ private:
 	FSmithMapConstructionBluePrint MapConstructionBluePrint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint EnemyGenerateBluePrint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
+	FSmithMapBluePrint BossMapBluePrint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
+	FSmithEnemyGenerateBluePrint BossGenerateBluePrint;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UGameLogWidget> LogWidgetSub;
+
 	UPROPERTY()
 	TObjectPtr<USmithBattleSubsystem> m_battleSystem;
 	UPROPERTY()
@@ -75,10 +90,23 @@ private:
 	TObjectPtr<USmithEnhanceSubsystem> m_enhanceSystem;
 	UPROPERTY()
 	TObjectPtr<USmithEventPublishMediator> m_eventMediator;
+	UPROPERTY()
+	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSubsystem;
+	UPROPERTY()
+	TObjectPtr<USmithDungeonDamageCalculator> m_damageCalculator;
 
 	UPROPERTY(EditAnywhere, Category = TEST)
 	TSubclassOf<AActor> TEST_ACTOR;
 
+	UPROPERTY(EditAnywhere)
+	double TEST_DAMAGE_CALCULATOR_CONSTANT;
+
+	UPROPERTY()
+	TObjectPtr<UUI_CurrentLevel> CurtLevelUI;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUI_CurrentLevel> LevelUISub;
+
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
+	uint8 m_curtLevel;
 };

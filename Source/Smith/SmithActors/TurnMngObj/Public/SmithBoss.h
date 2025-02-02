@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SmithActors/TurnMngObj/Public/SmithEnemy.h"
+#include "SmithEnemy.h"
 #include "ICanSetOnMap.h"
 #include "ISmithSimpleAIDriven.h"
 #include "MapObjType.h"
 #include "../Weapon/Params.h"
 #include "ICanRequestEventPublishment.h"
+#include "SmithAIConditionBindHandle.h"
 #include "SmithBoss.generated.h"
 
 class USmithAIConditionAttackStrategy;
@@ -18,6 +19,8 @@ class USmithAttackComponent;
 class USmithPickable;
 
 struct FSmithAIStrategyContainer;
+
+// TODO ???????????????????????????
 struct FSmithAIConditionBindHandle;
 
 DECLARE_DELEGATE_RetVal(bool,FConditionDelegate);

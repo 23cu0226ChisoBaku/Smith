@@ -24,7 +24,8 @@ void USmithItemDescriptionWidget::SetItemInformation(const FString& ItemName, co
 {
   if (ItemNameTextBlock != nullptr)
   {
-    ItemNameTextBlock->SetText(FText::FromString(ItemName));
+    const FString nameStr = TEXT("◇"); 
+    ItemNameTextBlock->SetText(FText::FromString(nameStr + ItemName));
   }
 
   if (ItemDescriptionTextBlock != nullptr)

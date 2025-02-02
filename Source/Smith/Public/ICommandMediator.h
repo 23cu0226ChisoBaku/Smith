@@ -10,6 +10,7 @@ class IMoveable;
 class ICanMakeAttack;
 class IAttackable;
 struct AttackHandle;
+struct FAttackHandle;
 enum class EDirection : uint8;
 
 namespace UE::Smith
@@ -36,4 +37,6 @@ public:
 	virtual bool SendMoveCommand(AActor*, IMoveable*, EDirection, uint8 moveDistance) = 0;
 	virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&, bool bAttackEvenNoTarget = true) = 0;
 	virtual bool SendIdleCommand(AActor*) = 0;
+
+	virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) = 0;
 };

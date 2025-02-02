@@ -25,6 +25,10 @@ void USmithWeapon::Upgrade(IParamAbsorbable* absorbItem)
   }
 
   WeaponParam += absorbItem->GetParam();
+  if (OnUpgrade.IsBound())
+  {
+    OnUpgrade.Broadcast(absorbItem->GetParam());
+  }
   ++m_weaponLevel;
 }
 

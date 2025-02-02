@@ -40,7 +40,7 @@ void ASpawnActorGameMode_Test::StartPlay()
   m_battleMediator = NewObject<USmithBattleMediator>();
   check((m_battleMediator != nullptr));
 
-  m_battleMediator->SetupMediator(subsys, m_mapMgr);
+  m_battleMediator->SetupMediator(subsys, nullptr, m_mapMgr);
 
   TArray<AActor*> canCmdMediateObjs;
   UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UCanCommandMediate::StaticClass(), canCmdMediateObjs);
