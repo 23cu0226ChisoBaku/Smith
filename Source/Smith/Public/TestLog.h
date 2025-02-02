@@ -8,6 +8,7 @@
 
 class UUserWidget;
 class UGameLogWidget;
+class URichTextBlock;
 
 UCLASS()
 class SMITH_API ATestLog : public APawn
