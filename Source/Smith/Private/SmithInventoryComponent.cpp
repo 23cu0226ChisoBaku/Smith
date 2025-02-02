@@ -86,6 +86,16 @@ UObject* USmithInventoryComponent::Get(const FString& inventoryCategoryName, int
 	return InventoryContainers[inventoryCategoryName].ObjectContainer[containerIdx];
 }
 
+int32 USmithInventoryComponent::GetQuantity(const FString& inventoryCategoryName) const
+{
+	if (!InventoryContainers.Contains(inventoryCategoryName))
+	{
+		return -1;
+	}
+
+	return InventoryContainers[inventoryCategoryName].ObjectContainer.Num();
+}
+
 bool USmithInventoryComponent::check_Internal(const FString& inventoryCategoryName, UObject* itemObject) const
 {
 	if (!InventoryContainers.Contains(inventoryCategoryName))

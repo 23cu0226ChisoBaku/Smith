@@ -51,6 +51,10 @@ public:
 		return handle;
 	}
 
+// TODO
+public:
+	TMulticastDelegate<void(FParams)> OnUpgrade;
+	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = WeaponParameter, meta = (AllowPrivateAccess = "true"))
 	FParams WeaponParam;

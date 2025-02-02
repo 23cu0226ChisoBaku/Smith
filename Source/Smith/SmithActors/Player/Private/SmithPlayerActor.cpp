@@ -36,6 +36,7 @@
 #include "SmithBattleLogWorldSubsystem.h"
 
 #include "BattleParamHandle.h"
+#include "HerbWidget.h"
 
 #include "MLibrary.h"
 
@@ -134,7 +135,7 @@ void ASmithPlayerActor::BeginPlay()
 			Weapon->SetParam(FParams{50, 10, 10, 10});
 		}
 	}
-	
+	Weapon->OnUpgrade.AddUObject(this, &ASmithPlayerActor::updateParam);
 	Weapon->Rename(nullptr, this);
 
 	{
@@ -169,11 +170,24 @@ void ASmithPlayerActor::BeginPlay()
 		}
 	}
 
+	if (HerbUISub != nullptr)
+	{
+		m_herbUI = CreateWidget<UHerbWidget>(GetWorld(), HerbUISub);
+		if (m_herbUI != nullptr && InventoryComponent != nullptr) 
+		{
+			m_herbUI->AddToViewport();
+			m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
+		}
+	}
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+	if (Weapon != nullptr)
+	{
+		Weapon->OnUpgrade.Clear();
+	}
 }
 
 // Called every frame
@@ -385,6 +399,11 @@ void ASmithPlayerActor::OpenMenu()
 	{
 		HPComponent->SetWidgetVisibility(!m_bIsInMenu);
 	}
+
+	if (m_herbUI != nullptr)
+	{
+		m_herbUI->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void ASmithPlayerActor::CloseMenu()
@@ -409,6 +428,11 @@ void ASmithPlayerActor::CloseMenu()
 	{
 		HPComponent->SetWidgetVisibility(!m_bIsInMenu);
 	}
+
+	if (m_herbUI != nullptr)
+	{
+		m_herbUI->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void ASmithPlayerActor::RecoverHealth()
@@ -432,6 +456,11 @@ void ASmithPlayerActor::RecoverHealth()
 
 	consumeItem->Use(this);
 	InventoryComponent->Remove(TEXT("ConsumeItem"), 0);
+	
+	if (m_herbUI != nullptr)
+	{
+		m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
+	}
 
 	if (m_commandMediator.IsValid())
 	{
@@ -642,6 +671,7 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 	event->RaiseEvent();
 }
 
+// TODO Refactoring
 void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 {
 	if (!::IsValid(event))
@@ -669,6 +699,14 @@ void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 		{
 			InventoryComponent->Insert(pickable->GetPickType(), pickable->_getUObject());
 			event->RaiseEvent();
+
+			// TODO!!!!!!!
+			// View専用クラスを作成し、コールバックを呼び出す
+			// ActorはModel専用で！！！
+			if (m_herbUI != nullptr)
+			{
+				m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
+			}
 		}
 	}
 }
@@ -785,4 +823,21 @@ EDirection ASmithPlayerActor::GetCameraDirection() const
 void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
 {
 	m_curtHP -= damage;
+}
+
+// TODO!!!!!! 
+void ASmithPlayerActor::updateParam(FParams upgradeParam)
+{
+	if (upgradeParam.HP != 0)
+	{
+		const float curtPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
+
+		m_maxHP += upgradeParam.HP;
+		m_curtHP = FMath::CeilToInt32(StaticCast<float>(m_maxHP) * curtPercentage);
+
+		if (HPComponent != nullptr)
+		{
+			HPComponent->SetHP(StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP));
+		}
+	}
 }

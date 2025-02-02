@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_CurrentLevel.generated.h"
 
-class URictTextBlock;
+class URichTextBlock;
 
 /**
  *

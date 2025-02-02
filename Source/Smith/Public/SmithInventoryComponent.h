@@ -28,6 +28,7 @@ public:
 	bool Insert(const FString&, UObject*);
 	void Remove(const FString&, int32 idx);
 	UObject* Get(const FString&, int32 idx) const;
+	int32 GetQuantity(const FString&) const;
 	int32 GetAll(const FString&, TArray<UObject*>& outItemList) const;
 	bool ContainsCategory(const FString&) const;
 	bool IsReachCapacity(const FString& category) const;

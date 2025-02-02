@@ -68,6 +68,9 @@ enum class EDirection : uint8;
 class USmithWeapon;
 class IEnhanceSystem;
 
+class UHerbWidget;
+struct FParams;
+
 namespace UE::Smith
 {
 	namespace Battle
@@ -189,6 +192,7 @@ public:
 private:
 	bool enhanceImpl(int32 idx);
 	void updateCamera(float deltaTime);
+	void updateParam(FParams upgradeParam);
 #pragma endregion Private Functions
 // end of Private Functions
 
@@ -228,6 +232,11 @@ private:
 	UPROPERTY(EditAnywhere, Instanced, Category = Weapon)
 	TObjectPtr<USmithWeapon> Weapon;
 
+	// TODO
+	UPROPERTY()
+	TObjectPtr<UHerbWidget> m_herbUI;
+	UPROPERTY(EditAnywhere, Category = RecoveryItem)
+	TSubclassOf<UHerbWidget> HerbUISub;
 
 	TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
 

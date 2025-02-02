@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "SmithActors/TurnMngObj/Public/SmithBoss.h"
+#include "SmithBoss.h"
 #include "AttackHandle.h"
 #include "SmithAIRegistry.h"
 #include "SmithAIBehaviorProcessor.h"
@@ -13,8 +12,8 @@
 #include "FormatInfo_Import.h"
 #include "SmithPickable.h"
 #include "IEventPublishMediator.h"
+// #include "SmithAIConditionBindHandle.h"
 #include "MLibrary.h"
-#include "SmithAIConditionBindHandle.h"
 
 ASmithBoss::ASmithBoss()
   : m_attackStrategy(nullptr)

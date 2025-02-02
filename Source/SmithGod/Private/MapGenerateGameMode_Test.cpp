@@ -37,6 +37,7 @@
 #include "GameLogWidget.h"
 
 #include "SmithDungeonDamageCalculator.h"
+#include "UI_CurrentLevel.h"
 
 #include "MLibrary.h"
 
@@ -175,6 +176,11 @@ void AMapGenerateGameMode_Test::startNewLevel()
   }
 
   m_eventSystem->Reset();
+
+  if (CurtLevelUI != nullptr)
+  {
+    CurtLevelUI->SetLevel(StaticCast<int32>(m_curtLevel));
+  }
 }
 
 void AMapGenerateGameMode_Test::clearCurrentLevel()
@@ -248,10 +254,17 @@ void AMapGenerateGameMode_Test::initializeGame()
       UGameLogWidget* logWidget = CreateWidget<UGameLogWidget>(world, LogWidgetSub);
       m_logSubsystem->SetLogWidget(logWidget);
     }
+
+    m_curtLevel = 1u;
+
+    // TODO
+    CurtLevelUI = CreateWidget<UUI_CurrentLevel>(GetWorld(), LevelUISub);
+    if (CurtLevelUI != nullptr)
+    {
+      CurtLevelUI->AddToViewport();
+      CurtLevelUI->SetLevel(StaticCast<int32>(m_curtLevel));
+    }
   }
-
-  m_curtLevel = 1u;
-
 }
 
 void AMapGenerateGameMode_Test::goToNextLevel()

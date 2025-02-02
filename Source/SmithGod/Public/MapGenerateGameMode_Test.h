@@ -17,6 +17,7 @@ class USmithEventSystem;
 class USmithEnhanceSubsystem;
 class USmithEventPublishMediator;
 class USmithBattleLogWorldSubsystem;
+class UUI_CurrentLevel;
 
 // Damage
 class USmithDungeonDamageCalculator;
@@ -99,6 +100,11 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	double TEST_DAMAGE_CALCULATOR_CONSTANT;
+
+	UPROPERTY()
+	TObjectPtr<UUI_CurrentLevel> CurtLevelUI;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUI_CurrentLevel> LevelUISub;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;

@@ -163,8 +163,6 @@ namespace UE::Smith
           TMap<FMapCoord, ICanSetOnMap*> deployMapObjs{};
           m_mapObserver->InitMapObj(deployMapObjs, world, player, generateBP);
 
-          MDebug::Log(FString::FromInt(deployMapObjs.Num()));
-
           for(const auto& deployPair : deployMapObjs)
           {
             m_deployDirector->DeployMapObj(deployPair.Value, deployPair.Key.x, deployPair.Key.y);

@@ -2,6 +2,7 @@
 
 
 #include "UI_CurrentLevel.h"
+#include "Components/RichTextBlock.h"
 
 void UUI_CurrentLevel::NativeConstruct()
 {
