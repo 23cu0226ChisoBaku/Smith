@@ -12,8 +12,8 @@
 class TURNBATTLESYSTEM_API IBattleCommand 
 {
 public:
-	// コマンドを執行する
 	virtual void Start() = 0;
+	// コマンドを執行する
 	virtual void Execute(float deltaTime) = 0;
 	virtual void End() = 0;
 	virtual bool IsFinish() const = 0;

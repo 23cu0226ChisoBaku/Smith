@@ -9,7 +9,7 @@ public class SmithGod: ModuleRules
 
     PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", 
                                                        "MLibrary", "TurnBattleSystem", "MapManagement", 
-                                                       "SmithModel", "Smith"});
+                                                       "SmithModel", "Smith", "UMG"});
 
     PrivateIncludePaths.AddRange(new string[] {"Smith/SmithActors/Interfaces",
                                                "Smith/BattleCommand/Public",

@@ -69,7 +69,8 @@ void USmithUpgradeInteractiveComponent::SetWeaponInfo(FSmithWeaponInfoHandle han
 {
 	if (m_upgradeWidget != nullptr)
 	{
-		m_upgradeWidget->SetWeaponInfo(handle.Name, handle.Image2D);
+		m_upgradeWidget->SetWeaponInfo(handle.Name, handle.Level, handle.Image2D);
+		m_upgradeWidget->SetWeaponParam(handle.Param);
 	}
 }
 
@@ -92,13 +93,11 @@ void USmithUpgradeInteractiveComponent::SelectNextItem(ESelectDirection directio
 	{
 		case ESelectDirection::Up:
 		{
-			MDebug::Log("Up");
 			m_upgradeWidget->SelectUp();
 		}
 		break;
 		case ESelectDirection::Down:
 		{
-			MDebug::Log("Down");
 			m_upgradeWidget->SelectDown();
 		}
 		break;

@@ -28,6 +28,8 @@ struct MAPMANAGEMENT_API FSmithEnemyGenerateBluePrint
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bShouldRandomGenerate;
 	/** 敵のBPパス */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString EnemyBPPath;
@@ -40,5 +42,9 @@ struct MAPMANAGEMENT_API FSmithEnemyGenerateBluePrint
 	/** 未使用 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 GenerateNew_TurnInterval;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 GenerateRoomCoord_X;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 GenerateRoomCoord_Y;
 
 };

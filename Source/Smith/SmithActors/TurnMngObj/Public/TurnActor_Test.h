@@ -14,6 +14,7 @@
 #include "MapObjType.h"
 #include "../Weapon/Params.h"
 #include "ICanRequestEventPublishment.h"
+#include "ISmithBattleLogger.h"
 #include "TurnActor_Test.generated.h"
 
 struct FSmithAIStrategyContainer;
@@ -26,13 +27,17 @@ class USmithMoveDirector;
 class USmithPickable;
 
 class USmithAnimationComponent;
+
+// TODO
+class USmithBattleLogWorldSubsystem;
 /**
  * 
  */
 UCLASS()
 class SMITH_API ATurnActor_Test final: 	public ATurnBaseActor, public IAttackable, 
 																				public ICanSetOnMap, public IMoveDirector, 
-																				public ISmithSimpleAIDriven, public ICanRequestEventPublishment,public ISmithAnimator
+																				public ISmithSimpleAIDriven, public ICanRequestEventPublishment,
+																				public ISmithAnimator, public ISmithBattleLogger
 {
 	GENERATED_BODY()
 
@@ -64,6 +69,9 @@ public:
 	void SwitchAnimationDelay(uint8 animationState, float delay) override;
 	void UpdateAnimation(float deltaTime) override;
 	bool IsAnimationFinish() const override;
+
+	FString GetName_Log() const override;
+	EBattleLogType GetType_Log() const override;
 
 private:
 	UPROPERTY()
@@ -99,4 +107,8 @@ private:
 	FParams EnemyParam;
 
 	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
+
+	// TODO
+	UPROPERTY()
+	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
 };

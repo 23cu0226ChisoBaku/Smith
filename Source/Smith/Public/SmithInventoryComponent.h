@@ -25,11 +25,13 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	void Insert(const FString&, UObject*);
+	bool Insert(const FString&, UObject*);
 	void Remove(const FString&, int32 idx);
 	UObject* Get(const FString&, int32 idx) const;
-
+	int32 GetQuantity(const FString&) const;
 	int32 GetAll(const FString&, TArray<UObject*>& outItemList) const;
+	bool ContainsCategory(const FString&) const;
+	bool IsReachCapacity(const FString& category) const;
 
 private:
 	bool check_Internal(const FString&, UObject*) const;

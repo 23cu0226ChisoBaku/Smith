@@ -38,26 +38,24 @@ void USmithInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	// ...
 }
 
-void USmithInventoryComponent::Insert(const FString& inventoryCategoryName, UObject* itemObject)
+bool USmithInventoryComponent::Insert(const FString& inventoryCategoryName, UObject* itemObject)
 {
 	if (!check_Internal(inventoryCategoryName, itemObject))
 	{
 		MDebug::LogError("Failed To Insert");
-		return;
+		return false;
 	}
 
-	if (InventoryContainers[inventoryCategoryName].ObjectContainer.Num() > InventoryContainers[inventoryCategoryName].InventoryCapacity)
+	if (InventoryContainers[inventoryCategoryName].ObjectContainer.Num() >= InventoryContainers[inventoryCategoryName].InventoryCapacity)
 	{
 		MDebug::LogError("Can not insert item to inventory. --- inventory full");
-		return;
+		return false;
 	}
 
-	// Outerを変更（生存期間管理者変更）
+	// Outerを変更
 	itemObject->Rename(nullptr, GetOwner());
 	InventoryContainers[inventoryCategoryName].ObjectContainer.Emplace(itemObject);
-
-	MDebug::LogWarning("Insert Success");
-	
+	return true;
 }
 
 void USmithInventoryComponent::Remove(const FString& inventoryCategoryName, int32 idx)
@@ -86,6 +84,16 @@ UObject* USmithInventoryComponent::Get(const FString& inventoryCategoryName, int
 	}
 	
 	return InventoryContainers[inventoryCategoryName].ObjectContainer[containerIdx];
+}
+
+int32 USmithInventoryComponent::GetQuantity(const FString& inventoryCategoryName) const
+{
+	if (!InventoryContainers.Contains(inventoryCategoryName))
+	{
+		return -1;
+	}
+
+	return InventoryContainers[inventoryCategoryName].ObjectContainer.Num();
 }
 
 bool USmithInventoryComponent::check_Internal(const FString& inventoryCategoryName, UObject* itemObject) const
@@ -144,6 +152,21 @@ bool USmithInventoryComponent::check_Internal(const FString& inventoryCategoryNa
 	}
 
 	return true;
+}
+
+bool USmithInventoryComponent::ContainsCategory(const FString& category) const
+{
+	return InventoryContainers.Contains(category);
+}
+
+bool USmithInventoryComponent::IsReachCapacity(const FString& category) const
+{
+	if (!ContainsCategory(category))
+	{
+		return true;
+	}
+	const auto& inventory = InventoryContainers[category];
+	return inventory.ObjectContainer.Num() >= inventory.InventoryCapacity;
 }
 
 

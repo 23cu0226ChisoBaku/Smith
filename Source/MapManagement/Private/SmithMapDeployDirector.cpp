@@ -86,7 +86,7 @@ namespace UE::Smith
             model_shared->OnMapObjsCoordTable.Emplace(mapObj, FMapCoord{x, y});
           }
         }
-        void DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y)
+        void DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y, const FRotator& rotation)
         {
           check(m_model.IsValid())
           if (!m_model.IsValid())
@@ -125,7 +125,7 @@ namespace UE::Smith
             const FVector eventInitLocation = FVector{ eventInitLocationX, eventInitLocationY,eventInitLocationZ};
 
             event->SetEventCoord(x, y);
-            event->InitializeEvent(eventInitLocation);
+            event->InitializeEvent(eventInitLocation, rotation);
           }
         }
       private:
@@ -165,9 +165,9 @@ namespace UE::Smith
       m_pImpl->DeployMapObj(mapObj, x, y); 
     }
 
-    void FSmithMapDeployDirector::DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y)
+    void FSmithMapDeployDirector::DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y, const FRotator& rotation)
     {
-      m_pImpl->DeployEvent(event, x, y);
+      m_pImpl->DeployEvent(event, x, y, rotation);
     }
   } 
 }

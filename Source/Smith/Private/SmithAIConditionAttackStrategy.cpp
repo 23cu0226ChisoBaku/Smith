@@ -3,6 +3,7 @@
 #include "SmithAIConditionAttackStrategy.h"
 #include "ICommandMediator.h"
 #include "ICanMakeAttack.h"
+#include "ISmithBattleLogger.h"
 #include "AttackHandle.h"
 #include "MLibrary.h"
 
@@ -60,11 +61,14 @@ bool USmithAIConditionAttackStrategy::executeImpl()
         continue;
       }
 
+      // TODO add by Mai
+      ISmithBattleLogger* logger = Cast<ISmithBattleLogger>(GetOwner());
+
       for (uint8 i = 0u; i < 4u; ++i)
       {
         EDirection atkDir = StaticCast<EDirection>(i * 2u);
 
-        bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *m_attackFormatTables[tempHandle.Name], AttackHandle{GetName(), m_atk}, false);
+        bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *m_attackFormatTables[tempHandle.Name], AttackHandle{logger, m_atk}, false);
         if (success)
         {
           isExecuted = true;

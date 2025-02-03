@@ -3,6 +3,7 @@
 
 #include "SmithActors/Player/SmithAnimPawnTest.h"
 #include "Smith/Public/SmithAnimationComponent.h"
+//#include "SmithGameOver/GameOver.h"
 
 // Sets default values
 ASmithAnimPawnTest::ASmithAnimPawnTest()
@@ -17,6 +18,12 @@ ASmithAnimPawnTest::ASmithAnimPawnTest()
 void ASmithAnimPawnTest::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//AGameOver* gameover = LoadObject<AGameOver>(nullptr, TEXT("/Game/TestLevel/ueno/GameOver_BP"));
+	//if (gameover != nullptr)
+	//{
+	//	//gameover->GameOverEventDispatcher.AddActor(this, &AGameOver::TriggerdEvent);
+	//}
 
 }
 
@@ -82,4 +89,6 @@ bool ASmithAnimPawnTest::IsAnimationFinish() const
 {
 	return false;
 }
+
+void ASmithAnimPawnTest::OpenGameOverUI_Implementation(){}
 

@@ -6,6 +6,7 @@
 #include "ICanMakeAttack.h"
 #include "Direction.h"
 #include "AttackHandle.h"
+#include "ISmithBattleLogger.h"
 #include "MLibrary.h"
 
 USmithTurnBaseAIAttackStrategy::USmithTurnBaseAIAttackStrategy(const FObjectInitializer& ObjectInitializer)
@@ -46,6 +47,7 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
     return false;
   }
 
+  ISmithBattleLogger* attackerLogger = Cast<ISmithBattleLogger>(GetOwner());
   for (auto& format : m_attackFormatTables)
   {
     if (!format.Value.IsValid())
@@ -56,7 +58,7 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
     for (uint8 i = 0u; i < 4u; ++i)
     {
       EDirection atkDir = StaticCast<EDirection>(i * 2u);
-      bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *format.Value, AttackHandle{GetName(), m_atk}, false);
+      bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *format.Value, AttackHandle{attackerLogger, m_atk}, false);
       if (success)
       {
         return true;

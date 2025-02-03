@@ -2,23 +2,40 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "SmithCommandFormat.h"
-
-/**
- * 
- */
-
 #ifndef SMITH_ATKHDL
 #define SMITH_ATKHDL
+
+#include "CoreMinimal.h"
+
+class ISmithBattleLogger;
+
+struct SMITH_API FAttackHandle
+{
+	static const FAttackHandle NullHandle;
+
+	ISmithBattleLogger* Attacker;
+	int32 AttackPower;
+	int32 CriticalPower;
+	int32 Level;
+	double MotionValue;
+
+	constexpr FAttackHandle()
+		: Attacker(nullptr)
+		, AttackPower(0)
+		, CriticalPower(0)
+		, Level(0)
+		, MotionValue(0)
+	{}
+};
 
 struct SMITH_API AttackHandle
 {
 	static const AttackHandle NullHandle;
 
-	FString AttackName;
+	ISmithBattleLogger* Attacker;
 	int32 AttackPower;
 };
+
 
 #endif
 
