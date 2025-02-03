@@ -7,6 +7,7 @@
 #include "ICanSetOnMap.h"
 #include "SmithPickable.h"
 #include "SmithPickUpItemEvent.h"
+#include "NiagaraSystem.h"
 
 USmithEventPublishMediator::USmithEventPublishMediator(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -63,7 +64,10 @@ void USmithEventPublishMediator::PublishPickUpEvent(ICanSetOnMap* mapObj, USmith
         temp = world->SpawnActor<AActor>(TEST_ACTOR->GetClass(), FVector::ZeroVector, FRotator::ZeroRotator);
       }
     }
-    pickEvent->AssignPickable(pickable, temp);
+
+    FString Path = TEXT("/Game/Resources/Effect/EventEffect/NS_ItemEffect.NS_ItemEffect");
+    UNiagaraSystem* itemEffect = Cast<UNiagaraSystem>(StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr, *Path));
+    pickEvent->AssignPickable(pickable, temp, itemEffect);
     mgr_shared->DeployEvent(pickEvent, publishCoordX, publishCoordY);
   }
   else

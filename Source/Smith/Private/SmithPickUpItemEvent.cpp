@@ -8,6 +8,11 @@
 #include "ISmithBattleLogger.h"
 #include "IEventTriggerable.h"
 #include "MLibrary.h"
+
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
+
 USmithPickUpItemEvent::USmithPickUpItemEvent(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
   , m_pickableAppearence(nullptr)
@@ -19,6 +24,11 @@ USmithPickUpItemEvent::USmithPickUpItemEvent(const FObjectInitializer& ObjectIni
 void USmithPickUpItemEvent::BeginDestroy()
 {
   Super::BeginDestroy();
+
+  if (m_itemEventNiagaraComp != nullptr)
+  {
+    m_itemEventNiagaraComp->Deactivate();
+  }
 }
 
 void USmithPickUpItemEvent::InitializeEvent(const FVector& location, const FRotator& rotation)
@@ -28,6 +38,16 @@ void USmithPickUpItemEvent::InitializeEvent(const FVector& location, const FRota
     m_pickableAppearence->SetActorLocation(location);
     m_pickableAppearence->SetActorRotation(rotation);
     m_pickableAppearence->SetActorHiddenInGame(false);
+    m_itemEventNiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(m_pickableAppearence->GetWorld(),
+                                                                            m_itemEventNiagaraSystem,
+                                                                            location,
+                                                                            rotation);
+
+    if (m_itemEventNiagaraComp != nullptr)
+    {
+      m_itemEventNiagaraComp->Activate();
+    }
+    
   }
 }
 
@@ -75,7 +95,6 @@ void USmithPickUpItemEvent::DiscardEvent()
 
 void USmithPickUpItemEvent::RaiseEvent()
 {
-  
   m_isPicked = true;
   if (m_pickableAppearence != nullptr)
   {
@@ -88,7 +107,7 @@ bool USmithPickUpItemEvent::IsDisposed() const
   return m_isPicked;
 }
 
-void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearance)
+void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearance, UNiagaraSystem* itemEventNiagara)
 {
   if (m_pickable.IsValid())
   {
@@ -105,12 +124,9 @@ void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearan
   m_pickableObject->Rename(nullptr, this);
   m_pickableAppearence = appearance;
 
-  if (m_pickableAppearence != nullptr)
-  {
-    m_pickableAppearence->SetActorHiddenInGame(true);
-  }
-
   m_isPicked = false;
+
+  m_itemEventNiagaraSystem = itemEventNiagara;
   
 }
 
