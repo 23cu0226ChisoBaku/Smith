@@ -2,6 +2,7 @@
 
 
 #include "UI_CurrentLevel.h"
+#include "Components/RichTextBlock.h"
 
 void UUI_CurrentLevel::NativeConstruct()
 {
@@ -11,6 +12,7 @@ void UUI_CurrentLevel::NativeConstruct()
     CurrentLevel->SetText(FText::FromString(TEXT("1F")));
   }
 }
+
 void UUI_CurrentLevel::SetLevel(int32 level)
 {
   if(CurrentLevel != nullptr)
