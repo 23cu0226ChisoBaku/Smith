@@ -276,7 +276,7 @@ bool ATurnActor_Test::IsAnimationFinish() const
 
 FString ATurnActor_Test::GetName_Log() const
 {
-	return TEXT("豆腐");
+	return TEXT("小ゴーレム");
 }
 
 EBattleLogType ATurnActor_Test::GetType_Log() const
