@@ -42,7 +42,7 @@
 
 namespace SmithPlayerActor::Private
 {
-	constexpr int32 PlayerHP_Temp = 30;
+	constexpr int32 PlayerHP_Temp = 50;
 	constexpr double ANGLE_PER_DIRECTION = 360.0 / (double)EDirection::DirectionCount;
 }
 
@@ -165,7 +165,9 @@ void ASmithPlayerActor::BeginPlay()
 		for (int32 i = 0; i < 3; ++i)
 		{
 			USmithHPItem* item = NewObject<USmithHPItem>();
-			item->SetRecoveryPercentage(0.2);
+			// TODO Modelをいい感じに
+			// 30%
+			item->SetRecoveryPercentage(0.3);
 			bool insertResult = InventoryComponent->Insert(TEXT("ConsumeItem"), item);
 		}
 	}

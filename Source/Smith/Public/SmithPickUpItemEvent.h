@@ -10,6 +10,8 @@
 #include "SmithPickUpItemEvent.generated.h"
 
 class IPickable;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 /**
  * 
@@ -36,13 +38,17 @@ public:
 	FString GetFailedMessage() const override;
 
 public:
-	void AssignPickable(IPickable*, AActor*);
+	void AssignPickable(IPickable*, AActor*, UNiagaraSystem* = nullptr);
 	IPickable* GetPickable() const;
 	FString GetPickUpItemType() const;
 	
 private:
 	UPROPERTY()
 	TObjectPtr<AActor> m_pickableAppearence;
+	UPROPERTY()
+	TObjectPtr<UNiagaraSystem> m_itemEventNiagaraSystem;
+	UPROPERTY()
+	TObjectPtr<UNiagaraComponent> m_itemEventNiagaraComp;
 	UPROPERTY()
 	TObjectPtr<UObject> m_pickableObject;
 	TWeakInterfacePtr<IPickable> m_pickable;
