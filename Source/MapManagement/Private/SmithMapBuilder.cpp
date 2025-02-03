@@ -106,39 +106,40 @@ namespace UE::Smith
         return nullptr;
       }
       #pragma endregion Safe Check
-      
+
       TSharedPtr<FSmithMapDataModel> model = ::MakeShared<FSmithMapDataModel>();
-
-      model->Map = pMap;
-
       const FSmithRect mapRect = pMap->GetMap();
       const uint8 mapRectWidth = mapRect.GetWidth();
       const uint8 mapRectHeight = mapRect.GetHeight();
+      TMap<FMapCoord, TSharedPtr<FObstacleTileInfoContainer>> tempObstacleTable;
+      TMap<FMapCoord, TSharedPtr<FStaySpaceTileInfoContainer>> tempStaySpaceTable;
 
       for (uint8 y = 0; y < mapRectHeight; ++y)
       {
         for (uint8 x = 0; x < mapRectWidth; ++x)
         {
-          ETileType tileType = StaticCast<ETileType>(mapRect.GetRect(x, y));
-          FMapCoord coord(x, y);
+          const ETileType tileType = StaticCast<ETileType>(mapRect.GetRect(x, y));
+          const FMapCoord coord(x, y);
           // マップ情報を初期化する
           switch (tileType)
           {
+            // 壁
             case ETileType::Wall:
             {
-              if (!model->ObstacleTable.Contains(coord))
+              if (!tempObstacleTable.Contains(coord))
               {
-                model->ObstacleTable.Emplace(coord, ::MakeShared<FObstacleTileInfoContainer>());
+                tempObstacleTable.Emplace(coord, ::MakeShared<FObstacleTileInfoContainer>());
               }
             }
             break;
 
+            // 地面
             case ETileType::Ground:
             case ETileType::Corridor:
             {
-              if (!model->StaySpaceTable.Contains(coord))
+              if (!tempStaySpaceTable.Contains(coord))
               {
-                model->StaySpaceTable.Emplace(coord, ::MakeShared<FStaySpaceTileInfoContainer>(tileType));
+                tempStaySpaceTable.Emplace(coord, ::MakeShared<FStaySpaceTileInfoContainer>(tileType));
               }
             }
             break;
@@ -151,6 +152,10 @@ namespace UE::Smith
           }
         }
       }
+   
+      model->Map = pMap;
+      model->ObstacleTable = ::MoveTemp(tempObstacleTable);
+      model->StaySpaceTable = ::MoveTemp(tempStaySpaceTable);
 
       return model;
     }

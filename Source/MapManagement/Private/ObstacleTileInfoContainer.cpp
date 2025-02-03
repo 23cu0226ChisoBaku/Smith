@@ -59,6 +59,5 @@ namespace UE::Smith
     {
       return false;
     }
-
   }
 }
