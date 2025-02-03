@@ -430,10 +430,10 @@ namespace UE::Smith
                                       m_originCoord_World.Z,
                                     };
               {
-                const FMapCoord coord_north{outX + 1u, outY};
-                const FMapCoord coord_east{outX, outY + 1u};
-                const FMapCoord coord_south{outX - 1u, outY};
-                const FMapCoord coord_west{outX, outY - 1u};
+                const FMapCoord coord_north{StaticCast<uint8>(outX + 1u), outY};
+                const FMapCoord coord_east{outX, StaticCast<uint8>(outY + 1u)};
+                const FMapCoord coord_south{StaticCast<uint8>(outX - 1u), outY};
+                const FMapCoord coord_west{outX, StaticCast<uint8>(outY - 1u)};
                 if (model_shared->ObstacleTable.Contains(coord_north))
                 {
                   rotation = FRotator(0.0, 180.0, 0.0);
@@ -773,28 +773,28 @@ namespace UE::Smith
             // 4だったら交差点
             int32 crossCount = 0;
             {
-              const FMapCoord coord_north{coord.x + 1u, coord.y};
+              const FMapCoord coord_north{StaticCast<uint8>(coord.x + 1u), coord.y};
               if (model_shared->StaySpaceTable.Contains(coord_north))
               {
                 ++crossCount;
               }
             }
             {
-              const FMapCoord coord_east{coord.x, coord.y + 1u};
+              const FMapCoord coord_east{StaticCast<uint8>(coord.x), StaticCast<uint8>(coord.y + 1u)};
               if (model_shared->StaySpaceTable.Contains(coord_east))
               {
                 ++crossCount;
               }
             }
             {
-              const FMapCoord coord_south{coord.x - 1u, coord.y};
+              const FMapCoord coord_south{StaticCast<uint8>(coord.x - 1u), StaticCast<uint8>(coord.y)};
               if (model_shared->StaySpaceTable.Contains(coord_south))
               {
                 ++crossCount;
               }
             }
             {
-              const FMapCoord coord_west{coord.x, coord.y - 1u};
+              const FMapCoord coord_west{StaticCast<uint8>(coord.x), StaticCast<uint8>(coord.y - 1u)};
               if (model_shared->StaySpaceTable.Contains(coord_west))
               {
                 ++crossCount;
