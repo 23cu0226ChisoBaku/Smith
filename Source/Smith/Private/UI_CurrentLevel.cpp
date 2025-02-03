@@ -12,6 +12,7 @@ void UUI_CurrentLevel::NativeConstruct()
     CurrentLevel->SetText(FText::FromString(TEXT("1F")));
   }
 }
+
 void UUI_CurrentLevel::SetLevel(int32 level)
 {
   if(CurrentLevel != nullptr)

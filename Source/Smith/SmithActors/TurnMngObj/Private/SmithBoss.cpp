@@ -31,6 +31,9 @@ ASmithBoss::ASmithBoss()
   m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
   check(m_atkComponent != nullptr);
 
+  EnemyParam.HP = 150;
+  EnemyParam.ATK = 5;
+	//EnemyParam.ATK = ;
   // // デリゲートのバインド
   // m_conditionCallBack.BindLambda(ASmithBoss::RageCondition);
   // m_conditionCallBack.BindLambda(ASmithBoss::WingsCondition);
@@ -104,12 +107,12 @@ void ASmithBoss::OnAttack(AttackHandle&& handle)
 
 uint8 ASmithBoss::GetOnMapSizeX() const
 {
-  return 1;
+  return 5;
 }
 
 uint8 ASmithBoss::GetOnMapSizeY() const
 {
-  return 1;
+  return 5;
 }
 
 EMapObjType ASmithBoss::GetType() const
