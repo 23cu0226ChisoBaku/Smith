@@ -144,15 +144,14 @@ namespace UE::Smith
             TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
             event->SetEventCoord(x, y);
 
-            const double eventInitLocationX = StaticCast<double>(x) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.X;
-            const double eventInitLocationY = StaticCast<double>(y) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.Y;
-            const double eventInitLocationZ = model_shared->OriginWorldCoord.Z;
-            const FVector eventInitLocation = FVector{ eventInitLocationX, eventInitLocationY,eventInitLocationZ};
+            const double eventLocationX = StaticCast<double>(x) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.X;
+            const double eventLocationY = StaticCast<double>(y) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.Y;
+            const double eventLocationZ = model_shared->OriginWorldCoord.Z;
+            const FVector eventLocation = FVector{ eventLocationX, eventLocationY,eventLocationZ};
 
             FRotator eventRotation;
             FSmithMapHelperFunc::DirectMapElementRotation(map_shared.Get(), eventRotation, x, y);
-            MDebug::LogWarning(eventRotation.ToString());
-            event->InitializeEvent(eventInitLocation, eventRotation);
+            event->InitializeEvent(eventLocation, eventRotation);
             staySpaceTileContainer->SetEvent(event);
           }
         }

@@ -31,7 +31,7 @@ namespace UE::Smith
 
 			public:
 				void AssignMap(TSharedPtr<FSmithMapDataModel>);
-				void DirectNextLevelEventInfo(uint8& outX, uint8& outY, FVector& worldLocation, FRotator& worldRotation);
+				void DirectNextLevelEventCoord(uint8& outX, uint8& outY);
 
 			private:
 				class EventDirectorImpl;

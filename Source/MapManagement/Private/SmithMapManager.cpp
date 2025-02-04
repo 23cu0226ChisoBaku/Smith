@@ -187,10 +187,8 @@ namespace UE::Smith
 
           uint8 nextLevelEventCoordX = 0u;
           uint8 nextLevelEventCoordY = 0u;
-          FVector worldLocation = FVector::ZeroVector;
-          FRotator worldRotation = FRotator::ZeroRotator;
 
-          m_eventDirector->DirectNextLevelEventInfo(nextLevelEventCoordX, nextLevelEventCoordY, worldLocation, worldRotation);
+          m_eventDirector->DirectNextLevelEventCoord(nextLevelEventCoordX, nextLevelEventCoordY);
           DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY);
         }
 

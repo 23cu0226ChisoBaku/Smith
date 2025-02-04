@@ -28,7 +28,7 @@ namespace UE::Smith
         {
           m_model = model;
         }
-        void DirectNextLevelEventInfo(uint8& outX, uint8& outY, FVector& worldLocation, FRotator& worldRotation)
+        void DirectNextLevelEventCoord(uint8& outX, uint8& outY)
         {
           TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared.IsValid())
@@ -55,8 +55,6 @@ namespace UE::Smith
 
           outX = 0u;
           outY = 0u;
-          worldLocation = FVector::ZeroVector;
-          worldRotation = FRotator::ZeroRotator;
 
           for (uint8 i = 0u; i < map_shared->GetSectionCount(); ++i)
           {
@@ -207,9 +205,9 @@ namespace UE::Smith
     {
       m_pImpl->AssignMap(model);
     }
-    void FSmithMapEventDirector::DirectNextLevelEventInfo(uint8& outX, uint8& outY, FVector& worldLocation, FRotator& worldRotation)
+    void FSmithMapEventDirector::DirectNextLevelEventCoord(uint8& outX, uint8& outY)
     {
-      m_pImpl->DirectNextLevelEventInfo(outX, outY, worldLocation, worldRotation);
+      m_pImpl->DirectNextLevelEventCoord(outX, outY);
     }
   }
 }

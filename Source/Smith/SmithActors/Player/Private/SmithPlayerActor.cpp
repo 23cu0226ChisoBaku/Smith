@@ -331,12 +331,7 @@ void ASmithPlayerActor::ChangeForward(EDirection newDirection)
 	}
 
 	using namespace SmithPlayerActor::Private;
-	// 今の向きと変えようとする向きが同じだったら処理しない
-	if (m_actorFaceDir == newDirection)
-	{
-		return;
-	}
-
+	
 	m_actorFaceDir = newDirection;
 	const double newYaw = StaticCast<double>(m_actorFaceDir) * ANGLE_PER_DIRECTION;
 	SetActorRelativeRotation(FRotator(0.0, newYaw, 0.0));
