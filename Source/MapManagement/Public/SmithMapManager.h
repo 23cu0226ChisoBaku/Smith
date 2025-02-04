@@ -113,7 +113,7 @@ namespace UE::Smith
         ///
         void InitMapObjs(UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
         // TODO
-        void InitMapEvents(UWorld*, USmithEventPublisher*);
+        void InitNextLevelEvent(ISmithMapEvent*);
         /// 
         /// @brief                                マップオブジェクトを配置する
         /// @param ICanSetOnMap                   マップオブジェクト

@@ -2,22 +2,49 @@
 
 
 #include "SmithUpgradeMaterial.h"
-#include "ICanPick.h"
+#include <limits>
 #include "MLibrary.h"
 
 USmithUpgradeMaterial::USmithUpgradeMaterial(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
-{ 
-  // TODO Test Code
-  Param = FParams{0,3,0,0};
-}
+  , m_labelColor(FColor::White)
+{ }
 
+void USmithUpgradeMaterial::PostInitProperties()
+{
+  Super::PostInitProperties();
+  int32 maxParam = std::numeric_limits<int32>::min();
+  if (maxParam < Param.HP)
+  {
+    maxParam = Param.HP;
+    m_labelColor = FColor::Green;  
+  }
+
+  if (maxParam < Param.ATK)
+  {
+    maxParam = Param.ATK;
+    m_labelColor = FColor::Red;
+  }
+
+  if (maxParam < Param.DEF)
+  {
+    maxParam = Param.DEF;
+    m_labelColor = FColor::Blue;
+  }
+
+  if (maxParam < Param.CRT)
+  {
+    maxParam = Param.CRT;
+    m_labelColor = FColor::Yellow;
+  }
+
+  m_labelColor.A = StaticCast<uint8>(255.0 * 0.9);
+}
 
 
 void USmithUpgradeMaterial::BeginDestroy()
 {
   Super::BeginDestroy();
-
 }
 
 FParams USmithUpgradeMaterial::GetParam()
@@ -42,35 +69,7 @@ UTexture2D* USmithUpgradeMaterial::GetIconImage() const
 
 FColor USmithUpgradeMaterial::GetLabelColor() const
 {
-  int32 maxParam = -999;
-  FColor resultColor = FColor::Black;
-
-  if (maxParam < Param.HP)
-  {
-    maxParam = Param.HP;
-    resultColor = FColor::Green;  
-  }
-
-  if (maxParam < Param.ATK)
-  {
-    maxParam = Param.ATK;
-    resultColor = FColor::Red;
-  }
-
-  if (maxParam < Param.DEF)
-  {
-    maxParam = Param.DEF;
-    resultColor = FColor::Blue;
-  }
-
-  if (maxParam < Param.CRT)
-  {
-    maxParam = Param.CRT;
-    resultColor = FColor::Yellow;
-  }
-
-  resultColor.A = StaticCast<uint8>(255.0 * 0.9);
-  return resultColor;
+  return m_labelColor;
 }
 
 FString USmithUpgradeMaterial::GetName() const

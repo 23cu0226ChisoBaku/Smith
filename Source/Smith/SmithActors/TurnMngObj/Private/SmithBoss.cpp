@@ -2,7 +2,6 @@
 
 #include "SmithBoss.h"
 #include "AttackHandle.h"
-#include "SmithAIRegistry.h"
 #include "SmithAIBehaviorProcessor.h"
 #include "SmithAIStrategyContainer.h"
 #include "SmithAIConditionAttackStrategy.h"

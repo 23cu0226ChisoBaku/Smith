@@ -20,10 +20,6 @@ Encoding : UTF-8
 #include "SmithRoom.h"
 #include "MLibrary.h"
 
-// Deprecated Include
-#include "SmithConnection.h"
-
-
 namespace UE::Smith
 {
   namespace Map
@@ -186,21 +182,6 @@ namespace UE::Smith
     {
       return m_pImpl->HasRoom();
     }
-
-    // Deprecated Interface
-    #pragma region Deprecated Interface
-    bool FSmithSection::IsConnected() const
-    {
-      //return m_pImpl->IsConnected();
-      return false;
-    }
-    void FSmithSection::AddConnection(FSmithConnection connection)
-    {
-      //m_pImpl->AddConnection(connection);
-    }
-    #pragma endregion Deprecated Interface
-    // end of Deprecated Interface
-
     uint8 FSmithSection::GetWidth() const
     {
       return m_pImpl->GetWidth();

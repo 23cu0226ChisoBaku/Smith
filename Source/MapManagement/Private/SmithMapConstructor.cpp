@@ -25,13 +25,6 @@ namespace UE::Smith
 {
   namespace Map
   {
-    FSmithMapConstructor::FSmithMapConstructor()
-      : m_mapMaterials{}
-    { }
-
-    FSmithMapConstructor::~FSmithMapConstructor()
-    { }
-
     void FSmithMapConstructor::ConstructMap(UWorld* world, const FSmithRect& mapRect, const FSmithMapConstructionBluePrint& blueprint)
     {
       if (!::IsValid(world))
@@ -50,15 +43,14 @@ namespace UE::Smith
       const uint8 mapColumn = mapRect.GetWidth();
 
       // オブジェクトリフレクションクラスポインタを入れるバッファ
-      TMap<ETileType,UClass*> tileActorBuffer;
-      tileActorBuffer.Reserve(blueprint.TileBuildingMaterialPaths.Num());
+      TMap<ETileType,UClass*> tileActorUClassBuffer;
+      tileActorUClassBuffer.Reserve(blueprint.TileBuildingMaterialPaths.Num());
 
       for (uint8 y = 0 ; y < mapRow; ++y)
       {
         for (uint8 x = 0; x < mapColumn; ++x)
         {
           const ETileType tileType = StaticCast<ETileType>(mapRect.GetRect(x,y));
-
           if (!blueprint.TileBuildingMaterialPaths.Contains(tileType))
           {
             MDebug::LogError("Invalid Tile Type");
@@ -66,10 +58,10 @@ namespace UE::Smith
           }
 
           // バッファにマップ素材のActorのUClassがなかったらContentsから探して、バッファ入れておく
-          if (!tileActorBuffer.Contains(tileType))
+          if (!tileActorUClassBuffer.Contains(tileType))
           {
             // マップ素材のBPクラスを取得
-            TSubclassOf<class AActor> subClass = TSoftClassPtr<AActor>(FSoftObjectPath(*blueprint.TileBuildingMaterialPaths[tileType])).LoadSynchronous();
+            TSubclassOf<AActor> subClass = TSoftClassPtr<AActor>(FSoftObjectPath(*blueprint.TileBuildingMaterialPaths[tileType])).LoadSynchronous();
 
             if (subClass == nullptr)
             {
@@ -77,7 +69,7 @@ namespace UE::Smith
               return;
             }
 
-            tileActorBuffer.Emplace(tileType, subClass);
+            tileActorUClassBuffer.Emplace(tileType, subClass);
           }
 
           const FVector spawnCoord(
@@ -91,9 +83,11 @@ namespace UE::Smith
           const int32 randRotator = FMath::RandRange(0,3);
           const FRotator rotate = FRotator{0.0, 90.0 * StaticCast<double>(randRotator) , 0.0};
           
-          AActor* actor = world->SpawnActor<AActor>(tileActorBuffer[tileType], spawnCoord, rotate);
-
-          m_mapMaterials.Emplace(actor);
+          AActor* actor = world->SpawnActor<AActor>(tileActorUClassBuffer[tileType], spawnCoord, rotate);
+          if (::IsValid(actor))
+          {
+            m_mapMaterials.Emplace(actor);
+          }
         }
       }
     }

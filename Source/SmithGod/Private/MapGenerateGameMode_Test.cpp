@@ -26,18 +26,16 @@
 #include "ICanRequestEventPublishment.h"
 #include "SmithEventPublishMediator.h"
 #include "SmithBattleLogWorldSubsystem.h"
-
 #include "SmithTurnBattleWorldSettings.h"
-
 #include "Kismet/GameplayStatics.h"
-
 #include "SmithPlayerActor.h"
 #include "SmithMapBaseMoveDirector.h"
-
 #include "GameLogWidget.h"
-
 #include "SmithDungeonDamageCalculator.h"
 #include "UI_CurrentLevel.h"
+
+// TODO
+#include "SmithNextLevelEvent.h"
 
 #include "MLibrary.h"
 
@@ -94,7 +92,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
   {
     m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
     m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
-    m_mapMgr->InitMapEvents(GetWorld(), m_eventPublisher);
+    deployNextLevelEvent();
   }
 
   m_battleSystem->InitializeBattle();
@@ -264,6 +262,16 @@ void AMapGenerateGameMode_Test::initializeGame()
       CurtLevelUI->AddToViewport();
       CurtLevelUI->SetLevel(StaticCast<int32>(m_curtLevel));
     }
+
+    m_nextLevelEvent = m_eventPublisher->PublishMapEvent<USmithNextLevelEvent>(USmithNextLevelEvent::StaticClass());
+    if (m_nextLevelEvent == nullptr)
+    {
+      MDebug::LogError("Publish failed");
+    }
+    else
+    {
+      m_nextLevelEvent->OnNextLevel.BindUObject(this, &AMapGenerateGameMode_Test::goToNextLevel);
+    }
   }
 }
 
@@ -272,4 +280,12 @@ void AMapGenerateGameMode_Test::goToNextLevel()
   clearCurrentLevel();
   ++m_curtLevel;
   startNewLevel();
+}
+
+void AMapGenerateGameMode_Test::deployNextLevelEvent(bool bIsActiveWhenDeploy)
+{
+  if (m_mapMgr.IsValid())
+  {
+    m_mapMgr->InitNextLevelEvent(m_nextLevelEvent);
+  }
 }

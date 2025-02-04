@@ -18,11 +18,10 @@ Encoding : UTF-8
 
 #include "CoreMinimal.h"
 #include "UObject/WeakInterfacePtr.h"
+#include "ICanSetOnMap.h"
 #include "MapCoord.h"
-#include "SmithMap.h"
 #include "ObstacleTileInfoContainer.h"
 #include "StaySpaceTileInfoContainer.h"
-#include "ICanSetOnMap.h"
 
 ///
 /// @brief TWeakInterfacePtr<ICanSetOnMap>をキーとしてTMapに使う
@@ -37,10 +36,14 @@ FORCEINLINE uint32 GetTypeHash(const TWeakInterfacePtr<ICanSetOnMap>& Thing)
 }
 #endif
 
+class FObstacleTileInfoContainer;
+class FStaySpaceTileInfoContainer;
+
 namespace UE::Smith
 {
 	namespace Map
 	{
+		class FSmithMap;
 		/// 
 		/// @brief マップデータモデル
 		/// namespace UE::Smith::Map

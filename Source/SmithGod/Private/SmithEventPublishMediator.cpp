@@ -32,13 +32,16 @@ void USmithEventPublishMediator::Initialize(USmithEventPublisher* eventPublisher
 void USmithEventPublishMediator::PublishPickUpEvent(ICanSetOnMap* mapObj, USmithPickable* pickable)
 {
   check(m_eventPublisher.IsValid());
-  check(m_mapMgr.IsValid());
-  if (!m_eventPublisher.IsValid() || !m_mapMgr.IsValid())
+  if (!m_eventPublisher.IsValid())
   {
     return;
   }
 
   TSharedPtr<UE::Smith::Map::FSmithMapManager> mgr_shared = m_mapMgr.Pin();
+  if (!mgr_shared.IsValid())
+  {
+    return;
+  }
 
   uint8 publishCoordX = 0;
   uint8 publishCoordY = 0;

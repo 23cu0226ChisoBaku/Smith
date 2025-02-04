@@ -51,8 +51,8 @@ namespace UE::Smith
 			*/
 			//---------------------------------------
 			public:
-				FSmithMapConstructor();
-				~FSmithMapConstructor();
+				FSmithMapConstructor() = default;
+				~FSmithMapConstructor() = default;
 
 			//---------------------------------------
 			/*

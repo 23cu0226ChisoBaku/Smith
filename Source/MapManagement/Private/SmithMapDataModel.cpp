@@ -17,6 +17,7 @@ Encoding : UTF-8
 
 #include "SmithMapDataModel.h"
 #include "InvalidValues.h"
+#include "SmithMap.h"
 
 namespace UE::Smith
 {
@@ -33,6 +34,7 @@ namespace UE::Smith
 
     FSmithMapDataModel::~FSmithMapDataModel()
     {
+      Map.Reset();
       OnMapObjsCoordTable.Empty();
       ObstacleTable.Empty();
       StaySpaceTable.Empty();

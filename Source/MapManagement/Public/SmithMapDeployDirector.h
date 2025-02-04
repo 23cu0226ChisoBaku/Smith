@@ -8,6 +8,8 @@ Author : MAI ZHICONG
 Description : マップオブジェクトを新しく配置するクラス
 
 Update History: 2025/01/08 作成
+								2025/01/20 イベント配置インターフェース追加
+								2025/01/21 イベントの回転パラメーターを追加
 
 Version : alpha_1.0.0
 
@@ -91,7 +93,13 @@ namespace UE::Smith
 				/// @param	y												Y座標
 				///
 				void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
-				void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y, const FRotator& = FRotator::ZeroRotator);
+				///
+				///	@brief	イベントを配置する
+				///	@param	ISmithMapEvent					イベントオブジェクト
+				///	@param	x												X座標
+				/// @param	y												Y座標
+				///
+				void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y);
 			#pragma endregion FSmithMapDeployDirector Interface
 			// end of FSmithMapDeployDirector Interface
 			private:
