@@ -80,10 +80,8 @@ namespace UE::Smith
 				///
 				///	@brief													マップモデルを登録する
 				/// @param	FSmithMapDataModel			マップモデル
-				/// @param	originCoord_World				マップ原点座標
-				/// @param	mapTileSize							マップタイルサイズ
 				///
-			  void AssignMap(TSharedPtr<FSmithMapDataModel>, FVector originCoord_World, int32 mapTileSize);
+			  void AssignMap(TSharedPtr<FSmithMapDataModel>);
 				///
 				///	@brief																マップオブジェクトを初期化する
 				/// @param	outMapObjs										マップ座標と座標に配置するオブジェクトコンテナ

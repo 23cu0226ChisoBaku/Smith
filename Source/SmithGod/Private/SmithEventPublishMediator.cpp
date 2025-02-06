@@ -55,35 +55,13 @@ void USmithEventPublishMediator::PublishPickUpEvent(ICanSetOnMap* mapObj, USmith
       return;
     }
 
-    // TODO 
-    AActor* temp = nullptr;
-    if (TEST_ACTOR != nullptr)
-    {
-      UWorld* world = GetWorld();
-      if (::IsValid(world))
-      {
-        FActorSpawnParameters spawnParams{};
-        spawnParams.Template = TEST_ACTOR;
-        temp = world->SpawnActor<AActor>(TEST_ACTOR->GetClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-      }
-    }
-
     FString Path = TEXT("/Game/Resources/Effect/EventEffect/NS_ItemEffect.NS_ItemEffect");
     UNiagaraSystem* itemEffect = Cast<UNiagaraSystem>(StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr, *Path));
-    pickEvent->AssignPickable(pickable, temp, itemEffect);
+    pickEvent->AssignPickable(pickable, itemEffect);
     mgr_shared->DeployEvent(pickEvent, publishCoordX, publishCoordY);
   }
   else
   {
     MDebug::LogError("Can not get map Object Coord");
-  }
-}
-
-void USmithEventPublishMediator::ACTOR_TEST(AActor* TEST)
-{
-  TEST_ACTOR = TEST;
-  if (::IsValid(TEST_ACTOR))
-  {
-    TEST_ACTOR->SetActorHiddenInGame(true);
   }
 }

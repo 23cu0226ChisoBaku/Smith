@@ -21,7 +21,6 @@ void USmithNextLevelEvent::BeginDestroy()
     m_eventAppearance->Destroy();
   }
 
-  MDebug::LogError("Stairs Destroyed");
   Super::BeginDestroy();
 }
 

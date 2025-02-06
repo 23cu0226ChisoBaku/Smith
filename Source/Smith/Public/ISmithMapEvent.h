@@ -50,11 +50,5 @@ public:
 	virtual void DiscardEvent() = 0;
 	virtual void RaiseEvent() = 0;
 	virtual bool IsDisposed() const = 0;
-	void SetEventCoord(uint8 x, uint8 y);
-	uint8 GetEventCoordX() const;
-	uint8 GetEventCoordY() const;
 
-private:
-	uint8 m_eventCoordX = 0u;
-	uint8 m_eventCoordY = 0u;
 };

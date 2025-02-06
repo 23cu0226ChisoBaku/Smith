@@ -97,9 +97,6 @@ private:
 	UPROPERTY()
 	TObjectPtr<USmithDungeonDamageCalculator> m_damageCalculator;
 
-	UPROPERTY(EditAnywhere, Category = TEST)
-	TSubclassOf<AActor> TEST_ACTOR;
-
 	UPROPERTY(EditAnywhere)
 	double TEST_DAMAGE_CALCULATOR_CONSTANT;
 

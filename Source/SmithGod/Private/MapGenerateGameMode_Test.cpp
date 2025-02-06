@@ -240,9 +240,6 @@ void AMapGenerateGameMode_Test::initializeGame()
     check(m_eventMediator != nullptr)
 
     m_eventMediator->Initialize(m_eventPublisher, m_mapMgr);
-    AActor* actor = world->SpawnActor<AActor>(TEST_ACTOR, FVector::ZeroVector, FRotator::ZeroRotator);
-    check(::IsValid(actor));
-    m_eventMediator->ACTOR_TEST(actor);
 
     m_logSubsystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
     check(m_logSubsystem != nullptr);

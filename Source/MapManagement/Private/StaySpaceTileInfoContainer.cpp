@@ -50,11 +50,11 @@ namespace UE::Smith
         }
         ICanSetOnMap* GetMapObject() const
         {
-          return m_mapObj.Get();
+          return m_mapObj.IsValid() ? m_mapObj.Get() : nullptr;
         }
         ISmithMapEvent* GetEvent() const
         {
-          return m_event.Get();
+          return m_event.IsValid() ? m_event.Get() : nullptr;
         }
         void ResetContainer()
         {

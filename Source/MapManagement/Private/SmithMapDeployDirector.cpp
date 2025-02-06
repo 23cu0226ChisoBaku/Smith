@@ -8,6 +8,9 @@ Author : MAI ZHICONG
 Description : マップオブジェクトを新しく配置するクラス
 
 Update History: 2025/01/08 作成
+								2025/01/20 イベント配置インターフェース追加
+								2025/01/21 イベントの回転パラメーターを追加
+                2025/02/05 イベントの回転を決めるヘルパークラス追加
 
 Version : alpha_1.0.0
 
@@ -19,9 +22,9 @@ Encoding : UTF-8
 #include "SmithMap.h"
 #include "SmithMapDataModel.h"
 #include "ISmithMapEvent.h"
+#include "SmithMapHelperLibrary.h"
 #include "MLibrary.h"
 
-#include "SmithMapHelperFunc.h"
 
 namespace UE::Smith
 {
@@ -50,11 +53,6 @@ namespace UE::Smith
         }
         void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
         {
-          if (!IS_UINTERFACE_VALID(mapObj))
-          {
-            return;
-          }
-
           TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared.IsValid())
           {
@@ -63,6 +61,11 @@ namespace UE::Smith
 
           TSharedPtr<Map> map_shared = model_shared->Map.Pin();
           if (!map_shared.IsValid())
+          {
+            return;
+          }
+
+          if (!IS_UINTERFACE_VALID(mapObj))
           {
             return;
           }
@@ -77,8 +80,8 @@ namespace UE::Smith
           const uint8 mapObjSizeY = mapObj->GetOnMapSizeY();
           const uint8 mapWidth = map_shared->GetMapWidth();
           const uint8 mapHeight = map_shared->GetMapHeight();
-          TArray<FMapCoord> mapObjCoords{};
-          mapObjCoords.Reserve(StaticCast<int32>(mapObjSizeX * mapObjSizeY));
+          TArray<FMapCoord> mapObjPlaceCoords{};
+          mapObjPlaceCoords.Reserve(StaticCast<int32>(mapObjSizeX) * StaticCast<int32>(mapObjSizeY));
 
           // マップオブジェクトが占める座標を全て調べる
           for (uint8 mapObjLocalCoordX = 0u; mapObjLocalCoordX < mapObjSizeX; ++mapObjLocalCoordX)
@@ -86,9 +89,9 @@ namespace UE::Smith
             for (uint8 mapObjLocalCoordY = 0u; mapObjLocalCoordY < mapObjSizeX; ++mapObjLocalCoordY)
             {
               // 座標がマップにはみ出ていないかを確認
-              const int32 mapObjCheckCoordX = StaticCast<int32>(x + mapObjLocalCoordX);
-              const int32 mapObjCheckCoordY = StaticCast<int32>(y + mapObjLocalCoordY);
-              if (mapObjCheckCoordX >= mapWidth || mapObjCheckCoordY >= mapHeight)
+              const int32 mapObjCheckCoordX = StaticCast<int32>(x) + StaticCast<int32>(mapObjLocalCoordX);
+              const int32 mapObjCheckCoordY = StaticCast<int32>(y) + StaticCast<int32>(mapObjLocalCoordY);
+              if (mapObjCheckCoordX >= StaticCast<int32>(mapWidth) || mapObjCheckCoordY >= StaticCast<int32>(mapHeight))
               {
                 return;
               }
@@ -101,30 +104,33 @@ namespace UE::Smith
                 return;
               }
 
-              mapObjCoords.Emplace(mapObjOnMapCoord);
+              mapObjPlaceCoords.Emplace(mapObjOnMapCoord);
             }
           }
 
-          for (const auto& onMapCoord : mapObjCoords)
+          // タイル情報にマップオブジェクトをいれる
+          for (const auto& placeCoord : mapObjPlaceCoords)
           {
-            model_shared->StaySpaceTable[onMapCoord]->SetMapObj(mapObj);
+            model_shared->StaySpaceTable[placeCoord]->SetMapObj(mapObj);
           }
+          // マップオブジェクトの原点座標だけテーブルに記録する
           model_shared->OnMapObjsCoordTable.Emplace(mapObj, FMapCoord{x, y});
         }
         void DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y)
         {
-          if (!IS_UINTERFACE_VALID(event))
-          {
-            return;
-          }
-
           TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared.IsValid())
           {
             return;
           }
 
+          if (!IS_UINTERFACE_VALID(event))
+          {
+            return;
+          }
+
           const FMapCoord eventCoord(x, y);
+          // 座標にイベントを配置できるか確認
           if (!model_shared->StaySpaceTable.Contains(eventCoord))
           {
             MDebug::LogError("cant place event here");
@@ -137,20 +143,26 @@ namespace UE::Smith
             return;
           }
 
-          // TODO
-          if (staySpaceTileContainer->GetEvent() == nullptr
-              /*&& staySpaceTileContainer->GetMapObject() == nullptr*/)
+          // 座標にイベントが配置されていない場合だけイベントを配置する
+          if (staySpaceTileContainer->GetEvent() == nullptr)
           {
+            FRotator eventRotation;
             TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
-            event->SetEventCoord(x, y);
+
+            // イベントの向きを決める
+            bool success = FSmithMapHelperLibrary::DirectMapElementRotation(map_shared.Get(), eventRotation, x, y);
+            // 例外が発生した場合は抜ける
+            if (!success)
+            {
+              return;
+            }
 
             const double eventLocationX = StaticCast<double>(x) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.X;
             const double eventLocationY = StaticCast<double>(y) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.Y;
             const double eventLocationZ = model_shared->OriginWorldCoord.Z;
             const FVector eventLocation = FVector{ eventLocationX, eventLocationY,eventLocationZ};
 
-            FRotator eventRotation;
-            FSmithMapHelperFunc::DirectMapElementRotation(map_shared.Get(), eventRotation, x, y);
+            // イベント初期化
             event->InitializeEvent(eventLocation, eventRotation);
             staySpaceTileContainer->SetEvent(event);
           }

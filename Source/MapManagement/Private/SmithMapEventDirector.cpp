@@ -1,19 +1,39 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMapEventDirector.cpp
 
+Author : MAI ZHICONG
+
+Description : マップイベントを配置する前に向きなど情報を調整するクラス
+
+Update History: 2025/02/04 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 #include "SmithMapEventDirector.h"
 #include "SmithMap.h"
 #include "SmithSection.h"
 #include "SmithMapDataModel.h"
-
 #include "MLibrary.h"
 
 namespace UE::Smith
 {
   namespace Map
   {
+    ///
+    /// @FSmithMapEventDirector 実装クラス
+    /// 
     class FSmithMapEventDirector::EventDirectorImpl
     {
+      //---------------------------------------
+      /*
+                        エイリアス
+      */
+      //---------------------------------------
       using Model = typename FSmithMapDataModel;
       public:
         EventDirectorImpl()
@@ -33,29 +53,30 @@ namespace UE::Smith
           TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared.IsValid())
           { 
-            MDebug::LogError("failed to InitNextLevelEvent --- model invalid");
+            MDebug::LogError("failed to DirectNextLevelEventCoord --- model invalid");
             return;
           }
 
           TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
           if (!map_shared.IsValid())
           {
-            MDebug::LogError("failed to InitNextLevelEvent --- map invalid");
+            MDebug::LogError("failed to DirectNextLevelEventCoord --- map invalid");
+            return;
+          }
+
+          if (map_shared->GetSectionCount() == 0)
+          {
+            MDebug::LogError("failed to DirectNextLevelEventCoord --- map section num invalid");
             return;
           }
 
           TArray<uint8> sectionIdx{};
           sectionIdx.Reserve(map_shared->GetSectionCount());
 
-          if (map_shared->GetSectionCount() == 0)
-          {
-            MDebug::LogError("failed to InitNextLevelEvent --- map section num invalid");
-            return;
-          }
-
           outX = 0u;
           outY = 0u;
 
+          // 全てのセクションからランダムで一つを決める
           for (uint8 i = 0u; i < map_shared->GetSectionCount(); ++i)
           {
             sectionIdx.Emplace(i);
@@ -64,9 +85,11 @@ namespace UE::Smith
           FUECollectionsLibrary::Shuffle(sectionIdx);
           for(int32 i = 0; i < sectionIdx.Num(); ++i)
           {
+            // セクションを取得
             const uint8 sectionRow = sectionIdx[i] / map_shared->GetColumn();
             const uint8 sectionColumn = sectionIdx[i] % map_shared->GetColumn();
             FSmithSection* sectionPtr = map_shared->GetSection(sectionRow, sectionColumn);
+            // セクションの有効性チェックかつ部屋があるかをチェック
             if (sectionPtr == nullptr || !sectionPtr->HasRoom())
             {
               continue;
@@ -92,7 +115,7 @@ namespace UE::Smith
               eventRandomPlaceCoords.Emplace(FMapCoord{column, sectionRoomTop});
               eventRandomPlaceCoords.Emplace(FMapCoord{column, sectionRoomBottom});
             }
-
+            // 部屋の左右両辺の座標
             for (uint8 row = sectionRoomTop + 1u; row < sectionRoomBottom; ++row)
             {
               eventRandomPlaceCoords.Emplace(FMapCoord{sectionRoomLeft, row});
@@ -110,52 +133,57 @@ namespace UE::Smith
               }
 
               if (canPlaceEvent(mapCoord))
-                {
-                  outX = mapCoord.x;
-                  outY = mapCoord.y;
-                  return;
-                }
+              {
+                outX = mapCoord.x;
+                outY = mapCoord.y;
+                return;
+              }
             }
           }
         }
-        // TODO need check out of bounds;
+        ///
+        /// @brief 座標にイベントを置けるかをチェック
+        ///
         bool canPlaceEvent(FMapCoord coord, bool bPlaceOnCrossroad = false)
         {
           TSharedPtr<Model> model_shared = m_model.Pin();
-          if (model_shared->StaySpaceTable[coord]->GetMapObject() != nullptr 
-              || model_shared->StaySpaceTable[coord]->GetEvent() != nullptr
-             )
+          if (model_shared->StaySpaceTable[coord]->GetEvent() != nullptr)
           {
             return false;
           }
-    
+
+          // 交差点（上下左右四つのタイルも地面）に配置する時
           if (!bPlaceOnCrossroad)
           {
-            // 4だったら交差点
+            // 4になると交差点
             int32 crossCount = 0;
+            // 北方向
             {
-              const FMapCoord coord_north{StaticCast<uint8>(coord.x + 1u), coord.y};
+              const FMapCoord coord_north(coord.x + 1u, coord.y);
               if (model_shared->StaySpaceTable.Contains(coord_north))
               {
                 ++crossCount;
               }
             }
+            // 東方向
             {
-              const FMapCoord coord_east{StaticCast<uint8>(coord.x), StaticCast<uint8>(coord.y + 1u)};
+              const FMapCoord coord_east(coord.x, coord.y + 1u);
               if (model_shared->StaySpaceTable.Contains(coord_east))
               {
                 ++crossCount;
               }
             }
+            // 南方向
             {
-              const FMapCoord coord_south{StaticCast<uint8>(coord.x - 1u), StaticCast<uint8>(coord.y)};
+              const FMapCoord coord_south(coord.x - 1u, coord.y);
               if (model_shared->StaySpaceTable.Contains(coord_south))
               {
                 ++crossCount;
               }
             }
+            // 西方向
             {
-              const FMapCoord coord_west{StaticCast<uint8>(coord.x), StaticCast<uint8>(coord.y - 1u)};
+              const FMapCoord coord_west(coord.x, coord.y - 1u);
               if (model_shared->StaySpaceTable.Contains(coord_west))
               {
                 ++crossCount;

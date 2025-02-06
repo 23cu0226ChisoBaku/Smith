@@ -91,7 +91,7 @@ namespace UE::Smith
 				/// @param	originCoord_World				マップ原点座標
 				/// @param	mapTileSize							マップタイルサイズ
 				///
-				void AssignMap(TSharedPtr<FSmithMapDataModel>, FVector originCoord_World, int32 tileSize);
+				void AssignMap(TSharedPtr<FSmithMapDataModel>);
 				///
 				/// @brief 													攻撃できるオブジェクトを探す
 				/// @param outActors 								攻撃できるオブジェクト(IAttackable)が全て入っているコンテナ

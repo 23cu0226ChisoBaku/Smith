@@ -40,13 +40,7 @@ Encoding : UTF-8
 #include "SmithEventPublisher.h"
 #include "IEventRegister.h"
 
-#include "SmithNextLevelEvent.h"
-#include "SmithMapHelperFunc.h"
-
 #include "MLibrary.h"
-
-// TODO
-#include "MapGenerateGameMode_Test.h"
 
 namespace UE::Smith
 {
@@ -139,9 +133,9 @@ namespace UE::Smith
 
           m_mapConstructor->ConstructMap(world, m_map->GetMap(), constructionBP);
 
-          m_mapOperator->AssignMap(m_model, constructionBP.OriginCoordinate, constructionBP.TileSize);
+          m_mapOperator->AssignMap(m_model);
           m_deployDirector->AssignMap(m_model);
-          m_mapObserver->AssignMap(m_model, constructionBP.OriginCoordinate, constructionBP.TileSize);
+          m_mapObserver->AssignMap(m_model);
           m_eventDirector->AssignMap(m_model);
 
           discardEvents();

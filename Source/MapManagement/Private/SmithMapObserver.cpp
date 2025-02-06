@@ -8,6 +8,8 @@ Author : MAI ZHICONG
 Description : マップを観察し処理するクラス(※Smithマップ専用)
 
 Update History: 2025/01/07 作成
+                2025/01/13 追跡インターフェース追加
+                2025/02/01 ボス生成追加
 
 Version : alpha_1.0.0
 
@@ -21,7 +23,7 @@ Encoding : UTF-8
 #include "SmithEnemyGenerateBluePrint.h"
 #include "SmithMapDataModel.h"
 #include "Direction.h"
-#include "SmithMapHelperFunc.h"
+#include "SmithMapHelperLibrary.h"
 
 #include "MLibrary.h"
 
@@ -41,17 +43,20 @@ namespace UE::Smith
         ~MapObserverImpl()
         { }
       public:
-        void AssignMap(TSharedPtr<Model> pModel, FVector originCoord_World, int32 tileSize)
+        void AssignMap(TSharedPtr<Model> pModel)
         {
           m_model = pModel;
-          m_originCoord_World = originCoord_World;
-          m_mapTileSize = tileSize;
         }
         void InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
         {
-          // AssignMapを呼び出す必要がある
-          check(m_model.IsValid())
-          if (!m_model.IsValid()) [[unlikely]]
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared.IsValid())
+          {
+            return;
+          }
+
+          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+          if (!map_shared.IsValid())
           {
             return;
           }
@@ -68,23 +73,11 @@ namespace UE::Smith
             return;
           }
 
-          TSharedPtr<Model> model_shared = m_model.Pin();
-          if (!model_shared.IsValid())
-          {
-            return;
-          }
-
-          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
-          if (!map_shared.IsValid())
-          {
-            return;
-          }
-
           const uint8 mapRow = map_shared->GetRow();
           const uint8 mapColumn = map_shared->GetColumn();
-          outMapObjs.Reset();
           // 空いているタイルの座標を入れる
           TArray<FMapCoord> remainCoords{};
+          outMapObjs.Reset();
 
           for (uint8 y = 0; y < mapRow; ++y)
           {
@@ -153,13 +146,15 @@ namespace UE::Smith
                   bool canPlace = false;
                   FMapCoord mapCoord{};
                   
-                  TArray<FMapCoord> test;
                   for (int32 j = 0; j < roomCoords.Num(); ++j)
                   {
                     mapCoord = roomCoords[j];
                     
-                    if (mapCoord.x + mapSizeX >= roomLeft + roomWidth
-                      || mapCoord.y + mapSizeY >= roomTop + roomHeight) 
+                    // マップオブジェクトの最大のXY座標は部屋からはみ出ていないかを確認
+                    const int32 maxCoordX = StaticCast<int32>(mapCoord.x) + StaticCast<int32>(mapSizeX);
+                    const int32 maxCoordY = StaticCast<int32>(mapCoord.y) + StaticCast<int32>(mapSizeY);
+                    if (maxCoordX >= StaticCast<int32>(roomLeft + roomWidth)
+                      || maxCoordY >= StaticCast<int32>(roomTop + roomHeight)) 
                     {
                       continue;
                     }
@@ -178,26 +173,22 @@ namespace UE::Smith
                   }
 
                   const FVector mapObjoffset = FVector(
-                                                       StaticCast<double>((mapSizeX - 1u) * m_mapTileSize * 0.5),
-                                                       StaticCast<double>((mapSizeY - 1u) * m_mapTileSize * 0.5),
+                                                       StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize * 0.5),
+                                                       StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize * 0.5),
                                                        0.0
                                                      );
 
-                  const FVector spawnWorldCoord = FVector(
-                                                          m_originCoord_World.X + StaticCast<double>(StaticCast<int32>(mapCoord.x) * m_mapTileSize),
-                                                          m_originCoord_World.Y + StaticCast<double>(StaticCast<int32>(mapCoord.y) * m_mapTileSize),
-                                                          m_originCoord_World.Z
-                                                          )
+                  const FVector worldLocation = FVector(
+                                                          model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(mapCoord.x) * model_shared->MapTileSize),
+                                                          model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(mapCoord.y) * model_shared->MapTileSize),
+                                                          model_shared->OriginWorldCoord.Z
+                                                        )
                                                   + mapObjoffset;
 
-                  enemy->SetActorLocation(spawnWorldCoord);
-                  // FRotator rotation;
-                  // bool success = FSmithMapHelperFunc::DirectMapElementRotation(map_shared.Get(), rotation, mapCoord.x, mapCoord.y);
-                  // if (!success)
-                  // {
-                  //   MDebug::Log("Fuck");
-                  // } 
-                  // enemy->SetActorRotation(rotation);
+                  FRotator worldRotation;
+                  FSmithMapHelperLibrary::DirectMapElementRotation(map_shared.Get(), worldRotation, mapCoord.x, mapCoord.y);
+
+                  enemy->SetActorLocationAndRotation(worldLocation, worldRotation);
               
                   for (uint8 mapCoordOffsetX = 0; mapCoordOffsetX < mapSizeX; ++mapCoordOffsetX)
                   {
@@ -231,19 +222,19 @@ namespace UE::Smith
                   const uint8 mapSizeX = mapObj->GetOnMapSizeX();
                   const uint8 mapSizeY = mapObj->GetOnMapSizeY();
                   const FVector mapObjoffset = FVector(
-                                                       StaticCast<double>((mapSizeX - 1u) * m_mapTileSize) * 0.5,
-                                                       StaticCast<double>((mapSizeY - 1u) * m_mapTileSize) * 0.5,
+                                                       StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize) * 0.5,
+                                                       StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize) * 0.5,
                                                        0.0
                                                      );
 
-                  const FVector spawnWorldCoord = FVector(
-                                                          m_originCoord_World.X + StaticCast<double>(StaticCast<int32>(bossCoord.x) * m_mapTileSize),
-                                                          m_originCoord_World.Y + StaticCast<double>(StaticCast<int32>(bossCoord.y) * m_mapTileSize),
-                                                          m_originCoord_World.Z
+                  const FVector worldLocation = FVector(
+                                                          model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(bossCoord.x) * model_shared->MapTileSize),
+                                                          model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(bossCoord.y) * model_shared->MapTileSize),
+                                                          model_shared->OriginWorldCoord.Z
                                                           )
                                                   + mapObjoffset;
                                                      
-                  enemy->SetActorLocation(spawnWorldCoord);
+                  enemy->SetActorLocation(worldLocation);
                   outMapObjs.Emplace(bossCoord, mapObj);
 
                   for (uint8 mapCoordOffsetX = 0; mapCoordOffsetX < mapSizeX; ++mapCoordOffsetX)
@@ -276,13 +267,13 @@ namespace UE::Smith
           // プレイヤーを配置
           const FMapCoord playerMapCoord = remainCoords[0];
           const FVector playerWorldCoord = FVector(
-                                                    m_originCoord_World.X + StaticCast<double>(StaticCast<int32>(playerMapCoord.x) * m_mapTileSize),
-                                                    m_originCoord_World.Y + StaticCast<double>(StaticCast<int32>(playerMapCoord.y) * m_mapTileSize),
-                                                    m_originCoord_World.Z
+                                                    model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(playerMapCoord.x) * model_shared->MapTileSize),
+                                                    model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(playerMapCoord.y) * model_shared->MapTileSize),
+                                                    model_shared->OriginWorldCoord.Z
                                                   ); 
           player->SetActorLocation(playerWorldCoord);
           FRotator playerRotation;
-          FSmithMapHelperFunc::DirectMapElementRotation(map_shared.Get(), playerRotation, playerMapCoord.x, playerMapCoord.y);
+          FSmithMapHelperLibrary::DirectMapElementRotation(map_shared.Get(), playerRotation, playerMapCoord.x, playerMapCoord.y);
           player->SetActorRotation(playerRotation);
           outMapObjs.Emplace(playerMapCoord, playerMapObj);
 
@@ -416,7 +407,7 @@ namespace UE::Smith
           const uint8 targetCoordX = model_shared->OnMapObjsCoordTable[target].x;
           const uint8 targetCoordY = model_shared->OnMapObjsCoordTable[target].y;
 
-          return FSmithMapHelperFunc::IsInSameSection(map_shared.Get(), chaserCoordX, chaserCoordY, targetCoordX, targetCoordY);
+          return FSmithMapHelperLibrary::IsInSameSection(map_shared.Get(), chaserCoordX, chaserCoordY, targetCoordX, targetCoordY);
         }
         void chaseTarget_internal(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
         {
@@ -618,9 +609,6 @@ namespace UE::Smith
         TWeakPtr<Model> m_model;
         TWeakInterfacePtr<ICanSetOnMap> m_player;
         FSmithEnemyGenerateBluePrint m_generateBP;
-        FVector m_originCoord_World;
-        int32 m_mapTileSize;
-        uint8 m_turnPastCnt;
     };
     FSmithMapObserver::FSmithMapObserver()
       : m_pImpl(::MakeUnique<MapObserverImpl>())
@@ -645,9 +633,9 @@ namespace UE::Smith
 
       return *this;
     }
-    void FSmithMapObserver::AssignMap(TSharedPtr<FSmithMapDataModel> pModel, FVector originCoord_World, int32 mapTileSize)
+    void FSmithMapObserver::AssignMap(TSharedPtr<FSmithMapDataModel> pModel)
     {
-      m_pImpl->AssignMap(pModel, originCoord_World, mapTileSize);
+      m_pImpl->AssignMap(pModel);
     }
     void FSmithMapObserver::InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
     {

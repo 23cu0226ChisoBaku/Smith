@@ -7,7 +7,8 @@ Author : MAI ZHICONG
 
 Description : マップオブジェクトをワールドに配置するクラス
 
-Update History: 2024/01/04 作成
+Update History: 2025/01/04 作成
+                2025/01/10 マップタイルアクターを破棄するインターフェース追加
 
 Version : alpha_1.0.0
 
@@ -42,7 +43,7 @@ namespace UE::Smith
       const uint8 mapRow = mapRect.GetHeight();
       const uint8 mapColumn = mapRect.GetWidth();
 
-      // オブジェクトリフレクションクラスポインタを入れるバッファ
+      // タイルアクターのリフレクションクラスポインタを入れるバッファ
       TMap<ETileType,UClass*> tileActorUClassBuffer;
       tileActorUClassBuffer.Reserve(blueprint.TileBuildingMaterialPaths.Num());
 
@@ -78,22 +79,20 @@ namespace UE::Smith
                                    blueprint.OriginCoordinate.Z
                                   );
           
-          // オブジェクトを配置
-          // TODO
+          // タイルアクターを配置
+          // 壁や床タイルの向きを乱数で決めて、全体的見た目を同じく見えないようにする
           const int32 randRotator = FMath::RandRange(0,3);
-          const FRotator rotate = FRotator{0.0, 90.0 * StaticCast<double>(randRotator) , 0.0};
+          const FRotator rotation = FRotator{0.0, 90.0 * StaticCast<double>(randRotator) , 0.0};
           
-          AActor* actor = world->SpawnActor<AActor>(tileActorUClassBuffer[tileType], spawnCoord, rotate);
-          if (::IsValid(actor))
-          {
-            m_mapMaterials.Emplace(actor);
-          }
+          AActor* actor = world->SpawnActor<AActor>(tileActorUClassBuffer[tileType], spawnCoord, rotation);
+          m_mapMaterials.Emplace(actor);
+          
         }
       }
     }
     void FSmithMapConstructor::DestructMap()
     {
-      for (auto& material : m_mapMaterials)
+      for (const auto& material : m_mapMaterials)
       {
         if (material.IsValid())
         {

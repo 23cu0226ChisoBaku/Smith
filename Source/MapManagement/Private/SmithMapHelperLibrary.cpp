@@ -14,24 +14,25 @@ Version : alpha_1.0.0
 Encoding : UTF-8 
 
 */
-#include "SmithMapHelperFunc.h"
+#include "SmithMapHelperLibrary.h"
 #include "SmithSection.h"
 #include "SmithMap.h"
+#include "MLibrary.h"
 
+/// @brief cpp専用名前空間
 namespace MapHelperFunc::Private
 {
   constexpr uint8 FIRST_QUADRANT = 1u;
   constexpr uint8 SECOND_QUADRANT = 2u;
   constexpr uint8 THIRD_QUADRANT = 3u;
   constexpr uint8 FOURTH_QUADRANT = 4u;
-
 }
 
 namespace UE::Smith
 {
   namespace Map
   {
-    bool FSmithMapHelperFunc::IsInSameRoom(FSmithMap* map, uint8 x1, uint8 y1, uint8 x2, uint8 y2)
+    bool FSmithMapHelperLibrary::IsInSameRoom(FSmithMap* map, uint8 x1, uint8 y1, uint8 x2, uint8 y2)
     {
       if (map == nullptr)
       {
@@ -54,7 +55,7 @@ namespace UE::Smith
       return true;
     }
 
-    bool FSmithMapHelperFunc::IsInSameSection(FSmithMap* map, uint8 x1, uint8 y1, uint8 x2, uint8 y2)
+    bool FSmithMapHelperLibrary::IsInSameSection(FSmithMap* map, uint8 x1, uint8 y1, uint8 x2, uint8 y2)
     {
       if (map == nullptr)
       {
@@ -70,30 +71,29 @@ namespace UE::Smith
       }
 
       return section1 == section2;
-
     }
 
-    bool FSmithMapHelperFunc::DirectMapElementRotation(FSmithMap* map, FRotator& outRotation, uint8 x, uint8 y)
+    bool FSmithMapHelperLibrary::DirectMapElementRotation(FSmithMap* map, FRotator& outRotation, uint8 x, uint8 y)
     {
       if (map == nullptr)
       {
         return false;
       }
 
+      // マップ要素のある/いるセクション
       FSmithSection* section = map->GetSectionByCoord(x, y);
       if (section == nullptr || !section->HasRoom())
       {
         return false;
       }
 
+      // 必要なデータを計算
       const uint8 mapColumn = map->GetColumn();
       const uint8 sectionIdx = section->GetSectionIdx();
       const uint8 rowIdx = sectionIdx / mapColumn;
       const uint8 columnIdx = sectionIdx % mapColumn;
-
       const uint8 sectionLeft = map->GetSectionLeft(columnIdx);
       const uint8 sectionTop = map->GetSectionTop(rowIdx);
-
       const uint8 localSectionCoordX = x - sectionLeft;
       const uint8 localSectionCoordY = y - sectionTop;
       const uint8 roomLeft = section->GetRoomLeft();
@@ -101,38 +101,44 @@ namespace UE::Smith
       const uint8 roomRight = roomLeft + section->GetRoomWidth() - 1u;
       const uint8 roomBottom = roomTop + section->GetRoomHeight() - 1u;
 
+      // 要素と四つの辺の距離を計算
       const uint8 distanceToLeft = localSectionCoordX - roomLeft;
       const uint8 distanceToRight = roomRight - localSectionCoordX;
       const uint8 distanceToTop = localSectionCoordY - roomTop;
       const uint8 distanceToBottom = roomBottom - localSectionCoordY;
 
       using namespace MapHelperFunc::Private;
+      // 要素のある/いる象限を探す
+      // 部屋を基準にしているため、UEのXY軸の方向と違う
       uint8 quadrant = 0u;
 
+      // 第一・第四象限又は間に
       if (distanceToRight < distanceToLeft)
       {
         outRotation = FRotator{0.0, 180.0, 0.0};
         if (distanceToBottom > distanceToTop) 
         {
-          quadrant = SECOND_QUADRANT;
-        }
-        else if(distanceToBottom < distanceToTop)
-        {
           quadrant = FIRST_QUADRANT;
-        }
-      }
-      else if (distanceToRight > distanceToLeft)
-      {
-        outRotation = FRotator::ZeroRotator;
-        if (distanceToBottom > distanceToTop) 
-        {
-          quadrant = THIRD_QUADRANT;
         }
         else if(distanceToBottom < distanceToTop)
         {
           quadrant = FOURTH_QUADRANT;
         }
       }
+      // 第二・第三象限又は間に
+      else if (distanceToRight > distanceToLeft)
+      {
+        outRotation = FRotator::ZeroRotator;
+        if (distanceToBottom > distanceToTop) 
+        {
+          quadrant = SECOND_QUADRANT;
+        }
+        else if(distanceToBottom < distanceToTop)
+        {
+          quadrant = THIRD_QUADRANT;
+        }
+      }
+      // 軸の上に
       else
       {
         if (distanceToBottom > distanceToTop) 
@@ -150,6 +156,7 @@ namespace UE::Smith
         return true;
       }
 
+      // 壁に近い方向を探し、壁に背を向けて配置する
       switch (quadrant)
       {
         case FIRST_QUADRANT:
@@ -160,7 +167,7 @@ namespace UE::Smith
           }
           else
           {
-            outRotation = FRotator{0.0, 90.0, 0.0};
+            outRotation = FRotator{0.0, 90, 0.0};
           }
         }
         break;
@@ -192,15 +199,16 @@ namespace UE::Smith
         {
           if (distanceToBottom > distanceToRight)
           {
-            outRotation = FRotator{0.0, 270.0, 0.0};
+            outRotation = FRotator{0.0, 180.0, 0.0};
           }
           else
           {
-            outRotation = FRotator{0.0, 180.0, 0.0};
+            outRotation = FRotator{0.0, 270.0, 0.0};
           }
         }
         break;
       }
+
       return true;
     }
   }
