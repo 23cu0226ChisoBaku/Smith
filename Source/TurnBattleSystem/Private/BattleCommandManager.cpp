@@ -1,5 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+BattleCommandManager.cpp
+
+Author : MAI ZHICONG
+
+Description : バトルコマンドを管理するクラス
+
+Update History: 2024/12/16 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "BattleCommandManager.h"
 #include "IBattleCommand.h"
@@ -40,7 +54,7 @@ void UBattleCommandManager::RegisterWaitList(const TArray<TWeakInterfacePtr<ITur
       continue;
     }
 
-    m_requestCmdWaitList.Add(waitObj.Get());
+    m_requestCmdWaitList.Add(waitObj);
   }
 }
 
@@ -49,16 +63,16 @@ void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedP
   // コマンド実行中に登録禁止
   if (m_bIsExecutingCommand || !m_bCanRegister)
   {
-    MDebug::LogError("Cant register");
+    MDebug::LogError("Cant register during command executing");
     return;
   }
 
-  check(IS_UINTERFACE_VALID(requester));
   if (!IS_UINTERFACE_VALID(requester))
   {
     return;
   }
 
+  // 受付リストにあれば受け付ける
   if (m_requestCmdWaitList.Contains(requester))
   {
     requester->SetCommandSendable(false);
@@ -68,10 +82,11 @@ void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedP
   }
   else
   {
-    MDebug::LogError("Cant Register");
+    MDebug::LogError("Cant Register --- not authorized");
     return;
   }
 
+  // 受付がなくなったらコマンドを実行
   if (m_requestCmdWaitList.Num() == 0)
   {
     m_bIsExecutingCommand = true;
@@ -112,6 +127,7 @@ void UBattleCommandManager::ExecuteCommands(float deltaTime)
     }
   }
 
+  // コマンドがなくなったら受付を再開
   if (m_commandLists.Num() == 0)
   {
     m_bIsExecutingCommand = false;
@@ -120,6 +136,7 @@ void UBattleCommandManager::ExecuteCommands(float deltaTime)
       OnEndExecuteEvent.Broadcast();
     }
 
+    // このターンに発生するマップイベントを実行
     if (m_eventExecutor.IsValid() && m_eventExecutor->IsEventInStock())
     { 
       m_eventExecutor->ExecuteEvent();

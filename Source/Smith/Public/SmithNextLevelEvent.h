@@ -36,6 +36,6 @@ public:
 private:
 	UPROPERTY()
 	TObjectPtr<AActor> m_eventAppearance;
-	uint8 m_isTriggered : 1;
+	uint8 m_bIsDisposed : 1;
 
 };

@@ -11,7 +11,7 @@ USmithNextLevelEvent::USmithNextLevelEvent(const FObjectInitializer& ObjectIniti
   : Super(ObjectInitializer)
   , OnNextLevel{}
   , m_eventAppearance(nullptr)
-  , m_isTriggered(false)
+  , m_bIsDisposed(false)
 { }
 
 void USmithNextLevelEvent::BeginDestroy()
@@ -42,6 +42,13 @@ void USmithNextLevelEvent::InitializeEvent(const FVector& location, const FRotat
       m_eventAppearance = world->SpawnActor<AActor>(subClass.Get(), location, rotation);
     }
   }
+  else
+  {
+    m_eventAppearance->SetActorLocationAndRotation(location, rotation);
+    m_eventAppearance->SetActorHiddenInGame(false);
+  }
+
+  m_bIsDisposed = false;
 }
 
 void USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
@@ -71,17 +78,15 @@ void USmithNextLevelEvent::DiscardEvent()
   {
     m_eventAppearance->SetActorHiddenInGame(true);
   }
-
-  MarkAsGarbage();
 }
 
 void USmithNextLevelEvent::RaiseEvent()
 {
+  m_bIsDisposed = true;
   OnNextLevel.ExecuteIfBound();
-  m_isTriggered = true;
 }
 
 bool USmithNextLevelEvent::IsDisposed() const
 { 
-  return m_isTriggered;
+  return m_bIsDisposed;
 }
