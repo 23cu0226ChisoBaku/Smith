@@ -5,6 +5,7 @@
 #include "ICanMakeAttack.h"
 #include "ISmithBattleLogger.h"
 #include "AttackHandle.h"
+#include "Direction.h"
 #include "MLibrary.h"
 
 void USmithAIConditionAttackStrategy::Initialize(ICanMakeAttack *attacker, ICommandMediator *mediator, int32 attackPower)
@@ -38,57 +39,43 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     return false;
   }
 
-  TQueue<FConditionHandle> queue;
-  FConditionHandle tempHandle;
   bool isExecuted = false;
-  while (m_conditions.Dequeue(tempHandle))
+  FConditionHandle* curtConditionAttatkHandle = m_conditions.Peek();
+  if (curtConditionAttatkHandle == nullptr)
   {
-    queue.Enqueue(tempHandle);
-    // 条件を満たしているか
-    if (tempHandle.Condition.Execute())
+    return false;
+  }
+
+  // 条件を満たしているか
+  if (curtConditionAttatkHandle->Condition.Execute())
+  {
+    FConditionHandle curtHandleInstance{};
+    m_conditions.Dequeue(curtHandleInstance);
+    isExecuted = true;
+    // 攻撃
+    if (!m_attackFormatTables.Contains(curtHandleInstance.Name))
     {
-      // 攻撃
-      if (!m_attackFormatTables.Contains(tempHandle.Name))
-      {
-        MDebug::LogError("Not Found Key");
-        continue;
-      }
-
-      const auto& format = m_attackFormatTables[tempHandle.Name];
-      if (!format.IsValid())
-      {
-        MDebug::LogError("Format Invalid");
-        continue;
-      }
-
-      // TODO add by Mai
-      ISmithBattleLogger* logger = Cast<ISmithBattleLogger>(GetOwner());
-
-      for (uint8 i = 0u; i < 4u; ++i)
-      {
-        EDirection atkDir = StaticCast<EDirection>(i * 2u);
-
-        bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *m_attackFormatTables[tempHandle.Name], AttackHandle{logger, m_atk}, false);
-        if (success)
-        {
-          isExecuted = true;
-          break;
-        }
-      }
+      MDebug::LogError("Not Found Key");
+      m_conditions.Enqueue(curtHandleInstance);
+      return false;
     }
-  }
 
-  // 残った要素を代入
-  while (m_conditions.Dequeue(tempHandle))
-  {
-    queue.Enqueue(tempHandle);
-  }
+    const TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>& format = m_attackFormatTables[curtHandleInstance.Name];
+    if (!format.IsValid())
+    {
+      MDebug::LogError("Format Invalid");
+      m_conditions.Enqueue(curtHandleInstance);
+      return false;
+    }
 
-  // 要素を元に戻す
-  while (queue.Dequeue(tempHandle))
-  {
-    m_conditions.Enqueue(tempHandle);
-  }
+    // TODO add by Mai
+    ISmithBattleLogger* logger = Cast<ISmithBattleLogger>(GetOwner());
 
+    // 南に向けて攻撃
+    m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), EDirection::South, *format, AttackHandle{logger, m_atk});
+    m_conditions.Enqueue(curtHandleInstance);
+    
+  }
+  
   return isExecuted;
 }

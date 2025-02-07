@@ -2,7 +2,6 @@
 
 #include "SmithBoss.h"
 #include "AttackHandle.h"
-#include "SmithAIRegistry.h"
 #include "SmithAIBehaviorProcessor.h"
 #include "SmithAIStrategyContainer.h"
 #include "SmithAIConditionAttackStrategy.h"
@@ -12,7 +11,7 @@
 #include "FormatInfo_Import.h"
 #include "SmithPickable.h"
 #include "IEventPublishMediator.h"
-// #include "SmithAIConditionBindHandle.h"
+#include "SmithBattleLogWorldSubsystem.h"
 #include "MLibrary.h"
 
 ASmithBoss::ASmithBoss()
@@ -30,16 +29,6 @@ ASmithBoss::ASmithBoss()
 
   m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
   check(m_atkComponent != nullptr);
-
-  EnemyParam.HP = 150;
-  EnemyParam.ATK = 5;
-	//EnemyParam.ATK = ;
-  // // デリゲートのバインド
-  // m_conditionCallBack.BindLambda(ASmithBoss::RageCondition);
-  // m_conditionCallBack.BindLambda(ASmithBoss::WingsCondition);
-  // m_conditionCallBack.BindLambda(ASmithBoss::BreathCondition);
-  // m_conditionCallBack.BindLambda(ASmithBoss::SweepCondition);
-  // m_conditionCallBack.BindLambda(ASmithBoss::NormalCondition);
 }
 
 void ASmithBoss::BeginPlay()
@@ -52,6 +41,12 @@ void ASmithBoss::BeginPlay()
   check(m_moveStrategy != nullptr);
   m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
   check(m_idleStrategy != nullptr);
+
+  UWorld* world = GetWorld();
+  if (::IsValid(world))
+  {
+    m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
+  }
 }
 
 void ASmithBoss::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -77,9 +72,6 @@ void ASmithBoss::Tick(float DeltaTime)
   if (m_aiBehaviorProcessor != nullptr)
   {
     m_aiBehaviorProcessor->TickBehaviorProcessor(DeltaTime);
-    m_wingsCnt++;
-    m_breathCnt++;
-    m_sweepCnt++;
   }
 }
 
@@ -87,32 +79,26 @@ void ASmithBoss::OnAttack(AttackHandle&& handle)
 {
   EnemyParam.HP -= handle.AttackPower;
 
-  MDebug::LogWarning(GetName() + " left HP:" + FString::FromInt(EnemyParam.HP));
+  if (m_logSystem != nullptr)
+  {
+    // TODO
+    m_logSystem->SendAttackLog(handle.Attacker, this);
+    m_logSystem->SendDamageLog(this, handle.AttackPower);
+  }
   if(EnemyParam.HP <= 0)
   {
-    MDebug::LogError(GetName() + " Dead");
-    if (m_eventMediator.IsValid())
-    {
-      
-      if (DropUpgradeTable.Num() > 0)
-      {
-        m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[0]);
-        DropUpgradeTable.RemoveAt(0);
-      }
-    }
     Destroy();
-    DropUpgradeTable.Reset();
   }
 }
 
 uint8 ASmithBoss::GetOnMapSizeX() const
 {
-  return 5;
+  return 3;
 }
 
 uint8 ASmithBoss::GetOnMapSizeY() const
 {
-  return 5;
+  return 3;
 }
 
 EMapObjType ASmithBoss::GetType() const
@@ -128,7 +114,6 @@ void ASmithBoss::TurnOnAI()
     m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get(), EnemyParam.ATK);
   }
 
-  // いる？
 	for (auto& pair : ConditionAttackFormatTables)
 	{
 		if (!pair.Value.FormatMasterData.IsValid())
@@ -180,7 +165,7 @@ bool ASmithBoss::RageCondition()
 
 bool ASmithBoss::WingsCondition()
 {
-
+  m_wingsCnt++;
   if(m_wingsCnt >= 5)
   {
     m_wingsCnt = 0;
@@ -192,6 +177,7 @@ bool ASmithBoss::WingsCondition()
 
 bool ASmithBoss::BreathCondition()
 {
+  m_breathCnt++;
   if(m_breathCnt >= 3)
   {
     m_breathCnt = 0;
@@ -203,6 +189,7 @@ bool ASmithBoss::BreathCondition()
 
 bool ASmithBoss::SweepCondition()
 {
+  m_sweepCnt++;
   if(m_sweepCnt >= 3)
   {
     m_sweepCnt = 0;
@@ -215,4 +202,14 @@ bool ASmithBoss::SweepCondition()
 bool ASmithBoss::NormalCondition()
 {
   return true;
+}
+
+FString ASmithBoss::GetName_Log() const
+{
+  return Name;
+}
+
+EBattleLogType ASmithBoss::GetType_Log() const
+{
+  return EBattleLogType::Enemy;
 }

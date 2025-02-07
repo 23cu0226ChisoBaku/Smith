@@ -9,7 +9,7 @@ Author : MAI ZHICONG
 
 Description : ターンシステムを利用するのに使うインターフェース
 
-Update History: 2024/12/11 Create
+Update History: 2024/12/08 作成
 
 Version : alpha_1.0.0
 
@@ -34,7 +34,7 @@ class UTurnManageable : public UInterface
 };
 
 /// 
-/// @brief ターン管理ができる
+/// @brief ターン管理ができるインターフェース
 ///
 class TURNBATTLESYSTEM_API ITurnManageable
 {
@@ -42,7 +42,13 @@ class TURNBATTLESYSTEM_API ITurnManageable
 	
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 	public:
+		///
+		/// @brief コマンド送信許可設定
+		///
 		void SetCommandSendable(bool);
+		///
+		/// @brief ターン順番を設定
+		///
 		void SetTurnPriority(ETurnPriority);
 
 		bool IsCommandSendable() const;

@@ -63,17 +63,13 @@ namespace UE::Smith
         MapObjOperatorImpl()
           : m_model(nullptr)
           , m_eventRegister(nullptr)
-          , m_originCoord_World(FVector::ZeroVector)
-          , m_mapTileSize(0)
         { }
         ~MapObjOperatorImpl()
         { }
 
-        void AssignMap(TSharedPtr<Model> model, FVector originCoord_World, int32 tileSize)
+        void AssignMap(TSharedPtr<Model> model)
         {
           m_model = model;
-          m_originCoord_World = originCoord_World;
-          m_mapTileSize = tileSize;
         }
         void AssignEventRegister(IEventRegister* eventRegister)
         {
@@ -173,6 +169,16 @@ namespace UE::Smith
                   outActors.Add(attackable);
                 }
               }
+
+              if (outActors.Num() > 0)
+              {
+                break;
+              }
+            }
+            
+            if (outActors.Num() > 0)
+            {
+              break;
             } 
           }
         }
@@ -335,7 +341,6 @@ namespace UE::Smith
             {
               check(IS_UINTERFACE_VALID(mapObj));
               check(m_model.IsValid());
-              check(m_mapTileSize > 0);
             }
             #pragma endregion Safe Check
           #endif
@@ -418,15 +423,15 @@ namespace UE::Smith
           const uint8 mapSizeX = mapObj->GetOnMapSizeX();
           const uint8 mapSizeY = mapObj->GetOnMapSizeY();
           const FVector mapObjoffset = FVector(
-                                      StaticCast<double>((mapSizeX - 1u) * m_mapTileSize) * 0.5,
-                                      StaticCast<double>((mapSizeY - 1u) * m_mapTileSize) * 0.5,
+                                      StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize) * 0.5,
+                                      StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize) * 0.5,
                                       0.0
                                     );
           // TODO
-          destination = m_originCoord_World 
+          destination = model_shared->OriginWorldCoord 
                       + FVector(
-                                newMapObjOriginCoordX * m_mapTileSize, 
-                                newMapObjOriginCoordY * m_mapTileSize, 
+                                newMapObjOriginCoordX * model_shared->MapTileSize, 
+                                newMapObjOriginCoordY * model_shared->MapTileSize, 
                                 0.0
                                 )
                       + mapObjoffset;
@@ -435,8 +440,6 @@ namespace UE::Smith
       private:
         TWeakPtr<Model> m_model;
         TWeakInterfacePtr<IEventRegister> m_eventRegister;
-        FVector m_originCoord_World;
-        int32 m_mapTileSize;
     };
 
     FSmithMapObjOperator::FSmithMapObjOperator()
@@ -466,9 +469,9 @@ namespace UE::Smith
     {
       m_pImpl->AssignEventRegister(eventRegister);
     }
-    void FSmithMapObjOperator::AssignMap(TSharedPtr<FSmithMapDataModel> map, FVector originCoord_World, int32 tileSize)
+    void FSmithMapObjOperator::AssignMap(TSharedPtr<FSmithMapDataModel> map)
     {
-      m_pImpl->AssignMap(map, originCoord_World, tileSize);
+      m_pImpl->AssignMap(map);
     }
     void FSmithMapObjOperator::FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format)
     {

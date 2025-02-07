@@ -22,9 +22,6 @@ Encoding : UTF-8
 #include "CoreMinimal.h"
 #include "TileInfoContainer.h"
 
-/**
- * 
- */
 namespace UE::Smith
 {
 	namespace Map
@@ -65,7 +62,7 @@ namespace UE::Smith
 				///
 				/// @brief 親クラス実装オーバーライド
 				///
-				virtual bool isAbleToStayOn_Impl() const override;
+				virtual bool isAbleToStayOnImpl() const override;
 		};
 	}
 }

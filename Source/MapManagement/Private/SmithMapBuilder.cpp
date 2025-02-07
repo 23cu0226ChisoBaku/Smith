@@ -23,48 +23,29 @@ Encoding : UTF-8
 #include "SmithMapDataModel.h"
 #include "TileType.h"
 #include "MapCoord.h"
+#include "MLibrary.h"
 
-// シャッフル関数(内部使用)
-namespace SimpleArrayShuffle::Private
-{
-  template<typename T>
-  void RandomShuffle(TArray<T>& arr)
-  {
-    const int32 arrLastIndex = arr.Num() - 1;
-    for (int32 i = 0; i <= arrLastIndex; ++i)
-    {
-      int32 index = FMath::RandRange(i, arrLastIndex);
-      if (i != index)
-      {
-        arr.Swap(i, index);
-      }
-    }
-  }
-}
 namespace UE::Smith
 {
   namespace Map
   {
-    FSmithMapBuilder::FSmithMapBuilder()
-    { }
-
-    FSmithMapBuilder::~FSmithMapBuilder()
-    { }
-
-    bool FSmithMapBuilder::Build(FSmithMap* pMap, const FSmithMapBluePrint& blueprint)
+    bool FSmithMapBuilder::Build(TSharedPtr<FSmithMap> pMap, const FSmithMapBluePrint& blueprint)
     {
-      if (pMap == nullptr)
+      if (!pMap.IsValid())
       {
+        MDebug::LogError("Map is INVALID");
+        MDebug::LogError("Exit Map Builder Build");
         return false;
       }
 
-      using namespace SimpleArrayShuffle::Private;
-
+      // マップ生成
       pMap->GenerateMap(blueprint.SectionRow, blueprint.SectionColumn, blueprint.SectionWidth, blueprint.SectionHeight, blueprint.SectionGap, StaticCast<uint8>(blueprint.DefaultSectionTileType));
       const uint8 sectionCnt = pMap->GetSectionCount();
 
       if (sectionCnt == 0)
       {
+        MDebug::LogError("GenerateMap Failed");
+        MDebug::LogError("Exit Map Builder Build");
         return false;
       }
 
@@ -79,20 +60,15 @@ namespace UE::Smith
       {
         sectionIdxArr.Emplace(idx);
       }
-      RandomShuffle(sectionIdxArr);
+      FUECollectionsLibrary::Shuffle(sectionIdxArr);
 
       // 部屋を作る
       for (int32 i = 0; i < generateRoomCnt; ++i)
       {
         generateRoom(pMap, blueprint, sectionIdxArr[i]);
       }
-      // 部屋を作らない（1*1の矩形を配置）
-      for (int32 i = generateRoomCnt; i < sectionCnt; ++i)
-      {
-        generateJoint(pMap, blueprint, sectionIdxArr[i]);
-      }
 
-      // 部屋をつないでいく
+      // 部屋をつなぐ
       pMap->ConnectRooms(StaticCast<uint8>(blueprint.DefaultCorridorTileType));
       return true;
     }
@@ -106,39 +82,40 @@ namespace UE::Smith
         return nullptr;
       }
       #pragma endregion Safe Check
-      
+
       TSharedPtr<FSmithMapDataModel> model = ::MakeShared<FSmithMapDataModel>();
-
-      model->Map = pMap;
-
       const FSmithRect mapRect = pMap->GetMap();
       const uint8 mapRectWidth = mapRect.GetWidth();
       const uint8 mapRectHeight = mapRect.GetHeight();
+      TMap<FMapCoord, TSharedPtr<FObstacleTileInfoContainer>> tempObstacleTable;
+      TMap<FMapCoord, TSharedPtr<FStaySpaceTileInfoContainer>> tempStaySpaceTable;
 
       for (uint8 y = 0; y < mapRectHeight; ++y)
       {
         for (uint8 x = 0; x < mapRectWidth; ++x)
         {
-          ETileType tileType = StaticCast<ETileType>(mapRect.GetRect(x, y));
-          FMapCoord coord(x, y);
+          const ETileType tileType = StaticCast<ETileType>(mapRect.GetRect(x, y));
+          const FMapCoord coord(x, y);
           // マップ情報を初期化する
           switch (tileType)
           {
+            // 壁
             case ETileType::Wall:
             {
-              if (!model->ObstacleTable.Contains(coord))
+              if (!tempObstacleTable.Contains(coord))
               {
-                model->ObstacleTable.Emplace(coord, ::MakeShared<FObstacleTileInfoContainer>());
+                tempObstacleTable.Emplace(coord, ::MakeShared<FObstacleTileInfoContainer>());
               }
             }
             break;
 
+            // 地面
             case ETileType::Ground:
             case ETileType::Corridor:
             {
-              if (!model->StaySpaceTable.Contains(coord))
+              if (!tempStaySpaceTable.Contains(coord))
               {
-                model->StaySpaceTable.Emplace(coord, ::MakeShared<FStaySpaceTileInfoContainer>(tileType));
+                tempStaySpaceTable.Emplace(coord, ::MakeShared<FStaySpaceTileInfoContainer>(tileType));
               }
             }
             break;
@@ -151,17 +128,17 @@ namespace UE::Smith
           }
         }
       }
+   
+      model->Map = pMap;
+      model->ObstacleTable = ::MoveTemp(tempObstacleTable);
+      model->StaySpaceTable = ::MoveTemp(tempStaySpaceTable);
 
       return model;
     }
 
-    void FSmithMapBuilder::generateRoom(FSmithMap* map, const FSmithMapBluePrint& blueprint, uint8 sectionIdx)
+    void FSmithMapBuilder::generateRoom(TSharedPtr<FSmithMap> pMap, const FSmithMapBluePrint& blueprint, uint8 sectionIdx)
     {
-      map->GenerateRoom(sectionIdx, blueprint.RoomMinWidth, blueprint.RoomMaxWidth, blueprint.RoomMinHeight, blueprint.RoomMaxHeight, StaticCast<uint8>(blueprint.DefaultRoomTileType));
-    }
-    void FSmithMapBuilder::generateJoint(FSmithMap* map, const FSmithMapBluePrint& blueprint, uint8 sectionIdx)
-    {
-      map->GenerateRoom(sectionIdx, 1, 1, 1, 1, StaticCast<uint8>(blueprint.DefaultRoomTileType));
+      pMap->GenerateRoom(sectionIdx, blueprint.RoomMinWidth, blueprint.RoomMaxWidth, blueprint.RoomMinHeight, blueprint.RoomMaxHeight, StaticCast<uint8>(blueprint.DefaultRoomTileType));
     }
   }
 }

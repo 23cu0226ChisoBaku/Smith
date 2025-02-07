@@ -18,6 +18,7 @@ class USmithEnhanceSubsystem;
 class USmithEventPublishMediator;
 class USmithBattleLogWorldSubsystem;
 class UUI_CurrentLevel;
+class USmithNextLevelEvent;
 
 // Damage
 class USmithDungeonDamageCalculator;
@@ -55,6 +56,7 @@ private:
 	void initializeGame();
 	void startNewLevel();
 	void clearCurrentLevel();
+	void deployNextLevelEvent(bool bIsActiveWhenDeploy = true);
 
 // TODO
 public:
@@ -95,9 +97,6 @@ private:
 	UPROPERTY()
 	TObjectPtr<USmithDungeonDamageCalculator> m_damageCalculator;
 
-	UPROPERTY(EditAnywhere, Category = TEST)
-	TSubclassOf<AActor> TEST_ACTOR;
-
 	UPROPERTY(EditAnywhere)
 	double TEST_DAMAGE_CALCULATOR_CONSTANT;
 
@@ -105,6 +104,9 @@ private:
 	TObjectPtr<UUI_CurrentLevel> CurtLevelUI;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUI_CurrentLevel> LevelUISub;
+
+	UPROPERTY()
+	TObjectPtr<USmithNextLevelEvent> m_nextLevelEvent;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;

@@ -38,19 +38,19 @@ public:
 	FString GetFailedMessage() const override;
 
 public:
-	void AssignPickable(IPickable*, AActor*, UNiagaraSystem* = nullptr);
+	void AssignPickable(IPickable*, UNiagaraSystem*);
 	IPickable* GetPickable() const;
 	FString GetPickUpItemType() const;
 	
 private:
-	UPROPERTY()
-	TObjectPtr<AActor> m_pickableAppearence;
 	UPROPERTY()
 	TObjectPtr<UNiagaraSystem> m_itemEventNiagaraSystem;
 	UPROPERTY()
 	TObjectPtr<UNiagaraComponent> m_itemEventNiagaraComp;
 	UPROPERTY()
 	TObjectPtr<UObject> m_pickableObject;
+
+private:
 	TWeakInterfacePtr<IPickable> m_pickable;
 	uint8 m_isPicked : 1;
 };

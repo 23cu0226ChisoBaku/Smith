@@ -15,13 +15,16 @@
  * 
  */
 UCLASS(EditInlineNew,CollapseCategories)
-class SMITH_API USmithUpgradeMaterial : public USmithPickable, public IParamAbsorbable
-																			, public ISmithItemWidgetParameterizable, public ISmithBattleParameterizable
+class SMITH_API USmithUpgradeMaterial : public USmithPickable
+																			, public IParamAbsorbable
+																			, public ISmithItemWidgetParameterizable
+																			, public ISmithBattleParameterizable
 {
 	GENERATED_BODY()
 
 public:
 	USmithUpgradeMaterial(const FObjectInitializer&);
+	virtual void PostInitProperties() override;
 	virtual void BeginDestroy() override;
 
 public:
@@ -47,4 +50,7 @@ private:
 	FString Description;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Parameter, meta = (AllowPrivateAccess = "true"))
 	FParams Param;
+	
+private:
+	FColor m_labelColor;
 };

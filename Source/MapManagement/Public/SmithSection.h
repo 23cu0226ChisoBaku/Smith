@@ -31,7 +31,6 @@ namespace UE::Smith
 		*/
 		//---------------------------------------
 		class FSmithRect;
-		struct FSmithConnection;
 		
 		///
 		/// @brief セクションクラス
@@ -90,23 +89,7 @@ namespace UE::Smith
 				/// @brief              部屋があるかを確認
 				/// @return             部屋がある-> true 部屋がない-> false
         ///
-				bool HasRoom() const;
-
-				// Deprecated Interface
-				#pragma region Deprecated Interface
-				///
-				/// @brief							他のセクションと繋がっているか（通路があるか）を調べる
-				/// @return							繋がっている -> true 繋がっていない -> false
-				///
-				bool IsConnected() const;
-				///
-				/// @brief							通路情報を追加
-				/// @param connection   通路情報
-				///
-				void AddConnection(FSmithConnection connection);
-				#pragma endregion Deprecated Interface
-				// end of Deprecated Interface
-				
+				bool HasRoom() const;		
         ///
         /// @brief              セクションの横幅を取得
         /// @return             横幅

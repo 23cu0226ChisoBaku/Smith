@@ -8,7 +8,8 @@ Author : MAI ZHICONG
 Description : 
 
 Update History: 2025/01/05 作成
-
+                2025/02/04 インターフェース修正   SetPickable、GetPickable、CanPlacePickable削除
+                                                SetEvent、GetEvent追加
 Version : alpha_1.0.0
 
 Encoding : UTF-8 
@@ -49,15 +50,16 @@ namespace UE::Smith
         }
         ICanSetOnMap* GetMapObject() const
         {
-          return m_mapObj.Get();
+          return m_mapObj.IsValid() ? m_mapObj.Get() : nullptr;
         }
         ISmithMapEvent* GetEvent() const
         {
-          return m_event.Get();
+          return m_event.IsValid() ? m_event.Get() : nullptr;
         }
         void ResetContainer()
         {
           m_mapObj.Reset();
+          m_event.Reset();
         }
 
       private:
@@ -118,11 +120,6 @@ namespace UE::Smith
       m_pImpl->SetMapObj(mapObj);
     }
 
-    // TODO not implemented
-    void FStaySpaceTileInfoContainer::SetPickable(IPickable* pickable)
-    {
-      unimplemented()
-    }
     void FStaySpaceTileInfoContainer::SetEvent(ISmithMapEvent* event)
     {
       m_pImpl->SetEvent(event);
@@ -138,19 +135,12 @@ namespace UE::Smith
       return m_pImpl->GetEvent();
     }
 
-    // TODO not implemented
-    bool FStaySpaceTileInfoContainer::CanPlacePickable() const
-    {
-      unimplemented();
-      return false;
-    }
-
-    void FStaySpaceTileInfoContainer::reset_Impl()
+    void FStaySpaceTileInfoContainer::resetImpl()
     {
       m_pImpl->ResetContainer();
     }
 
-    bool FStaySpaceTileInfoContainer::isAbleToStayOn_Impl() const
+    bool FStaySpaceTileInfoContainer::isAbleToStayOnImpl() const
     {
       return m_pImpl->IsAbleToStayOn();
     }
