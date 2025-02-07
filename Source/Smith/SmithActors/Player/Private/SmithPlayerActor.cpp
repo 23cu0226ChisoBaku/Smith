@@ -42,7 +42,6 @@
 
 namespace SmithPlayerActor::Private
 {
-	constexpr int32 PlayerHP_Temp = 30;
 	constexpr double ANGLE_PER_DIRECTION = 360.0 / (double)EDirection::DirectionCount;
 }
 
@@ -57,7 +56,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, m_enhanceSystem(nullptr)
 	, m_logSystem(nullptr)
 	, m_curtHP(0)
-	, m_maxHP(SmithPlayerActor::Private::PlayerHP_Temp)
+	, m_maxHP(0)
 	, m_rotateSpeed(720.0f)
 	, m_rotatingDirection(0)
 	, m_camDir(EDirection::North)
@@ -165,7 +164,9 @@ void ASmithPlayerActor::BeginPlay()
 		for (int32 i = 0; i < 3; ++i)
 		{
 			USmithHPItem* item = NewObject<USmithHPItem>();
-			item->SetRecoveryPercentage(0.2);
+			// TODO Modelをいい感じに
+			// 30%
+			item->SetRecoveryPercentage(0.3);
 			bool insertResult = InventoryComponent->Insert(TEXT("ConsumeItem"), item);
 		}
 	}
@@ -329,15 +330,10 @@ void ASmithPlayerActor::ChangeForward(EDirection newDirection)
 	}
 
 	using namespace SmithPlayerActor::Private;
-	// 今の向きと変えようとする向きが同じだったら処理しない
-	if (m_actorFaceDir == newDirection)
-	{
-		return;
-	}
-
+	
 	m_actorFaceDir = newDirection;
 	const double newYaw = StaticCast<double>(m_actorFaceDir) * ANGLE_PER_DIRECTION;
-	SetActorRelativeRotation(FRotator(0.0, newYaw, 0.0));
+	SetActorRotation(FRotator{0.0, newYaw, 0.0});
 }
 
 void ASmithPlayerActor::ChangeCameraDirection(EDirection newDirection, bool bIsClockwise)
@@ -393,17 +389,18 @@ void ASmithPlayerActor::OpenMenu()
 			}
 		} 
 		UpgradeInteractiveComponent->ActivateUpgradeMenu();
+
+		if (HPComponent != nullptr)
+		{
+			HPComponent->SetWidgetVisibility(!m_bIsInMenu);
+		}
+
+		if (m_herbUI != nullptr)
+		{
+			m_herbUI->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 
-	if (HPComponent != nullptr)
-	{
-		HPComponent->SetWidgetVisibility(!m_bIsInMenu);
-	}
-
-	if (m_herbUI != nullptr)
-	{
-		m_herbUI->SetVisibility(ESlateVisibility::Hidden);
-	}
 }
 
 void ASmithPlayerActor::CloseMenu()
@@ -422,17 +419,17 @@ void ASmithPlayerActor::CloseMenu()
 	{
 		m_bIsInMenu = false;
 		UpgradeInteractiveComponent->DeactivateUpgradeMenu();
+		if (HPComponent != nullptr)
+		{
+			HPComponent->SetWidgetVisibility(!m_bIsInMenu);
+		}
+
+		if (m_herbUI != nullptr)
+		{
+			m_herbUI->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 
-	if (HPComponent != nullptr)
-	{
-		HPComponent->SetWidgetVisibility(!m_bIsInMenu);
-	}
-
-	if (m_herbUI != nullptr)
-	{
-		m_herbUI->SetVisibility(ESlateVisibility::Visible);
-	}
 }
 
 void ASmithPlayerActor::RecoverHealth()

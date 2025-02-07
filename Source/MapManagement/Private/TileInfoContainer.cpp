@@ -56,20 +56,20 @@ namespace UE::Smith
 
     bool FTileInfoContainer::IsAbleToStayOn() const
     {
-      return isAbleToStayOn_Impl();
+      return isAbleToStayOnImpl();
     }
 
     void FTileInfoContainer::Reset()
     {
-      reset_Impl();
+      resetImpl();
     }
 
-    bool FTileInfoContainer::isAbleToStayOn_Impl() const
+    bool FTileInfoContainer::isAbleToStayOnImpl() const
     {
       return true;
     }
 
-    void FTileInfoContainer::reset_Impl()
+    void FTileInfoContainer::resetImpl()
     { }
   }
 }

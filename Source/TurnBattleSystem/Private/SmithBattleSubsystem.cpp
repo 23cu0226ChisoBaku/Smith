@@ -3,7 +3,6 @@
 
 #include "SmithBattleSubsystem.h"
 #include "Kismet/GameplayStatics.h"
-
 #include "ITurnManageable.h"
 #include "IBattleCommand.h"
 #include "BattleCommandManager.h"
@@ -22,6 +21,7 @@ bool USmithBattleSubsystem::ShouldCreateSubsystem(UObject* Outer) const
   UWorld* worldOuter = Cast<UWorld>(Outer);
   if (::IsValid(worldOuter))
   {
+    // バトルレベルだけ作る
     ASmithTurnBattleWorldSettings* smithWorldSettings = Cast<ASmithTurnBattleWorldSettings>(worldOuter->GetWorldSettings());
     if (::IsValid(smithWorldSettings))
     {
@@ -63,6 +63,7 @@ void USmithBattleSubsystem::Deinitialize()
 
 void USmithBattleSubsystem::InitializeBattle()
 {
+  // ターン管理オブジェクトを全て登録
   TArray<AActor*> turnManageable;
   UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UTurnManageable::StaticClass(),turnManageable);
 
@@ -71,31 +72,28 @@ void USmithBattleSubsystem::InitializeBattle()
     TArray<TWeakInterfacePtr<ITurnManageable>> registerWaitList;
     registerWaitList.Reserve(turnManageable.Num());
 
-    for (const auto manageable : turnManageable)
+    for (const auto& manageable : turnManageable)
     {
-      // TODO componentをInterfaceに変換
-      ITurnManageable* iManageable = Cast<ITurnManageable>(manageable);
+      ITurnManageable* manageInterface = Cast<ITurnManageable>(manageable);
+      const ETurnPriority actorPriority = manageInterface->GetPriority();
 
-      if (iManageable != nullptr)
+      // プレイヤーだったら先に行動できる
+      if (actorPriority == ETurnPriority::PlayerSelf)
       {
-        const ETurnPriority actorPriority = iManageable->GetPriority();
-        if (actorPriority == ETurnPriority::PlayerSelf)
-        {
-          iManageable->SetCommandSendable(true);
-          registerWaitList.Emplace(iManageable);
-        }
-        else
-        {
-          iManageable->SetCommandSendable(false);
-        }
-
-        if (!m_priorityManageableLists.Contains(actorPriority))
-        {
-          m_priorityManageableLists.Emplace(actorPriority, {});
-        }
-        
-        m_priorityManageableLists[actorPriority].Elements.Add(Cast<ITurnManageable>(manageable));
+        manageInterface->SetCommandSendable(true);
+        registerWaitList.Emplace(manageable);
       }
+      else
+      {
+        manageInterface->SetCommandSendable(false);
+      }
+
+      if (!m_priorityManageableLists.Contains(actorPriority))
+      {
+        m_priorityManageableLists.Emplace(actorPriority, {});
+      }
+      
+      m_priorityManageableLists[actorPriority].Elements.Add(manageInterface);
     }
 
     if (m_battleCmdMgr != nullptr)
@@ -125,32 +123,21 @@ void USmithBattleSubsystem::AssignEventExecutor(IEventExecutor* eventExecutor)
 
 void USmithBattleSubsystem::RegisterCommand(ITurnManageable* requester, TSharedPtr<IBattleCommand> battleCommand)
 {
+  check(m_battleCmdMgr != nullptr);
+  if (m_battleCmdMgr == nullptr)
+  {
+    return;
+  }
+
   if (requester == nullptr || battleCommand == nullptr)
   {
     MDebug::LogError("Can not register!!!");
     return;
   }
 
-  check(m_battleCmdMgr != nullptr);
-  if (m_battleCmdMgr == nullptr)
-  {
-    return;
-  }
   m_battleCmdMgr->RegisterCommand(requester, ::MoveTemp(battleCommand));
 
 }
-
-// TODO
-void USmithBattleSubsystem::SubscribeOnTurnStartEvent(TDelegate<void()>& delegate)
-{
-  m_battleCmdMgr->OnStartExecuteEvent.Add(delegate);
-}
-
-void USmithBattleSubsystem::SubscribeOnTurnFinishEvent(TDelegate<void()>& delegate)
-{
-  m_battleCmdMgr->OnEndExecuteEvent.Add(delegate);
-}
-
 
 void USmithBattleSubsystem::registerNextTurnObjs()
 {
@@ -168,6 +155,7 @@ void USmithBattleSubsystem::registerNextTurnObjs()
     if (m_priorityManageableLists.Contains(nextTurn))
     {
       int32 idx = 0;
+    // 次のターンのオブジェクトへコマンド送信許可を下す
       while (idx < m_priorityManageableLists[nextTurn].Elements.Num())
       {
         auto nextTurnObj = m_priorityManageableLists[nextTurn].Elements[idx];
@@ -190,6 +178,7 @@ void USmithBattleSubsystem::registerNextTurnObjs()
         ++idx;
       }
 
+      // コマンド待ちリストを設定
       if (m_priorityManageableLists[nextTurn].Elements.Num() > 0)
       {
         m_battleCmdMgr->RegisterWaitList(m_priorityManageableLists[nextTurn].Elements);
@@ -215,12 +204,13 @@ void USmithBattleSubsystem::endExecute()
 
 void USmithBattleSubsystem::Tick(float DeltaTime)
 {
+  UTickableWorldSubsystem::Tick(DeltaTime);
+  
   if (!m_bIsInitialized)
   {
     return;
   }
 
-  UTickableWorldSubsystem::Tick(DeltaTime);
   if (m_bCanExecuteCmd && m_battleCmdMgr != nullptr) 
   {
     m_battleCmdMgr->ExecuteCommands(DeltaTime);

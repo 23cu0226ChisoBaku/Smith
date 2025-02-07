@@ -1,4 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
+
+ISmithMapEvent.h
+
+Author : MAI ZHICONG
+
+Description : マップイベントクラス
+
+Update History: 2025/01/19 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #pragma once
 
@@ -6,6 +21,11 @@
 #include "UObject/Interface.h"
 #include "ISmithMapEvent.generated.h"
 
+//---------------------------------------
+/*
+                  前方宣言
+*/
+//---------------------------------------
 class ICanSetOnMap;
 
 // This class does not need to be modified.
@@ -30,11 +50,5 @@ public:
 	virtual void DiscardEvent() = 0;
 	virtual void RaiseEvent() = 0;
 	virtual bool IsDisposed() const = 0;
-	void SetEventCoord(uint8 x, uint8 y);
-	uint8 GetEventCoordX() const;
-	uint8 GetEventCoordY() const;
 
-private:
-	uint8 m_eventCoordX = 0u;
-	uint8 m_eventCoordY = 0u;
 };

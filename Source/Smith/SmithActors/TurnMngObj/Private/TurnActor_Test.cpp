@@ -3,7 +3,6 @@
 
 #include "TurnActor_Test.h"
 #include "AttackHandle.h"
-#include "SmithAIRegistry.h"
 #include "SmithAIBehaviorProcessor.h"
 #include "SmithAIStrategyContainer.h"
 #include "SmithTurnBaseAIAttackStrategy.h"
@@ -276,7 +275,7 @@ bool ATurnActor_Test::IsAnimationFinish() const
 
 FString ATurnActor_Test::GetName_Log() const
 {
-	return TEXT("豆腐");
+	return TEXT("小ゴーレム");
 }
 
 EBattleLogType ATurnActor_Test::GetType_Log() const

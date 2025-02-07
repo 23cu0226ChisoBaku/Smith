@@ -35,17 +35,12 @@ Encoding : UTF-8
 #include "SmithMapDeployDirector.h"
 #include "SmithEnemyGenerateBluePrint.h"
 #include "SmithMapObserver.h"
+#include "SmithMapEventDirector.h"
 #include "SmithMapDataModel.h"
 #include "SmithEventPublisher.h"
 #include "IEventRegister.h"
-#include "Kismet/GameplayStatics.h"
-
-#include "SmithNextLevelEvent.h"
 
 #include "MLibrary.h"
-
-// TODO
-#include "MapGenerateGameMode_Test.h"
 
 namespace UE::Smith
 {
@@ -70,6 +65,7 @@ namespace UE::Smith
           , m_mapConstructor(::MakeUnique<FSmithMapConstructor>())
           , m_mapOperator(::MakeUnique<FSmithMapObjOperator>())
           , m_deployDirector(::MakeUnique<FSmithMapDeployDirector>())
+          , m_eventDirector(::MakeUnique<FSmithMapEventDirector>())
           , m_mapObserver(::MakeUnique<FSmithMapObserver>())
           , m_model(::MakeShared<Model>())
           , m_map(nullptr)
@@ -77,8 +73,16 @@ namespace UE::Smith
         { }
         ~MapMgrImpl()
         { 
+          m_mapBuilder.Reset();
+          m_mapConstructor.Reset();
+          m_mapOperator.Reset();
+          m_deployDirector.Reset();
+          m_eventDirector.Reset();
+          m_mapObserver.Reset();
           m_model.Reset();
           m_map.Reset();
+
+          discardEvents();
         }
         void AssignEventRegister(IEventRegister* eventRegister)
         {
@@ -101,16 +105,16 @@ namespace UE::Smith
             }
           #pragma endregion Safe Check
 
-          TSharedPtr<FSmithMap> temp = ::MakeShared<FSmithMap>();
+          TSharedPtr<FSmithMap> tempMap = ::MakeShared<FSmithMap>();
           
           // マップを構築する
-          if(!m_mapBuilder->Build(temp.Get(), mapBP))
+          if(!m_mapBuilder->Build(tempMap, mapBP))
           {
             return;
           }
 
           // マップモデルを作成する
-          TSharedPtr<Model> tempModel = m_mapBuilder->GenerateModel(temp);
+          TSharedPtr<Model> tempModel = m_mapBuilder->GenerateModel(tempMap);
           check(tempModel.IsValid());
           if (!tempModel.IsValid())
           {
@@ -122,26 +126,19 @@ namespace UE::Smith
 
           // マネージャーを更新
           m_map.Reset();
-          m_map = ::MoveTemp(temp);
+          m_map = ::MoveTemp(tempMap);
 
           m_model.Reset();
           m_model = ::MoveTemp(tempModel);
 
           m_mapConstructor->ConstructMap(world, m_map->GetMap(), constructionBP);
 
-          m_mapOperator->AssignMap(m_model, constructionBP.OriginCoordinate, constructionBP.TileSize);
+          m_mapOperator->AssignMap(m_model);
           m_deployDirector->AssignMap(m_model);
-          m_mapObserver->AssignMap(m_model, constructionBP.OriginCoordinate, constructionBP.TileSize);
+          m_mapObserver->AssignMap(m_model);
+          m_eventDirector->AssignMap(m_model);
 
-          for (auto& event : m_mapEvents)
-          {
-            if (IS_UINTERFACE_VALID(event))
-            {
-              event->DiscardEvent();
-            }
-          }
-
-          m_mapEvents.Reset();
+          discardEvents();
         }
         void InitMapObjs(UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
         {
@@ -163,51 +160,30 @@ namespace UE::Smith
           TMap<FMapCoord, ICanSetOnMap*> deployMapObjs{};
           m_mapObserver->InitMapObj(deployMapObjs, world, player, generateBP);
 
-          for(const auto& deployPair : deployMapObjs)
+          for(const auto& [mapCoord, mapObj] : deployMapObjs)
           {
-            m_deployDirector->DeployMapObj(deployPair.Value, deployPair.Key.x, deployPair.Key.y);
+            m_deployDirector->DeployMapObj(mapObj, mapCoord.x, mapCoord.y);
           }
-
         }
-        void InitMapEvents(UWorld* world, USmithEventPublisher* eventPublisher)
+        void InitNextLevelEvent(ISmithMapEvent* nextLevelEvent)
         {
           // TODO test event
-          check((m_mapObserver.IsValid() && m_deployDirector.IsValid()));
-          if (!m_mapObserver.IsValid() || !m_deployDirector.IsValid())
+          check((m_eventDirector.IsValid() && m_deployDirector.IsValid()));
+          if (!m_eventDirector.IsValid() || !m_deployDirector.IsValid())
           {
             return;
           }
 
-          if (!::IsValid(world) || !::IsValid(eventPublisher))
+          if (!IS_UINTERFACE_VALID(nextLevelEvent))
           {
             return;
           }
-          USmithNextLevelEvent* nextLevelEvent = eventPublisher->PublishMapEvent<USmithNextLevelEvent>(USmithNextLevelEvent::StaticClass());
-          if (nextLevelEvent == nullptr)
-          {
-            MDebug::LogError("Publish failed");
-          }
-          else
-          {
-            nextLevelEvent->OnNextLevel.BindLambda(
-              [=](){
-                AMapGenerateGameMode_Test* testGameMode = Cast<AMapGenerateGameMode_Test>(world->GetAuthGameMode());
-                if (testGameMode != nullptr)
-                {
-                  testGameMode->goToNextLevel();
-                }
-              }
-            );
-            uint8 nextLevelEventCoordX = 0;
-            uint8 nextLevelEventCoordY = 0;
-            FVector nextLevelEventDestination = FVector::ZeroVector;
-            FRotator nextLevelEventRotation = FRotator::ZeroRotator;
 
-            m_mapObserver->InitNextLevelEvent_Temp(nextLevelEventCoordX, nextLevelEventCoordY, nextLevelEventDestination, nextLevelEventRotation);
-            m_deployDirector->DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY, nextLevelEventRotation);
+          uint8 nextLevelEventCoordX = 0u;
+          uint8 nextLevelEventCoordY = 0u;
 
-            m_mapEvents.Emplace(nextLevelEvent);
-          }
+          m_eventDirector->DirectNextLevelEventCoord(nextLevelEventCoordX, nextLevelEventCoordY);
+          DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY);
         }
 
         void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
@@ -262,10 +238,24 @@ namespace UE::Smith
           }
         }
       private:
+        void discardEvents()
+        {
+          for (auto& event : m_mapEvents)
+          {
+            if (IS_UINTERFACE_VALID(event))
+            {
+              event->DiscardEvent();
+            }
+          }
+
+          m_mapEvents.Reset();
+        }
+      private:
         TUniquePtr<FSmithMapBuilder> m_mapBuilder;
         TUniquePtr<FSmithMapConstructor> m_mapConstructor;
         TUniquePtr<FSmithMapObjOperator> m_mapOperator;
         TUniquePtr<FSmithMapDeployDirector> m_deployDirector;
+        TUniquePtr<FSmithMapEventDirector> m_eventDirector;
         TUniquePtr<FSmithMapObserver> m_mapObserver;
         TSharedPtr<Model> m_model;
         TSharedPtr<FSmithMap> m_map;
@@ -290,9 +280,9 @@ namespace UE::Smith
     {
       m_pImpl->InitMapObjs(world, player, generateBP);
     }
-    void FSmithMapManager::InitMapEvents(UWorld* world, USmithEventPublisher* eventPublisher)
+    void FSmithMapManager::InitNextLevelEvent(ISmithMapEvent* nextLevelEvent)
     {
-      m_pImpl->InitMapEvents(world, eventPublisher);
+      m_pImpl->InitNextLevelEvent(nextLevelEvent);
     }
     void FSmithMapManager::DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
     {

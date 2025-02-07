@@ -8,9 +8,13 @@
 #include "ISmithBattleLogger.h"
 #include "IEventTriggerable.h"
 #include "MLibrary.h"
+
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
+
 USmithPickUpItemEvent::USmithPickUpItemEvent(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
-  , m_pickableAppearence(nullptr)
   , m_pickableObject(nullptr)
   , m_pickable(nullptr)
   , m_isPicked(true)
@@ -19,15 +23,23 @@ USmithPickUpItemEvent::USmithPickUpItemEvent(const FObjectInitializer& ObjectIni
 void USmithPickUpItemEvent::BeginDestroy()
 {
   Super::BeginDestroy();
+
+  if (m_itemEventNiagaraComp != nullptr)
+  {
+    m_itemEventNiagaraComp->Deactivate();
+  }
 }
 
 void USmithPickUpItemEvent::InitializeEvent(const FVector& location, const FRotator& rotation)
 {
-  if (m_pickableAppearence != nullptr)
+  m_itemEventNiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),
+                                                                          m_itemEventNiagaraSystem,
+                                                                          location,
+                                                                          rotation);
+
+  if (m_itemEventNiagaraComp != nullptr)
   {
-    m_pickableAppearence->SetActorLocation(location);
-    m_pickableAppearence->SetActorRotation(rotation);
-    m_pickableAppearence->SetActorHiddenInGame(false);
+    m_itemEventNiagaraComp->Activate();
   }
 }
 
@@ -62,11 +74,6 @@ void USmithPickUpItemEvent::TriggerEvent(ICanSetOnMap* mapObj)
 
 void USmithPickUpItemEvent::DiscardEvent()
 {
-  if (m_pickableAppearence != nullptr)
-  {
-    m_pickableAppearence->Destroy();
-  }
-
   m_pickableObject = nullptr;
   m_pickable.Reset();
 
@@ -75,12 +82,7 @@ void USmithPickUpItemEvent::DiscardEvent()
 
 void USmithPickUpItemEvent::RaiseEvent()
 {
-  
   m_isPicked = true;
-  if (m_pickableAppearence != nullptr)
-  {
-    m_pickableAppearence->SetActorHiddenInGame(true);
-  }
 }
 
 bool USmithPickUpItemEvent::IsDisposed() const
@@ -88,7 +90,7 @@ bool USmithPickUpItemEvent::IsDisposed() const
   return m_isPicked;
 }
 
-void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearance)
+void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, UNiagaraSystem* itemEventNiagara)
 {
   if (m_pickable.IsValid())
   {
@@ -103,14 +105,10 @@ void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, AActor* appearan
   m_pickable = pickable;
   m_pickableObject = pickable->_getUObject();
   m_pickableObject->Rename(nullptr, this);
-  m_pickableAppearence = appearance;
-
-  if (m_pickableAppearence != nullptr)
-  {
-    m_pickableAppearence->SetActorHiddenInGame(true);
-  }
 
   m_isPicked = false;
+
+  m_itemEventNiagaraSystem = itemEventNiagara;
   
 }
 

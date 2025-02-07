@@ -8,6 +8,8 @@ Author : MAI ZHICONG
 Description : 
 
 Update History: 2025/01/05 作成
+                2025/02/04 インターフェース修正   SetPickable、GetPickable、CanPlacePickable削除
+                                                SetEvent、GetEvent追加
 
 Version : alpha_1.0.0
 
@@ -87,10 +89,9 @@ namespace UE::Smith
 				///
 				void SetMapObj(ICanSetOnMap*);
 				///
-				/// @brief 拾えるオブジェクトを設定する
-				/// @param ICanSetOnMap 拾えるオブジェクト
+				/// @brief マップイベントを設定する
+				/// @param ICanSetOnMap マップに配置できるイベント
 				///
-				void SetPickable(IPickable*);
 				void SetEvent(ISmithMapEvent*);
 				///
 				/// @brief マップオブジェクトを返す
@@ -99,22 +100,26 @@ namespace UE::Smith
 				///
 				ICanSetOnMap* GetMapObject() const;
 				///
-				/// @brief 拾えるオブジェクトを返す
-				/// @return 何かがあったら	-> ここにある拾えるオブジェクトのポインタ
-				///					何もなかったら	-> nullptr
-				///
-				IPickable* GetPickable() const;
+				/// @brief	マップイベントを取得 
+				/// @return	あったら　	->	イベントポインタ
+				///					なかったら	->	nullptr	
+				/// 
 				ISmithMapEvent* GetEvent() const;
-				///
-				/// @brief 拾えるオブジェクトを置けるか
-				///	@return 置けたら	-> true 置けなかったら	-> false
-				///
-				bool CanPlacePickable() const;
 			#pragma endregion FStaySpaceTileInfoContainer Interface
 			// end of FStaySpaceTileInfoContainer Interface
+
+			//---------------------------------------
+			/*
+										プライベート関数
+			*/
+			//---------------------------------------
+			// FTileInfoContainer オーバーライド
+			#pragma region FTileInfoContainer Override
 			private:
-				virtual bool isAbleToStayOn_Impl() const override;
-				virtual void reset_Impl() override;
+				virtual bool isAbleToStayOnImpl() const override;
+				virtual void resetImpl() override;
+			#pragma endregion FTileInfoContainer Override
+			//　end of FTileInfoContainer オーバーライド
 			private:
 				/// @brief FStaySpaceTileInfoContainerImpl実装(pImplイディオム)
 				class StaySpaceTileInfoImpl;

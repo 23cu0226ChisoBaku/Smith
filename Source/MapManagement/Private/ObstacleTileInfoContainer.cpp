@@ -55,10 +55,9 @@ namespace UE::Smith
       return *this;
     }
 
-    bool FObstacleTileInfoContainer::isAbleToStayOn_Impl() const
+    bool FObstacleTileInfoContainer::isAbleToStayOnImpl() const
     {
       return false;
     }
-
   }
 }

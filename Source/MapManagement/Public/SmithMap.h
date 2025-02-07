@@ -113,7 +113,6 @@ namespace UE::Smith
 					/// @param rowIdx 					行インデックス
 					/// @param columnIdx 				列インデックス
 					/// @return 								見つかったらセクションへのポインタを返す 見つからなかったら　nullptr　を返す
-					///													(DANGER!!! UniquePtrの生ポインタを返すため安全性低め)
 					///
 					FSmithSection* GetSection(uint8 rowIdx, uint8 columnIdx) const;
 					FSmithSection* GetSectionByCoord(uint8 x, uint8 y) const;
