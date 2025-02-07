@@ -38,7 +38,11 @@
 #include "BattleParamHandle.h"
 #include "HerbWidget.h"
 
+#include "SmithBattleGameInstanceSubsystem.h"
+
 #include "MLibrary.h"
+
+using namespace MLibrary::UE::Audio;
 
 namespace SmithPlayerActor::Private
 {
@@ -65,6 +69,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, m_bCanAttack(true)
 	, m_bRotatingCamera(false)
 	, m_bIsInMenu(false)
+	, m_bCanReceiveInput(true)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -198,7 +203,6 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 	// HPがなくなったらTickを停める
 	if (m_curtHP <= 0)
 	{
-		PrimaryActorTick.bCanEverTick = false;
 		return;
 	}
 
@@ -206,6 +210,8 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 	{
 		updateCamera(DeltaTime);
 	}
+
+	AudioKit::PlaySE2D(TEXT("a"));
 
 }
 
@@ -603,34 +609,29 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 
 	if (m_curtHP <= 0)
 	{
-
+		m_bCanReceiveInput = false;
 		// TODO
-		OnDead.ExecuteIfBound();
+		if (OnDead.IsBound())
+		{
+			OnDead.Broadcast();
+		}
+
 		if (AnimationComponent!= nullptr)
 		{
 			AnimationComponent->SwitchAnimState(TEXT("Dead"), 0.0f);
 		}
 
 		UWorld* world = GetWorld();
-		if (::IsValid(world))
+		if (world != nullptr)
 		{
-			// ゲームを停めて、レベルをリロードする
-			UGameplayStatics::SetGamePaused(world, true);
-			UGameplayStatics::OpenLevel(world, FName(*(world->GetName())), false);
-			DisableInput(Cast<APlayerController>(Controller));
+			UGameInstance* gameInstance = world->GetGameInstance();
+			USmithBattleGameInstanceSubsystem* battleInstanceSubsystem = gameInstance->GetSubsystem<USmithBattleGameInstanceSubsystem>();
+			if (battleInstanceSubsystem != nullptr)
+			{
+				battleInstanceSubsystem->DisplayGameOverWidget(this);
+			}
 		}
 
-		// else
-		// {
-		// 	#if WITH_EDITOR
-		// 		if (GEngine != nullptr)
-		// 		{
-		// 			UKismetSystemLibrary::QuitEditor();
-		// 		}		
-		// 	#else
-		// 		//UKismetSystemLibrary::QuitGame();
-		// 	#endif
-		// }
 	}
 	else
 	{
@@ -837,4 +838,9 @@ void ASmithPlayerActor::updateParam(FParams upgradeParam)
 			HPComponent->SetHP(StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP));
 		}
 	}
+}
+
+bool ASmithPlayerActor::CanReceiveInputEvent() const
+{
+	return m_bCanReceiveInput;
 }
