@@ -1,0 +1,115 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+/*
+
+SmithMapObserver.h
+
+Author : MAI ZHICONG
+
+Description : マップを観察し処理するクラス(※Smithマップ専用)
+
+Update History: 2025/01/07 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
+#pragma once
+
+#ifndef SMITH_MAP_OBSERVER
+#define SMITH_MAP_OBSERVER
+
+#include "CoreMinimal.h"
+
+//---------------------------------------
+/*
+									前方宣言
+*/
+//---------------------------------------
+class ICanSetOnMap;
+struct FSmithEnemyGenerateBluePrint;
+struct FMapCoord;
+enum class EDirection : uint8;
+
+namespace UE::Smith
+{
+	namespace Map
+	{
+		//---------------------------------------
+		/*
+											前方宣言
+		*/
+		//---------------------------------------
+		struct FSmithMapDataModel;
+
+		class MAPMANAGEMENT_API FSmithMapObserver
+		{
+			//---------------------------------------
+			/*
+											ctorとdtor
+			*/
+			//---------------------------------------
+			public:
+				FSmithMapObserver();
+				~FSmithMapObserver();
+				//---------------------------------------
+				/*
+													ムーブ
+				*/
+				//---------------------------------------
+				FSmithMapObserver(FSmithMapObserver&&) noexcept;
+				FSmithMapObserver& operator=(FSmithMapObserver&&) noexcept;
+
+			//---------------------------------------
+			/*
+											コピー禁止
+			*/
+			//---------------------------------------
+			private:
+				FSmithMapObserver(const FSmithMapObserver&) = delete;
+				FSmithMapObserver& operator=(const FSmithMapObserver&) = delete;
+
+			//---------------------------------------
+			/*
+							パブリック関数(インターフェース)
+			*/
+			//---------------------------------------
+			// FSmithMapObserver Interface
+			#pragma region FSmithMapObserver Interface
+			public:
+				///
+				///	@brief													マップモデルを登録する
+				/// @param	FSmithMapDataModel			マップモデル
+				/// @param	originCoord_World				マップ原点座標
+				/// @param	mapTileSize							マップタイルサイズ
+				///
+			  void AssignMap(TSharedPtr<FSmithMapDataModel>, FVector originCoord_World, int32 mapTileSize);
+				///
+				///	@brief																マップオブジェクトを初期化する
+				/// @param	outMapObjs										マップ座標と座標に配置するオブジェクトコンテナ
+				/// @param	UWorld												Unreal Engine ワールド
+				/// @param	player												プレイヤーポインタ
+				/// @param	FSmithEnemyGenerateBluePrint	敵を生成する設計図
+				///
+				void InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
+				void ClearMapObjs_IgnorePlayer();
+				void InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination, FRotator& rotation);
+				bool ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
+				bool GetMapObjectCoord(ICanSetOnMap*, uint8& outX, uint8& outY);
+				/// @brief 未使用
+				void GenerateNewEnemy();
+				/// @brief 未使用
+				bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius);
+			#pragma endregion FSmithMapObserver Interface
+			// end of FSmithMapObserver Interface
+			private:
+				///
+				///	@brief FSmithMapObserver実装クラス(pImplイディオム)
+				///
+				class MapObserverImpl;
+				TUniquePtr<MapObserverImpl> m_pImpl;
+		};
+	}
+}
+
+#endif

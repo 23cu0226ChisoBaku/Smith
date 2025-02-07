@@ -1,28 +1,33 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "IMoveable.h"
 #include "SmithMoveComponent.generated.h"
 
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SMITH_API USmithMoveComponent : public UActorComponent
+class SMITH_API USmithMoveComponent : public UActorComponent , public IMoveable
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
-	USmithMoveComponent();
-
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+public:
+	USmithMoveComponent();
 
-		
+public:
+	virtual void Move(float deltaTime) override;
+	virtual void SetDestination(FVector) override;
+	virtual bool IsReachDestination() const override;
+	void SetTerminusPos(FVector pos) ;
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MoveParameter, meta = (AllowPrivateAccess = "true"))
+	double MoveSpeed;
+
+private:
+	FVector m_terminus;
+	uint8 m_bCanMove : 1;
 };

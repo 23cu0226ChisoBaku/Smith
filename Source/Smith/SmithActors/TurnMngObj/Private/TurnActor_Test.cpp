@@ -2,42 +2,284 @@
 
 
 #include "TurnActor_Test.h"
-#include "TurnControlComponent.h"
-#include "NullCommand.h"
+#include "AttackHandle.h"
+#include "SmithAIRegistry.h"
+#include "SmithAIBehaviorProcessor.h"
+#include "SmithAIStrategyContainer.h"
+#include "SmithTurnBaseAIAttackStrategy.h"
+#include "SmithTurnBaseAIMoveStrategy.h"
+#include "SmithTurnBaseAIIdleStrategy.h"
+#include "SmithAttackComponent.h"
+#include "SmithMoveComponent.h"
 
-namespace TEST_NS
-{
-  constexpr float SEND_INTERVAL = 0.5f;
-}
+#include "SmithAnimationComponent.h"
+
+#include "FormatInfo_Import.h"
+#include "SmithMoveDirector.h"
+#include "SmithPickable.h"
+#include "IEventPublishMediator.h"
+#include "SmithBattleLogWorldSubsystem.h"
+#include "MLibrary.h"
 
 ATurnActor_Test::ATurnActor_Test()
-  : m_TimeCnt(0.0f)
+	: m_attackStrategy(nullptr)
+	, m_moveStrategy(nullptr)
+	, m_idleStrategy(nullptr)
+	, m_atkComponent(nullptr)
+	, MoveComponent(nullptr)
+	, AnimComponent(nullptr)
 {
-  if (TurnComponent != nullptr)
-  {
-    TurnComponent->SetTurnPriority(ETurnPriority::Rival);
-  }
+	PrimaryActorTick.bCanEverTick = true;
+	SetTurnPriority(ETurnPriority::Rival);
+
+	m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
+	check(m_atkComponent != nullptr);
+
+	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
+	check(MoveComponent != nullptr);
+
+	AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("anim comp"));
+	check(AnimComponent != nullptr)
 
 }
 
 void ATurnActor_Test::BeginPlay()
 {
-  Super::BeginPlay();
+	Super::BeginPlay();
+
+	m_attackStrategy = NewObject<USmithTurnBaseAIAttackStrategy>(this);
+	check(m_attackStrategy != nullptr);
+	m_moveStrategy = NewObject<USmithTurnBaseAIMoveStrategy>(this);
+	check(m_moveStrategy != nullptr);
+	m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
+	check(m_idleStrategy != nullptr);
+
+  AnimComponent->SwitchAnimState(TEXT("Idle"), 0.0f);
+
+	UWorld* world = GetWorld();
+	if (world != nullptr)
+	{
+		m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
+	}
 }
 
 void ATurnActor_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-  Super::EndPlay(EndPlayReason);
+	Super::EndPlay(EndPlayReason);
+
+	if (m_aiBehaviorProcessor != nullptr)
+	{
+		m_aiBehaviorProcessor->StopBehaviorProcessor();
+		m_aiBehaviorProcessor->MarkAsGarbage();
+	}
 }
 
 void ATurnActor_Test::Tick(float DeltaTime)
 {
-  Super::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
+	if (!IsCommandSendable())
+	{
+		return;
+	}
 
-  m_TimeCnt += DeltaTime;
-  if (m_TimeCnt >= TEST_NS::SEND_INTERVAL)
-  {
-    m_TimeCnt = 0.0f;
-    SendCommand(MakeShared<UE::Smith::Command::NullCommand>());
-  }
+	if (m_aiBehaviorProcessor != nullptr)
+	{
+		m_aiBehaviorProcessor->TickBehaviorProcessor(DeltaTime);
+	}
+}
+
+void ATurnActor_Test::OnAttack(AttackHandle&& handle)
+{
+	if (handle.AttackPower > 0)
+	{
+		EnemyParam.HP -= handle.AttackPower;
+
+		if (m_logSystem != nullptr)
+		{
+			m_logSystem->SendAttackLog(handle.Attacker, this);
+			m_logSystem->SendDamageLog(this,handle.AttackPower);
+		}
+
+	}
+	else
+	{
+		return;
+	}
+
+	if (EnemyParam.HP <= 0)
+	{
+		if (m_logSystem != nullptr)
+		{
+			m_logSystem->SendDefeatedLog(this);
+		}
+
+		if (m_eventMediator.IsValid())
+		{
+			if (DropUpgradeTable.Num() > 0)
+			{
+				int32 idx = FMath::RandRange(0, DropUpgradeTable.Num() - 1);
+				m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[idx]);
+			}
+		}
+		Destroy();
+		DropUpgradeTable.Reset();
+	}
+}
+
+uint8 ATurnActor_Test::GetOnMapSizeX() const
+{
+	return 1;
+}
+
+uint8 ATurnActor_Test::GetOnMapSizeY() const
+{
+	return 1;
+}
+
+UClass* ATurnActor_Test::GetMoveDirectorUClass() const
+{
+	return MoveDirectorSubclass.Get();
+}
+
+void ATurnActor_Test::SetMoveDirector(USmithMoveDirector* director)
+{
+	m_moveDirector = director;
+}
+
+uint8 ATurnActor_Test::GetChaseRadius() const
+{
+	return ChaseRadius;
+}
+
+EMapObjType ATurnActor_Test::GetType() const
+{
+	return MapObjectType;
+}
+
+void ATurnActor_Test::TurnOnAI()
+{
+	if (m_attackStrategy != nullptr)
+	{
+		m_attackStrategy->SetOwner(this);
+		m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get(), EnemyParam.ATK);
+	}
+
+	for (auto& pair : AttackFormatTables)
+	{
+		if (!pair.Value.IsValid())
+		{
+			pair.Value.LoadSynchronous();
+		}
+
+		if (m_attackStrategy != nullptr)
+		{
+			m_attackStrategy->RegisterAttackFormat(pair.Key, pair.Value.Get());
+		}
+	}
+
+	if (m_moveStrategy != nullptr)
+	{
+		m_moveStrategy->SetOwner(this);
+		m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, MoveComponent, 1);
+	}
+
+	if (m_idleStrategy != nullptr)
+	{
+		m_idleStrategy->SetOwner(this);
+		m_idleStrategy->Initialize(m_commandMediator.Get());
+	}
+
+	if (m_aiBehaviorProcessor != nullptr)
+	{
+		m_aiBehaviorProcessor->RegisterAIStrategy(0, m_attackStrategy);
+		m_aiBehaviorProcessor->RegisterAIStrategy(1, m_moveStrategy);
+		m_aiBehaviorProcessor->RegisterAIStrategy(2, m_idleStrategy);
+		m_aiBehaviorProcessor->RunBehaviorProcessor();
+	}
+}
+
+void ATurnActor_Test::SetEventPublishMediator(IEventPublishMediator* eventMediator)
+{
+	m_eventMediator = eventMediator;
+}
+
+void ATurnActor_Test::SwitchAnimation(uint8 animationState)
+{
+	//MDebug::Log(TEXT("called animation"));
+
+	if (AnimComponent == nullptr)
+	{
+		return;
+	}
+
+	using namespace UE::Smith;
+	FName StateName;
+	switch (animationState)
+	{
+	case SMITH_ANIM_IDLE:
+		StateName = TEXT("Idle");
+		break;
+	case	SMITH_ANIM_WALK:
+		StateName = TEXT("Walk");
+		break;
+	case SMITH_ANIM_ATTACK:
+		StateName = TEXT("Attack");
+		break;
+	case SMITH_ANIM_DAMAGED:
+		StateName = TEXT("Damaged");
+		break;
+	case SMITH_ANIM_DEAD:
+		StateName = TEXT("Dead");
+		break;
+	default:
+		break;
+	}
+	AnimComponent->SwitchAnimState(StateName, 0.0f);
+}
+
+void ATurnActor_Test::UpdateAnimation(float deltaTime)
+{
+	AnimComponent->UpdateAnim(deltaTime);
+}
+
+void ATurnActor_Test::SwitchAnimationDelay(uint8 animationState, float delay)
+{
+  using namespace UE::Smith;
+	FName StateName;
+	switch (animationState)
+	{
+	case SMITH_ANIM_IDLE:
+		StateName = TEXT("Idle");
+		break;
+	case	SMITH_ANIM_WALK:
+		StateName = TEXT("Walk");
+		break;
+	case SMITH_ANIM_ATTACK:
+		StateName = TEXT("Attack");
+		break;
+	case SMITH_ANIM_DAMAGED:
+		StateName = TEXT("Damaged");
+		break;
+	case SMITH_ANIM_DEAD:
+		StateName = TEXT("Dead");
+		break;
+	default:
+		break;
+	}
+  AnimComponent->SwitchAnimStateDelay(StateName, delay);
+}
+
+bool ATurnActor_Test::IsAnimationFinish() const
+{
+	return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
+}
+
+FString ATurnActor_Test::GetName_Log() const
+{
+	return TEXT("小ゴーレム");
+}
+
+EBattleLogType ATurnActor_Test::GetType_Log() const
+{
+	return EBattleLogType::Enemy;
 }

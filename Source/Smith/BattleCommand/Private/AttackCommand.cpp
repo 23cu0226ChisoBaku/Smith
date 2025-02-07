@@ -2,52 +2,102 @@
 
 
 #include "AttackCommand.h"
-#include "SmithPlayerActor.h"
-#include "SmithMoveComponent.h"
+#include "UObject/WeakInterfacePtr.h"
+#include "SmithAttackComponent.h"
+#include "IAttackable.h"
+#include "ISmithAnimator.h"
+#include "AttackHandle.h"
 #include "Debug.h"
 
 namespace UE::Smith::Command
 {
-  AttackCommand::AttackCommand(USmithMoveComponent* moveComp)
-    : m_moveComp(moveComp)
-  {}
+  // 実装
+  // AttackCommand PImpl
+  #pragma region AttackCommand PImpl
+  class AttackCommand::AttackImpl
+  {
+    public:
+      AttackImpl(ICanMakeAttack* attacker, ISmithAnimator* animator)
+        : m_attacker(attacker)
+        , m_animator(animator)
+      { }
+      ~AttackImpl()
+      {
+        m_attacker.Reset();
+        m_animator.Reset();
+      }
+
+    public:
+      void Start()
+      {
+        if (m_animator.IsValid())
+        {
+          m_animator->SwitchAnimation(SMITH_ANIM_ATTACK);
+        }
+      }
+      void Update(float deltaTime)
+      {
+        if (m_animator.IsValid())
+        {
+          m_animator->UpdateAnimation(deltaTime);
+        }
+      }
+      void End()
+      {
+        if (m_attacker.IsValid())
+        {
+          m_attacker->Attack();
+        }
+        if (m_animator.IsValid())
+        {
+          m_animator->SwitchAnimation(SMITH_ANIM_IDLE);
+        }
+      }
+      bool IsFinish() const
+      {
+        return m_animator.IsValid() ? m_animator->IsAnimationFinish() : true;
+      }
+    private:
+      TWeakInterfacePtr<ICanMakeAttack> m_attacker;
+      TWeakInterfacePtr<ISmithAnimator> m_animator;
+  };
+  #pragma endregion AttackCommand PImpl
+  // end of AttackCommand PImpl
+
+  AttackCommand::AttackCommand(ICanMakeAttack* attacker, IAttackable* target, AttackHandle&& handle, ISmithAnimator* animator)
+    : m_attackImpl(nullptr)
+  {
+    if (attacker != nullptr && ::IsValid(attacker->_getUObject()))
+    {
+      attacker->SetAttackTarget(target);
+      attacker->SetAttackHandle(::MoveTemp(handle));
+    }
+    m_attackImpl = ::MakeUnique<AttackImpl>(attacker, animator);
+  }
 
   AttackCommand::~AttackCommand()
   {
-    memset(this, 0 , sizeof(this));
+    m_attackImpl.Reset();
+    memset(this, 0 , sizeof(*this));
   }
 
   void AttackCommand::Start()
   {
-
+    m_attackImpl->Start();
   }
 
   void AttackCommand::Execute(float deltaTime)
   {
-    FString attackStr{};
-    if (m_moveComp.IsValid())
-    {
-      attackStr.Append(m_moveComp->GetName());
-    }
-    else
-    {
-      attackStr.Append(TEXT("EMPTY OBJECT"));
-    }
-
-    attackStr.AppendChars(TEXT(" Attack Command"), 16);
-
-    UE::MLibrary::Debug::Log(attackStr);
-
+    m_attackImpl->Update(deltaTime);
   }
 
   void AttackCommand::End()
   {
-    
+    m_attackImpl->End();
   }
 
   bool AttackCommand::IsFinish() const
   {
-    return true;
+    return m_attackImpl->IsFinish();
   }
-
 }

@@ -23,7 +23,7 @@ Encoding : UTF-8
 #ifndef M_LIB_UINTERFACE_VALID
 #define M_LIB_UINTERFACE_VALID
 
-#define IS_UINTERFACE_VALID(interface)  (interface != nullptr) && (::IsValid(interface->_getUObject))
+#define IS_UINTERFACE_VALID(interface)  ((interface != nullptr) && (::IsValid(interface->_getUObject())))
                                       
 
 #endif

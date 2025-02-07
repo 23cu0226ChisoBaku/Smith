@@ -1,37 +1,62 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "SmithMoveComponent.h"
+#include "SmithPlayerActor.h"
+#include "Debug.h"
+#include "Kismet/GameplayStatics.h"
 
-// Sets default values for this component's properties
 USmithMoveComponent::USmithMoveComponent()
+	: m_terminus(FVector::ZeroVector)
+	, m_bCanMove(false)
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
-
-// Called when the game starts
 void USmithMoveComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
-	if (GEngine)
-	{ }
-	
 }
 
-
-// Called every frame
-void USmithMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+// 終点をセット
+void USmithMoveComponent::SetTerminusPos(FVector pos)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	m_terminus = pos;
+	m_bCanMove = true;
 }
 
+void USmithMoveComponent::Move(float deltaTime)
+{
+	if (!m_bCanMove)
+	{
+		return;
+	}
+
+	AActor *actor = GetOwner();
+	if (actor == nullptr)
+	{
+		return;
+	}
+
+	const FVector curtLocation = actor->GetActorLocation();
+	const FVector leftDistanceVec = m_terminus - curtLocation;
+	FVector curtMovement = leftDistanceVec.GetSafeNormal() * deltaTime * MoveSpeed;
+	if (curtMovement.SquaredLength() > leftDistanceVec.SquaredLength())
+	{
+		curtMovement = leftDistanceVec;
+		m_bCanMove = false;
+	}
+
+	const FVector nextLocation = curtLocation + curtMovement;
+	actor->SetActorLocation(nextLocation);
+}
+
+void USmithMoveComponent::SetDestination(FVector destination)
+{
+	m_terminus = destination;
+	m_bCanMove = true;
+}
+
+bool USmithMoveComponent::IsReachDestination() const
+{
+	AActor* actor = GetOwner();
+	return ::IsValid(actor) ? actor->GetActorLocation().Equals(m_terminus) : false;
+	
+}

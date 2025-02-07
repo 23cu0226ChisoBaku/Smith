@@ -5,19 +5,17 @@
 #include "CoreMinimal.h"
 #include "IBattleCommand.h"
 
-class ASmithPlayerActor;
-
-class USmithMoveComponent;
-/**
- * 
- */
+class ICanMakeAttack;
+class IAttackable;
+class ISmithAnimator;
+struct AttackHandle;
 
 namespace UE::Smith::Command
 {
-	class SMITH_API AttackCommand : public IBattleCommand
+	class SMITH_API AttackCommand final: public IBattleCommand
 	{
 	public:
-		AttackCommand(USmithMoveComponent*);
+		AttackCommand(ICanMakeAttack*, IAttackable*, AttackHandle&&, ISmithAnimator* = nullptr);
 		~AttackCommand();
 
 	public:
@@ -27,6 +25,7 @@ namespace UE::Smith::Command
 		virtual bool IsFinish() const override;
 
 	private:
-		TWeakObjectPtr<USmithMoveComponent> m_moveComp;
+		class AttackImpl;
+		TUniquePtr<AttackImpl> m_attackImpl;
 	};
 }
