@@ -88,3 +88,10 @@ void UGameLogWidget::OutputLog()
   m_isVisibility = true;
   m_timer = 0.0f;
 }
+
+void UGameLogWidget::UpdatedLog()
+{
+  m_timer = 0.0f;
+  m_currentAlpha.A = 1.0f;
+  SetColorAndOpacity(m_currentAlpha);
+}
