@@ -24,7 +24,7 @@ class MLIBRARY_API IAudioPlayer
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual FSoundEffectHandle PlaySE3D(const FString&, float volume = 1.0f, const FVector& location = FVector::ZeroVector) = 0;
-	virtual FSoundEffectHandle PlaySE2D(const FString&, float volume = 1.0f) = 0;
+	virtual FSoundEffectHandle PlaySE(const FString&, float volume = 1.0f) = 0;
 	virtual bool StopSE(const FSoundEffectHandle&) = 0;
 	virtual void PlayBGM(const FString&, float volume = 1.0f) = 0;
 	virtual bool StopBGM() = 0;

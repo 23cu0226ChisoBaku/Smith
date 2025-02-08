@@ -185,6 +185,8 @@ void ASmithPlayerActor::BeginPlay()
 			m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
 		}
 	}
+
+	AudioKit::PlayBGM(TEXT("Dungeon_BGM_1"), 0.1f);
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -210,8 +212,6 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 	{
 		updateCamera(DeltaTime);
 	}
-
-	AudioKit::PlaySE2D(TEXT("a"));
 
 }
 
@@ -325,6 +325,11 @@ void ASmithPlayerActor::Attack()
 			paramHandle.MotionValue = 1.0;
 			m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], paramHandle);
 		}
+
+		int32 ran = FMath::RandRange(1, 2);
+		FString atkSE = TEXT("Player_Slash_") + FString::FromInt(ran);
+
+		AudioKit::PlaySE(atkSE);
 	}
 }
 
@@ -823,7 +828,6 @@ void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
 	m_curtHP -= damage;
 }
 
-// TODO!!!!!! 
 void ASmithPlayerActor::updateParam(FParams upgradeParam)
 {
 	if (upgradeParam.HP != 0)

@@ -203,6 +203,10 @@ namespace UE::Smith
         {
           m_mapOperator->FindAttackableMapObjs(outActors, mapObj, format);
         }
+        void FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+        {
+          m_mapOperator->FindAttackableMapObjsFromCoord(outActors, mapObj, format, offsetToLeft, offsetToTop);
+        }
         void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
           m_mapOperator->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
@@ -214,6 +218,10 @@ namespace UE::Smith
         bool GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& x, uint8& y)
         {
           return m_mapObserver->GetMapObjectCoord(mapObj, x, y);
+        }
+        bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y)
+        {
+          return m_mapObserver->ConvertMapCoordToWorldLocation(outLocation, x, y);
         }
         void Reset()
         {
@@ -296,6 +304,10 @@ namespace UE::Smith
     {
       m_pImpl->FindAttackableMapObjs(outActors, mapObj, format);
     } 
+    void FSmithMapManager::FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+    {
+      m_pImpl->FindAttackableMapObjsFromCoord(outActors, mapObj, format, offsetToLeft, offsetToTop);
+    }
     void FSmithMapManager::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     {
       return m_pImpl->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
@@ -307,6 +319,10 @@ namespace UE::Smith
     bool FSmithMapManager::GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& x, uint8& y)
     {
       return m_pImpl->GetMapObjectCoord(mapObj, x, y);
+    }
+    bool FSmithMapManager::ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y)
+    {
+      return m_pImpl->ConvertMapCoordToWorldLocation(outLocation, x, y);
     }
     void FSmithMapManager::Reset()
     {

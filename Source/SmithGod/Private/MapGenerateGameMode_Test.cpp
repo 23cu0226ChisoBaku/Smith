@@ -91,8 +91,8 @@ void AMapGenerateGameMode_Test::startNewLevel()
   else
   {
     m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
-    m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
     deployNextLevelEvent();
+    m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
   }
 
   m_battleSystem->InitializeBattle();

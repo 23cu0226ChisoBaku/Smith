@@ -1,5 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SoundEffectHandle.h
+
+Author : MAI ZHICONG
+
+Description : SEハンドル
+
+Update History: 2025/02/07 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 #pragma once
 
 #ifndef MLIBRARY_SE_HANDLE
@@ -7,23 +21,30 @@
 
 #include "CoreMinimal.h"
 
-struct MLIBRARY_API FSoundEffectHandle
+class FSoundEffectHandle
 {
 public:
-	constexpr FSoundEffectHandle()
-		: UniqueIdentifier{}
-	{}
-	FSoundEffectHandle(const FString& identifierStr)
-		: UniqueIdentifier(identifierStr)
-	{
+	MLIBRARY_API FSoundEffectHandle();
+	MLIBRARY_API FSoundEffectHandle(const FString& identifierStr, UAudioComponent* audioComp);
+	MLIBRARY_API ~FSoundEffectHandle();
 
-	}
-	~FSoundEffectHandle()
+	inline bool operator==(const FSoundEffectHandle& rhs)
 	{
-		UniqueIdentifier.Invalidate();
+		return IsEqual(*this, rhs);
 	}
-public:
+	inline UAudioComponent* operator->() const
+	{
+		return AudioComponent.Get();
+	}
+	inline bool IsValid() const
+	{
+		return UniqueIdentifier.IsValid() && AudioComponent.IsValid();
+	}
+
+	friend MLIBRARY_API bool IsEqual(const FSoundEffectHandle&, const FSoundEffectHandle&);
+private:
 	FGuid UniqueIdentifier;
+	TWeakObjectPtr<UAudioComponent> AudioComponent;
 };
 
 #endif

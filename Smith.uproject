@@ -20,7 +20,10 @@
 		{
 			"Name": "MLibrary",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		},
 		{
 			"Name": "TurnBattleSystem",

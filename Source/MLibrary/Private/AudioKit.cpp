@@ -8,29 +8,56 @@ namespace MLibrary
 {
 	namespace UE::Audio
 	{
-    void AudioKit::AssignAudioPlayer(IAudioPlayer*)
-    {
+    TWeakInterfacePtr<IAudioPlayer> AudioKit::m_audioPlayer = nullptr;
 
-    }
-    FSoundEffectHandle AudioKit::PlaySE3D(const FString&, float volume, const FVector& location)
+    void AudioKit::AssignAudioPlayer(IAudioPlayer* newAudioPlayer)
     {
-      return FSoundEffectHandle{};
+      m_audioPlayer = newAudioPlayer;
     }
-    FSoundEffectHandle AudioKit::PlaySE2D(const FString&, float volume)
+    FSoundEffectHandle AudioKit::PlaySE3D(const FString& seName, float volume, const FVector& location)
     {
-      return FSoundEffectHandle{};
-    }
-    bool AudioKit::StopSE(const FSoundEffectHandle&)
-    {
-      return false;
-    }
-    void AudioKit::PlayBGM(const FString&, float volume)
-    {
+      if (!m_audioPlayer.IsValid())
+      {
+        return {};
+      }
 
+      return m_audioPlayer->PlaySE3D(seName, volume, location);
+    }
+    FSoundEffectHandle AudioKit::PlaySE(const FString& seName, float volume)
+    {
+      if (!m_audioPlayer.IsValid())
+      {
+        return {};
+      }
+
+      return m_audioPlayer->PlaySE(seName, volume);
+    }
+    bool AudioKit::StopSE(const FSoundEffectHandle& seHandle)
+    {
+      if (!m_audioPlayer.IsValid())
+      {
+        return false;
+      }
+
+      return m_audioPlayer->StopSE(seHandle);
+    }
+    void AudioKit::PlayBGM(const FString& bgmName, float volume)
+    {
+      if (!m_audioPlayer.IsValid())
+      {
+        return;
+      }
+
+      m_audioPlayer->PlayBGM(bgmName, volume);
     }
     bool AudioKit::StopBGM()
     {
-      return false;
+      if (!m_audioPlayer.IsValid())
+      {
+        return false;
+      }
+
+      return m_audioPlayer->StopBGM();
     }
   }
 }

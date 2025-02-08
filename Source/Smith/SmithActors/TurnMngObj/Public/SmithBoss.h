@@ -25,6 +25,8 @@ struct FSmithAIStrategyContainer;
 // TODO
 struct FSmithAIConditionBindHandle;
 
+class ASmithDangerZoneDisplayer;
+
 DECLARE_DELEGATE_RetVal(bool,FConditionDelegate);
 
 /**
@@ -109,7 +111,6 @@ private:
   TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
 
 private:
-  FConditionDelegate m_conditionCallBack;
   int32 m_maxHp;
   int32 m_wingsCnt;
   int32 m_breathCnt;

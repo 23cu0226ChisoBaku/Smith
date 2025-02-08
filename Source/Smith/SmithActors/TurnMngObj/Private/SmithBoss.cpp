@@ -14,6 +14,9 @@
 #include "SmithBattleLogWorldSubsystem.h"
 #include "MLibrary.h"
 
+// TODO
+#include "SmithDangerZoneDisplayer.h"
+
 ASmithBoss::ASmithBoss()
   : m_attackStrategy(nullptr)
   , m_idleStrategy(nullptr)
@@ -114,18 +117,18 @@ void ASmithBoss::TurnOnAI()
     m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get(), EnemyParam.ATK);
   }
 
-	for (auto& pair : ConditionAttackFormatTables)
+	for (const auto& [AttackName, ConditionBindHandle] : ConditionAttackFormatTables)
 	{
-		if (!pair.Value.FormatMasterData.IsValid())
+		if (!ConditionBindHandle.FormatMasterData.IsValid())
 		{
-			pair.Value.FormatMasterData.LoadSynchronous();
+			ConditionBindHandle.FormatMasterData.LoadSynchronous();
 		}
 
     if (m_attackStrategy != nullptr)
     {
       TDelegate<bool()> condition;
-      condition.BindUFunction(this, pair.Value.ConditionFuncName);
-      m_attackStrategy->ConditionResgister(pair.Key,pair.Value.FormatMasterData.Get(),condition);
+      condition.BindUFunction(this, ConditionBindHandle.ConditionFuncName);
+      m_attackStrategy->ConditionResgister(AttackName, ConditionBindHandle.FormatMasterData.Get(), condition, ConditionBindHandle.SkillParameter);
     }
 	}
 

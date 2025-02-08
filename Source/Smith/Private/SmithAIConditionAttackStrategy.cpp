@@ -8,14 +8,39 @@
 #include "Direction.h"
 #include "MLibrary.h"
 
+#include "SmithDangerZoneDisplayer.h"
+USmithAIConditionAttackStrategy::USmithAIConditionAttackStrategy(const FObjectInitializer& ObjectInitializer)
+  : Super(ObjectInitializer)
+  , m_bIsDisplayingDangerZone(false)
+{
+
+}
+
 void USmithAIConditionAttackStrategy::Initialize(ICanMakeAttack *attacker, ICommandMediator *mediator, int32 attackPower)
 {
   m_attacker = attacker;
   m_mediator = mediator;
   m_atk = attackPower;
+
+  AActor* owner = GetOwner();
+  if (!::IsValid(owner))
+  {
+    return;
+  }
+
+  // TODO need ignore hard coding
+  UWorld* world = owner->GetWorld();
+  if (::IsValid(world))
+  {
+    TSubclassOf<ASmithDangerZoneDisplayer> dangerZoneSub = TSoftClassPtr<ASmithDangerZoneDisplayer>(FSoftObjectPath("/Game/BP/BP_SmithDangerZoneDisplayer.BP_SmithDangerZoneDisplayer_C")).LoadSynchronous();
+    if (dangerZoneSub != nullptr)
+    {
+      m_dangerZoneDisplayer = world->SpawnActor<ASmithDangerZoneDisplayer>(dangerZoneSub, owner->GetActorLocation(), owner->GetActorRotation());
+    }
+  }
 }
 
-void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)> &condition)
+void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)> &condition, FSmithSkillCenterSpotParameter skillParameter)
 {
   if (condition.IsBound())
   {
@@ -23,6 +48,7 @@ void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, co
     FConditionHandle handle;
     handle.Name = name;
     handle.Condition = condition;
+    handle.SkillParameter = skillParameter;
     m_conditions.Enqueue(handle);
   }
   else
@@ -39,11 +65,23 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     return false;
   }
 
-  bool isExecuted = false;
   FConditionHandle* curtConditionAttatkHandle = m_conditions.Peek();
   if (curtConditionAttatkHandle == nullptr)
   {
     return false;
+  }
+  
+  if (!m_bIsDisplayingDangerZone && m_dangerZoneDisplayer != nullptr)
+  {
+    const TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>& format = m_attackFormatTables[curtConditionAttatkHandle->Name];
+    TArray<FVector> dangerZoneDisplayLocations;
+    int32 num = m_mediator->GetRangeLocations(dangerZoneDisplayLocations, GetOwner(), curtConditionAttatkHandle->SkillParameter, *format);
+
+    if (num > 0)
+    {
+      m_dangerZoneDisplayer->SetupDisplayLocations(dangerZoneDisplayLocations);
+      m_bIsDisplayingDangerZone = true;
+    }
   }
 
   // 条件を満たしているか
@@ -51,7 +89,6 @@ bool USmithAIConditionAttackStrategy::executeImpl()
   {
     FConditionHandle curtHandleInstance{};
     m_conditions.Dequeue(curtHandleInstance);
-    isExecuted = true;
     // 攻撃
     if (!m_attackFormatTables.Contains(curtHandleInstance.Name))
     {
@@ -71,11 +108,25 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     // TODO add by Mai
     ISmithBattleLogger* logger = Cast<ISmithBattleLogger>(GetOwner());
 
-    // 南に向けて攻撃
-    m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), EDirection::South, *format, AttackHandle{logger, m_atk});
+    // TODO
+    FAttackHandle handle;
+    handle.Attacker = logger;
+    handle.AttackPower = m_atk;
+    handle.Level = 1;
+    handle.MotionValue = 1.0;
+
+    m_mediator->SendSkillCommand(GetOwner(), m_attacker.Get(), curtHandleInstance.SkillParameter, *format, handle);
     m_conditions.Enqueue(curtHandleInstance);
-    
+
+    // TODO
+    if (m_dangerZoneDisplayer != nullptr && m_bIsDisplayingDangerZone)
+    {
+      m_bIsDisplayingDangerZone = false;
+      m_dangerZoneDisplayer->Dispose();
+    }
+
+    return true;
   }
-  
-  return isExecuted;
+
+  return false;
 }

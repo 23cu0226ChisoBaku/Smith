@@ -109,6 +109,11 @@ namespace UE::Smith
                 for (uint8 roomX = 0; roomX < roomWidth; ++roomX)
                 {
                   const FMapCoord roomCoord(roomLeft + roomX, roomTop + roomY);
+                  if (!model_shared->StaySpaceTable.Contains(roomCoord) || model_shared->StaySpaceTable[roomCoord]->GetEvent() != nullptr)
+                  {
+                    continue;
+                  }
+
                   roomCoords.Emplace(roomCoord);
                 }
               }   
@@ -380,7 +385,30 @@ namespace UE::Smith
 
           return false;
         }
+      bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y)
+      {
+        outLocation = FVector::ZeroVector;
+        TSharedPtr<Model> model_shared = m_model.Pin();
+        if (!model_shared.IsValid())
+        {
+          return false;
+        }
 
+        TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+        if (!map_shared.IsValid())
+        {
+          return false;
+        }
+
+        outLocation = FVector(
+                              StaticCast<double>(StaticCast<int32>(x) * model_shared->MapTileSize),
+                              StaticCast<double>(StaticCast<int32>(y) * model_shared->MapTileSize),
+                              0.0
+                             )
+                    + model_shared->OriginWorldCoord;
+
+        return true;
+      }
       private:
         bool isInSameSection(ICanSetOnMap* chaser, ICanSetOnMap* target)
         {
@@ -660,6 +688,11 @@ namespace UE::Smith
     bool FSmithMapObserver::ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
     {
       return m_pImpl->ChaseTarget(outChaseDirection, chaser, target, chaseRadius);
+    }
+    // TODO another Class
+    bool FSmithMapObserver::ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y)
+    {
+      return m_pImpl->ConvertMapCoordToWorldLocation(outLocation, x, y);
     }
 
   }

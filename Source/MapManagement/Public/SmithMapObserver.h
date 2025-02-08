@@ -97,6 +97,8 @@ namespace UE::Smith
 				void GenerateNewEnemy();
 				/// @brief 未使用
 				bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius);
+				/// TODO
+				bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y);
 			#pragma endregion FSmithMapObserver Interface
 			// end of FSmithMapObserver Interface
 			private:

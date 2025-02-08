@@ -39,7 +39,11 @@ public:
 	bool SendMoveCommand(AActor*, IMoveable*, EDirection, uint8 moveDistance) override final;
 	bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&, bool bAttackEvenNoTarget) override final;
 	bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) override final;
+	bool SendSkillCommand(AActor*, ICanMakeAttack*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&) override final;
 	bool SendIdleCommand(AActor*) override final;
+
+public:
+	int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&) const override final;
 private:
 	UPROPERTY()
 	TWeakObjectPtr<USmithBattleSubsystem> m_battleSys;
