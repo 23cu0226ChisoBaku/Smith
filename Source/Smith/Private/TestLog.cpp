@@ -1,5 +1,7 @@
 // // Fill out your copyright notice in the Description page of Project Settings.
 // #include "TestLog.h"
+// #include "GameLogWidget.h"
+// #include "Blueprint/UserWidget.h"
 // #include "Debug.h"
 
 // // Sets default values
@@ -51,6 +53,6 @@
 // 	if(m_widget != nullptr)
 // 	{
 // 		m_widget->AddLogMessage(str);
-// 		m_widget->OutPutLog();
+// 		m_widget->OutputLog();
 // 	}
 // }
