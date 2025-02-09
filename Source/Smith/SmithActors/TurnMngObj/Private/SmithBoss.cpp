@@ -12,6 +12,7 @@
 #include "SmithPickable.h"
 #include "IEventPublishMediator.h"
 #include "SmithBattleLogWorldSubsystem.h"
+#include "SmithEnemyParamInitializer.h"
 #include "MLibrary.h"
 
 // TODO
@@ -215,4 +216,9 @@ FString ASmithBoss::GetName_Log() const
 EBattleLogType ASmithBoss::GetType_Log() const
 {
   return EBattleLogType::Enemy;
+}
+
+void ASmithBoss::InitializeParameter(int32 currentLevel)
+{
+	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
 }

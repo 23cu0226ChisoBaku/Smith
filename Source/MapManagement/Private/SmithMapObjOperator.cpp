@@ -3,7 +3,7 @@
 
 SmithMapObjOperator.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップオブジェクトを操作する(移動など)クラス
 

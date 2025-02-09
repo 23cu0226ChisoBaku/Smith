@@ -3,7 +3,7 @@
 
 SmithMapManager.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップマネージャー
 

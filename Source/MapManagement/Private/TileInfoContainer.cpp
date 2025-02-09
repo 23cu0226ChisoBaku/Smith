@@ -3,7 +3,7 @@
 
 TileInfoContainer.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップタイルの情報コンテナ実装
 

@@ -3,7 +3,7 @@
 
 SmithMapObjDeployDirector.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップオブジェクトを新しく配置するクラス
 

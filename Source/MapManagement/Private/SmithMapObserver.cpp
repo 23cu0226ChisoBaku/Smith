@@ -3,7 +3,7 @@
 
 SmithMapObserver.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップを観察し処理するクラス(※Smithマップ専用)
 

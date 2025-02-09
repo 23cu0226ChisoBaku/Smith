@@ -3,7 +3,7 @@
 
 ObstacleInfoContainer.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : 障害物タイルの情報コンテナ
 

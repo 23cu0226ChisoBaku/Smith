@@ -3,7 +3,7 @@
 
 SmithMapConstructor.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップオブジェクトをワールドに配置するクラス
 

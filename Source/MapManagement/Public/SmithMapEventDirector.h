@@ -3,7 +3,7 @@
 
 SmithMapEventDirector.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップイベントを配置する前に向きなど情報を調整するクラス
 

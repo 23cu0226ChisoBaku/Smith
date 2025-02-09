@@ -19,7 +19,6 @@ USmithRichUpgradeParam::USmithRichUpgradeParam(const FObjectInitializer& ObjectI
 void USmithRichUpgradeParam::NativeConstruct()
 {
   Super::NativeConstruct();
-
   ResetWidget();
 }
 

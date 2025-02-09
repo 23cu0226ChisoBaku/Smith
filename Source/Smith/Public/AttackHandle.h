@@ -1,12 +1,31 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+AttackHandle.h
+
+Author : MAI ZHICONG(バクチソウ)
+
+Description : 攻撃ハンドル
+
+Update History: 2024/12/08	作成
+								2025/01/29  FAttackHandle追加作成（ログを出すため）
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 #pragma once
 
-#ifndef SMITH_ATKHDL
-#define SMITH_ATKHDL
+#ifndef SMITH_ATK_HDL
+#define SMITH_ATK_HDL
 
 #include "CoreMinimal.h"
-
+//---------------------------------------
+/*
+                  前方宣言
+*/
+//---------------------------------------
 class ISmithBattleLogger;
 
 struct SMITH_API FAttackHandle

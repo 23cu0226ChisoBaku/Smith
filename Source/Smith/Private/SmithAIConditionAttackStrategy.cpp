@@ -16,6 +16,16 @@ USmithAIConditionAttackStrategy::USmithAIConditionAttackStrategy(const FObjectIn
 
 }
 
+void USmithAIConditionAttackStrategy::BeginDestroy()
+{
+  if (m_dangerZoneDisplayer != nullptr)
+  {
+    m_dangerZoneDisplayer->Dispose();
+  }
+  
+  Super::BeginDestroy();
+}
+
 void USmithAIConditionAttackStrategy::Initialize(ICanMakeAttack *attacker, ICommandMediator *mediator, int32 attackPower)
 {
   m_attacker = attacker;
