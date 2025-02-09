@@ -30,6 +30,7 @@ bool USmithEnhanceSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 void USmithEnhanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
   Super::Initialize(Collection);
+  m_upgradeCount = 0;
 }
 
 void USmithEnhanceSubsystem::Deinitialize()
@@ -45,5 +46,11 @@ void USmithEnhanceSubsystem::Enhance(IEnhanceable* enhanceable,IParamAbsorbable*
   }
 
   enhanceable->Upgrade(absorbItem);
+
+  ++m_upgradeCount;
 }
 
+int32 USmithEnhanceSubsystem::GetUpgradeCount() const
+{
+  return m_upgradeCount;
+}

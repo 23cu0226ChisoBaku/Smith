@@ -185,8 +185,6 @@ void ASmithPlayerActor::BeginPlay()
 			m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
 		}
 	}
-
-	AudioKit::PlayBGM(TEXT("Dungeon_BGM_1"), 0.1f);
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -825,7 +823,7 @@ EDirection ASmithPlayerActor::GetCameraDirection() const
 
 void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
 {
-	m_curtHP -= damage;
+	OnAttack(AttackHandle{this, damage});
 }
 
 void ASmithPlayerActor::updateParam(FParams upgradeParam)

@@ -313,6 +313,7 @@ bool USmithBattleMediator::SendIdleCommand(AActor* requester)
 
 int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillCenterSpotParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format) const
 { 
+  using namespace UE::Smith::Battle;
   outLocations.Reset();
 
   if (!::IsValid(requester))
@@ -338,12 +339,22 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
     return outLocations.Num();
   }
 
-  UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, skillParameter.Direction);
-  for (int32 y = 0; y < rotatedFormat.GetRow(); ++y)
+  uint8 mapObjOriginCoordX = 0u;
+  uint8 mapObjOriginCoordY = 0u;
+  if (!mapMgr_shared->GetMapObjectCoord(mapObj, mapObjOriginCoordX, mapObjOriginCoordY))
   {
-    for (int32 x = 0; x < rotatedFormat.GetColumn(); ++x)
+    return outLocations.Num();
+  }
+
+  FSmithCommandFormat rotatedFormat = FFormatTransformer::GetRotatedFormat(format, skillParameter.Direction);
+  auto formattedMapCoords = FFormatTransformer::FormatToMapCoord(rotatedFormat, FMapCoord(mapObjOriginCoordX + skillParameter.OffsetToLeft, mapObjOriginCoordY + skillParameter.OffsetToTop));
+
+  for (int32 row = 0; row < rotatedFormat.GetRow(); ++row)
+  {
+    for (int32 column = 0; column < rotatedFormat.GetColumn(); ++column)
     {
-      switch(rotatedFormat.GetFormatData(x, y))
+      // TODO
+      switch(rotatedFormat.GetFormatData(column, row))
       {
         case ESmithFormatType::NO_EFFECT:
         case ESmithFormatType::CENTER_NO_EFFECT:
@@ -354,15 +365,10 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
         case ESmithFormatType::EFFECT:
         case ESmithFormatType::CENTER_EFFECT:
         {
-          uint8 coordX = 0u;
-          uint8 coordY = 0u;
-          if (!mapMgr_shared->GetMapObjectCoord(mapObj, coordX, coordY))
-          {
-            continue;
-          }
+          const FMapCoord coord = formattedMapCoords.At_ReadOnly(row, column);
 
           FVector location;
-          if (!mapMgr_shared->ConvertMapCoordToWorldLocation(location, coordX, coordY))
+          if (!mapMgr_shared->ConvertMapCoordToWorldLocation(location, coord.x, coord.y))
           {
             continue;
           }
