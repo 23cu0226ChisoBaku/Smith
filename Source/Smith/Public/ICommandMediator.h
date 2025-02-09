@@ -11,6 +11,7 @@ class ICanMakeAttack;
 class IAttackable;
 struct AttackHandle;
 struct FAttackHandle;
+struct FSmithSkillCenterSpotParameter;
 enum class EDirection : uint8;
 
 namespace UE::Smith
@@ -39,4 +40,8 @@ public:
 	virtual bool SendIdleCommand(AActor*) = 0;
 
 	virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) = 0;
+	virtual bool SendSkillCommand(AActor*, ICanMakeAttack*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&) = 0;
+
+	// TODO
+	virtual int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&) const = 0;
 };

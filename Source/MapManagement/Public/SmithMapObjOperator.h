@@ -99,6 +99,8 @@ namespace UE::Smith
 				/// @param FSmithCommandFormat			攻撃フォーマット
 				///
 				void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
+				// TODO
+				void FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
 				///
 				/// @brief 													オブジェクトを移動する
 				/// @param ICanSetOnMap							移動するターゲットオブジェクト

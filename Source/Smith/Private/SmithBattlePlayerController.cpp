@@ -104,7 +104,7 @@ void ASmithBattlePlayerController::SetupInputComponent()
 
 void ASmithBattlePlayerController::Move(const FInputActionValue& inputValue)
 {
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }
@@ -118,7 +118,7 @@ void ASmithBattlePlayerController::Move(const FInputActionValue& inputValue)
 }
 void ASmithBattlePlayerController::Attack(const FInputActionValue& inputValue)
 {
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }
@@ -127,11 +127,10 @@ void ASmithBattlePlayerController::Attack(const FInputActionValue& inputValue)
 }
 void ASmithBattlePlayerController::ChangeCameraAngle(const FInputActionValue& inputValue)
 {
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }
-
   float inputDirection = inputValue.Get<float>();
   bool bIsClockwise = false;
 	uint8 newDirection = StaticCast<uint8>(m_player->GetCameraDirection());
@@ -151,7 +150,7 @@ void ASmithBattlePlayerController::ChangeCameraAngle(const FInputActionValue& in
 }
 void ASmithBattlePlayerController::ChangeForward(const FInputActionValue& inputValue)
 {  
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }
@@ -165,7 +164,7 @@ void ASmithBattlePlayerController::ChangeForward(const FInputActionValue& inputV
 }
 void ASmithBattlePlayerController::Debug_SelfDamage(const FInputActionValue& inputValue)
 {
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }
@@ -174,11 +173,10 @@ void ASmithBattlePlayerController::Debug_SelfDamage(const FInputActionValue& inp
 }
 void ASmithBattlePlayerController::OpenMenu(const FInputActionValue& inputValue)
 {
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }
-
   UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
   if (enhancedInputSubsystem != nullptr)
   {
@@ -191,7 +189,7 @@ void ASmithBattlePlayerController::OpenMenu(const FInputActionValue& inputValue)
 
 void ASmithBattlePlayerController::CloseMenu(const FInputActionValue& inputValue)
 {
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }
@@ -208,7 +206,7 @@ void ASmithBattlePlayerController::CloseMenu(const FInputActionValue& inputValue
 
 void ASmithBattlePlayerController::UseRecovery(const FInputActionValue& inputValue)
 {
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }
@@ -217,7 +215,7 @@ void ASmithBattlePlayerController::UseRecovery(const FInputActionValue& inputVal
 }
 void ASmithBattlePlayerController::InMenuSelect(const FInputActionValue& inputValue)
 {
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }
@@ -227,7 +225,7 @@ void ASmithBattlePlayerController::InMenuSelect(const FInputActionValue& inputVa
 }
 void ASmithBattlePlayerController::InMenuInteract(const FInputActionValue& inputValue)
 {
-  if (m_player == nullptr)
+  if (m_player == nullptr || !m_player->CanReceiveInputEvent())
   {
     return;
   }

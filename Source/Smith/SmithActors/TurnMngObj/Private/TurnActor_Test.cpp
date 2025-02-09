@@ -120,6 +120,12 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 				m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[idx]);
 			}
 		}
+		
+		if (OnDefeatEvent.IsBound())
+		{
+			OnDefeatEvent.Broadcast();
+		}
+
 		Destroy();
 		DropUpgradeTable.Reset();
 	}

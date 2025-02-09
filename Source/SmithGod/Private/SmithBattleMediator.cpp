@@ -29,6 +29,8 @@
 
 // TODO
 #include "AttackHandle.h"
+#include "SmithSkillCenterSpotParameter.h"
+#include "FormatType.h"
 
 USmithBattleMediator::USmithBattleMediator()
   : m_battleSys(nullptr)
@@ -153,7 +155,7 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
 
 bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle, bool bAttackEvenNoTarget)
 {
-   if (!m_mapMgr.IsValid() || !m_battleSys.IsValid())
+   if (!m_battleSys.IsValid())
   {
     MDebug::LogError("System INVALID!!!");
     return false;
@@ -171,8 +173,8 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
     return false;
   }
 
-  auto mapMgrSharedPtr = m_mapMgr.Pin();
-  if (!mapMgrSharedPtr.IsValid())
+  TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
+  if (!mapMgr_shared.IsValid())
   {
     return false;
   }
@@ -180,7 +182,7 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
   // TODO
   UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, direction);
   TArray<IAttackable*> attackables{};
-  mapMgrSharedPtr->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
+  mapMgr_shared->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
 
   // TODO Safe Cast may cause performance issue
   ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
@@ -225,6 +227,67 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
   }
 }
 
+bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* attacker, FSmithSkillCenterSpotParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle)
+{
+  if (!m_battleSys.IsValid())
+  {
+    return false;
+  }
+
+  if (!::IsValid(requester) || !IS_UINTERFACE_VALID(attacker))
+  {
+    return false;
+  }
+
+  if (format.GetRow() == 0 || format.GetColumn() == 0)
+  {
+    MDebug::LogError("Format INVALID");
+    return false;
+  }
+
+  TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
+  if (!mapMgr_shared.IsValid())
+  {
+    return false;
+  }
+
+  UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, skillParameter.Direction);
+  TArray<IAttackable*> attackables{};
+  mapMgr_shared->FindAttackableMapObjsFromCoord(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat, skillParameter.OffsetToLeft, skillParameter.OffsetToTop);
+
+   // TODO Safe Cast may cause performance issue
+  ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
+  if (attackables.Num() > 0)
+  {
+    ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
+    for(auto target : attackables)
+    {
+      // TODO 修正案ー＞BattleModelを作成し、Data Assetsで設定できるようにする
+      AttackHandle attackHandle;
+      attackHandle.Attacker = atkHandle.Attacker;
+      if (target != nullptr && m_damageCalculator.IsValid())
+      { 
+        FBattleAttackParamHandle attackParam;
+        attackParam.AttackPoint = atkHandle.AttackPower;
+        attackParam.CriticalPoint = atkHandle.CriticalPower;
+        attackParam.Level = atkHandle.Level;
+        attackParam.MotionValue = atkHandle.MotionValue;
+
+        const FBattleResult result = m_damageCalculator->CalculateDamage(attackParam, target->GetDefenseParam());
+        attackHandle.AttackPower = result.Damage;
+      }
+      else
+      {
+        attackHandle.AttackPower = atkHandle.AttackPower;
+      }
+      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(attackHandle), animator));
+    }
+    return true;
+  }
+
+  return false;
+}
+
 bool USmithBattleMediator::SendIdleCommand(AActor* requester)
 {
   if (!m_battleSys.IsValid())
@@ -246,5 +309,77 @@ bool USmithBattleMediator::SendIdleCommand(AActor* requester)
   m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::NullCommand>());
   return true;
 
+}
+
+int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillCenterSpotParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format) const
+{ 
+  using namespace UE::Smith::Battle;
+  outLocations.Reset();
+
+  if (!::IsValid(requester))
+  {
+    return outLocations.Num();
+  }
+
+  TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
+  if (!mapMgr_shared.IsValid())
+  {
+    return outLocations.Num();
+  }
+
+  if (format.GetRow() == 0 || format.GetColumn() == 0)
+  {
+    MDebug::LogError("Format INVALID");
+    return outLocations.Num();
+  }
+
+  ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(requester);
+  if (!IS_UINTERFACE_VALID(mapObj))
+  {
+    return outLocations.Num();
+  }
+
+  uint8 mapObjOriginCoordX = 0u;
+  uint8 mapObjOriginCoordY = 0u;
+  if (!mapMgr_shared->GetMapObjectCoord(mapObj, mapObjOriginCoordX, mapObjOriginCoordY))
+  {
+    return outLocations.Num();
+  }
+
+  FSmithCommandFormat rotatedFormat = FFormatTransformer::GetRotatedFormat(format, skillParameter.Direction);
+  auto formattedMapCoords = FFormatTransformer::FormatToMapCoord(rotatedFormat, FMapCoord(mapObjOriginCoordX + skillParameter.OffsetToLeft, mapObjOriginCoordY + skillParameter.OffsetToTop));
+
+  for (int32 row = 0; row < rotatedFormat.GetRow(); ++row)
+  {
+    for (int32 column = 0; column < rotatedFormat.GetColumn(); ++column)
+    {
+      // TODO
+      switch(rotatedFormat.GetFormatData(column, row))
+      {
+        case ESmithFormatType::NO_EFFECT:
+        case ESmithFormatType::CENTER_NO_EFFECT:
+        {
+          continue;
+        }
+
+        case ESmithFormatType::EFFECT:
+        case ESmithFormatType::CENTER_EFFECT:
+        {
+          const FMapCoord coord = formattedMapCoords.At_ReadOnly(row, column);
+
+          FVector location;
+          if (!mapMgr_shared->ConvertMapCoordToWorldLocation(location, coord.x, coord.y))
+          {
+            continue;
+          }
+
+          outLocations.Emplace(location);
+        }
+        break;
+      }
+    }
+  }
+
+  return outLocations.Num();
 }
 

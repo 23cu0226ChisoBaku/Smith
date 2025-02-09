@@ -60,7 +60,7 @@ void ASmithDangerZoneDisplayer::SetupDisplayLocations(const TArray<FVector>& loc
 
 	for (const auto& location : locations)
 	{
-		AActor* dangerZone = world->SpawnActor<AActor>(PlaneObjectSubclass);
+		AActor* dangerZone = world->SpawnActor<AActor>(PlaneObjectSubclass, location, FRotator::ZeroRotator);
 		m_dangerZonePlane.Emplace(dangerZone);
 	}
 }

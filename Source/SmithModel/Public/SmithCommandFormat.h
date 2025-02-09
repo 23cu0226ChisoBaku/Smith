@@ -56,6 +56,7 @@ namespace UE::Smith
 				FMapCoord GetCNCoord() const;
 				uint64 GetRow() const;
 				uint64 GetColumn() const;
+				// TODO
 				ESmithFormatType GetFormatData(uint64 x, uint64 y) const;
 
 			private:

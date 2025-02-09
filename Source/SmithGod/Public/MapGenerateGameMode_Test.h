@@ -52,15 +52,23 @@ public:
 	void StartPlay() override final;
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
+public:
+	UFUNCTION(BlueprintCallable)
+	int32 GetDefeatedEnemyCount() const;
+	UFUNCTION(BlueprintCallable)
+	int32 GetUpgradeCount() const;
+	UFUNCTION(BlueprintCallable)
+	int32 GetCurrentLevel() const;
+	UFUNCTION(BlueprintCallable)
+	int32 GetCurrentPlayTime_Second() const;
+
 private:
 	void initializeGame();
 	void startNewLevel();
 	void clearCurrentLevel();
 	void deployNextLevelEvent(bool bIsActiveWhenDeploy = true);
-
-// TODO
-public:
 	void goToNextLevel();
+	void addDefeatedEnemyCount();
 
 private:
 	/** ダンジョンマップ設計図 */
@@ -74,10 +82,8 @@ private:
 	FSmithMapBluePrint BossMapBluePrint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint BossGenerateBluePrint;
-
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UGameLogWidget> LogWidgetSub;
-
 	UPROPERTY()
 	TObjectPtr<USmithBattleSubsystem> m_battleSystem;
 	UPROPERTY()
@@ -96,19 +102,20 @@ private:
 	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSubsystem;
 	UPROPERTY()
 	TObjectPtr<USmithDungeonDamageCalculator> m_damageCalculator;
-
 	UPROPERTY(EditAnywhere)
 	double TEST_DAMAGE_CALCULATOR_CONSTANT;
-
 	UPROPERTY()
 	TObjectPtr<UUI_CurrentLevel> CurtLevelUI;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUI_CurrentLevel> LevelUISub;
-
 	UPROPERTY()
 	TObjectPtr<USmithNextLevelEvent> m_nextLevelEvent;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
-	uint8 m_curtLevel;
+	// 倒された敵の数
+	int32 m_defeatedEnemyCount;
+	int32 m_curtLevel;
+	int32 m_startPlayTime;
+
 };
