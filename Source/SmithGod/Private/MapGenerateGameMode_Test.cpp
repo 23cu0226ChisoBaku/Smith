@@ -25,12 +25,19 @@
 #include "IEnhanceSystem.h"
 #include "ICanRequestEventPublishment.h"
 #include "SmithEventPublishMediator.h"
-
+#include "SmithBattleLogWorldSubsystem.h"
+#include "SmithTurnBattleWorldSettings.h"
 #include "Kismet/GameplayStatics.h"
-
 #include "SmithPlayerActor.h"
 #include "SmithMapBaseMoveDirector.h"
+#include "GameLogWidget.h"
+#include "SmithDungeonDamageCalculator.h"
+#include "UI_CurrentLevel.h"
 
+// TODO
+#include "SmithNextLevelEvent.h"
+
+#include "Kismet/KismetSystemLibrary.h"
 #include "MLibrary.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
@@ -39,15 +46,15 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   , m_eventPublisher(nullptr)
   , m_eventSystem(nullptr)
   , m_chasePlayerTracker(nullptr)
+  , m_enhanceSystem(nullptr)
   , m_eventMediator(nullptr)
+  , m_logSubsystem(nullptr)
+  , m_damageCalculator(nullptr)
   , m_mapMgr(nullptr)
-{
-  static ConstructorHelpers::FClassFinder<APawn> PlayerBP(TEXT("/Game/BP/BP_TestMapGeneratePawn"));
-  if (PlayerBP.Class != nullptr)
-  {
-    DefaultPawnClass = PlayerBP.Class;
-  }
-}
+  , m_defeatedEnemyCount(0)
+  , m_curtLevel(0)
+  , m_startPlayTime(0)
+{ }
 
 void AMapGenerateGameMode_Test::StartPlay()
 {
@@ -60,6 +67,10 @@ void AMapGenerateGameMode_Test::StartPlay()
 void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
   Super::EndPlay(EndPlayReason);
+
+  MDebug::LogError("Defeat Count" + FString::FromInt(m_defeatedEnemyCount));
+  MDebug::LogError("Enhance Count" + FString::FromInt(GetUpgradeCount()));
+  MDebug::LogError("Play Time" + FString::FromInt(GetCurrentPlayTime_Second()));
 }
 
 void AMapGenerateGameMode_Test::startNewLevel()
@@ -77,14 +88,26 @@ void AMapGenerateGameMode_Test::startNewLevel()
 
   m_chasePlayerTracker->SetupTracker(m_mapMgr, mapPlayer);
 
-  m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
-  m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
-  m_mapMgr->InitMapEvents(GetWorld(), m_eventPublisher);
+  if (m_curtLevel % 5 == 0)
+  {
+    m_mapMgr->InitMap(GetWorld(), BossMapBluePrint, MapConstructionBluePrint);
+    m_mapMgr->InitMapObjs(GetWorld(), playerPawn, BossGenerateBluePrint);
+  }
+  else
+  {
+    m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
+    deployNextLevelEvent();
+    m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
+  }
+
   m_battleSystem->InitializeBattle();
 
+  UWorld* world = GetWorld();
+
+  // コマンド仲介初期化
   {
     TArray<AActor*> canCmdMediateObjs;
-    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UCanCommandMediate::StaticClass(), canCmdMediateObjs);
+    UGameplayStatics::GetAllActorsWithInterface(world, UCanCommandMediate::StaticClass(), canCmdMediateObjs);
 
     if (canCmdMediateObjs.Num() > 0)
     {
@@ -97,9 +120,10 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
+  // 移動ストラテジー実装アクター
   {
     TArray<AActor*> moveDirectorImplementedActors;
-    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UMoveDirector::StaticClass(), moveDirectorImplementedActors);
+    UGameplayStatics::GetAllActorsWithInterface(world, UMoveDirector::StaticClass(), moveDirectorImplementedActors);
     
     if (moveDirectorImplementedActors.Num() > 0)
     {
@@ -117,6 +141,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
           continue;
         }
 
+        // TODO
         IMoveDirector* moveDirector = Cast<IMoveDirector>(obj);
         UClass* moveDirectorSub = moveDirector->GetMoveDirectorUClass();
 
@@ -130,9 +155,10 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
+  // SmithAI駆動アクター
   {
     TArray<AActor*> aiDrivenActors;
-    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), USmithSimpleAIDriven::StaticClass(), aiDrivenActors);
+    UGameplayStatics::GetAllActorsWithInterface(world, USmithSimpleAIDriven::StaticClass(), aiDrivenActors);
 
     if (aiDrivenActors.Num() > 0)
     {
@@ -144,9 +170,10 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
+  // イベント発行アクター
   {
     TArray<AActor*> eventPublishObjs;
-    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UCanRequestEventPublishment::StaticClass(), eventPublishObjs);
+    UGameplayStatics::GetAllActorsWithInterface(world, UCanRequestEventPublishment::StaticClass(), eventPublishObjs);
 
     if (eventPublishObjs.Num() > 0)
     {
@@ -158,7 +185,26 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
+  {
+    TArray<AActor*> turnBaseEnemies;
+    UGameplayStatics::GetAllActorsOfClass(world, ATurnBaseActor::StaticClass(), turnBaseEnemies);
+
+    if (turnBaseEnemies.Num() > 0)
+    {
+      for (const auto& enemy : turnBaseEnemies)
+      {
+        ATurnBaseActor* turnBaseEnemy = Cast<ATurnBaseActor>(enemy);
+        turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
+      }
+    }
+  }
+
   m_eventSystem->Reset();
+
+  if (CurtLevelUI != nullptr)
+  {
+    CurtLevelUI->SetLevel(StaticCast<int32>(m_curtLevel));
+  }
 }
 
 void AMapGenerateGameMode_Test::clearCurrentLevel()
@@ -177,49 +223,120 @@ void AMapGenerateGameMode_Test::initializeGame()
 {
   UWorld* world = GetWorld();
   check(world != nullptr);
+  ASmithTurnBattleWorldSettings* worldSettings = Cast<ASmithTurnBattleWorldSettings>(world->GetWorldSettings());
 
-  m_battleSystem = world->GetSubsystem<USmithBattleSubsystem>();
-  check(m_battleSystem != nullptr);
-  
-  m_battleMediator = NewObject<USmithBattleMediator>(this);
-  check((m_battleMediator != nullptr));
+  if (worldSettings != nullptr && worldSettings->IsBattleLevel())
+  {
+    m_battleSystem = world->GetSubsystem<USmithBattleSubsystem>();
+    check(m_battleSystem != nullptr);
+    
+    m_battleMediator = NewObject<USmithBattleMediator>(this);
+    check((m_battleMediator != nullptr));
 
-  m_eventPublisher = NewObject<USmithEventPublisher>(this);
-  check(m_eventPublisher != nullptr);
+    m_eventPublisher = NewObject<USmithEventPublisher>(this);
+    check(m_eventPublisher != nullptr);
 
-  m_eventSystem = NewObject<USmithEventSystem>(this);
-  check(m_eventSystem != nullptr);
+    m_eventSystem = NewObject<USmithEventSystem>(this);
+    check(m_eventSystem != nullptr);
 
-  m_chasePlayerTracker = NewObject<USmithChasePlayerTracker>(this);
-  check(m_chasePlayerTracker != nullptr);
-  
-  m_mapMgr = ::MakeShared<UE::Smith::Map::FSmithMapManager>();
-  check(m_mapMgr.IsValid());
+    m_chasePlayerTracker = NewObject<USmithChasePlayerTracker>(this);
+    check(m_chasePlayerTracker != nullptr);
+    
+    m_mapMgr = ::MakeShared<UE::Smith::Map::FSmithMapManager>();
+    check(m_mapMgr.IsValid());
 
-  m_battleMediator->SetupMediator(m_battleSystem, m_mapMgr);
+    m_damageCalculator = NewObject<USmithDungeonDamageCalculator>(this);
+    check(m_damageCalculator != nullptr);
+    m_damageCalculator->SetConstantNumber(TEST_DAMAGE_CALCULATOR_CONSTANT);
 
-  m_mapMgr->AssignEventRegister(m_eventSystem);
-  m_battleSystem->AssignEventExecutor(m_eventSystem);
+    m_battleMediator->SetupMediator(m_battleSystem, m_damageCalculator, m_mapMgr);
 
-  m_enhanceSystem = world->GetSubsystem<USmithEnhanceSubsystem>();
-  check(m_enhanceSystem != nullptr);
+    m_mapMgr->AssignEventRegister(m_eventSystem);
+    m_battleSystem->AssignEventExecutor(m_eventSystem);
 
-  APawn* playerPawn = UGameplayStatics::GetPlayerPawn(world, 0);
-  ICanUseEnhanceSystem* enhanceUser = Cast<ICanUseEnhanceSystem>(playerPawn);
-  check(enhanceUser != nullptr);
-  enhanceUser->SetEnhanceSystem(m_enhanceSystem);
+    m_enhanceSystem = world->GetSubsystem<USmithEnhanceSubsystem>();
+    check(m_enhanceSystem != nullptr);
 
-  m_eventMediator = NewObject<USmithEventPublishMediator>(this);
-  check(m_eventMediator != nullptr)
+    APawn* playerPawn = UGameplayStatics::GetPlayerPawn(world, 0);
+    ICanUseEnhanceSystem* enhanceUser = Cast<ICanUseEnhanceSystem>(playerPawn);
+    check(enhanceUser != nullptr);
+    enhanceUser->SetEnhanceSystem(m_enhanceSystem);
 
-  m_eventMediator->Initialize(m_eventPublisher, m_mapMgr);
-  AActor* actor = world->SpawnActor<AActor>(TEST_ACTOR, FVector::ZeroVector, FRotator::ZeroRotator);
-  check(::IsValid(actor));
-  m_eventMediator->ACTOR_TEST(actor);
+    m_eventMediator = NewObject<USmithEventPublishMediator>(this);
+    check(m_eventMediator != nullptr)
+
+    m_eventMediator->Initialize(m_eventPublisher, m_mapMgr);
+
+    m_logSubsystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
+    check(m_logSubsystem != nullptr);
+
+    if (LogWidgetSub != nullptr)
+    {
+      UGameLogWidget* logWidget = CreateWidget<UGameLogWidget>(world, LogWidgetSub);
+      m_logSubsystem->SetLogWidget(logWidget);
+    }
+
+    m_curtLevel = 1;
+    m_defeatedEnemyCount = 0;
+    m_startPlayTime = FMath::FloorToInt32(world->GetTimeSeconds());
+
+    // TODO
+    CurtLevelUI = CreateWidget<UUI_CurrentLevel>(world, LevelUISub);
+    if (CurtLevelUI != nullptr)
+    {
+      CurtLevelUI->AddToViewport();
+      CurtLevelUI->SetLevel(StaticCast<int32>(m_curtLevel));
+    }
+
+    m_nextLevelEvent = m_eventPublisher->PublishMapEvent<USmithNextLevelEvent>(USmithNextLevelEvent::StaticClass());
+    if (m_nextLevelEvent == nullptr)
+    {
+      MDebug::LogError("Publish failed");
+    }
+    else
+    {
+      m_nextLevelEvent->OnNextLevel.BindUObject(this, &AMapGenerateGameMode_Test::goToNextLevel);
+    }
+  }
 }
 
 void AMapGenerateGameMode_Test::goToNextLevel()
 {
   clearCurrentLevel();
+  ++m_curtLevel;
   startNewLevel();
+}
+
+void AMapGenerateGameMode_Test::deployNextLevelEvent(bool bIsActiveWhenDeploy)
+{
+  if (m_mapMgr.IsValid())
+  {
+    m_mapMgr->InitNextLevelEvent(m_nextLevelEvent);
+  }
+}
+
+void AMapGenerateGameMode_Test::addDefeatedEnemyCount()
+{
+  ++m_defeatedEnemyCount;
+}
+
+int32 AMapGenerateGameMode_Test::GetDefeatedEnemyCount() const
+{
+  return m_defeatedEnemyCount;
+}
+
+int32 AMapGenerateGameMode_Test::GetUpgradeCount() const
+{
+  return m_enhanceSystem != nullptr ? m_enhanceSystem->GetUpgradeCount() : 0; 
+}
+
+int32 AMapGenerateGameMode_Test::GetCurrentLevel() const
+{
+  return m_curtLevel;
+}
+
+int32 AMapGenerateGameMode_Test::GetCurrentPlayTime_Second() const
+{
+  UWorld* world = GetWorld();
+  return ::IsValid(world) ? FMath::FloorToInt32(world->GetTimeSeconds()) - m_startPlayTime : 0;
 }

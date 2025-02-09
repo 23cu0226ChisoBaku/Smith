@@ -5,9 +5,10 @@ SmithRect.cpp
 
 Author : MAI ZHICONG
 
-Description : Smith モジュール専用矩形
+Description : MapManagement モジュール専用矩形
 
 Update History: 2024/12/29 作成
+								2025/01/30 Description修正
 
 Version : alpha_1.0.0
 
@@ -79,7 +80,7 @@ namespace UE::Smith
         {
           // ムーブ代入（Move assignment）
           // heightは行（Row）、widthは列（Column）
-          m_rect = FDimension2D_uint8(StaticCast<uint64>(height), StaticCast<uint64>(width));
+          m_rect = std::move(FDimension2D_uint8(StaticCast<uint64>(height), StaticCast<uint64>(width)));
           for (uint64 y = 0; y < m_rect.Row(); ++y)
           {
             for (uint64 x = 0; x < m_rect.Column(); ++x)
@@ -135,7 +136,7 @@ namespace UE::Smith
         {
           using namespace UE::FSmithRect::Private;
 
-          // 範囲外だったらOUT_OF_BOUNDSデータを返す(0)
+          // 範囲外だったらOUT_OF_BOUNDSデータを返す(255)
           if (IsOutOfBounds(x, y))
           {
             return OUT_OF_BOUNDS;

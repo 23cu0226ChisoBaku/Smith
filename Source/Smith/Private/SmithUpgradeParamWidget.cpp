@@ -7,9 +7,9 @@
 
 namespace SmithUpgradeParamWidget::Private
 {
-  const FString HEALTH_PRE_TEXT = TEXT("HP  + ");
-  const FString ATTACK_PRE_TEXT = TEXT("ATK  + ");
-  const FString CRITICAL_PRE_TEXT = TEXT("CRT  + ");
+  const FString HEALTH_PRE_TEXT = TEXT("体力    ");
+  const FString ATTACK_PRE_TEXT = TEXT("攻撃力  ");
+  const FString CRITICAL_PRE_TEXT = TEXT("会心力  ");
 }
 
 USmithUpgradeParamWidget::USmithUpgradeParamWidget(const FObjectInitializer& ObjectInitializer)
@@ -24,36 +24,51 @@ void USmithUpgradeParamWidget::NativeConstruct()
 
 void USmithUpgradeParamWidget::UpdateParam(FParams newParam)
 {
-  if (HealthPointTextBlock == nullptr || AttackPowerTextBlock == nullptr || CriticalTextBlock == nullptr)
+  if (HealthPointText == nullptr || AttackPowerText== nullptr || CriticalText == nullptr)
   {
     return;
   }
 
   using namespace SmithUpgradeParamWidget::Private;
-  FString healthText = HEALTH_PRE_TEXT + FString::FromInt(newParam.HP);
-  FString attackText = ATTACK_PRE_TEXT + FString::FromInt(newParam.ATK);
-  FString criticalText = CRITICAL_PRE_TEXT + FString::FromInt(newParam.CRT);
+  FString healthText = HEALTH_PRE_TEXT;
+  convertParamText(healthText, newParam.HP);
+  FString attackText = ATTACK_PRE_TEXT;
+  convertParamText(attackText, newParam.ATK);
+  FString criticalText = CRITICAL_PRE_TEXT;
+  convertParamText(criticalText, newParam.CRT);
 
-  HealthPointTextBlock->SetText(FText::FromString(healthText));
-  AttackPowerTextBlock->SetText(FText::FromString(attackText));
-  CriticalTextBlock->SetText(FText::FromString(criticalText));
+  HealthPointText->SetText(FText::FromString(healthText));
+  AttackPowerText->SetText(FText::FromString(attackText));
+  CriticalText->SetText(FText::FromString(criticalText));
 }
 
 void USmithUpgradeParamWidget::ResetWidget()
 {
-  if (HealthPointTextBlock != nullptr)
+  if (HealthPointText != nullptr)
   {
-    HealthPointTextBlock->SetText(FText{});
+    HealthPointText->SetText(FText{});
   }
-  if (AttackPowerTextBlock != nullptr)
+  if (AttackPowerText != nullptr)
   {
-    AttackPowerTextBlock->SetText(FText{});
+    AttackPowerText->SetText(FText{});
   }
-  if (CriticalTextBlock != nullptr)
+  if (CriticalText != nullptr)
   {
-    CriticalTextBlock->SetText(FText{});
+    CriticalText->SetText(FText{});
   }
+}
 
-  
+void USmithUpgradeParamWidget::convertParamText(FString& outParamText, int32 param)
+{
+  if (param >= 0)
+  {
+    outParamText.Append(TEXT("+ "));
+    outParamText.Append(FString::FromInt(param));
+  }
+  else
+  {
+    outParamText.Append(TEXT("- "));
+    outParamText.Append(FString::FromInt(FMath::Abs(param)));
+  }
 }
 

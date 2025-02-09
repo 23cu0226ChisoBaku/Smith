@@ -54,7 +54,7 @@ void UGameLogWidget::AddLogMessage(FString message)
   m_outputLogArr.Emplace(message);
 }
 
-void UGameLogWidget::OutPutLog()
+void UGameLogWidget::OutputLog()
 {
   if (m_maxVisibleQuantity < m_outputLogArr.Num())
   {
@@ -87,4 +87,11 @@ void UGameLogWidget::OutPutLog()
   SetColorAndOpacity(m_currentAlpha);
   m_isVisibility = true;
   m_timer = 0.0f;
+}
+
+void UGameLogWidget::UpdatedLog()
+{
+  m_timer = 0.0f;
+  m_currentAlpha.A = 1.0f;
+  SetColorAndOpacity(m_currentAlpha);
 }

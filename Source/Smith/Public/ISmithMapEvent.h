@@ -1,4 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
+
+ISmithMapEvent.h
+
+Author : MAI ZHICONG
+
+Description : マップイベントクラス
+
+Update History: 2025/01/19 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #pragma once
 
@@ -6,6 +21,11 @@
 #include "UObject/Interface.h"
 #include "ISmithMapEvent.generated.h"
 
+//---------------------------------------
+/*
+                  前方宣言
+*/
+//---------------------------------------
 class ICanSetOnMap;
 
 // This class does not need to be modified.
@@ -25,14 +45,10 @@ class SMITH_API ISmithMapEvent
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void InitializeEvent(const FVector&) = 0;
-	virtual bool TriggerEvent(ICanSetOnMap*) = 0;
+	virtual void InitializeEvent(const FVector&, const FRotator& = FRotator::ZeroRotator) = 0;
+	virtual void TriggerEvent(ICanSetOnMap*) = 0;
 	virtual void DiscardEvent() = 0;
-	void SetEventCoord(uint8 x, uint8 y);
-	uint8 GetEventCoordX() const;
-	uint8 GetEventCoordY() const;
+	virtual void RaiseEvent() = 0;
+	virtual bool IsDisposed() const = 0;
 
-private:
-	uint8 m_eventCoordX = 0u;
-	uint8 m_eventCoordY = 0u;
 };

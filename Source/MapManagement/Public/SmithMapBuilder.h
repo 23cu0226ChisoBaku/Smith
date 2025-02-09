@@ -53,8 +53,8 @@ namespace UE::Smith
 			*/
 			//---------------------------------------
 			public:
-				FSmithMapBuilder();
-				~FSmithMapBuilder();
+				FSmithMapBuilder() = default;
+				~FSmithMapBuilder() = default;
 			//---------------------------------------
 			/*
 							パブリック関数(インターフェース)
@@ -67,7 +67,7 @@ namespace UE::Smith
 				/// @param        設計図
 				/// @return       作成成功-> true 作成失敗-> false
 				///
-				bool Build(FSmithMap*, const FSmithMapBluePrint&);
+				bool Build(TSharedPtr<FSmithMap>, const FSmithMapBluePrint&);
 				///
 				/// @brief        マップモデルを作成する
 				/// @param        マップポインター(TSharedPtr)
@@ -77,8 +77,7 @@ namespace UE::Smith
 
 			private:
 				// TODO Temp Code
-				void generateRoom(FSmithMap*, const FSmithMapBluePrint& , uint8 sectionIdx);
-				void generateJoint(FSmithMap*, const FSmithMapBluePrint&, uint8 sectionIdx);
+				void generateRoom(TSharedPtr<FSmithMap>, const FSmithMapBluePrint& , uint8 sectionIdx);
 		};
 	}
 }

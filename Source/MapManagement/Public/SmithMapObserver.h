@@ -80,10 +80,8 @@ namespace UE::Smith
 				///
 				///	@brief													マップモデルを登録する
 				/// @param	FSmithMapDataModel			マップモデル
-				/// @param	originCoord_World				マップ原点座標
-				/// @param	mapTileSize							マップタイルサイズ
 				///
-			  void AssignMap(TSharedPtr<FSmithMapDataModel>, FVector originCoord_World, int32 mapTileSize);
+			  void AssignMap(TSharedPtr<FSmithMapDataModel>);
 				///
 				///	@brief																マップオブジェクトを初期化する
 				/// @param	outMapObjs										マップ座標と座標に配置するオブジェクトコンテナ
@@ -93,13 +91,14 @@ namespace UE::Smith
 				///
 				void InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
 				void ClearMapObjs_IgnorePlayer();
-				void InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination);
 				bool ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
 				bool GetMapObjectCoord(ICanSetOnMap*, uint8& outX, uint8& outY);
 				/// @brief 未使用
 				void GenerateNewEnemy();
 				/// @brief 未使用
 				bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius);
+				/// TODO
+				bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y);
 			#pragma endregion FSmithMapObserver Interface
 			// end of FSmithMapObserver Interface
 			private:

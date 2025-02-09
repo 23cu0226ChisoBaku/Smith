@@ -16,6 +16,14 @@ class USmithEventPublisher;
 class USmithEventSystem;
 class USmithEnhanceSubsystem;
 class USmithEventPublishMediator;
+class USmithBattleLogWorldSubsystem;
+class UUI_CurrentLevel;
+class USmithNextLevelEvent;
+
+// Damage
+class USmithDungeonDamageCalculator;
+
+class UGameLogWidget;
 
 namespace UE::Smith
 {
@@ -44,14 +52,23 @@ public:
 	void StartPlay() override final;
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
+public:
+	UFUNCTION(BlueprintCallable)
+	int32 GetDefeatedEnemyCount() const;
+	UFUNCTION(BlueprintCallable)
+	int32 GetUpgradeCount() const;
+	UFUNCTION(BlueprintCallable)
+	int32 GetCurrentLevel() const;
+	UFUNCTION(BlueprintCallable)
+	int32 GetCurrentPlayTime_Second() const;
+
 private:
 	void initializeGame();
 	void startNewLevel();
 	void clearCurrentLevel();
-
-// TODO
-public:
+	void deployNextLevelEvent(bool bIsActiveWhenDeploy = true);
 	void goToNextLevel();
+	void addDefeatedEnemyCount();
 
 private:
 	/** ダンジョンマップ設計図 */
@@ -61,6 +78,12 @@ private:
 	FSmithMapConstructionBluePrint MapConstructionBluePrint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint EnemyGenerateBluePrint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
+	FSmithMapBluePrint BossMapBluePrint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
+	FSmithEnemyGenerateBluePrint BossGenerateBluePrint;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UGameLogWidget> LogWidgetSub;
 	UPROPERTY()
 	TObjectPtr<USmithBattleSubsystem> m_battleSystem;
 	UPROPERTY()
@@ -75,10 +98,24 @@ private:
 	TObjectPtr<USmithEnhanceSubsystem> m_enhanceSystem;
 	UPROPERTY()
 	TObjectPtr<USmithEventPublishMediator> m_eventMediator;
-
-	UPROPERTY(EditAnywhere, Category = TEST)
-	TSubclassOf<AActor> TEST_ACTOR;
+	UPROPERTY()
+	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSubsystem;
+	UPROPERTY()
+	TObjectPtr<USmithDungeonDamageCalculator> m_damageCalculator;
+	UPROPERTY(EditAnywhere)
+	double TEST_DAMAGE_CALCULATOR_CONSTANT;
+	UPROPERTY()
+	TObjectPtr<UUI_CurrentLevel> CurtLevelUI;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUI_CurrentLevel> LevelUISub;
+	UPROPERTY()
+	TObjectPtr<USmithNextLevelEvent> m_nextLevelEvent;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
+	// 倒された敵の数
+	int32 m_defeatedEnemyCount;
+	int32 m_curtLevel;
+	int32 m_startPlayTime;
+
 };

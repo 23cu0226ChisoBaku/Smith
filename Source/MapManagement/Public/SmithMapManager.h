@@ -113,7 +113,7 @@ namespace UE::Smith
         ///
         void InitMapObjs(UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
         // TODO
-        void InitMapEvents(UWorld*, USmithEventPublisher*);
+        void InitNextLevelEvent(ISmithMapEvent*);
         /// 
         /// @brief                                マップオブジェクトを配置する
         /// @param ICanSetOnMap                   マップオブジェクト
@@ -129,6 +129,7 @@ namespace UE::Smith
         /// @param FSmithCommandFormat            攻撃フォーマット
         ///
         void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
+        void FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
         ///
         /// @brief                                マップオブジェクトを移動
         /// @param ICanSetOnMap                   マップオブジェクト
@@ -139,6 +140,7 @@ namespace UE::Smith
         void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
         bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
         bool GetMapObjectCoord(ICanSetOnMap*, uint8& outX, uint8& outY);
+        bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y);
         void Reset();
 			#pragma endregion FSmithMapManager Interface
 			// end of FSmithMapManager Interface

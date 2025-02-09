@@ -27,7 +27,7 @@ protected:
 public:
 	// 引数を渡すときはTEXT()を使用する
 	void AddLogMessage(FString);
-	void OutPutLog();
+	void OutputLog();
 
 public:
 	// BP側でログの表示をする（cppでは呼び出しだけ）
@@ -35,6 +35,9 @@ public:
 	void OnLog_BP();
 	UFUNCTION(BlueprintImplementableEvent)
 	void AddLog_BP();
+	// ログが更新されたときの処理
+	UFUNCTION(BluePrintCallable,Category = "GameLog")
+	void UpdatedLog();
 
 public:
 	// BP側の変数とバインド（処理が終わっているのでプロジェクトが終わったら改善する）

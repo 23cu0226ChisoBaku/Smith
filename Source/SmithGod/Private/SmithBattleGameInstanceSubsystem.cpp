@@ -1,0 +1,31 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "SmithBattleGameInstanceSubsystem.h"
+#include "Blueprint/UserWidget.h"
+
+void USmithBattleGameInstanceSubsystem::DisplayGameOverWidget(UObject* worldContextObject)
+{
+  UWorld* world = nullptr;
+  if (::IsValid(worldContextObject))
+  {
+    world = worldContextObject->GetWorld();
+  }
+  else
+  {
+    if (GEngine != nullptr)
+    {
+      world = GEngine->GetWorld();
+    }
+  }
+
+  TSubclassOf<UUserWidget> GameOverWidgetSubClass = TSoftClassPtr<UUserWidget>(FSoftObjectPath("/Game/BP/WBP_GameOver_TextWidget.WBP_GameOver_TextWidget_C")).LoadSynchronous();
+  UUserWidget* GameOverWidget = CreateWidget<UUserWidget>(world, GameOverWidgetSubClass);
+
+  if (GameOverWidget != nullptr)
+  {
+    GameOverWidget->AddToViewport();
+  }
+
+}
+

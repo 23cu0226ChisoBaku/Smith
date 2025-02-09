@@ -91,7 +91,7 @@ namespace UE::Smith
 				/// @param	originCoord_World				マップ原点座標
 				/// @param	mapTileSize							マップタイルサイズ
 				///
-				void AssignMap(TSharedPtr<FSmithMapDataModel>, FVector originCoord_World, int32 tileSize);
+				void AssignMap(TSharedPtr<FSmithMapDataModel>);
 				///
 				/// @brief 													攻撃できるオブジェクトを探す
 				/// @param outActors 								攻撃できるオブジェクト(IAttackable)が全て入っているコンテナ
@@ -99,6 +99,8 @@ namespace UE::Smith
 				/// @param FSmithCommandFormat			攻撃フォーマット
 				///
 				void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
+				// TODO
+				void FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
 				///
 				/// @brief 													オブジェクトを移動する
 				/// @param ICanSetOnMap							移動するターゲットオブジェクト

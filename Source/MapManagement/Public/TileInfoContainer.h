@@ -74,11 +74,11 @@ namespace UE::Smith
 				/// @brief			IsAbleToStayOn()実装(仮想関数)
 				/// @return			置ける -> true 置けない -> false
 				///
-				virtual bool isAbleToStayOn_Impl() const;
+				virtual bool isAbleToStayOnImpl() const;
 				/// 
 				/// @brief			Reset()実装(仮想関数)
 				/// 
-				virtual void reset_Impl();
+				virtual void resetImpl();
 			private:
 				///
 				/// @brief      タイルタイプ

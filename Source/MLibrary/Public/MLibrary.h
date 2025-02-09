@@ -31,6 +31,8 @@ Encoding : UTF-8
 #include "UInterfaceValidCheck.h"
 #include "GetAddComponent.h"
 #include "MAssertion.h"
+#include "UECollectionsLibrary.h"
+#include "AudioKit.h"
 
 #pragma endregion
 // end of Debug Tool Include

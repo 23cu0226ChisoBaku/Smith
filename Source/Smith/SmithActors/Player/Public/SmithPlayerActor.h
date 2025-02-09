@@ -20,6 +20,7 @@ Encoding : UTF-8
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "UObject/WeakInterfacePtr.h"
+#include "Direction.h"
 #include "ITurnManageable.h"
 #include "IAttackable.h"
 #include "ICanCommandMediate.h"
@@ -28,6 +29,8 @@ Encoding : UTF-8
 #include "ICanPick.h"
 #include "ICanUseEnhanceSystem.h"
 #include "ISmithAnimator.h"
+#include "ISmithBattleLogger.h"
+#include "IItemUseable.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -47,6 +50,9 @@ class USmithAnimationComponent;
 class UHPUIComponent;
 class USmithUpgradeInteractiveComponent;
 
+// TODO インターフェースにする
+class USmithBattleLogWorldSubsystem;
+
 // Unreal Enhanced Input
 class UInputMappingContext;
 class UInputAction;
@@ -59,8 +65,10 @@ class IBattleCommand;
 struct AttackHandle;
 enum class EDirection : uint8;
 
-class USmithWeapon;
 class IEnhanceSystem;
+class USmithWeapon;
+class UHerbWidget;
+struct FParams;
 
 namespace UE::Smith
 {
@@ -79,26 +87,10 @@ UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
 																			 , public IAttackable, public ICanCommandMediate
 																			 , public ICanSetOnMap, public IEventTriggerable
-																			 , public ICanUseEnhanceSystem, public ICanPick
-																			 , public ISmithAnimator
+																			 , public ICanUseEnhanceSystem, public ISmithAnimator
+																			 , public ISmithBattleLogger, public IItemUseable
 {
 	GENERATED_BODY()
-
-// TODO Test用方向列挙
-public:
-	enum EDir_Test : uint8
-	{
-		North = 0,						// 上方向
-		NorthEast = 1,				// 右上
-		East = 2,							// 右
-		SouthEast = 3,				// 右下
-		South = 4,						// 下
-		SouthWest = 5,				// 左下
-		West = 6,							// 左
-		NorthWest = 7,				// 左上
-
-		DirectionCnt,					// 選べられる方向の数
-	};
 
 //---------------------------------------
 /*
@@ -157,14 +149,17 @@ public:
 		void OnTriggerEvent(USmithPickUpItemEvent*) override final;
 
 	public:
-		void PickUpConsume(USmithConsumeItem*) override final;
-		void PickUpMaterial(USmithUpgradeMaterial*) override final;
-
-	public:
 		void SwitchAnimation(uint8 animationState) override final;
 		void SwitchAnimationDelay(uint8 animationState, float delay) override final;
 		void UpdateAnimation(float deltaTime) override final;
 		bool IsAnimationFinish() const override final;
+
+	public:
+		FString GetName_Log() const override;
+		EBattleLogType GetType_Log() const override;
+
+	public:
+		void UseItem(USmithHPItem*);
 	
 	private:
 		void convertAnimState(uint8 animationState, FName& outName, float& outDurationTime);
@@ -174,27 +169,30 @@ public:
 #pragma endregion Interfaces Override
 // end of Interfaces Override
 
+public:
+	EDirection GetCameraDirection() const;
+	bool CanReceiveInputEvent() const;
+
+public:
+	void Move(EDirection);
+	void Attack();
+	void ChangeForward(EDirection);
+	void ChangeCameraDirection(EDirection, bool bIsClockwise);
+	void OpenMenu();
+	void CloseMenu();
+	void SelectNextMenuItem(float direction);
+	bool InteractMenu();
+	void RecoverHealth();
+	bool registerAttackFormat(const FString&, const UDataTable*);
+
+	void SelfDamage_Debug(int32);
+
 // Private Functions
 #pragma region Private Functions
 private:
-	void moveImpl(EDirection);
-	void attackImpl();
-	void changeFwdImpl(EDir_Test);
-	void updateCamImpl(EDir_Test);
-	void enhanceImpl(int32 idx);
-	void switchMenuStateImpl();
-	bool registerAttackFormat(const FString&, const UDataTable*);
-
-private:
-	// Input bind Functions
-	void Move_Input(const FInputActionValue&);
-	void Attack_Input(const FInputActionValue&);
-	void Look_Input(const FInputActionValue&);
-	void Debug_SelfDamage_Input(const FInputActionValue&);
-	void Menu_Input(const FInputActionValue&);
-	void Menu_Input_Select(const FInputActionValue&);
-	void Menu_Input_Interact(const FInputActionValue&);
-	
+	bool enhanceImpl(int32 idx);
+	void updateCamera(float deltaTime);
+	void updateParam(FParams upgradeParam);
 #pragma endregion Private Functions
 // end of Private Functions
 
@@ -225,31 +223,6 @@ private:
 	TObjectPtr<UHPUIComponent> HPComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USmithUpgradeInteractiveComponent> UpgradeInteractiveComponent;
-
-
-	// Enhanced Input
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputMappingContext> MappingCtx;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputMappingContext> MappingCtx_Menu;
-	/** 移動インプットアクション */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> MoveAction;
-	/** 攻撃インプットアクション */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> AttackAction;
-	/** カメラ移動インプットアクション */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> CameraAction;
-	/** デバッグ専用！！ */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> DebugAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> MenuAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> SelectMenuAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithEnhancedInput, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> InteractMenuAction;
 	
 	/** 攻撃フォーマット */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
@@ -259,6 +232,11 @@ private:
 	UPROPERTY(EditAnywhere, Instanced, Category = Weapon)
 	TObjectPtr<USmithWeapon> Weapon;
 
+	// TODO
+	UPROPERTY()
+	TObjectPtr<UHerbWidget> m_herbUI;
+	UPROPERTY(EditAnywhere, Category = RecoveryItem)
+	TSubclassOf<UHerbWidget> HerbUISub;
 
 	TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
 
@@ -266,11 +244,19 @@ private:
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
 	// 強化
 	TWeakInterfacePtr<IEnhanceSystem> m_enhanceSystem;
+
+	// TODO インターフェースにしてより柔軟性のいい設計
+	UPROPERTY()
+	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
+
+
 #pragma endregion UProperties
 // end of UProperties
 
 public:
-	TDelegate<void()> OnDead;
+	TMulticastDelegate<void()> OnDead;
+	TMulticastDelegate<void()> OnStartCameraRotation;
+	TMulticastDelegate<void()> OnFinishCameraRotation;
 //---------------------------------------
 /*
             プライベートプロパティ
@@ -283,12 +269,13 @@ private:
 	int32 m_maxHP;
 	float m_rotateSpeed;
 	int32 m_rotatingDirection;
-	EDir_Test m_camDir;
-	EDir_Test m_actorFaceDir;
+	EDirection m_camDir;
+	EDirection m_actorFaceDir;
 	uint8 m_bCanMove : 1;
 	uint8 m_bCanAttack : 1;
 	uint8 m_bRotatingCamera : 1;
 	uint8 m_bIsInMenu : 1;
+	uint8 m_bCanReceiveInput : 1;
 	
 
 #pragma endregion Private Properties

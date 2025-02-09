@@ -3,17 +3,44 @@
 #include "SmithAIConditionAttackStrategy.h"
 #include "ICommandMediator.h"
 #include "ICanMakeAttack.h"
+#include "ISmithBattleLogger.h"
 #include "AttackHandle.h"
+#include "Direction.h"
 #include "MLibrary.h"
+
+#include "SmithDangerZoneDisplayer.h"
+USmithAIConditionAttackStrategy::USmithAIConditionAttackStrategy(const FObjectInitializer& ObjectInitializer)
+  : Super(ObjectInitializer)
+  , m_bIsDisplayingDangerZone(false)
+{
+
+}
 
 void USmithAIConditionAttackStrategy::Initialize(ICanMakeAttack *attacker, ICommandMediator *mediator, int32 attackPower)
 {
   m_attacker = attacker;
   m_mediator = mediator;
   m_atk = attackPower;
+
+  AActor* owner = GetOwner();
+  if (!::IsValid(owner))
+  {
+    return;
+  }
+
+  // TODO need ignore hard coding
+  UWorld* world = owner->GetWorld();
+  if (::IsValid(world))
+  {
+    TSubclassOf<ASmithDangerZoneDisplayer> dangerZoneSub = TSoftClassPtr<ASmithDangerZoneDisplayer>(FSoftObjectPath("/Game/BP/BP_SmithDangerZoneDisplayer.BP_SmithDangerZoneDisplayer_C")).LoadSynchronous();
+    if (dangerZoneSub != nullptr)
+    {
+      m_dangerZoneDisplayer = world->SpawnActor<ASmithDangerZoneDisplayer>(dangerZoneSub, owner->GetActorLocation(), owner->GetActorRotation());
+    }
+  }
 }
 
-void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)> &condition)
+void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)> &condition, FSmithSkillCenterSpotParameter skillParameter)
 {
   if (condition.IsBound())
   {
@@ -21,6 +48,7 @@ void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, co
     FConditionHandle handle;
     handle.Name = name;
     handle.Condition = condition;
+    handle.SkillParameter = skillParameter;
     m_conditions.Enqueue(handle);
   }
   else
@@ -37,54 +65,68 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     return false;
   }
 
-  TQueue<FConditionHandle> queue;
-  FConditionHandle tempHandle;
-  bool isExecuted = false;
-  while (m_conditions.Dequeue(tempHandle))
+  FConditionHandle* curtConditionAttatkHandle = m_conditions.Peek();
+  if (curtConditionAttatkHandle == nullptr)
   {
-    queue.Enqueue(tempHandle);
-    // 条件を満たしているか
-    if (tempHandle.Condition.Execute())
+    return false;
+  }
+  
+  if (!m_bIsDisplayingDangerZone && m_dangerZoneDisplayer != nullptr)
+  {
+    const TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>& format = m_attackFormatTables[curtConditionAttatkHandle->Name];
+    TArray<FVector> dangerZoneDisplayLocations;
+    int32 num = m_mediator->GetRangeLocations(dangerZoneDisplayLocations, GetOwner(), curtConditionAttatkHandle->SkillParameter, *format);
+
+    if (num > 0)
     {
-      // 攻撃
-      if (!m_attackFormatTables.Contains(tempHandle.Name))
-      {
-        MDebug::LogError("Not Found Key");
-        continue;
-      }
-
-      const auto& format = m_attackFormatTables[tempHandle.Name];
-      if (!format.IsValid())
-      {
-        MDebug::LogError("Format Invalid");
-        continue;
-      }
-
-      for (uint8 i = 0u; i < 4u; ++i)
-      {
-        EDirection atkDir = StaticCast<EDirection>(i * 2u);
-
-        bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *m_attackFormatTables[tempHandle.Name], AttackHandle{GetName(), m_atk}, false);
-        if (success)
-        {
-          isExecuted = true;
-          break;
-        }
-      }
+      m_dangerZoneDisplayer->SetupDisplayLocations(dangerZoneDisplayLocations);
+      m_bIsDisplayingDangerZone = true;
     }
   }
 
-  // 残った要素を代入
-  while (m_conditions.Dequeue(tempHandle))
+  // 条件を満たしているか
+  if (curtConditionAttatkHandle->Condition.Execute())
   {
-    queue.Enqueue(tempHandle);
+    FConditionHandle curtHandleInstance{};
+    m_conditions.Dequeue(curtHandleInstance);
+    // 攻撃
+    if (!m_attackFormatTables.Contains(curtHandleInstance.Name))
+    {
+      MDebug::LogError("Not Found Key");
+      m_conditions.Enqueue(curtHandleInstance);
+      return false;
+    }
+
+    const TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>& format = m_attackFormatTables[curtHandleInstance.Name];
+    if (!format.IsValid())
+    {
+      MDebug::LogError("Format Invalid");
+      m_conditions.Enqueue(curtHandleInstance);
+      return false;
+    }
+
+    // TODO add by Mai
+    ISmithBattleLogger* logger = Cast<ISmithBattleLogger>(GetOwner());
+
+    // TODO
+    FAttackHandle handle;
+    handle.Attacker = logger;
+    handle.AttackPower = m_atk;
+    handle.Level = 1;
+    handle.MotionValue = 1.0;
+
+    m_mediator->SendSkillCommand(GetOwner(), m_attacker.Get(), curtHandleInstance.SkillParameter, *format, handle);
+    m_conditions.Enqueue(curtHandleInstance);
+
+    // TODO
+    if (m_dangerZoneDisplayer != nullptr && m_bIsDisplayingDangerZone)
+    {
+      m_bIsDisplayingDangerZone = false;
+      m_dangerZoneDisplayer->Dispose();
+    }
+
+    return true;
   }
 
-  // 要素を元に戻す
-  while (queue.Dequeue(tempHandle))
-  {
-    m_conditions.Enqueue(tempHandle);
-  }
-
-  return isExecuted;
+  return false;
 }

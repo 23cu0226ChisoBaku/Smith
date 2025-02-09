@@ -7,6 +7,7 @@
 #include "IAttackable.generated.h"
 
 struct AttackHandle;
+struct FBattleDefenseParamHandle;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
@@ -25,4 +26,5 @@ class SMITH_API IAttackable
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual void OnAttack(AttackHandle&&) = 0;
+	virtual FBattleDefenseParamHandle GetDefenseParam() const;
 };

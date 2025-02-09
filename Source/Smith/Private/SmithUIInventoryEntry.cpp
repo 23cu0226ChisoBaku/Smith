@@ -2,7 +2,7 @@
 
 
 #include "SmithUIInventoryEntry.h"
-#include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
 #include "Components/Image.h"
 #include "ISmithItemWidgetParameterizable.h"
 
@@ -22,6 +22,7 @@ void USmithUIInventoryEntry::NativeOnListItemObjectSet(UObject* listItemObject)
   if (itemParam != nullptr)
   {
     ItemNameLabel->SetText(FText::FromString(itemParam->GetName()));
+    LabelBackground->SetBrushTintColor(itemParam->GetLabelColor());
     ItemIconImage->SetBrushFromTexture(itemParam->GetIconImage());
     SelectArrow->SetVisibility(ESlateVisibility::Hidden);
   }

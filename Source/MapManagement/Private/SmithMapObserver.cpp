@@ -8,6 +8,8 @@ Author : MAI ZHICONG
 Description : マップを観察し処理するクラス(※Smithマップ専用)
 
 Update History: 2025/01/07 作成
+                2025/01/13 追跡インターフェース追加
+                2025/02/01 ボス生成追加
 
 Version : alpha_1.0.0
 
@@ -16,33 +18,14 @@ Encoding : UTF-8
 */
 
 #include "SmithMapObserver.h"
-#include "UObject/WeakInterfacePtr.h"
-#include "SmithEnemyGenerateBluePrint.h"
-#include "MapCoord.h"
-#include "ICanSetOnMap.h"
-#include "SmithMapDataModel.h"
+#include "SmithMap.h"
 #include "SmithSection.h"
+#include "SmithEnemyGenerateBluePrint.h"
+#include "SmithMapDataModel.h"
 #include "Direction.h"
-#include "SmithMapHelperFunc.h"
-#include "MLibrary.h"
+#include "SmithMapHelperLibrary.h"
 
-// 内部使用(シャッフル)
-namespace UE::Smith::Map::Private
-{
-  template<typename T>
-  void RandomShuffle(TArray<T>& arr)
-  {
-    const int32 arrLastIndex = arr.Num() - 1;
-    for (int32 i = 0; i <= arrLastIndex; ++i)
-    {
-      int32 index = FMath::RandRange(i, arrLastIndex);
-      if (i != index)
-      {
-        arr.Swap(i, index);
-      }
-    }
-  }
-}
+#include "MLibrary.h"
 
 namespace UE::Smith
 {
@@ -60,19 +43,20 @@ namespace UE::Smith
         ~MapObserverImpl()
         { }
       public:
-        void AssignMap(TSharedPtr<Model> pModel, FVector originCoord_World, int32 tileSize)
+        void AssignMap(TSharedPtr<Model> pModel)
         {
           m_model = pModel;
-          m_originCoord_World = originCoord_World;
-          m_mapTileSize = tileSize;
         }
         void InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
         {
-          using namespace UE::Smith::Map::Private;
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared.IsValid())
+          {
+            return;
+          }
 
-          // AssignMapをこの前に呼び出す必要がある
-          check(m_model.IsValid())
-          if (!m_model.IsValid()) [[unlikely]]
+          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+          if (!map_shared.IsValid())
           {
             return;
           }
@@ -89,25 +73,11 @@ namespace UE::Smith
             return;
           }
 
-          TSharedPtr<Model> model_shared = m_model.Pin();
-          if (!model_shared.IsValid())
-          {
-            return;
-          }
-
-          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
-          if (!map_shared.IsValid())
-          {
-            return;
-          }
-
-          outMapObjs.Reset();
-
           const uint8 mapRow = map_shared->GetRow();
           const uint8 mapColumn = map_shared->GetColumn();
-
           // 空いているタイルの座標を入れる
           TArray<FMapCoord> remainCoords{};
+          outMapObjs.Reset();
 
           for (uint8 y = 0; y < mapRow; ++y)
           {
@@ -139,13 +109,18 @@ namespace UE::Smith
                 for (uint8 roomX = 0; roomX < roomWidth; ++roomX)
                 {
                   const FMapCoord roomCoord(roomLeft + roomX, roomTop + roomY);
+                  if (!model_shared->StaySpaceTable.Contains(roomCoord) || model_shared->StaySpaceTable[roomCoord]->GetEvent() != nullptr)
+                  {
+                    continue;
+                  }
+
                   roomCoords.Emplace(roomCoord);
                 }
               }   
 
               // マップのタイル数が生成する敵の数より小さいするとき例外として処理
               check(roomCoords.Num() >= generateBP.InitGenerateCountPerRoom);
-              RandomShuffle(roomCoords);
+              FUECollectionsLibrary::Shuffle(roomCoords);
 
               // 敵のBPクラスを取得
               TSubclassOf<class AActor> subClass = TSoftClassPtr<AActor>(FSoftObjectPath(*generateBP.EnemyBPPath)).LoadSynchronous();
@@ -156,37 +131,135 @@ namespace UE::Smith
                 return;
               }
 
-              for (int32 i = 0; i < StaticCast<int32>(generateBP.InitGenerateCountPerRoom); ++i)
+              if (generateBP.bShouldRandomGenerate)
               {
-                const FMapCoord mapCoord = roomCoords[i]; 
-                // タイルがモデルに入ってないと処理を中断する
-                if (!model_shared->StaySpaceTable.Contains(mapCoord))
+                for (int32 i = 0; i < StaticCast<int32>(generateBP.InitGenerateCountPerRoom); ++i)
                 {
-                  return;
-                }
+                  AActor* enemy = world->SpawnActor<AActor>(subClass, FVector::ZeroVector, FRotator::ZeroRotator);
 
-                const FVector spawnWorldCoord = FVector(
-                                                         m_originCoord_World.X + StaticCast<double>(StaticCast<int32>(mapCoord.x) * m_mapTileSize),
-                                                         m_originCoord_World.Y + StaticCast<double>(StaticCast<int32>(mapCoord.y) * m_mapTileSize),
-                                                         m_originCoord_World.Z
-                                                        );
-                AActor* enemy = world->SpawnActor<AActor>(subClass, spawnWorldCoord, FRotator::ZeroRotator);
+                  // 生成した敵がマップに置けないと処理を中断する
+                  ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(enemy);
+                  if (mapObj == nullptr)
+                  {
+                    MDebug::LogError("Can not place actor on map because it is not implemented ICanSetOnMap");
+                    enemy->Destroy();
+                    return;
+                  }
 
-                // 生成した敵がマップに置けないと処理を中断する
-                ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(enemy);
-                if (mapObj == nullptr)
+                  const uint8 mapSizeX = mapObj->GetOnMapSizeX();
+                  const uint8 mapSizeY = mapObj->GetOnMapSizeY();
+                  bool canPlace = false;
+                  FMapCoord mapCoord{};
+                  
+                  for (int32 j = 0; j < roomCoords.Num(); ++j)
+                  {
+                    mapCoord = roomCoords[j];
+                    
+                    // マップオブジェクトの最大のXY座標は部屋からはみ出ていないかを確認
+                    const int32 maxCoordX = StaticCast<int32>(mapCoord.x) + StaticCast<int32>(mapSizeX);
+                    const int32 maxCoordY = StaticCast<int32>(mapCoord.y) + StaticCast<int32>(mapSizeY);
+                    if (maxCoordX >= StaticCast<int32>(roomLeft + roomWidth)
+                      || maxCoordY >= StaticCast<int32>(roomTop + roomHeight)) 
+                    {
+                      continue;
+                    }
+                    else
+                    {
+                      canPlace = true;
+                      break;
+                    }
+                  }
+                
+                  if (!canPlace)
+                  {
+                    MDebug::LogError("Can not place actor on map because it is no SPACE");
+                    enemy->Destroy();
+                    continue;
+                  }
+
+                  const FVector mapObjoffset = FVector(
+                                                       StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize * 0.5),
+                                                       StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize * 0.5),
+                                                       0.0
+                                                     );
+
+                  const FVector worldLocation = FVector(
+                                                          model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(mapCoord.x) * model_shared->MapTileSize),
+                                                          model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(mapCoord.y) * model_shared->MapTileSize),
+                                                          model_shared->OriginWorldCoord.Z
+                                                        )
+                                                  + mapObjoffset;
+
+                  FRotator worldRotation;
+                  FSmithMapHelperLibrary::DirectMapElementRotation(map_shared.Get(), worldRotation, mapCoord.x, mapCoord.y);
+
+                  enemy->SetActorLocationAndRotation(worldLocation, worldRotation);
+              
+                  for (uint8 mapCoordOffsetX = 0; mapCoordOffsetX < mapSizeX; ++mapCoordOffsetX)
+                  {
+                    for (uint8 mapCoordOffsetY = 0; mapCoordOffsetY < mapSizeY; ++mapCoordOffsetY)
+                    {
+                      const FMapCoord onMapCoord = mapCoord + FMapCoord(mapCoordOffsetX, mapCoordOffsetY);
+                      roomCoords.Remove(onMapCoord);
+                    }
+                  }  
+                  outMapObjs.Emplace(mapCoord, mapObj);         
+                } 
+              }
+              // TODO Boss専用
+              else
+              {
+                const FMapCoord bossCoord(roomLeft + generateBP.GenerateRoomCoord_X, roomTop + generateBP.GenerateRoomCoord_Y); 
+                if (model_shared->StaySpaceTable.Contains(bossCoord))
                 {
-                  MDebug::LogError("Can not place actor on map because it is not implemented ICanSetOnMap");
-                  enemy->Destroy();
-                  return;
+
+                  AActor* enemy = world->SpawnActor<AActor>(subClass, FVector::ZeroVector, FRotator::ZeroRotator);
+
+                  // 生成した敵がマップに置けないと処理を中断する
+                  ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(enemy);
+                  if (mapObj == nullptr)
+                  {
+                    MDebug::LogError("Can not place actor on map because it is not implemented ICanSetOnMap");
+                    enemy->Destroy();
+                    return;
+                  }
+                  
+                  const uint8 mapSizeX = mapObj->GetOnMapSizeX();
+                  const uint8 mapSizeY = mapObj->GetOnMapSizeY();
+                  const FVector mapObjoffset = FVector(
+                                                       StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize) * 0.5,
+                                                       StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize) * 0.5,
+                                                       0.0
+                                                     );
+
+                  const FVector worldLocation = FVector(
+                                                          model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(bossCoord.x) * model_shared->MapTileSize),
+                                                          model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(bossCoord.y) * model_shared->MapTileSize),
+                                                          model_shared->OriginWorldCoord.Z
+                                                          )
+                                                  + mapObjoffset;
+                                                     
+                  enemy->SetActorLocation(worldLocation);
+                  outMapObjs.Emplace(bossCoord, mapObj);
+
+                  for (uint8 mapCoordOffsetX = 0; mapCoordOffsetX < mapSizeX; ++mapCoordOffsetX)
+                  {
+                    for (uint8 mapCoordOffsetY = 0; mapCoordOffsetY < mapSizeY; ++mapCoordOffsetY)
+                    {
+                      const FMapCoord onMapCoord = bossCoord + FMapCoord(mapCoordOffsetX, mapCoordOffsetY);
+                      roomCoords.Remove(onMapCoord);
+                    }
+                  }
                 }
-
-                outMapObjs.Emplace(mapCoord, mapObj);
-
+                else
+                {
+                  MDebug::LogError("Get Fucked");
+                }
+                
               }
 
               // 何も入っていない部屋のタイルの座標を入れて、プレイヤー生成するとき使う
-              for (int32 i = StaticCast<int32>(generateBP.InitGenerateCountPerRoom); i < roomCoords.Num(); ++ i)
+              for (int32 i = 0; i < roomCoords.Num(); ++i)
               {
                 remainCoords.Emplace(roomCoords[i]);
               }
@@ -194,17 +267,19 @@ namespace UE::Smith
           }
 
           check(remainCoords.Num() > 0);
-          RandomShuffle(remainCoords);
+          FUECollectionsLibrary::Shuffle(remainCoords);
           
           // プレイヤーを配置
           const FMapCoord playerMapCoord = remainCoords[0];
           const FVector playerWorldCoord = FVector(
-                                                    m_originCoord_World.X + StaticCast<double>(StaticCast<int32>(playerMapCoord.x) * m_mapTileSize),
-                                                    m_originCoord_World.Y + StaticCast<double>(StaticCast<int32>(playerMapCoord.y) * m_mapTileSize),
-                                                    m_originCoord_World.Z
+                                                    model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(playerMapCoord.x) * model_shared->MapTileSize),
+                                                    model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(playerMapCoord.y) * model_shared->MapTileSize),
+                                                    model_shared->OriginWorldCoord.Z
                                                   ); 
           player->SetActorLocation(playerWorldCoord);
-
+          FRotator playerRotation;
+          FSmithMapHelperLibrary::DirectMapElementRotation(map_shared.Get(), playerRotation, playerMapCoord.x, playerMapCoord.y);
+          player->SetActorRotation(playerRotation);
           outMapObjs.Emplace(playerMapCoord, playerMapObj);
 
           m_player = playerMapObj;
@@ -233,115 +308,6 @@ namespace UE::Smith
             }
           }
         }
-        void InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination)
-        {
-          using namespace UE::Smith::Map::Private;
-
-          check (m_model.IsValid())
-          if (!m_model.IsValid())
-          {
-            MDebug::LogError("failed to InitNextLevelEvent --- model invalid");
-            return;
-          }
-
-          TSharedPtr<Model> model_shared = m_model.Pin();
-          check(model_shared->Map.IsValid())
-          if (!model_shared->Map.IsValid())
-          {
-            MDebug::LogError("failed to InitNextLevelEvent --- map invalid");
-            return;
-          }
-          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
-          TArray<uint8> sectionIdx{};
-          sectionIdx.Reserve(map_shared->GetSectionCount());
-
-          check(map_shared->GetSectionCount() > 0)
-          if (map_shared->GetSectionCount() == 0)
-          {
-            MDebug::LogError("failed to InitNextLevelEvent --- map section num invalid");
-            return;
-          }
-
-          outX = 0u;
-          outY = 0u;
-          destination = FVector::ZeroVector;
-
-          for (uint8 i = 0u; i < map_shared->GetSectionCount(); ++i)
-          {
-            sectionIdx.Emplace(i);
-          }
-
-          RandomShuffle(sectionIdx);
-          for(int32 i = 0; i < sectionIdx.Num(); ++i)
-          {
-            const uint8 sectionRow = sectionIdx[i] / map_shared->GetColumn();
-            const uint8 sectionColumn = sectionIdx[i] % map_shared->GetColumn();
-
-            FSmithSection* sectionPtr = map_shared->GetSection(sectionRow, sectionColumn);
-
-            if (sectionPtr == nullptr || !sectionPtr->HasRoom())
-            {
-              continue;
-            }
-
-            if (sectionPtr->GetRoomWidth() <= 2 && sectionPtr->GetRoomHeight() <= 2)
-            {
-              continue;
-            }
-
-            const uint8 sectionRoomLeft = map_shared->GetSectionLeft(sectionColumn) + sectionPtr->GetRoomLeft();
-            const uint8 sectionRoomRight = sectionRoomLeft + sectionPtr->GetRoomWidth() - 1;
-            const uint8 sectionRoomTop = map_shared->GetSectionTop(sectionRow) + sectionPtr->GetRoomTop();
-            const uint8 sectionRoomBottom = sectionRoomTop + sectionPtr->GetRoomHeight() - 1;
-
-            TArray<FMapCoord> eventRandomPlaceCoords{};
-            // 四隅に階段を配置しない
-            eventRandomPlaceCoords.Reserve(StaticCast<int32>(sectionPtr->GetRoomWidth()) * 2 + StaticCast<int32>(sectionPtr->GetRoomHeight()) * 2 - 8);
-            // 部屋の上と下両辺の座標
-            for (uint8 column = sectionRoomLeft + 1u; column < sectionRoomRight; ++column)
-            {
-              eventRandomPlaceCoords.Emplace(FMapCoord{column, sectionRoomTop});
-              eventRandomPlaceCoords.Emplace(FMapCoord{column, sectionRoomBottom});
-            }
-
-            for (uint8 row = sectionRoomTop + 1u; row < sectionRoomBottom; ++row)
-            {
-              eventRandomPlaceCoords.Emplace(FMapCoord{sectionRoomLeft, row});
-              eventRandomPlaceCoords.Emplace(FMapCoord{sectionRoomRight, row});
-            }
-
-            RandomShuffle(eventRandomPlaceCoords);
-            bool success = false;
-            for (int32 j = 0; j < eventRandomPlaceCoords.Num(); ++j)
-            {
-              const FMapCoord mapCoord = eventRandomPlaceCoords[j];
-
-              if (!model_shared->StaySpaceTable.Contains(mapCoord))
-              {
-                continue;
-              }
-
-            if (canPlaceEvent(mapCoord))
-              {
-                success = true;
-                outX = mapCoord.x;
-                outY = mapCoord.y;
-                break;
-              }
-            
-            }
-
-            if (success)
-            {
-              destination = FVector{
-                                      StaticCast<double>(outX) * StaticCast<double>(m_mapTileSize) + m_originCoord_World.X,
-                                      StaticCast<double>(outY) * StaticCast<double>(m_mapTileSize) + m_originCoord_World.Y,
-                                      m_originCoord_World.Z,
-                                    };
-              break;
-            }
-          }
-        }
         bool GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& outX, uint8& outY)
         {
           outX = 0;
@@ -358,6 +324,7 @@ namespace UE::Smith
             return false;
           }
 
+          TQueue<int32> a;
           TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared->OnMapObjsCoordTable.Contains(mapObj))
           {
@@ -418,7 +385,30 @@ namespace UE::Smith
 
           return false;
         }
+      bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y)
+      {
+        outLocation = FVector::ZeroVector;
+        TSharedPtr<Model> model_shared = m_model.Pin();
+        if (!model_shared.IsValid())
+        {
+          return false;
+        }
 
+        TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+        if (!map_shared.IsValid())
+        {
+          return false;
+        }
+
+        outLocation = FVector(
+                              StaticCast<double>(StaticCast<int32>(x) * model_shared->MapTileSize),
+                              StaticCast<double>(StaticCast<int32>(y) * model_shared->MapTileSize),
+                              0.0
+                             )
+                    + model_shared->OriginWorldCoord;
+
+        return true;
+      }
       private:
         bool isInSameSection(ICanSetOnMap* chaser, ICanSetOnMap* target)
         {
@@ -445,7 +435,7 @@ namespace UE::Smith
           const uint8 targetCoordX = model_shared->OnMapObjsCoordTable[target].x;
           const uint8 targetCoordY = model_shared->OnMapObjsCoordTable[target].y;
 
-          return FSmithMapHelperFunc::IsInSameSection(map_shared.Get(), chaserCoordX, chaserCoordY, targetCoordX, targetCoordY);
+          return FSmithMapHelperLibrary::IsInSameSection(map_shared.Get(), chaserCoordX, chaserCoordY, targetCoordX, targetCoordY);
         }
         void chaseTarget_internal(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
         {
@@ -463,111 +453,134 @@ namespace UE::Smith
           } 
           TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
 
-          const uint8 chaserCoordX = model_shared->OnMapObjsCoordTable[chaser].x;
-          const uint8 chaserCoordY = model_shared->OnMapObjsCoordTable[chaser].y;
+          const uint8 chaserMapSizeX = chaser->GetOnMapSizeX();
+          const uint8 chaserMapSizeY = chaser->GetOnMapSizeY();
           const uint8 mapWidth = map_shared->GetMapWidth();
           const uint8 mapHeight = map_shared->GetMapHeight();
-
+          bool bChaseSucceed = false;
           int32 chaseCoordX_Offset = chaseRadius;
           int32 chaseCoordY_Offset = 0;
-          bool bChaseSucceed = false;
 
-          // TODO Need Comment Immediately
-          while (chaseCoordX_Offset > 0)
+          for (uint8 coordOffsetX = 0; coordOffsetX < chaserMapSizeX; ++ coordOffsetX)
           {
+            for (uint8 coordOffsetY = 0; coordOffsetY < chaserMapSizeY; ++ coordOffsetY)
             {
-              const int32 checkMapCoordX = StaticCast<int32>(chaserCoordX) + chaseCoordX_Offset;
-              const int32 checkMapCoordY = StaticCast<int32>(chaserCoordY) + chaseCoordY_Offset;
-              if ((checkMapCoordX >= 0 && checkMapCoordX < StaticCast<int32>(mapWidth))
-                  && (checkMapCoordY >= 0 && checkMapCoordY < StaticCast<int32>(mapHeight))
-                )
-              {
-                const FMapCoord checkMapCoord{StaticCast<uint8>(checkMapCoordX), StaticCast<uint8>(checkMapCoordY)};  
-                if (model_shared->StaySpaceTable.Contains(checkMapCoord))
-                {
-                  if (model_shared->StaySpaceTable[checkMapCoord]->GetMapObject() == target)
-                  {
-                    bChaseSucceed = true;
-                    break;
-                  }
-                }
-              }
-            }
+              const uint8 chaserCoordX = model_shared->OnMapObjsCoordTable[chaser].x + coordOffsetX;
+              const uint8 chaserCoordY = model_shared->OnMapObjsCoordTable[chaser].y + coordOffsetY;
 
-            {
-              const int32 checkMapCoordX_Reverse = StaticCast<int32>(chaserCoordX) - chaseCoordX_Offset;
-              const int32 checkMapCoordY_Reverse = StaticCast<int32>(chaserCoordY) - chaseCoordY_Offset;
-              
-              if ((checkMapCoordX_Reverse >= 0 && checkMapCoordX_Reverse < StaticCast<int32>(mapWidth))
-                  && (checkMapCoordY_Reverse >= 0 && checkMapCoordY_Reverse < StaticCast<int32>(mapHeight))
-                )
-              {
-                const FMapCoord checkMapCoord_Reverse{StaticCast<uint8>(checkMapCoordX_Reverse), StaticCast<uint8>(checkMapCoordY_Reverse)};  
-                if (model_shared->StaySpaceTable.Contains(checkMapCoord_Reverse))
-                {
-                  if (model_shared->StaySpaceTable[checkMapCoord_Reverse]->GetMapObject() == target)
-                  {
-                    chaseCoordX_Offset *= -1;
-                    chaseCoordY_Offset *= -1;
-                    bChaseSucceed = true;
-                    break;
-                  }
-                }
-              }
-            }
-            --chaseCoordX_Offset;
-            ++chaseCoordY_Offset;
-          }
+              chaseCoordX_Offset = chaseRadius;
+              chaseCoordY_Offset = 0;
 
-          if (!bChaseSucceed)
-          {
-            while (chaseCoordX_Offset > -StaticCast<int32>(chaseRadius))
-            {
+              // TODO Need Comment Immediately
+              while (chaseCoordX_Offset > 0)
               {
-                const int32 checkMapCoordX = StaticCast<int32>(chaserCoordX) + chaseCoordX_Offset;
-                const int32 checkMapCoordY = StaticCast<int32>(chaserCoordY) + chaseCoordY_Offset;
-                if ((checkMapCoordX >= 0 && checkMapCoordX < StaticCast<int32>(mapWidth))
-                    && (checkMapCoordY >= 0 && checkMapCoordY < StaticCast<int32>(mapHeight))
-                  )
                 {
-                  const FMapCoord checkMapCoord{StaticCast<uint8>(checkMapCoordX), StaticCast<uint8>(checkMapCoordY)};  
-                  if (model_shared->StaySpaceTable.Contains(checkMapCoord))
+                  const int32 checkMapCoordX = StaticCast<int32>(chaserCoordX) + chaseCoordX_Offset;
+                  const int32 checkMapCoordY = StaticCast<int32>(chaserCoordY) + chaseCoordY_Offset;
+                  if ((checkMapCoordX >= 0 && checkMapCoordX < StaticCast<int32>(mapWidth))
+                      && (checkMapCoordY >= 0 && checkMapCoordY < StaticCast<int32>(mapHeight))
+                    )
                   {
-                    if (model_shared->StaySpaceTable[checkMapCoord]->GetMapObject() == target)
+                    const FMapCoord checkMapCoord{StaticCast<uint8>(checkMapCoordX), StaticCast<uint8>(checkMapCoordY)};  
+                    if (model_shared->StaySpaceTable.Contains(checkMapCoord))
                     {
-                      bChaseSucceed = true;
-                      break;
+                      if (model_shared->StaySpaceTable[checkMapCoord]->GetMapObject() == target)
+                      {
+                        bChaseSucceed = true;
+                        break;
+                      }
                     }
                   }
                 }
-              }
 
-              {
-                const int32 checkMapCoordX_Reverse = StaticCast<int32>(chaserCoordX) - chaseCoordX_Offset;
-                const int32 checkMapCoordY_Reverse = StaticCast<int32>(chaserCoordY) - chaseCoordY_Offset;
-                
-                if ((checkMapCoordX_Reverse >= 0 && checkMapCoordX_Reverse < StaticCast<int32>(mapWidth))
-                    && (checkMapCoordY_Reverse >= 0 && checkMapCoordY_Reverse < StaticCast<int32>(mapHeight))
-                  )
                 {
-                  const FMapCoord checkMapCoord_Reverse{StaticCast<uint8>(checkMapCoordX_Reverse), StaticCast<uint8>(checkMapCoordY_Reverse)};  
-                  if (model_shared->StaySpaceTable.Contains(checkMapCoord_Reverse))
+                  const int32 checkMapCoordX_Reverse = StaticCast<int32>(chaserCoordX) - chaseCoordX_Offset;
+                  const int32 checkMapCoordY_Reverse = StaticCast<int32>(chaserCoordY) - chaseCoordY_Offset;
+                  
+                  if ((checkMapCoordX_Reverse >= 0 && checkMapCoordX_Reverse < StaticCast<int32>(mapWidth))
+                      && (checkMapCoordY_Reverse >= 0 && checkMapCoordY_Reverse < StaticCast<int32>(mapHeight))
+                    )
                   {
-                    if (model_shared->StaySpaceTable[checkMapCoord_Reverse]->GetMapObject() == target)
+                    const FMapCoord checkMapCoord_Reverse{StaticCast<uint8>(checkMapCoordX_Reverse), StaticCast<uint8>(checkMapCoordY_Reverse)};  
+                    if (model_shared->StaySpaceTable.Contains(checkMapCoord_Reverse))
                     {
-                      chaseCoordX_Offset *= -1;
-                      chaseCoordY_Offset *= -1;
-                      bChaseSucceed = true;
-                      break;
+                      if (model_shared->StaySpaceTable[checkMapCoord_Reverse]->GetMapObject() == target)
+                      {
+                        chaseCoordX_Offset *= -1;
+                        chaseCoordY_Offset *= -1;
+                        bChaseSucceed = true;
+                        break;
+                      }
                     }
                   }
                 }
+                --chaseCoordX_Offset;
+                ++chaseCoordY_Offset;
               }
-              --chaseCoordX_Offset;
-              --chaseCoordY_Offset;
+
+              if (!bChaseSucceed)
+              {
+                while (chaseCoordX_Offset > -StaticCast<int32>(chaseRadius))
+                {
+                  {
+                    const int32 checkMapCoordX = StaticCast<int32>(chaserCoordX) + chaseCoordX_Offset;
+                    const int32 checkMapCoordY = StaticCast<int32>(chaserCoordY) + chaseCoordY_Offset;
+                    if ((checkMapCoordX >= 0 && checkMapCoordX < StaticCast<int32>(mapWidth))
+                        && (checkMapCoordY >= 0 && checkMapCoordY < StaticCast<int32>(mapHeight))
+                      )
+                    {
+                      const FMapCoord checkMapCoord{StaticCast<uint8>(checkMapCoordX), StaticCast<uint8>(checkMapCoordY)};  
+                      if (model_shared->StaySpaceTable.Contains(checkMapCoord))
+                      {
+                        if (model_shared->StaySpaceTable[checkMapCoord]->GetMapObject() == target)
+                        {
+                          bChaseSucceed = true;
+                          break;
+                        }
+                      }
+                    }
+                  }
+
+                  {
+                    const int32 checkMapCoordX_Reverse = StaticCast<int32>(chaserCoordX) - chaseCoordX_Offset;
+                    const int32 checkMapCoordY_Reverse = StaticCast<int32>(chaserCoordY) - chaseCoordY_Offset;
+                    
+                    if ((checkMapCoordX_Reverse >= 0 && checkMapCoordX_Reverse < StaticCast<int32>(mapWidth))
+                        && (checkMapCoordY_Reverse >= 0 && checkMapCoordY_Reverse < StaticCast<int32>(mapHeight))
+                      )
+                    {
+                      const FMapCoord checkMapCoord_Reverse{StaticCast<uint8>(checkMapCoordX_Reverse), StaticCast<uint8>(checkMapCoordY_Reverse)};  
+                      if (model_shared->StaySpaceTable.Contains(checkMapCoord_Reverse))
+                      {
+                        if (model_shared->StaySpaceTable[checkMapCoord_Reverse]->GetMapObject() == target)
+                        {
+                          chaseCoordX_Offset *= -1;
+                          chaseCoordY_Offset *= -1;
+                          bChaseSucceed = true;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                  --chaseCoordX_Offset;
+                  --chaseCoordY_Offset;
+                }
+              }
+
+              // TODO
+              if (bChaseSucceed)
+              {
+                break;
+              }
+            }
+
+            // TODO
+            if (bChaseSucceed)
+            {
+              break;
             }
           }
-
+        
           if (!bChaseSucceed)
           {
             outChaseDirection = EDirection::Invalid;
@@ -620,73 +633,10 @@ namespace UE::Smith
             }
           }
         }
-        // TODO need check out of bounds;
-        bool canPlaceEvent(FMapCoord coord, bool bPlaceOnCrossroad = false)
-        {
-          TSharedPtr<Model> model_shared = m_model.Pin();
-          if (model_shared->StaySpaceTable[coord]->GetMapObject() == nullptr 
-              && model_shared->StaySpaceTable[coord]->GetEvent() == nullptr
-             )
-          {
-            if (!bPlaceOnCrossroad)
-            {
-              // 4だったら交差点
-              int32 crossCount = 0;
-              {
-                //const FMapCoord coord_north{coord.x + 1u, coord.y};
-                // if (model_shared->StaySpaceTable.Contains(coord_north))
-                // {
-                //   ++crossCount;
-                // }
-              }
-              {
-                //const FMapCoord coord_east{coord.x, coord.y + 1u};
-                // if (model_shared->StaySpaceTable.Contains(coord_east))
-                // {
-                //   ++crossCount;
-                // }
-              }
-              {
-                //const FMapCoord coord_south{coord.x - 1u, coord.y};
-                // if (model_shared->StaySpaceTable.Contains(coord_south))
-                // {
-                //   ++crossCount;
-                // }
-              }
-              {
-                // const FMapCoord coord_west{coord.x, coord.y - 1u};
-                // if (model_shared->StaySpaceTable.Contains(coord_west))
-                // {
-                //   ++crossCount;
-                // }
-              }
-
-              if (crossCount == 4)
-              {
-                return false;
-              }
-              else
-              {
-                return true;
-              }
-            }
-            else
-            {
-              return true;
-            }
-          }
-          else
-          {
-            return false;
-          }
-        }
       private:
         TWeakPtr<Model> m_model;
         TWeakInterfacePtr<ICanSetOnMap> m_player;
         FSmithEnemyGenerateBluePrint m_generateBP;
-        FVector m_originCoord_World;
-        int32 m_mapTileSize;
-        uint8 m_turnPastCnt;
     };
     FSmithMapObserver::FSmithMapObserver()
       : m_pImpl(::MakeUnique<MapObserverImpl>())
@@ -711,9 +661,9 @@ namespace UE::Smith
 
       return *this;
     }
-    void FSmithMapObserver::AssignMap(TSharedPtr<FSmithMapDataModel> pModel, FVector originCoord_World, int32 mapTileSize)
+    void FSmithMapObserver::AssignMap(TSharedPtr<FSmithMapDataModel> pModel)
     {
-      m_pImpl->AssignMap(pModel, originCoord_World, mapTileSize);
+      m_pImpl->AssignMap(pModel);
     }
     void FSmithMapObserver::InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
     {
@@ -722,10 +672,6 @@ namespace UE::Smith
     void FSmithMapObserver::ClearMapObjs_IgnorePlayer()
     {
       m_pImpl->ClearMapObjs_IgnorePlayer();
-    }
-    void FSmithMapObserver::InitNextLevelEvent_Temp(uint8& outX, uint8& outY, FVector& destination)
-    {
-      m_pImpl->InitNextLevelEvent_Temp(outX, outY, destination);
     }
     bool FSmithMapObserver::ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
     {
@@ -739,10 +685,14 @@ namespace UE::Smith
     {
 
     }
-    
     bool FSmithMapObserver::ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
     {
       return m_pImpl->ChaseTarget(outChaseDirection, chaser, target, chaseRadius);
+    }
+    // TODO another Class
+    bool FSmithMapObserver::ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y)
+    {
+      return m_pImpl->ConvertMapCoordToWorldLocation(outLocation, x, y);
     }
 
   }

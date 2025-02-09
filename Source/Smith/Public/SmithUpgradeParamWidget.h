@@ -23,10 +23,13 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 
+private:
+	void convertParamText(FString& outParamText, int32 param);
+
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> HealthPointTextBlock;
+	TObjectPtr<UTextBlock> HealthPointText;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> AttackPowerTextBlock;
+	TObjectPtr<UTextBlock> AttackPowerText;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> CriticalTextBlock;
+	TObjectPtr<UTextBlock> CriticalText;
 };

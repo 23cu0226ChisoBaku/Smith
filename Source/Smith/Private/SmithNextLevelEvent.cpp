@@ -11,6 +11,7 @@ USmithNextLevelEvent::USmithNextLevelEvent(const FObjectInitializer& ObjectIniti
   : Super(ObjectInitializer)
   , OnNextLevel{}
   , m_eventAppearance(nullptr)
+  , m_bIsDisposed(false)
 { }
 
 void USmithNextLevelEvent::BeginDestroy()
@@ -19,11 +20,11 @@ void USmithNextLevelEvent::BeginDestroy()
   {
     m_eventAppearance->Destroy();
   }
-  MDebug::LogError("Next level event destroy");
+
   Super::BeginDestroy();
 }
 
-void USmithNextLevelEvent::InitializeEvent(const FVector& location)
+void USmithNextLevelEvent::InitializeEvent(const FVector& location, const FRotator& rotation)
 {  
   if (m_eventAppearance == nullptr)
   {
@@ -38,33 +39,37 @@ void USmithNextLevelEvent::InitializeEvent(const FVector& location)
         return;
       }
 
-      m_eventAppearance = world->SpawnActor<AActor>(subClass.Get(), location, FRotator::ZeroRotator);
+      m_eventAppearance = world->SpawnActor<AActor>(subClass.Get(), location, rotation);
     }
   }
+  else
+  {
+    m_eventAppearance->SetActorLocationAndRotation(location, rotation);
+    m_eventAppearance->SetActorHiddenInGame(false);
+  }
+
+  m_bIsDisposed = false;
 }
 
-bool USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
+void USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
 {
   if (!IS_UINTERFACE_VALID(mapObj))
   {
-    return false;
+    return;
   }
 
   if (mapObj->GetType() != EMapObjType::Player)
   {
-    return false;
+    return;
   }
 
   IEventTriggerable* eventTriggerable = Cast<IEventTriggerable>(mapObj);
   if (eventTriggerable == nullptr)
   {
-    return false;
+    return;
   }
 
   eventTriggerable->OnTriggerEvent(this);
-  MDebug::LogWarning("Trigger Next Level Event");
-  OnNextLevel.ExecuteIfBound();
-  return true;  
 }
 
 void USmithNextLevelEvent::DiscardEvent()
@@ -73,6 +78,15 @@ void USmithNextLevelEvent::DiscardEvent()
   {
     m_eventAppearance->SetActorHiddenInGame(true);
   }
+}
 
-  MarkAsGarbage();
+void USmithNextLevelEvent::RaiseEvent()
+{
+  m_bIsDisposed = true;
+  OnNextLevel.ExecuteIfBound();
+}
+
+bool USmithNextLevelEvent::IsDisposed() const
+{ 
+  return m_bIsDisposed;
 }

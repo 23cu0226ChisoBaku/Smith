@@ -2,22 +2,49 @@
 
 
 #include "SmithUpgradeMaterial.h"
-#include "ICanPick.h"
+#include <limits>
 #include "MLibrary.h"
 
 USmithUpgradeMaterial::USmithUpgradeMaterial(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
-{ 
-  // TODO Test Code
-  Param = FParams{0,3,0,0};
+  , m_labelColor(FColor::White)
+{ }
+
+void USmithUpgradeMaterial::PostInitProperties()
+{
+  Super::PostInitProperties();
+  int32 maxParam = std::numeric_limits<int32>::min();
+  if (maxParam < Param.HP)
+  {
+    maxParam = Param.HP;
+    m_labelColor = FColor::Green;  
+  }
+
+  if (maxParam < Param.ATK)
+  {
+    maxParam = Param.ATK;
+    m_labelColor = FColor::Red;
+  }
+
+  if (maxParam < Param.DEF)
+  {
+    maxParam = Param.DEF;
+    m_labelColor = FColor::Blue;
+  }
+
+  if (maxParam < Param.CRT)
+  {
+    maxParam = Param.CRT;
+    m_labelColor = FColor::Yellow;
+  }
+
+  m_labelColor.A = StaticCast<uint8>(255.0 * 0.9);
 }
+
 
 void USmithUpgradeMaterial::BeginDestroy()
 {
   Super::BeginDestroy();
-
-  MDebug::LogError("Upgrade Material Destroy");
-  MDebug::LogError(FString::FromInt((int64)this));
 }
 
 FParams USmithUpgradeMaterial::GetParam()
@@ -40,9 +67,14 @@ UTexture2D* USmithUpgradeMaterial::GetIconImage() const
   return Icon;
 }
 
+FColor USmithUpgradeMaterial::GetLabelColor() const
+{
+  return m_labelColor;
+}
+
 FString USmithUpgradeMaterial::GetName() const
 {
-  return Name;
+  return GetName_Log();
 }
 
 FString USmithUpgradeMaterial::GetDescription() const
@@ -50,12 +82,7 @@ FString USmithUpgradeMaterial::GetDescription() const
   return Description;
 }
 
-void USmithUpgradeMaterial::onPickImpl(ICanPick* picker)
+EBattleLogType USmithUpgradeMaterial::GetType_Log() const
 {
-  if (!IS_UINTERFACE_VALID(picker))
-  {
-    return;
-  }
-
-  picker->PickUpMaterial(this);
+  return EBattleLogType::Item;
 }
