@@ -1,5 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+SmithMap.cpp
+
+Author : MAI ZHICONG(バクチソウ)
+
+Description : マップクラス
+
+Update History: 2024/12/31 作成
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 
 #include "SmithMap.h"
 #include "SmithSection.h"

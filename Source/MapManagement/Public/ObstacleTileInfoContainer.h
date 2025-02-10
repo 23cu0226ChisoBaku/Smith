@@ -3,7 +3,7 @@
 
 ObstacleInfoContainer.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : 障害物タイルの情報コンテナ
 
@@ -24,47 +24,47 @@ Encoding : UTF-8
 
 namespace UE::Smith
 {
-	namespace Map
-	{
-		///
-		/// @brief 障害物タイル情報コンテナ
-		///	namespace UE::Smith::Map
-		/// 
-		class MAPMANAGEMENT_API FObstacleTileInfoContainer : public FTileInfoContainer
-		{
-			// 親クラスの全てのコンストラクタを使えるように
-			using FTileInfoContainer::FTileInfoContainer;
+  namespace Map
+  {
+    ///
+    /// @brief 障害物タイル情報コンテナ
+    ///	namespace UE::Smith::Map
+    /// 
+    class MAPMANAGEMENT_API FObstacleTileInfoContainer : public FTileInfoContainer
+    {
+      // 親クラスの全てのコンストラクタを使えるように
+      using FTileInfoContainer::FTileInfoContainer;
 
-			//---------------------------------------
-			/*
-											ctorとdtor
-			*/
-			//---------------------------------------
-			public:
-				FObstacleTileInfoContainer();
-				virtual ~FObstacleTileInfoContainer();
+      //---------------------------------------
+      /*
+                      ctorとdtor
+      */
+      //---------------------------------------
+      public:
+        FObstacleTileInfoContainer();
+        virtual ~FObstacleTileInfoContainer();
 
-				//---------------------------------------
-				/*
-												コピー
-				*/
-				//---------------------------------------
-				FObstacleTileInfoContainer(const FObstacleTileInfoContainer&);
-				FObstacleTileInfoContainer& operator=(const FObstacleTileInfoContainer&);
-				//---------------------------------------
-				/*
-												ムーブ
-				*/
-				//---------------------------------------
-				FObstacleTileInfoContainer(FObstacleTileInfoContainer&&) noexcept;
-				FObstacleTileInfoContainer& operator=(FObstacleTileInfoContainer&&) noexcept;
-			private:
-				///
-				/// @brief 親クラス実装オーバーライド
-				///
-				virtual bool isAbleToStayOnImpl() const override;
-		};
-	}
+        //---------------------------------------
+        /*
+                        コピー
+        */
+        //---------------------------------------
+        FObstacleTileInfoContainer(const FObstacleTileInfoContainer&);
+        FObstacleTileInfoContainer& operator=(const FObstacleTileInfoContainer&);
+        //---------------------------------------
+        /*
+                        ムーブ
+        */
+        //---------------------------------------
+        FObstacleTileInfoContainer(FObstacleTileInfoContainer&&) noexcept;
+        FObstacleTileInfoContainer& operator=(FObstacleTileInfoContainer&&) noexcept;
+      private:
+        ///
+        /// @brief 親クラス実装オーバーライド
+        ///
+        virtual bool isAbleToStayOnImpl() const override;
+    };
+  }
 }
 
 #endif

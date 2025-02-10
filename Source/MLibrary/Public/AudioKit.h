@@ -42,6 +42,7 @@ namespace MLibrary
         /// @param IAudioPlayer オーディオプレイヤーインターフェース
         ///
         static void AssignAudioPlayer(IAudioPlayer*);
+        static void DetachAudioPlayer();
         ///
         /// @brief              サウンドエフェクトを3D空間で再生
         /// @param seName       サウンドエフェクトの名前

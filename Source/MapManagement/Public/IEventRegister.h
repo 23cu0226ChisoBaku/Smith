@@ -1,11 +1,30 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+IEventRegister.h
+
+Author : MAI ZHICONG(バクチソウ)
+
+Description : イベントレジスター
+
+Update History: 2025/01/19
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+
+*/
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "IEventRegister.generated.h"
 
+//---------------------------------------
+/*
+                  前方宣言
+*/
+//---------------------------------------
 class ICanSetOnMap;
 class ISmithMapEvent;
 
@@ -13,7 +32,7 @@ class ISmithMapEvent;
 UINTERFACE(MinimalAPI)
 class UEventRegister : public UInterface
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 };
 
 /**
@@ -21,9 +40,14 @@ class UEventRegister : public UInterface
  */
 class MAPMANAGEMENT_API IEventRegister
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+  // Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void RegisterMapEvent(ICanSetOnMap*, ISmithMapEvent*) = 0;
+  ///
+  /// @brief 								イベントを登録する
+  /// @param ICanSetOnMap 	イベントを発生発生させたマップに配置できるオブジェクト
+  /// @param ISmithMapEvent	マップイベント
+  ///
+  virtual void RegisterMapEvent(ICanSetOnMap*, ISmithMapEvent*) = 0;
 };

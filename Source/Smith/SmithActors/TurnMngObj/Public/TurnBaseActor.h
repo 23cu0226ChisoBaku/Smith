@@ -39,6 +39,7 @@ public:
 		#pragma endregion ICanCommandMediate
 		// end of ICanCommandMediate
 
+		virtual void InitializeParameter(int32 currentLevel);
 	#pragma endregion Interfaces
 	// end of Interfaces
 

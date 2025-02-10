@@ -3,7 +3,7 @@
 
 ArrayIterator.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : Iterator of TDimension[X]Array (X >= 1)
 
@@ -23,82 +23,82 @@ Encoding : UTF-8
 template <typename Array>
 class ArrayIterator
 {
-	using ElementType = typename Array::ElementType;
-	using PointerType = ElementType*;
-	using ReferenceType = ElementType&;
-	using ConstReferenceType = const ReferenceType;
+  using ElementType = typename Array::ElementType;
+  using PointerType = ElementType*;
+  using ReferenceType = ElementType&;
+  using ConstReferenceType = const ReferenceType;
 public:
-	ArrayIterator(PointerType ptr)
-		: m_ptr(ptr)
-	{ }
+  ArrayIterator(PointerType ptr)
+    : m_ptr(ptr)
+  { }
 
-	PointerType Get() const
-	{
-		return m_ptr;
-	}
+  PointerType Get() const
+  {
+    return m_ptr;
+  }
 
-	ArrayIterator& operator++()
-	{
-		m_ptr++;
-		return *this;
-	}
+  ArrayIterator& operator++()
+  {
+    m_ptr++;
+    return *this;
+  }
 
-	ArrayIterator operator++(int)
-	{
-		ArrayIterator itr = *this;
-		++(*this);
-		return itr;
-	}
+  ArrayIterator operator++(int)
+  {
+    ArrayIterator itr = *this;
+    ++(*this);
+    return itr;
+  }
 
-		ArrayIterator& operator--()
-	{
-		m_ptr--;
-		return *this;
-	}
+    ArrayIterator& operator--()
+  {
+    m_ptr--;
+    return *this;
+  }
 
-	ArrayIterator operator--(int)
-	{
-		ArrayIterator itr = *this;
-		--(*this);
-		return itr;
-	}
+  ArrayIterator operator--(int)
+  {
+    ArrayIterator itr = *this;
+    --(*this);
+    return itr;
+  }
 
-	ConstReferenceType operator[](uint64 idx) const&
-	{
-		return *(m_ptr[idx]);
-	}
+  ConstReferenceType operator[](uint64 idx) const&
+  {
+    return *(m_ptr[idx]);
+  }
 
-	ReferenceType operator[](uint64 idx) &
-	{
-		return *(m_ptr[idx]);
-	}
+  ReferenceType operator[](uint64 idx) &
+  {
+    return *(m_ptr[idx]);
+  }
 
-	ReferenceType operator[](uint64 idx) &&
-	{
-		return *(m_ptr[idx]);
-	}
+  ReferenceType operator[](uint64 idx) &&
+  {
+    return *(m_ptr[idx]);
+  }
 
-	PointerType operator->()
-	{
-		return m_ptr;
-	}
+  PointerType operator->()
+  {
+    return m_ptr;
+  }
 
-	ReferenceType operator*()
-	{
-		return *m_ptr;
-	}
+  ReferenceType operator*()
+  {
+    return *m_ptr;
+  }
 
-	bool operator==(const ArrayIterator& other) const
-	{
-		return m_ptr == other.m_ptr;
-	}
+  bool operator==(const ArrayIterator& other) const
+  {
+    return m_ptr == other.m_ptr;
+  }
 
-	bool operator!=(const ArrayIterator& other) const
-	{
-		return !(*this == other);
-	}
+  bool operator!=(const ArrayIterator& other) const
+  {
+    return !(*this == other);
+  }
 
 
 private:
-	PointerType m_ptr;
+  PointerType m_ptr;
 };

@@ -11,6 +11,7 @@
 #include "ICanRequestEventPublishment.h"
 #include "SmithAIConditionBindHandle.h"
 #include "ISmithBattleLogger.h"
+#include "SmithEnemyTraits.h"
 #include "SmithBoss.generated.h"
 
 class USmithAIConditionAttackStrategy;
@@ -42,6 +43,8 @@ class SMITH_API ASmithBoss final: public ASmithEnemy,
   GENERATED_BODY()
 
 public:
+  using Type = typename Dragon;
+public:
   ASmithBoss();
 
 protected:
@@ -62,6 +65,8 @@ public:
 public:
   FString GetName_Log() const override;
 	EBattleLogType GetType_Log() const override;
+
+  void InitializeParameter(int32 currentLevel) override final;
 
 // その技を使う条件の関数
 private:

@@ -28,6 +28,7 @@ class SMITH_API USmithAIConditionAttackStrategy : public USmithAIAttackStrategy
 	};
 public:
 	USmithAIConditionAttackStrategy(const FObjectInitializer&);
+	virtual void BeginDestroy() override;
 	// 初期化
 	void Initialize(ICanMakeAttack*, ICommandMediator*, int32 attackPower);
 	// 条件の登録
