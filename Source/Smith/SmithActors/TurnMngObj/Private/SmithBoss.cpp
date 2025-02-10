@@ -60,7 +60,7 @@ void ASmithBoss::EndPlay(const EEndPlayReason::Type EndPlayReason)
   if (m_aiBehaviorProcessor != nullptr)
   {
     m_aiBehaviorProcessor->StopBehaviorProcessor();
-    m_aiBehaviorProcessor->MarkAsGarbage();
+    m_aiBehaviorProcessor->ConditionalBeginDestroy();
   }
 }
 

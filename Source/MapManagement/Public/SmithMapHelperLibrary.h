@@ -70,10 +70,8 @@ namespace UE::Smith
         /// @param outRotation(OUT) UEワールド回転					
         /// @param x                X座標
         /// @param y                Y座標
-        /// @return                 成功  ->  true
-        ///                         失敗  ->  false
         ///
-        static bool DirectMapElementRotation(FSmithMap*, FRotator& outRotation, uint8 x, uint8 y);
+        static void DirectMapElementRotation(FSmithMap*, FRotator& outRotation, uint8 x, uint8 y);
     };
   }
 }

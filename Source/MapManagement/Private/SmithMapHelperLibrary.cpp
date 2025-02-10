@@ -73,18 +73,19 @@ namespace UE::Smith
       return section1 == section2;
     }
 
-    bool FSmithMapHelperLibrary::DirectMapElementRotation(FSmithMap* map, FRotator& outRotation, uint8 x, uint8 y)
+    void FSmithMapHelperLibrary::DirectMapElementRotation(FSmithMap* map, FRotator& outRotation, uint8 x, uint8 y)
     {
+      outRotation = FRotator::ZeroRotator;
       if (map == nullptr)
       {
-        return false;
+        return;
       }
 
       // マップ要素のある/いるセクション
       FSmithSection* section = map->GetSectionByCoord(x, y);
       if (section == nullptr || !section->HasRoom())
       {
-        return false;
+        return;
       }
 
       // 必要なデータを計算
@@ -153,7 +154,7 @@ namespace UE::Smith
 
       if (quadrant == 0)
       {
-        return true;
+        return;
       }
 
       // 壁に近い方向を探し、壁に背を向けて配置する
@@ -208,8 +209,6 @@ namespace UE::Smith
         }
         break;
       }
-
-      return true;
     }
   }
 }

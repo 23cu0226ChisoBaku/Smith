@@ -185,6 +185,9 @@ void ASmithPlayerActor::BeginPlay()
 			m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
 		}
 	}
+
+	m_actorFaceDir = EDirection::South;
+	SetActorRotation(FRotator{0.0, 180.0, 0.0});
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -668,8 +671,9 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 		return;
 	}
 
-	// TODO?
 	event->RaiseEvent();
+	m_actorFaceDir = EDirection::South;
+	SetActorRotation(FRotator{0.0, 180.0, 0.0});
 }
 
 // TODO Refactoring
