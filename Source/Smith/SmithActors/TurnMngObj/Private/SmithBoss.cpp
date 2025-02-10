@@ -18,7 +18,6 @@ ASmithBoss::ASmithBoss()
   : m_attackStrategy(nullptr)
   , m_idleStrategy(nullptr)
   , m_atkComponent(nullptr)
-  , m_maxHp(EnemyParam.HP)
   , m_wingsCnt(0)
   , m_breathCnt(0)
   , m_sweepCnt(0)
@@ -47,6 +46,8 @@ void ASmithBoss::BeginPlay()
   {
     m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
   }
+
+  m_maxHp = EnemyParam.HP;
 }
 
 void ASmithBoss::EndPlay(const EEndPlayReason::Type EndPlayReason)
