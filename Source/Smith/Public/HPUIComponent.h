@@ -28,6 +28,7 @@ public:
 public:
 	void CreateHP(APlayerController*);
 	void SetHP(float percentage);
+	void SetHPNumber(int32,int32);
 	void SetWidgetVisibility(bool bIsVisible);
 
 private:

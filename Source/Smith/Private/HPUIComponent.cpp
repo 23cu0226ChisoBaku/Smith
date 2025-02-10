@@ -73,6 +73,14 @@ void UHPUIComponent::SetHP(float percentage)
 	}
 }
 
+void UHPUIComponent::SetHPNumber(int32 maxHp,int32 currentHp)
+{
+	if(m_playerHPWidget != nullptr)
+	{
+		m_playerHPWidget->SetHPNumber(maxHp,currentHp);
+	}
+}
+
 void UHPUIComponent::SetWidgetVisibility(bool bIsVisible)
 {
 	if (m_playerHPWidget == nullptr)

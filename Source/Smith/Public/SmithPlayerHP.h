@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SmithPlayerHP.generated.h"
 
+class URichTextBlock;
 /**
  *
  */
@@ -16,12 +17,17 @@ class SMITH_API USmithPlayerHP : public UUserWidget
 
 public:
 	void SetHP(float);
-	
+	void SetHPNumber(int32,int32);
+
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateHP();
+	UFUNCTION(BluePrintCallable)
+	void TestSetHP(int32 current,int32 max);
 
 public:
 	UPROPERTY(BluePrintReadOnly)
 	float percent;
+	UPROPERTY(meta = (BindWidget))
+	URichTextBlock* HPNumber;
 };
