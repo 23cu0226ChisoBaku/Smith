@@ -300,7 +300,7 @@ EBattleLogType ATurnActor_Test::GetType_Log() const
 
 void ATurnActor_Test::InitializeParameter(int32 currentLevel)
 {
-	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
+	EnemyParam = FSmithEnemyParamInitializer::GetParams(*this, currentLevel);
 }
 
 void ATurnActor_Test::faceToDirection(EDirection newDirection)

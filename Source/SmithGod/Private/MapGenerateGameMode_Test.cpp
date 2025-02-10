@@ -136,7 +136,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
   ICanSetOnMap* mapPlayer = Cast<ICanSetOnMap>(playerPawn);
   check(mapPlayer != nullptr);
 
-  m_chasePlayerTracker->SetupTracker(m_mapMgr, mapPlayer);
+  m_chasePlayerTracker->SetupTracker(m_mapMgr);
 
   if (m_curtLevel % 5 == 0)
   {

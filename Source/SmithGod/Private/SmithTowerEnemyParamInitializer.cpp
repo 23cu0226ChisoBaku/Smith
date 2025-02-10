@@ -64,3 +64,8 @@ FParams USmithTowerEnemyParamInitializer::Initialize(Dragon, int32 currentLevel)
 
   return m_paramList[tag];
 }
+
+FParams USmithTowerEnemyParamInitializer::Initialize(HerbGolem, int32 currentLevel)
+{
+  return {};
+}

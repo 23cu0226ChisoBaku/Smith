@@ -29,13 +29,11 @@ public:
 	USmithChasePlayerTracker(const FObjectInitializer&);
 
 public:
-	void SetupTracker(TSharedPtr<UE::Smith::Map::FSmithMapManager>, ICanSetOnMap* player);
+	void SetupTracker(TSharedPtr<UE::Smith::Map::FSmithMapManager>);
 
 public:
 	bool TrackTarget(EDirection& outDirection, ICanSetOnMap* chaser, uint8 chaseRadius) override final;
 
 private:
 	TWeakPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
-	TWeakInterfacePtr<ICanSetOnMap> m_targetPlayer;
-	
 };
