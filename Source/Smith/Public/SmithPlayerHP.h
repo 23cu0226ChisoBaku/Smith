@@ -22,8 +22,6 @@ public:
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateHP();
-	UFUNCTION(BluePrintCallable)
-	void TestSetHP(int32 current,int32 max);
 
 public:
 	UPROPERTY(BluePrintReadOnly)
