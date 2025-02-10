@@ -55,6 +55,12 @@ public:
 	/// @param percentage         HPの割合
 	///
 	void SetHP(float percentage);
+	///
+	///	@brief                    HPの数値を設定する
+	///	@param maxHp					    最大HP
+	/// @param currentHp					現在のHP
+	///
+	void SetHPNumber(int32 maxHp,int32 currentHp);
   ///
   /// @brief                    HPバーの可視性設定
   /// @param bIsVisible         見えるようにする    ->  true
