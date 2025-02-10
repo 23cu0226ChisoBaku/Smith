@@ -6,6 +6,8 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "SmithBattleGameInstanceSubsystem.generated.h"
 
+class UUserWidget;
+
 /**
  * 
  */
@@ -13,5 +15,9 @@ UCLASS()
 class SMITHGOD_API USmithBattleGameInstanceSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void DisplayGameOverWidget(UObject* worldContextObject);
 	
 };

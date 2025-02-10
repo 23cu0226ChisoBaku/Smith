@@ -3,7 +3,7 @@
 
 SmithMapObjOperator.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップオブジェクトを操作する(移動など)クラス
 
@@ -79,22 +79,14 @@ namespace UE::Smith
         {
           // 安全性チェック
           #pragma region Safe Check
+          if (!IS_UINTERFACE_VALID(mapObj))
           {
-            check(m_model.IsValid());
-            if (!m_model.IsValid())
-            {
-              return;
-            }
+            return;
+          }
 
-            if (!IS_UINTERFACE_VALID(mapObj))
-            {
-              return;
-            }
-
-            if (format.GetRow() == 0 || format.GetColumn() == 0)
-            {
-              return;
-            }
+          if (format.GetRow() == 0 || format.GetColumn() == 0)
+          {
+            return;
           }
           #pragma endregion Safe Check
           // end of Safe Check
@@ -105,14 +97,11 @@ namespace UE::Smith
             return;
           }
 
-          outActors.Reset();
-
           if (!model_shared->OnMapObjsCoordTable.Contains(mapObj))
           {
             return;
           }
-
-          // オブジェクトの中心座標
+          outActors.Reset();
 
           const uint8 mapObjSizeX = mapObj->GetOnMapSizeX();
           const uint8 mapObjSizeY = mapObj->GetOnMapSizeY();
@@ -120,6 +109,7 @@ namespace UE::Smith
           {
             for (uint8 coordY = 0u; coordY < mapObjSizeY; ++coordY)
             {
+              // オブジェクトの中心座標
               const FMapCoord mapObjOriginCoord = model_shared->OnMapObjsCoordTable[mapObj] + FMapCoord(coordX, coordY);
 
               const EMapObjType trackerType = mapObj->GetType();
@@ -181,6 +171,92 @@ namespace UE::Smith
               break;
             } 
           }
+        }
+        void FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+        {
+          // 安全性チェック
+          #pragma region Safe Check
+          if (!IS_UINTERFACE_VALID(mapObj))
+          {
+            return;
+          }
+
+          if (format.GetRow() == 0 || format.GetColumn() == 0)
+          {
+            return;
+          }
+          #pragma endregion Safe Check
+          // end of Safe Check
+
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared.IsValid())
+          {
+            return;
+          }
+
+          if (!model_shared->OnMapObjsCoordTable.Contains(mapObj))
+          {
+            return;
+          }
+
+          outActors.Reset();
+
+          const uint8 mapObjSizeX = mapObj->GetOnMapSizeX();
+          const uint8 mapObjSizeY = mapObj->GetOnMapSizeY();
+
+          const uint8 coordX = mapObjSizeX > offsetToLeft ? offsetToLeft : 0u;
+          const uint8 coordY = mapObjSizeY > offsetToTop ? offsetToTop : 0u;
+          // オブジェクトの中心座標
+          const FMapCoord mapObjOriginCoord = model_shared->OnMapObjsCoordTable[mapObj] + FMapCoord(coordX, coordY);
+
+          const EMapObjType trackerType = mapObj->GetType();
+
+          // 攻撃フォーマットをマップオブジェクトの中心座標でマップ座標に変換
+          using namespace UE::MLibrary::MDataStructure;
+          TDimension2Array<FMapCoord> mapCoords = FFormatTransformer::FormatToMapCoord(format, mapObjOriginCoord);
+
+          for (uint64 y = 0; y < format.GetRow(); ++y)
+          {
+            for (uint64 x = 0; x < format.GetColumn(); ++x)
+            {
+              ESmithFormatType formatType = format.GetFormatData(x, y);
+              // 効果がないマスだったら無視する
+              if (formatType != ESmithFormatType::EFFECT)
+              {
+                continue;
+              }
+
+              // マス座標がものを置ける座標じゃないと飛ばす
+              const FMapCoord mapCoord = mapCoords.At_ReadOnly(y, x);
+              if (!model_shared->StaySpaceTable.Contains(mapCoord))
+              {
+                continue;
+              }
+
+              // 座標にマップオブジェクトがないと飛ばす
+              ICanSetOnMap* coordMapObj = model_shared->StaySpaceTable[mapCoord]->GetMapObject();
+              if (coordMapObj == nullptr || coordMapObj == mapObj)
+              {
+                continue;
+              }
+
+              if (coordMapObj->GetType() == trackerType)
+              {
+                continue;
+              }
+
+              // TODO Safe Cast may cause performance issue
+              // マップオブジェクトが攻撃できないと飛ばす
+              IAttackable* attackable = Cast<IAttackable>(coordMapObj);
+              if (!IS_UINTERFACE_VALID(attackable))
+              {
+                continue;
+              }
+
+              outActors.Add(attackable);
+            }
+          }
+          
         }
         void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
@@ -476,6 +552,10 @@ namespace UE::Smith
     void FSmithMapObjOperator::FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format)
     {
       m_pImpl->FindAttackableMapObjs(outActors, mapObj, format);
+    }
+    void FSmithMapObjOperator::FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+    {
+      m_pImpl->FindAttackableMapObjsFromCoord(outActors, mapObj, format, offsetToLeft, offsetToTop);
     }
     void FSmithMapObjOperator::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     { 

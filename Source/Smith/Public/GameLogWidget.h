@@ -35,6 +35,9 @@ public:
 	void OnLog_BP();
 	UFUNCTION(BlueprintImplementableEvent)
 	void AddLog_BP();
+	// ログが更新されたときの処理
+	UFUNCTION(BluePrintCallable,Category = "GameLog")
+	void UpdatedLog();
 
 public:
 	// BP側の変数とバインド（処理が終わっているのでプロジェクトが終わったら改善する）

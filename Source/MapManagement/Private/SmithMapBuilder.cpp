@@ -3,7 +3,7 @@
 
 SmithMapBuilder.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップを作成するクラス
 

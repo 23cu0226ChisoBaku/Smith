@@ -56,10 +56,15 @@ bool USmithAIAttackStrategy::RegisterAttackFormat(const FString& name, const UDa
   }
 
   TArray<ESmithFormatType> typeSrcData;
+  typeSrcData.SetNum(arr.Num() - 1);
 
   for (int i = 1; i < arr.Num(); ++i)
   {
-    typeSrcData.Emplace(arr[i]->Type);
+    const uint8 row = arr[i]->Row;
+    const uint8 column = arr[i]->Column;
+    const int32 idx = StaticCast<int32>(row) * StaticCast<int32>(formatColumn) + StaticCast<int32>(column);
+    //typeSrcData.Emplace(arr[i]->Type);
+    typeSrcData[idx] = arr[i]->Type;
   }
 
   TSharedPtr<UE::Smith::Battle::FSmithCommandFormat> formatPtr = ::MakeShared<UE::Smith::Battle::FSmithCommandFormat>(typeSrcData.GetData(), dataCnt, formatRow, formatColumn);

@@ -74,10 +74,14 @@ void USmithPickUpItemEvent::TriggerEvent(ICanSetOnMap* mapObj)
 
 void USmithPickUpItemEvent::DiscardEvent()
 {
+  if (::IsValid(m_pickableObject))
+  {
+    m_pickableObject->ConditionalBeginDestroy();
+  }
   m_pickableObject = nullptr;
   m_pickable.Reset();
 
-  MarkAsGarbage();
+  ConditionalBeginDestroy();
 }
 
 void USmithPickUpItemEvent::RaiseEvent()

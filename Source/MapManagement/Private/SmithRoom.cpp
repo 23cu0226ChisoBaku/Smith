@@ -3,7 +3,7 @@
 
 SmithRoom.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : Smith部屋（不思議ダンジョン風）
 

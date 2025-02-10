@@ -24,4 +24,8 @@ public:
 
 public:
 	void Enhance(IEnhanceable*, IParamAbsorbable*) override final;
+	int32 GetUpgradeCount() const;
+
+private:
+	int32 m_upgradeCount;
 };

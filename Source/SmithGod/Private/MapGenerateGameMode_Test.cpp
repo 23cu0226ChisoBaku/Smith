@@ -33,10 +33,15 @@
 #include "GameLogWidget.h"
 #include "SmithDungeonDamageCalculator.h"
 #include "UI_CurrentLevel.h"
+#include "SmithTowerEnemyParamInitializer.h"
+#include "SmithEnemyParamInitializer.h"
 
 // TODO
 #include "SmithNextLevelEvent.h"
 
+#include "Kismet/KismetSystemLibrary.h"
+#include "Misc/DateTime.h"
+#include "AudioKit.h"
 #include "MLibrary.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
@@ -50,10 +55,10 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   , m_logSubsystem(nullptr)
   , m_damageCalculator(nullptr)
   , m_mapMgr(nullptr)
+  , m_defeatedEnemyCount(0)
   , m_curtLevel(0)
-{
-
-}
+  , m_startPlayTime(0)
+{ }
 
 void AMapGenerateGameMode_Test::StartPlay()
 {
@@ -66,6 +71,56 @@ void AMapGenerateGameMode_Test::StartPlay()
 void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
   Super::EndPlay(EndPlayReason);
+
+  FSmithEnemyParamInitializer::DetachInitializer();
+  MLibrary::UE::Audio::AudioKit::DetachAudioPlayer();
+
+  if (m_battleMediator != nullptr)
+  {
+    m_battleMediator->MarkAsGarbage();
+  }
+
+  if (m_eventPublisher != nullptr)
+  {
+    m_eventPublisher->MarkAsGarbage();
+  }
+
+  if (m_eventSystem != nullptr)
+  {
+    m_eventSystem->MarkAsGarbage();
+  }
+
+  if (m_chasePlayerTracker != nullptr)
+  {
+    m_chasePlayerTracker->MarkAsGarbage();
+  }
+
+  if (m_enhanceSystem != nullptr)
+  {
+    m_enhanceSystem->MarkAsGarbage();
+  }
+
+  if (m_eventMediator != nullptr)
+  {
+    m_eventMediator->MarkAsGarbage();
+  }
+
+  if (m_damageCalculator != nullptr)
+  {
+    m_damageCalculator->MarkAsGarbage();
+  }
+
+  if (m_nextLevelEvent != nullptr)
+  {
+    m_nextLevelEvent->ConditionalBeginDestroy();
+  }
+
+  if (m_towerInitializer != nullptr)
+  {
+    m_towerInitializer->MarkAsGarbage();
+  }
+
+  m_mapMgr.Reset();
 }
 
 void AMapGenerateGameMode_Test::startNewLevel()
@@ -91,15 +146,18 @@ void AMapGenerateGameMode_Test::startNewLevel()
   else
   {
     m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
-    m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
     deployNextLevelEvent();
+    m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
   }
 
   m_battleSystem->InitializeBattle();
 
+  UWorld* world = GetWorld();
+
+  // コマンド仲介初期化
   {
     TArray<AActor*> canCmdMediateObjs;
-    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UCanCommandMediate::StaticClass(), canCmdMediateObjs);
+    UGameplayStatics::GetAllActorsWithInterface(world, UCanCommandMediate::StaticClass(), canCmdMediateObjs);
 
     if (canCmdMediateObjs.Num() > 0)
     {
@@ -112,9 +170,10 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
+  // 移動ストラテジー実装アクター
   {
     TArray<AActor*> moveDirectorImplementedActors;
-    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UMoveDirector::StaticClass(), moveDirectorImplementedActors);
+    UGameplayStatics::GetAllActorsWithInterface(world, UMoveDirector::StaticClass(), moveDirectorImplementedActors);
     
     if (moveDirectorImplementedActors.Num() > 0)
     {
@@ -132,6 +191,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
           continue;
         }
 
+        // TODO
         IMoveDirector* moveDirector = Cast<IMoveDirector>(obj);
         UClass* moveDirectorSub = moveDirector->GetMoveDirectorUClass();
 
@@ -145,9 +205,10 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
+  // SmithAI駆動アクター
   {
     TArray<AActor*> aiDrivenActors;
-    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), USmithSimpleAIDriven::StaticClass(), aiDrivenActors);
+    UGameplayStatics::GetAllActorsWithInterface(world, USmithSimpleAIDriven::StaticClass(), aiDrivenActors);
 
     if (aiDrivenActors.Num() > 0)
     {
@@ -159,9 +220,10 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
+  // イベント発行アクター
   {
     TArray<AActor*> eventPublishObjs;
-    UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UCanRequestEventPublishment::StaticClass(), eventPublishObjs);
+    UGameplayStatics::GetAllActorsWithInterface(world, UCanRequestEventPublishment::StaticClass(), eventPublishObjs);
 
     if (eventPublishObjs.Num() > 0)
     {
@@ -169,6 +231,21 @@ void AMapGenerateGameMode_Test::startNewLevel()
       {
         ICanRequestEventPublishment* publishRequester = Cast<ICanRequestEventPublishment>(actor);
         publishRequester->SetEventPublishMediator(m_eventMediator);
+      }
+    }
+  }
+
+  {
+    TArray<AActor*> turnBaseEnemies;
+    UGameplayStatics::GetAllActorsOfClass(world, ATurnBaseActor::StaticClass(), turnBaseEnemies);
+
+    if (turnBaseEnemies.Num() > 0)
+    {
+      for (const auto& enemy : turnBaseEnemies)
+      {
+        ATurnBaseActor* turnBaseEnemy = Cast<ATurnBaseActor>(enemy);
+        turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
+        turnBaseEnemy->InitializeParameter(m_curtLevel);
       }
     }
   }
@@ -250,10 +327,13 @@ void AMapGenerateGameMode_Test::initializeGame()
       m_logSubsystem->SetLogWidget(logWidget);
     }
 
-    m_curtLevel = 1u;
+    m_curtLevel = 1;
+    m_defeatedEnemyCount = 0;
+    m_startPlayTime = FMath::FloorToInt32(world->GetTimeSeconds());
+    m_startDateTime = FDateTime::Now();
 
     // TODO
-    CurtLevelUI = CreateWidget<UUI_CurrentLevel>(GetWorld(), LevelUISub);
+    CurtLevelUI = CreateWidget<UUI_CurrentLevel>(world, LevelUISub);
     if (CurtLevelUI != nullptr)
     {
       CurtLevelUI->AddToViewport();
@@ -269,6 +349,12 @@ void AMapGenerateGameMode_Test::initializeGame()
     {
       m_nextLevelEvent->OnNextLevel.BindUObject(this, &AMapGenerateGameMode_Test::goToNextLevel);
     }
+
+    m_towerInitializer = NewObject<USmithTowerEnemyParamInitializer>(this);
+    check(m_towerInitializer != nullptr);
+
+    m_towerInitializer->AssignEnemyParamList(EnemyDefaultParamList);
+    FSmithEnemyParamInitializer::AssignInitializer(m_towerInitializer);
   }
 }
 
@@ -285,4 +371,35 @@ void AMapGenerateGameMode_Test::deployNextLevelEvent(bool bIsActiveWhenDeploy)
   {
     m_mapMgr->InitNextLevelEvent(m_nextLevelEvent);
   }
+}
+
+void AMapGenerateGameMode_Test::addDefeatedEnemyCount()
+{
+  ++m_defeatedEnemyCount;
+}
+
+int32 AMapGenerateGameMode_Test::GetDefeatedEnemyCount() const
+{
+  return m_defeatedEnemyCount;
+}
+
+int32 AMapGenerateGameMode_Test::GetUpgradeCount() const
+{
+  return m_enhanceSystem != nullptr ? m_enhanceSystem->GetUpgradeCount() : 0; 
+}
+
+int32 AMapGenerateGameMode_Test::GetCurrentLevel() const
+{
+  return m_curtLevel;
+}
+
+int32 AMapGenerateGameMode_Test::GetCurrentPlayTime_Second() const
+{
+  UWorld* world = GetWorld();
+  return ::IsValid(world) ? FMath::FloorToInt32(world->GetTimeSeconds()) - m_startPlayTime : 0;
+}
+
+FTimespan AMapGenerateGameMode_Test::GetCurrentPlayTime_Timespan() const
+{
+  return FDateTime::Now() - m_startDateTime;
 }
