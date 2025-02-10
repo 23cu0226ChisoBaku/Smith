@@ -41,6 +41,7 @@
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/DateTime.h"
+#include "AudioKit.h"
 #include "MLibrary.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
@@ -72,6 +73,54 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
   Super::EndPlay(EndPlayReason);
 
   FSmithEnemyParamInitializer::DetachInitializer();
+  MLibrary::UE::Audio::AudioKit::DetachAudioPlayer();
+
+  if (m_battleMediator != nullptr)
+  {
+    m_battleMediator->MarkAsGarbage();
+  }
+
+  if (m_eventPublisher != nullptr)
+  {
+    m_eventPublisher->MarkAsGarbage();
+  }
+
+  if (m_eventSystem != nullptr)
+  {
+    m_eventSystem->MarkAsGarbage();
+  }
+
+  if (m_chasePlayerTracker != nullptr)
+  {
+    m_chasePlayerTracker->MarkAsGarbage();
+  }
+
+  if (m_enhanceSystem != nullptr)
+  {
+    m_enhanceSystem->MarkAsGarbage();
+  }
+
+  if (m_eventMediator != nullptr)
+  {
+    m_eventMediator->MarkAsGarbage();
+  }
+
+  if (m_damageCalculator != nullptr)
+  {
+    m_damageCalculator->MarkAsGarbage();
+  }
+
+  if (m_nextLevelEvent != nullptr)
+  {
+    m_nextLevelEvent->ConditionalBeginDestroy();
+  }
+
+  if (m_towerInitializer != nullptr)
+  {
+    m_towerInitializer->MarkAsGarbage();
+  }
+
+  m_mapMgr.Reset();
 }
 
 void AMapGenerateGameMode_Test::startNewLevel()

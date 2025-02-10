@@ -81,7 +81,7 @@ void USmithPickUpItemEvent::DiscardEvent()
   m_pickableObject = nullptr;
   m_pickable.Reset();
 
-  MarkAsGarbage();
+  ConditionalBeginDestroy();
 }
 
 void USmithPickUpItemEvent::RaiseEvent()

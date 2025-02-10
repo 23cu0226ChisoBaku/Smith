@@ -14,6 +14,10 @@ namespace MLibrary
     {
       m_audioPlayer = newAudioPlayer;
     }
+    void AudioKit::DetachAudioPlayer()
+    {
+      m_audioPlayer = nullptr;
+    }
     FSoundEffectHandle AudioKit::PlaySE3D(const FString& seName, float volume, const FVector& location)
     {
       if (!m_audioPlayer.IsValid())
