@@ -15,6 +15,10 @@
 #include "../Weapon/Params.h"
 #include "ICanRequestEventPublishment.h"
 #include "ISmithBattleLogger.h"
+
+// TODO
+#include "SmithEnemyTraits.h"
+
 #include "TurnActor_Test.generated.h"
 
 struct FSmithAIStrategyContainer;
@@ -40,6 +44,10 @@ class SMITH_API ATurnActor_Test final: 	public ATurnBaseActor, public IAttackabl
 																				public ISmithAnimator, public ISmithBattleLogger
 {
 	GENERATED_BODY()
+
+// Enemy Traits
+public:
+	using Type = SmallGolem;
 
 public:
 	ATurnActor_Test();
@@ -73,6 +81,9 @@ public:
 	FString GetName_Log() const override;
 	EBattleLogType GetType_Log() const override;
 
+public:
+	void InitializeParameter(int32 currentLevel) override final;
+
 private:
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
@@ -103,7 +114,7 @@ private:
 	TArray<TObjectPtr<USmithPickable>> DropUpgradeTable; 
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
 	FParams EnemyParam;
 
 	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;

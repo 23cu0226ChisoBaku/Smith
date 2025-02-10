@@ -46,32 +46,7 @@ void ATurnBaseActor::SetCommandMediator(ICommandMediator* mediator)
 	m_commandMediator = mediator;
 }
 
-// void ATurnBaseActor::SendMoveCommand(IMoveable* moveable, EDirection direction, uint8 moveDistance)
-// {
-// 	if (!IsCommandSendable())
-// 	{
-// 		return;
-// 	}
-// 	else
-// 	{
-// 		MDebug::LogWarning("send succeed");
-// 	}
-
-// 	if (m_commandMediator.IsValid())
-// 	{
-// 		m_commandMediator->SendMoveCommand(this, moveable, direction, moveDistance);
-// 	}
-// }
-
-// void ATurnBaseActor::SendAttackCommand(ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& handle)
-// {
-// 	if (!IsCommandSendable())
-// 	{
-// 		return;
-// 	}
-
-// 	if (m_commandMediator.IsValid())
-// 	{
-// 		m_commandMediator->SendAttackCommand(this, attacker, direction, format, ::MoveTemp(handle));
-// 	}
-//}
+void ATurnBaseActor::InitializeParameter(int32 currentLevel)
+{
+	
+}

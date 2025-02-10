@@ -3,7 +3,7 @@
 
 SmithMapManager.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップマネージャー
 
@@ -138,6 +138,7 @@ namespace UE::Smith
         /// @param FVector                        移動先の座標
         ///
         void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
+        // TODO
         bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
         bool GetMapObjectCoord(ICanSetOnMap*, uint8& outX, uint8& outY);
         bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y);

@@ -7,6 +7,7 @@
 #include "SmithMapBluePrint.h"
 #include "SmithMapConstructionBluePrint.h"
 #include "SmithEnemyGenerateBluePrint.h"
+#include "Misc/DateTime.h"
 #include "MapGenerateGameMode_Test.generated.h"
 
 class USmithBattleMediator;
@@ -19,10 +20,10 @@ class USmithEventPublishMediator;
 class USmithBattleLogWorldSubsystem;
 class UUI_CurrentLevel;
 class USmithNextLevelEvent;
+class USmithTowerEnemyParamInitializer;
 
 // Damage
 class USmithDungeonDamageCalculator;
-
 class UGameLogWidget;
 
 namespace UE::Smith
@@ -61,6 +62,8 @@ public:
 	int32 GetCurrentLevel() const;
 	UFUNCTION(BlueprintCallable)
 	int32 GetCurrentPlayTime_Second() const;
+	UFUNCTION(BlueprintCallable)
+	FTimespan GetCurrentPlayTime_Timespan() const;
 
 private:
 	void initializeGame();
@@ -110,6 +113,10 @@ private:
 	TSubclassOf<UUI_CurrentLevel> LevelUISub;
 	UPROPERTY()
 	TObjectPtr<USmithNextLevelEvent> m_nextLevelEvent;
+	UPROPERTY(EditAnywhere, meta=(RequiredAssetDataTags = "RowStructure=/Script/SmithModel.SmithEnemyParamInitializerRow"))
+	TObjectPtr<UDataTable> EnemyDefaultParamList;
+	UPROPERTY()
+	TObjectPtr<USmithTowerEnemyParamInitializer> m_towerInitializer;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
@@ -117,5 +124,9 @@ private:
 	int32 m_defeatedEnemyCount;
 	int32 m_curtLevel;
 	int32 m_startPlayTime;
+
+// TODO Test
+private:
+	FDateTime m_startDateTime;
 
 };

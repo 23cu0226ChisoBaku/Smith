@@ -33,11 +33,15 @@
 #include "GameLogWidget.h"
 #include "SmithDungeonDamageCalculator.h"
 #include "UI_CurrentLevel.h"
+#include "SmithTowerEnemyParamInitializer.h"
+#include "SmithEnemyParamInitializer.h"
 
 // TODO
 #include "SmithNextLevelEvent.h"
 
 #include "Kismet/KismetSystemLibrary.h"
+#include "Misc/DateTime.h"
+#include "AudioKit.h"
 #include "MLibrary.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
@@ -68,9 +72,55 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
 {
   Super::EndPlay(EndPlayReason);
 
-  MDebug::LogError("Defeat Count" + FString::FromInt(m_defeatedEnemyCount));
-  MDebug::LogError("Enhance Count" + FString::FromInt(GetUpgradeCount()));
-  MDebug::LogError("Play Time" + FString::FromInt(GetCurrentPlayTime_Second()));
+  FSmithEnemyParamInitializer::DetachInitializer();
+  MLibrary::UE::Audio::AudioKit::DetachAudioPlayer();
+
+  if (m_battleMediator != nullptr)
+  {
+    m_battleMediator->MarkAsGarbage();
+  }
+
+  if (m_eventPublisher != nullptr)
+  {
+    m_eventPublisher->MarkAsGarbage();
+  }
+
+  if (m_eventSystem != nullptr)
+  {
+    m_eventSystem->MarkAsGarbage();
+  }
+
+  if (m_chasePlayerTracker != nullptr)
+  {
+    m_chasePlayerTracker->MarkAsGarbage();
+  }
+
+  if (m_enhanceSystem != nullptr)
+  {
+    m_enhanceSystem->MarkAsGarbage();
+  }
+
+  if (m_eventMediator != nullptr)
+  {
+    m_eventMediator->MarkAsGarbage();
+  }
+
+  if (m_damageCalculator != nullptr)
+  {
+    m_damageCalculator->MarkAsGarbage();
+  }
+
+  if (m_nextLevelEvent != nullptr)
+  {
+    m_nextLevelEvent->ConditionalBeginDestroy();
+  }
+
+  if (m_towerInitializer != nullptr)
+  {
+    m_towerInitializer->MarkAsGarbage();
+  }
+
+  m_mapMgr.Reset();
 }
 
 void AMapGenerateGameMode_Test::startNewLevel()
@@ -195,6 +245,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
       {
         ATurnBaseActor* turnBaseEnemy = Cast<ATurnBaseActor>(enemy);
         turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
+        turnBaseEnemy->InitializeParameter(m_curtLevel);
       }
     }
   }
@@ -279,6 +330,7 @@ void AMapGenerateGameMode_Test::initializeGame()
     m_curtLevel = 1;
     m_defeatedEnemyCount = 0;
     m_startPlayTime = FMath::FloorToInt32(world->GetTimeSeconds());
+    m_startDateTime = FDateTime::Now();
 
     // TODO
     CurtLevelUI = CreateWidget<UUI_CurrentLevel>(world, LevelUISub);
@@ -297,6 +349,12 @@ void AMapGenerateGameMode_Test::initializeGame()
     {
       m_nextLevelEvent->OnNextLevel.BindUObject(this, &AMapGenerateGameMode_Test::goToNextLevel);
     }
+
+    m_towerInitializer = NewObject<USmithTowerEnemyParamInitializer>(this);
+    check(m_towerInitializer != nullptr);
+
+    m_towerInitializer->AssignEnemyParamList(EnemyDefaultParamList);
+    FSmithEnemyParamInitializer::AssignInitializer(m_towerInitializer);
   }
 }
 
@@ -339,4 +397,9 @@ int32 AMapGenerateGameMode_Test::GetCurrentPlayTime_Second() const
 {
   UWorld* world = GetWorld();
   return ::IsValid(world) ? FMath::FloorToInt32(world->GetTimeSeconds()) - m_startPlayTime : 0;
+}
+
+FTimespan AMapGenerateGameMode_Test::GetCurrentPlayTime_Timespan() const
+{
+  return FDateTime::Now() - m_startDateTime;
 }

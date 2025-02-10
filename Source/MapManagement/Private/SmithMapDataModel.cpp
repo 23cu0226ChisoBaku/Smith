@@ -3,7 +3,7 @@
 
 SmithMapDataModel.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップデータ情報モデル
 

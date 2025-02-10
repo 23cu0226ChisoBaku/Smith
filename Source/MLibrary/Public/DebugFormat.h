@@ -23,8 +23,8 @@ Encoding : UTF-8
 
 struct DebugFormat
 {
-	FString LogHeaderString;
-	FColor  LogColor;
+  FString LogHeaderString;
+  FColor  LogColor;
 };
 
 #endif

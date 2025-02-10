@@ -24,27 +24,29 @@ Encoding : UTF-8
 class FSoundEffectHandle
 {
 public:
-	MLIBRARY_API FSoundEffectHandle();
-	MLIBRARY_API FSoundEffectHandle(const FString& identifierStr, UAudioComponent* audioComp);
-	MLIBRARY_API ~FSoundEffectHandle();
+  MLIBRARY_API FSoundEffectHandle();
+  MLIBRARY_API FSoundEffectHandle(const FString& identifierStr, UAudioComponent* audioComp);
+  MLIBRARY_API ~FSoundEffectHandle();
 
-	inline bool operator==(const FSoundEffectHandle& rhs)
-	{
-		return IsEqual(*this, rhs);
-	}
-	inline UAudioComponent* operator->() const
-	{
-		return AudioComponent.Get();
-	}
-	inline bool IsValid() const
-	{
-		return UniqueIdentifier.IsValid() && AudioComponent.IsValid();
-	}
+  inline bool operator==(const FSoundEffectHandle& rhs)
+  {
+    return IsEqual(*this, rhs);
+  }
+  inline UAudioComponent* operator->() const
+  {
+    return AudioComponent.Get();
+  }
+  inline bool IsValid() const
+  {
+    return UniqueIdentifier.IsValid() && AudioComponent.IsValid();
+  }
 
-	friend MLIBRARY_API bool IsEqual(const FSoundEffectHandle&, const FSoundEffectHandle&);
+  friend MLIBRARY_API bool IsEqual(const FSoundEffectHandle&, const FSoundEffectHandle&);
 private:
-	FGuid UniqueIdentifier;
-	TWeakObjectPtr<UAudioComponent> AudioComponent;
+  /// @brief	ハンドルユニークID 
+  FGuid UniqueIdentifier;
+  /// @brief	SE再生に使うAudioComponentへのポインタ
+  TWeakObjectPtr<UAudioComponent> AudioComponent;
 };
 
 #endif

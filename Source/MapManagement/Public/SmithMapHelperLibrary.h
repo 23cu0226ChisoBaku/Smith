@@ -3,7 +3,7 @@
 
 SmithMapHelperLibrary.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : FSmithMapヘルパーライブラリ
 
