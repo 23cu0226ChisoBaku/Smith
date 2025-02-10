@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+UENUM(BlueprintType)
 enum class EDirection: uint8
 {
   North = 0,

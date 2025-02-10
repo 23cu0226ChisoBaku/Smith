@@ -3,7 +3,7 @@
 
 SmithSection.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : セクションクラス（マップの基本単位）
 

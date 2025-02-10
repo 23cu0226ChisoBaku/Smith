@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SmithSkillCenterSpotParameter.h"
 #include "SmithAIConditionBindHandle.generated.h"
 
 /**
@@ -16,4 +17,6 @@ struct SMITH_API FSmithAIConditionBindHandle
 	FName ConditionFuncName;
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UDataTable> FormatMasterData;
+	UPROPERTY(EditAnywhere)
+	FSmithSkillCenterSpotParameter SkillParameter;
 };

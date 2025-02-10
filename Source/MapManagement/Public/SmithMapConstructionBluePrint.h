@@ -3,7 +3,7 @@
 
 SmithMapConstructor.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップに配置するオブジェクトの設計図
 
@@ -27,17 +27,17 @@ Encoding : UTF-8
 USTRUCT(BlueprintType)
 struct MAPMANAGEMENT_API FSmithMapConstructionBluePrint
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-	/** タイルサイズ(単位：cm) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 TileSize;
-	/** マップの原点座標(マップ矩形(二次元配列)の[0,0]の座標) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector OriginCoordinate;
-	/** タイルのBPオブジェクトパス */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<ETileType, FString> TileBuildingMaterialPaths;
+  /** タイルサイズ(単位：cm) */
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  int32 TileSize;
+  /** マップの原点座標(マップ矩形(二次元配列)の[0,0]の座標) */
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  FVector OriginCoordinate;
+  /** タイルのBPオブジェクトパス */
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  TMap<ETileType, FString> TileBuildingMaterialPaths;
 
 };

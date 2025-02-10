@@ -3,7 +3,7 @@
 
 SmithMapDataModel.h
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : マップデータ情報モデル
 
@@ -31,8 +31,8 @@ uint32 GetTypeHash(const TWeakInterfacePtr<ICanSetOnMap>&);
 #else /// @brief optimize by inlining in shipping and development builds
 FORCEINLINE uint32 GetTypeHash(const TWeakInterfacePtr<ICanSetOnMap>& Thing)
 {
-	uint32 Hash = FCrc::MemCrc32(&Thing, sizeof(TWeakInterfacePtr<ICanSetOnMap>));
-	return Hash;
+  uint32 Hash = FCrc::MemCrc32(&Thing, sizeof(TWeakInterfacePtr<ICanSetOnMap>));
+  return Hash;
 }
 #endif
 
@@ -41,48 +41,48 @@ class FStaySpaceTileInfoContainer;
 
 namespace UE::Smith
 {
-	namespace Map
-	{
-		class FSmithMap;
-		/// 
-		/// @brief マップデータモデル
-		/// namespace UE::Smith::Map
-		///
-		struct MAPMANAGEMENT_API FSmithMapDataModel
-		{
-			//---------------------------------------
-			/*
-											ctorとdtor
-			*/
-			//---------------------------------------
-			public:
-				FSmithMapDataModel();
-				~FSmithMapDataModel();
-				//---------------------------------------
-				/*
-													ムーブ
-				*/
-				//---------------------------------------
-				FSmithMapDataModel(FSmithMapDataModel&&) noexcept;
-				FSmithMapDataModel& operator=(FSmithMapDataModel&&) noexcept;
+  namespace Map
+  {
+    class FSmithMap;
+    /// 
+    /// @brief マップデータモデル
+    /// namespace UE::Smith::Map
+    ///
+    struct MAPMANAGEMENT_API FSmithMapDataModel
+    {
+      //---------------------------------------
+      /*
+                      ctorとdtor
+      */
+      //---------------------------------------
+      public:
+        FSmithMapDataModel();
+        ~FSmithMapDataModel();
+        //---------------------------------------
+        /*
+                          ムーブ
+        */
+        //---------------------------------------
+        FSmithMapDataModel(FSmithMapDataModel&&) noexcept;
+        FSmithMapDataModel& operator=(FSmithMapDataModel&&) noexcept;
 
-			//---------------------------------------
-			/*
-											コピー禁止
-			*/
-			//---------------------------------------
-			private:
-				FSmithMapDataModel(const FSmithMapDataModel&) = delete;
-				FSmithMapDataModel& operator=(const FSmithMapDataModel&) = delete;
-			
-			public:
+      //---------------------------------------
+      /*
+                      コピー禁止
+      */
+      //---------------------------------------
+      private:
+        FSmithMapDataModel(const FSmithMapDataModel&) = delete;
+        FSmithMapDataModel& operator=(const FSmithMapDataModel&) = delete;
+      
+      public:
         TWeakPtr<FSmithMap> Map;
         TMap<TWeakInterfacePtr<ICanSetOnMap>, FMapCoord> OnMapObjsCoordTable;
         TMap<FMapCoord, TSharedPtr<FObstacleTileInfoContainer>> ObstacleTable;
         TMap<FMapCoord, TSharedPtr<FStaySpaceTileInfoContainer>> StaySpaceTable;
-				FVector OriginWorldCoord;
-				int32 MapTileSize;
-		};
-	}
+        FVector OriginWorldCoord;
+        int32 MapTileSize;
+    };
+  }
 }
 

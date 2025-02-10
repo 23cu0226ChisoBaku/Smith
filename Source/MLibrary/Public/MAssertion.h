@@ -8,13 +8,13 @@
 #include <cassert>
 
 #define not_implemented() \
-{	\
-	static_assert(false, "Not implemented"); \
+{ \
+  static_assert(false, "Not implemented"); \
 }
 
 
 #define not_implemented_return() \
-		not_implemented() \
-		return 0;
+    not_implemented() \
+    return 0;
 
 #endif

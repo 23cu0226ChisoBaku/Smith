@@ -6,9 +6,9 @@
 #define MLIB_CPP_SUPPORT
 
 #if defined(__clang__) || defined(__GNUC__)
-    #define CPP_STANDARD __cpluspluc
+  #define CPP_STANDARD __cpluspluc
 #elif defined(_MSC_VER)
-    #define CPP_STANDARD _MSVC_LANG
+  #define CPP_STANDARD _MSVC_LANG
 #endif
 
 #define HAS_CPP11 CPP_STANDARD >= 201103L

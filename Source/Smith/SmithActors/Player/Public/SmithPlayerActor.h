@@ -65,9 +65,8 @@ class IBattleCommand;
 struct AttackHandle;
 enum class EDirection : uint8;
 
-class USmithWeapon;
 class IEnhanceSystem;
-
+class USmithWeapon;
 class UHerbWidget;
 struct FParams;
 
@@ -172,6 +171,7 @@ public:
 
 public:
 	EDirection GetCameraDirection() const;
+	bool CanReceiveInputEvent() const;
 
 public:
 	void Move(EDirection);
@@ -254,7 +254,7 @@ private:
 // end of UProperties
 
 public:
-	TDelegate<void()> OnDead;
+	TMulticastDelegate<void()> OnDead;
 	TMulticastDelegate<void()> OnStartCameraRotation;
 	TMulticastDelegate<void()> OnFinishCameraRotation;
 //---------------------------------------
@@ -275,6 +275,7 @@ private:
 	uint8 m_bCanAttack : 1;
 	uint8 m_bRotatingCamera : 1;
 	uint8 m_bIsInMenu : 1;
+	uint8 m_bCanReceiveInput : 1;
 	
 
 #pragma endregion Private Properties

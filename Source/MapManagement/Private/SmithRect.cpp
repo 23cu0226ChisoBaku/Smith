@@ -3,7 +3,7 @@
 
 SmithRect.cpp
 
-Author : MAI ZHICONG
+Author : MAI ZHICONG(バクチソウ)
 
 Description : MapManagement モジュール専用矩形
 

@@ -9,22 +9,8 @@
 #include "ICanCommandMediate.h"
 #include "TurnBaseActor.generated.h"
 
-class IBattleCommand;
-class IMoveable;
-class ICanMakeAttack;
-class IAttackable;
 class USmithAIStrategy;
 class USmithAIBehaviorProcessor;
-struct AttackHandle;
-enum class EDirection : uint8;
-
-namespace UE::Smith
-{
-	namespace Battle
-	{
-		class FSmithCommandFormat;
-	}
-}
 
 UCLASS(Abstract)
 class SMITH_API ATurnBaseActor : public AActor , public ITurnManageable , public ICanCommandMediate
@@ -53,10 +39,7 @@ public:
 		#pragma endregion ICanCommandMediate
 		// end of ICanCommandMediate
 
-protected:
-	//void SendMoveCommand(IMoveable*, EDirection, uint8 moveDistance);
-	//void SendAttackCommand(ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&);
-
+		virtual void InitializeParameter(int32 currentLevel);
 	#pragma endregion Interfaces
 	// end of Interfaces
 
@@ -70,5 +53,8 @@ protected:
 
 protected:
 	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
+
+public:
+	TMulticastDelegate<void()> OnDefeatEvent;
 	
 };

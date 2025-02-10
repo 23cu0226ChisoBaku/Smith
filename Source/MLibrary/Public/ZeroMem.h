@@ -20,12 +20,12 @@ Encoding : UTF-8
 #ifndef M_LIB_ZEROMEMORY
 #define M_LIB_ZEROMEMORY
 
-#define ZeroMemory(src,size)			\
-				{													\
-					memset(src, 0, size);		\
-				}
+#define ZeroMemory(src,size)      \
+        {                         \
+          memset(src, 0, size);   \
+        }
 
 #define ZeroMemory_Class()  ZeroMemory(this, sizeof(this))
-				
+        
 #endif
 

@@ -20,6 +20,8 @@
 #include "SmithBattleLogWorldSubsystem.h"
 #include "MLibrary.h"
 
+#include "SmithEnemyParamInitializer.h"
+
 ATurnActor_Test::ATurnActor_Test()
 	: m_attackStrategy(nullptr)
 	, m_moveStrategy(nullptr)
@@ -120,6 +122,12 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 				m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[idx]);
 			}
 		}
+
+		if (OnDefeatEvent.IsBound())
+		{
+			OnDefeatEvent.Broadcast();
+		}
+
 		Destroy();
 		DropUpgradeTable.Reset();
 	}
@@ -281,4 +289,9 @@ FString ATurnActor_Test::GetName_Log() const
 EBattleLogType ATurnActor_Test::GetType_Log() const
 {
 	return EBattleLogType::Enemy;
+}
+
+void ATurnActor_Test::InitializeParameter(int32 currentLevel)
+{
+	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
 }
