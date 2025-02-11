@@ -12,6 +12,7 @@
 namespace SmithPlayerController::Private
 {
   constexpr double ANGLE_PER_DIRECTION = 360.0 / (double)EDirection::DirectionCount;
+  constexpr double MOVE_DEAD_ZONE_SCALAR = 0.5;
   constexpr uint8 DIRECTION_COUNT = (uint8)EDirection::DirectionCount;
   // ベクトルを方向列挙に変換する(X,Yだけ,Zは無視)
 	EDirection VectorDirToEDir(const FVector& direction)
@@ -111,6 +112,11 @@ void ASmithBattlePlayerController::Move(const FInputActionValue& inputValue)
   
   using namespace SmithPlayerController::Private;
   const FVector2D movementInput = inputValue.Get<FVector2D>();
+  if (movementInput.SquaredLength() < MOVE_DEAD_ZONE_SCALAR)
+  {
+    return;
+  }
+
   const EDirection cameraDirection = m_player->GetCameraDirection();
   const EDirection newDirection = CalculateDirectionRelativeCamera(cameraDirection, movementInput);
 	

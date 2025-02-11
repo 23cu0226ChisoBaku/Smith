@@ -11,7 +11,7 @@
 /**
  * 
  */
-UCLASS(Abstract, EditInlineNew)
+UCLASS(Abstract, EditInlineNew, Blueprintable)
 class SMITH_API USmithPickable : public UObject, public IPickable
 															 , public ISmithBattleLogger
 {

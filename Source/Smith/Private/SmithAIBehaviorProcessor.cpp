@@ -21,7 +21,7 @@ void USmithAIBehaviorProcessor::BeginDestroy()
   {
     if (strategy.Strategy != nullptr)
     {
-      strategy.Strategy->MarkAsGarbage();
+      strategy.Strategy->ConditionalBeginDestroy();
     }
   }
   m_strategyContainer.Empty();

@@ -7,7 +7,6 @@
 
 #include "IMoveable.h"
 #include "ICanMakeAttack.h"
-#include "IAttackable.h"
 #include "ICanSetOnMap.h"
 #include "IHealable.h"
 
@@ -18,7 +17,6 @@
 
 #include "SmithCommandFormat.h"
 #include "FormatTransformer.h"
-#include "Direction.h"
 #include "ISmithAnimator.h"
 
 #include "ISmithDamageCalculator.h"
@@ -33,6 +31,7 @@
 #include "AttackHandle.h"
 #include "SmithSkillCenterSpotParameter.h"
 #include "FormatType.h"
+#include "AttackableInfoHandle.h"
 
 USmithBattleMediator::USmithBattleMediator()
   : m_battleSys(nullptr)
@@ -102,7 +101,7 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, E
 
 bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle, bool bAttackEvenNoTarget)
 {
-  if (!m_mapMgr.IsValid() || !m_battleSys.IsValid())
+  if (!m_battleSys.IsValid())
   {
     MDebug::LogError("System INVALID!!!");
     return false;
@@ -120,25 +119,26 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
     return false;
   }
 
-  auto mapMgrSharedPtr = m_mapMgr.Pin();
-  if (!mapMgrSharedPtr.IsValid())
+  TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
+  if (!mapMgr_shared.IsValid())
   {
     return false;
   }
 
   // TODO
   UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, direction);
-  TArray<IAttackable*> attackables{};
-  mapMgrSharedPtr->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
+  TArray<FAttackableInfoHandle> attackables{};
+  mapMgr_shared->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
 
   // TODO Safe Cast may cause performance issue
   ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
   if (attackables.Num() > 0)
   {
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
-    for(auto target : attackables)
+    for(const auto& attackableInfoHandle : attackables)
     {
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(atkHandle), animator));
+      atkHandle.AttackFrom = attackableInfoHandle.AttackFrom;
+      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, attackableInfoHandle.Attackable, ::MoveTemp(atkHandle), animator));
     }
     return true;
   }
@@ -183,7 +183,7 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
 
   // TODO
   UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, direction);
-  TArray<IAttackable*> attackables{};
+  TArray<FAttackableInfoHandle> attackables{};
   mapMgr_shared->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
 
   // TODO Safe Cast may cause performance issue
@@ -191,12 +191,12 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
   if (attackables.Num() > 0)
   {
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
-    for(auto target : attackables)
+    for(const auto& attackableInfo : attackables)
     {
       // TODO 修正案ー＞BattleModelを作成し、Data Assetsで設定できるようにする
       AttackHandle attackHandle;
       attackHandle.Attacker = atkHandle.Attacker;
-      if (target != nullptr && m_damageCalculator.IsValid())
+      if (attackableInfo.Attackable != nullptr && m_damageCalculator.IsValid())
       { 
         FBattleAttackParamHandle attackParam;
         attackParam.AttackPoint = atkHandle.AttackPower;
@@ -204,14 +204,16 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
         attackParam.Level = atkHandle.Level;
         attackParam.MotionValue = atkHandle.MotionValue;
 
-        const FBattleResult result = m_damageCalculator->CalculateDamage(attackParam, target->GetDefenseParam());
+        const FBattleResult result = m_damageCalculator->CalculateDamage(attackParam, attackableInfo.Attackable->GetDefenseParam());
         attackHandle.AttackPower = result.Damage;
       }
       else
       {
         attackHandle.AttackPower = atkHandle.AttackPower;
       }
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(attackHandle), animator));
+
+      attackHandle.AttackFrom = attackableInfo.AttackFrom;
+      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, attackableInfo.Attackable, ::MoveTemp(attackHandle), animator));
     }
     return true;
   }
@@ -254,7 +256,7 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* a
   }
 
   UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, skillParameter.Direction);
-  TArray<IAttackable*> attackables{};
+  TArray<FAttackableInfoHandle> attackables{};
   mapMgr_shared->FindAttackableMapObjsFromCoord(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat, skillParameter.OffsetToLeft, skillParameter.OffsetToTop);
 
    // TODO Safe Cast may cause performance issue
@@ -262,12 +264,12 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* a
   if (attackables.Num() > 0)
   {
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
-    for(auto target : attackables)
+    for(const auto& attackableInfo : attackables)
     {
       // TODO 修正案ー＞BattleModelを作成し、Data Assetsで設定できるようにする
       AttackHandle attackHandle;
       attackHandle.Attacker = atkHandle.Attacker;
-      if (target != nullptr && m_damageCalculator.IsValid())
+      if (attackableInfo.Attackable != nullptr && m_damageCalculator.IsValid())
       { 
         FBattleAttackParamHandle attackParam;
         attackParam.AttackPoint = atkHandle.AttackPower;
@@ -275,14 +277,16 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* a
         attackParam.Level = atkHandle.Level;
         attackParam.MotionValue = atkHandle.MotionValue;
 
-        const FBattleResult result = m_damageCalculator->CalculateDamage(attackParam, target->GetDefenseParam());
+        const FBattleResult result = m_damageCalculator->CalculateDamage(attackParam, attackableInfo.Attackable->GetDefenseParam());
         attackHandle.AttackPower = result.Damage;
       }
       else
       {
         attackHandle.AttackPower = atkHandle.AttackPower;
       }
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, target, ::MoveTemp(attackHandle), animator));
+
+      attackHandle.AttackFrom = attackableInfo.AttackFrom;
+      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, attackableInfo.Attackable, ::MoveTemp(attackHandle), animator));
     }
     return true;
   }

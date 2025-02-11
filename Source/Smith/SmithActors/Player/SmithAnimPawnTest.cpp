@@ -72,7 +72,7 @@ void ASmithAnimPawnTest::SwitchAnimation(uint8 animationState)
 	default:
 		break;
 	}
-	AnimationComp->SwitchAnimState(StateName,0.0f);
+	AnimationComp->SwitchAnimState(StateName);
 }
 
 void ASmithAnimPawnTest::UpdateAnimation(float deltaTime)

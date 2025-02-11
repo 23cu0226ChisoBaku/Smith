@@ -19,14 +19,18 @@ Encoding : UTF-8
 #include "SmithMapDataModel.h"
 #include "InvalidValues.h"
 #include "ICanSetOnMap.h"
-#include "Direction.h"
+#include "IEventRegister.h"
+#include "ISmithMapEvent.h"
 #include "SmithCommandFormat.h"
 #include "FormatType.h"
 #include "FormatTransformer.h"
-#include "IAttackable.h"
 #include "MapObjType.h"
-#include "IEventRegister.h"
-#include "ISmithMapEvent.h"
+
+// TODO
+// IAttackable.h
+// Direction.h
+#include "AttackableInfoHandle.h"
+#include "SmithModelHelperFunctionLibrary.h"
 
 #include "UObject/WeakInterfacePtr.h"
 #include "MLibrary.h"
@@ -75,7 +79,7 @@ namespace UE::Smith
         {
           m_eventRegister = eventRegister;
         }
-        void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
+        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
         {
           // 安全性チェック
           #pragma region Safe Check
@@ -101,7 +105,7 @@ namespace UE::Smith
           {
             return;
           }
-          outActors.Reset();
+          outAttackableHandles.Reset();
 
           const uint8 mapObjSizeX = mapObj->GetOnMapSizeX();
           const uint8 mapObjSizeY = mapObj->GetOnMapSizeY();
@@ -143,6 +147,7 @@ namespace UE::Smith
                     continue;
                   }
 
+                  // 同じタイプのターゲットに攻撃しない
                   if (coordMapObj->GetType() == trackerType)
                   {
                     continue;
@@ -156,23 +161,25 @@ namespace UE::Smith
                     continue;
                   }
 
-                  outActors.Add(attackable);
+                  const EDirection attackFrom = FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(model_shared->OnMapObjsCoordTable[mapObj], model_shared->OnMapObjsCoordTable[coordMapObj]);
+
+                  outAttackableHandles.Add(FAttackableInfoHandle{attackable, attackFrom});
                 }
               }
 
-              if (outActors.Num() > 0)
+              if (outAttackableHandles.Num() > 0)
               {
                 break;
               }
             }
             
-            if (outActors.Num() > 0)
+            if (outAttackableHandles.Num() > 0)
             {
               break;
             } 
           }
         }
-        void FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
         {
           // 安全性チェック
           #pragma region Safe Check
@@ -199,7 +206,7 @@ namespace UE::Smith
             return;
           }
 
-          outActors.Reset();
+          outAttackableHandles.Reset();
 
           const uint8 mapObjSizeX = mapObj->GetOnMapSizeX();
           const uint8 mapObjSizeY = mapObj->GetOnMapSizeY();
@@ -253,7 +260,9 @@ namespace UE::Smith
                 continue;
               }
 
-              outActors.Add(attackable);
+              const EDirection attackFrom = FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(model_shared->OnMapObjsCoordTable[mapObj], model_shared->OnMapObjsCoordTable[coordMapObj]);
+
+              outAttackableHandles.Add(FAttackableInfoHandle{attackable, attackFrom});
             }
           }
           
@@ -549,13 +558,13 @@ namespace UE::Smith
     {
       m_pImpl->AssignMap(map);
     }
-    void FSmithMapObjOperator::FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format)
+    void FSmithMapObjOperator::FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format)
     {
-      m_pImpl->FindAttackableMapObjs(outActors, mapObj, format);
+      m_pImpl->FindAttackableMapObjs(outAttackableHandles, mapObj, format);
     }
-    void FSmithMapObjOperator::FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+    void FSmithMapObjOperator::FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
     {
-      m_pImpl->FindAttackableMapObjsFromCoord(outActors, mapObj, format, offsetToLeft, offsetToTop);
+      m_pImpl->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
     }
     void FSmithMapObjOperator::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     { 

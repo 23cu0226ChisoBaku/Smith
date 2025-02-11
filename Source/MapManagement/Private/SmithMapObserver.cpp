@@ -277,9 +277,6 @@ namespace UE::Smith
                                                     model_shared->OriginWorldCoord.Z
                                                   ); 
           player->SetActorLocation(playerWorldCoord);
-          FRotator playerRotation;
-          FSmithMapHelperLibrary::DirectMapElementRotation(map_shared.Get(), playerRotation, playerMapCoord.x, playerMapCoord.y);
-          player->SetActorRotation(playerRotation);
           outMapObjs.Emplace(playerMapCoord, playerMapObj);
 
           m_player = playerMapObj;

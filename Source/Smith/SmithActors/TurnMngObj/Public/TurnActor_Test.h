@@ -7,9 +7,7 @@
 #include "IAttackable.h"
 #include "ICanSetOnMap.h"
 #include "IMoveDirector.h"
-
 #include "ISmithAnimator.h"
-
 #include "ISmithSimpleAIDriven.h"
 #include "MapObjType.h"
 #include "../Weapon/Params.h"
@@ -31,6 +29,8 @@ class USmithMoveDirector;
 class USmithPickable;
 
 class USmithAnimationComponent;
+
+enum class EDirection : uint8;
 
 // TODO
 class USmithBattleLogWorldSubsystem;
@@ -84,6 +84,8 @@ public:
 public:
 	void InitializeParameter(int32 currentLevel) override final;
 
+private:
+	void faceToDirection(EDirection);
 private:
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
