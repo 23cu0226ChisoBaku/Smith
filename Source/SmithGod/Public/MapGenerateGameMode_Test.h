@@ -72,6 +72,7 @@ private:
 	void deployNextLevelEvent(bool bIsActiveWhenDeploy = true);
 	void goToNextLevel();
 	void addDefeatedEnemyCount();
+	void processGameClear();
 
 private:
 	/** ダンジョンマップ設計図 */
@@ -115,6 +116,8 @@ private:
 	TObjectPtr<USmithNextLevelEvent> m_nextLevelEvent;
 	UPROPERTY(EditAnywhere, meta=(RequiredAssetDataTags = "RowStructure=/Script/SmithModel.SmithEnemyParamInitializerRow"))
 	TObjectPtr<UDataTable> EnemyDefaultParamList;
+	UPROPERTY(EditAnywhere, meta=(RequiredAssetDataTags = "RowStructure=/Script/Smith.SmithPickableDropRateListRow"))
+	TObjectPtr<UDataTable> EnemyDropLootList;
 	UPROPERTY()
 	TObjectPtr<USmithTowerEnemyParamInitializer> m_towerInitializer;
 

@@ -184,7 +184,6 @@ public:
 	bool InteractMenu();
 	void RecoverHealth();
 	bool registerAttackFormat(const FString&, const UDataTable*);
-
 	void SelfDamage_Debug(int32);
 
 // Private Functions
@@ -193,7 +192,11 @@ private:
 	bool enhanceImpl(int32 idx);
 	void updateCamera(float deltaTime);
 	void updateParam(FParams upgradeParam);
+	void changeForwardImpl(EDirection);
 #pragma endregion Private Functions
+
+public:
+	void OnGameClear();
 // end of Private Functions
 
 //---------------------------------------
@@ -276,7 +279,6 @@ private:
 	uint8 m_bRotatingCamera : 1;
 	uint8 m_bIsInMenu : 1;
 	uint8 m_bCanReceiveInput : 1;
-	
 
 #pragma endregion Private Properties
 // end of Private Properties

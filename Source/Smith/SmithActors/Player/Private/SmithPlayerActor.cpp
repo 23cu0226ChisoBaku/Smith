@@ -341,8 +341,13 @@ void ASmithPlayerActor::ChangeForward(EDirection newDirection)
 		return;
 	}
 
+	changeForwardImpl(newDirection);
+}
+
+void ASmithPlayerActor::changeForwardImpl(EDirection newDirection)
+{
 	using namespace SmithPlayerActor::Private;
-	
+
 	m_actorFaceDir = newDirection;
 	const double newYaw = StaticCast<double>(m_actorFaceDir) * ANGLE_PER_DIRECTION;
 	SetActorRotation(FRotator{0.0, newYaw, 0.0});
@@ -593,6 +598,12 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 {
 	if (attack.AttackPower > 0)
 	{
+		if (attack.AttackFrom != EDirection::Invalid)
+		{
+			const EDirection newDir = StaticCast<EDirection>((StaticCast<uint8>(attack.AttackFrom) + 4u) % StaticCast<uint8>(EDirection::DirectionCount));
+			changeForwardImpl(newDir);
+		}
+
 		m_curtHP -= attack.AttackPower;
 		if (HPComponent != nullptr && m_maxHP > 0)
 		{
@@ -827,7 +838,7 @@ EDirection ASmithPlayerActor::GetCameraDirection() const
 
 void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
 {
-	OnAttack(AttackHandle{this, damage});
+	OnAttack(AttackHandle{this, damage, EDirection::Invalid});
 }
 
 void ASmithPlayerActor::updateParam(FParams upgradeParam)
@@ -849,4 +860,9 @@ void ASmithPlayerActor::updateParam(FParams upgradeParam)
 bool ASmithPlayerActor::CanReceiveInputEvent() const
 {
 	return m_bCanReceiveInput;
+}
+
+void ASmithPlayerActor::OnGameClear()
+{
+	m_bCanReceiveInput = false;
 }

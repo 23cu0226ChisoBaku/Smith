@@ -27,11 +27,11 @@ Encoding : UTF-8
 									前方宣言
 */
 //---------------------------------------
-class IAttackable;
 class ICanSetOnMap;
 class IEventRegister;
 class ISmithMapEvent;
 class USmithEventPublisher;
+struct FAttackableInfoHandle;
 namespace UE::Smith
 {
 	namespace Battle
@@ -128,8 +128,8 @@ namespace UE::Smith
         /// @param ICanSetOnMap                   攻撃を行うマップオブジェクト
         /// @param FSmithCommandFormat            攻撃フォーマット
         ///
-        void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
-        void FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
+        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
+        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
         ///
         /// @brief                                マップオブジェクトを移動
         /// @param ICanSetOnMap                   マップオブジェクト

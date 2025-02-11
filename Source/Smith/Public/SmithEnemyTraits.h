@@ -27,7 +27,7 @@ struct SmithEnemyTraits<EnemyType, true>
 template<typename EnemyType>
 struct SmithEnemyTraits<EnemyType, false>
 {
-	using Type = typename EnemyType::Type;
+	using Type = typename std::decay_t<EnemyType>::Type;
 };
 
 

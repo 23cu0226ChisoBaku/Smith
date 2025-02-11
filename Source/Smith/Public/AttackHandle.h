@@ -56,7 +56,8 @@ struct SMITH_API AttackHandle
 
 	ISmithBattleLogger* Attacker;
 	int32 AttackPower;
-	EDirection AttackFrom = EDirection::Invalid;
+	EDirection AttackFrom;
+
 };
 
 

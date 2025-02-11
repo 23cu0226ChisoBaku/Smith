@@ -20,12 +20,10 @@ Encoding : UTF-8
 #include "SmithMap.h"
 
 #include "ICanSetOnMap.h"
-#include "IAttackable.h"
 
 #include "MapCoord.h"
 #include "TileType.h"
 #include "SmithCommandFormat.h"
-#include "Direction.h"
 
 #include "SmithMapBuilder.h"
 #include "SmithMapConstructor.h"
@@ -39,6 +37,11 @@ Encoding : UTF-8
 #include "SmithMapDataModel.h"
 #include "SmithEventPublisher.h"
 #include "IEventRegister.h"
+
+// TODO
+// IAttackable.h
+// Direction.h
+#include "AttackableInfoHandle.h"
 
 #include "MLibrary.h"
 
@@ -199,13 +202,13 @@ namespace UE::Smith
             m_mapEvents.Emplace(mapEvent);
           }
         }
-        void FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
+        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
         {
-          m_mapOperator->FindAttackableMapObjs(outActors, mapObj, format);
+          m_mapOperator->FindAttackableMapObjs(outAttackableHandles, mapObj, format);
         }
-        void FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
         {
-          m_mapOperator->FindAttackableMapObjsFromCoord(outActors, mapObj, format, offsetToLeft, offsetToTop);
+          m_mapOperator->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
         }
         void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
@@ -300,13 +303,13 @@ namespace UE::Smith
     {
       m_pImpl->DeployEvent(mapEvent, x, y);
     }
-    void FSmithMapManager::FindAttackableMapObjs(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj,const FSmithCommandFormat& format)
+    void FSmithMapManager::FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj,const FSmithCommandFormat& format)
     {
-      m_pImpl->FindAttackableMapObjs(outActors, mapObj, format);
+      m_pImpl->FindAttackableMapObjs(outAttackableHandles, mapObj, format);
     } 
-    void FSmithMapManager::FindAttackableMapObjsFromCoord(TArray<IAttackable*>& outActors, ICanSetOnMap* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+    void FSmithMapManager::FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
     {
-      m_pImpl->FindAttackableMapObjsFromCoord(outActors, mapObj, format, offsetToLeft, offsetToTop);
+      m_pImpl->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
     }
     void FSmithMapManager::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     {
