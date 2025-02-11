@@ -86,6 +86,8 @@ private:
 	FSmithMapBluePrint BossMapBluePrint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint BossGenerateBluePrint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true",RequiredAssetDataTags = "RowStructure=/Script/MapManagement.ItemGenerationListRow"))
+	TObjectPtr<UDataTable> ItemGenerationRecipe;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UGameLogWidget> LogWidgetSub;
 	UPROPERTY()

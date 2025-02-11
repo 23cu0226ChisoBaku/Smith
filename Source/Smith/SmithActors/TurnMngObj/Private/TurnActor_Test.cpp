@@ -56,7 +56,7 @@ void ATurnActor_Test::BeginPlay()
 	m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
 	check(m_idleStrategy != nullptr);
 
-  AnimComponent->SwitchAnimState(TEXT("Idle"), 0.0f);
+  AnimComponent->SwitchAnimState(TEXT("Idle"));
 
 	UWorld* world = GetWorld();
 	if (world != nullptr)
@@ -248,7 +248,7 @@ void ATurnActor_Test::SwitchAnimation(uint8 animationState)
 	default:
 		break;
 	}
-	AnimComponent->SwitchAnimState(StateName, 0.0f);
+	AnimComponent->SwitchAnimState(StateName);
 }
 
 void ATurnActor_Test::UpdateAnimation(float deltaTime)

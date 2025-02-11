@@ -162,7 +162,7 @@ public:
 		void UseItem(USmithHPItem*);
 	
 	private:
-		void convertAnimState(uint8 animationState, FName& outName, float& outDurationTime);
+		void convertAnimState(uint8 animationState, FName& outName);
 	public:
 		void SetEnhanceSystem(IEnhanceSystem*);
 

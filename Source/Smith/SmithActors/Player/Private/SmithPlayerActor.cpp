@@ -609,6 +609,7 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 		{
 			const float curtHPPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
 			HPComponent->SetHP(curtHPPercentage);
+			HPComponent->SetHPNumber(m_maxHP, m_curtHP);
 		}
 
 		if (m_logSystem != nullptr)
@@ -635,7 +636,7 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 
 		if (AnimationComponent!= nullptr)
 		{
-			AnimationComponent->SwitchAnimState(TEXT("Dead"), 0.0f);
+			AnimationComponent->SwitchAnimState(TEXT("Dead"));
 		}
 
 		UWorld* world = GetWorld();
@@ -654,7 +655,7 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 	{
 		if (AnimationComponent != nullptr)
 		{
-			AnimationComponent->SwitchAnimState(TEXT("Damaged"),0.0f);
+			AnimationComponent->SwitchAnimState(TEXT("Damaged"));
 			AnimationComponent->SwitchAnimStateDelay(TEXT("Idle"), 0.5f);
 		}
 	}
@@ -735,10 +736,9 @@ void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
 	}
 
 	FName StateName;
-	float durationTime;
-	convertAnimState(animationState, StateName, durationTime);
+	convertAnimState(animationState, StateName);
 
-	AnimationComponent->SwitchAnimState(StateName, durationTime);
+	AnimationComponent->SwitchAnimState(StateName);
 }
 
 void ASmithPlayerActor::UseItem(USmithHPItem* item)
@@ -761,6 +761,7 @@ void ASmithPlayerActor::UseItem(USmithHPItem* item)
 	if (HPComponent != nullptr)
 	{
 		HPComponent->SetHP(curtHPPercentage);
+		HPComponent->SetHPNumber(m_maxHP, m_curtHP);
 	}
 }
 
@@ -772,8 +773,7 @@ void ASmithPlayerActor::SwitchAnimationDelay(uint8 animationState, float delay)
 	}
 
 	FName StateName;
-	float dummy;
-	convertAnimState(animationState, StateName, dummy);
+	convertAnimState(animationState, StateName);
 	AnimationComponent->SwitchAnimStateDelay(StateName, delay);
 }
 
@@ -792,11 +792,10 @@ bool ASmithPlayerActor::IsAnimationFinish() const
 	return AnimationComponent == nullptr ? true : AnimationComponent->IsCurrentAnimationFinish();
 }
 
-void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName, float& outDurationTime)
+void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName)
 {
 	using namespace UE::Smith;
 	outName = TEXT("");
-	outDurationTime = 0.0f;
 
 	switch (animationState)
 	{
@@ -808,7 +807,6 @@ void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName, f
 			break;
 		case SMITH_ANIM_ATTACK:
 			outName = TEXT("Attack");
-			outDurationTime = 1.0f;
 			break;
 		case SMITH_ANIM_DAMAGED:
 			outName = TEXT("Damaged");
@@ -853,6 +851,7 @@ void ASmithPlayerActor::updateParam(FParams upgradeParam)
 		if (HPComponent != nullptr)
 		{
 			HPComponent->SetHP(StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP));
+			HPComponent->SetHPNumber(m_maxHP, m_curtHP);
 		}
 	}
 }

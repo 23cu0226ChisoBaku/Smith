@@ -3,8 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ItemGenerationInfo.generated.h"
-
 
 UENUM()
 enum class EMapDeployRule
@@ -14,17 +12,4 @@ enum class EMapDeployRule
 	Sides_With_Corner UMETA(DisplayName="Side Deployment"),
 	Sides_Without_Corner UMETA(DisplayName="Side without corner Deployment"),
 };
-/**
- * 
- */
-USTRUCT(BlueprintType)
-struct MAPMANAGEMENT_API FItemGenerationInfo
-{
-	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
-	EMapDeployRule DeployRule;
-	UPROPERTY(EditAnywhere, meta=(MustImplement="Pickable"))
-	TSubclassOf<UObject> Item;
-
-};

@@ -39,9 +39,8 @@ Encoding : UTF-8
 #include "IEventRegister.h"
 
 // TODO
-// IAttackable.h
-// Direction.h
 #include "AttackableInfoHandle.h"
+#include "ItemGenerationListRow.h"
 
 #include "MLibrary.h"
 
@@ -188,6 +187,10 @@ namespace UE::Smith
           m_eventDirector->DirectNextLevelEventCoord(nextLevelEventCoordX, nextLevelEventCoordY);
           DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY);
         }
+        void InitPickableEvent(const TArray<FItemGenerationListRow>& recipe)
+        {
+
+        }
 
         void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
         {
@@ -294,6 +297,10 @@ namespace UE::Smith
     void FSmithMapManager::InitNextLevelEvent(ISmithMapEvent* nextLevelEvent)
     {
       m_pImpl->InitNextLevelEvent(nextLevelEvent);
+    }
+    void FSmithMapManager::InitPickableEvent(const TArray<FItemGenerationListRow>& recipe)
+    {
+      m_pImpl->InitPickableEvent(recipe);
     }
     void FSmithMapManager::DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
     {

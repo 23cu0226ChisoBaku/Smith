@@ -46,6 +46,7 @@ struct FMapCoord;
 struct FSmithMapBluePrint;
 struct FSmithMapConstructionBluePrint;
 struct FSmithEnemyGenerateBluePrint;
+struct FItemGenerationListRow;
 
 namespace UE::Smith
 {
@@ -114,6 +115,7 @@ namespace UE::Smith
         void InitMapObjs(UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
         // TODO
         void InitNextLevelEvent(ISmithMapEvent*);
+        void InitPickableEvent(const TArray<FItemGenerationListRow>&);
         /// 
         /// @brief                                マップオブジェクトを配置する
         /// @param ICanSetOnMap                   マップオブジェクト

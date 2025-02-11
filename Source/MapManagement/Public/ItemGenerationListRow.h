@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ItemGenerationInfo.h"
+#include "MapDeployRule.h"
 #include "ItemGenerationListRow.generated.h"
 
 
@@ -16,7 +16,9 @@ struct MAPMANAGEMENT_API FItemGenerationListRow : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	FItemGenerationInfo Information;
+	EMapDeployRule DeployRule;
+	UPROPERTY(EditAnywhere, meta=(MustImplement="Pickable"))
+	TSubclassOf<UObject> Item;
 	UPROPERTY(EditAnywhere)
 	uint32 SpawnCount;
 };

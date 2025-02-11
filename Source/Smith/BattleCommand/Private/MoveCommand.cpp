@@ -64,7 +64,7 @@ namespace UE::Smith::Command
         // TODO ステート切り替え方法見直し
         if (m_animator.IsValid())
         {
-          m_animator->SwitchAnimationDelay(SMITH_ANIM_IDLE, 0.2f);
+          m_animator->SwitchAnimationDelay(SMITH_ANIM_IDLE, 0.3f);
         }
       }
       bool IsFinish() const
@@ -81,7 +81,7 @@ namespace UE::Smith::Command
   // end of MoveCommand PImpl
 
   MoveCommand::MoveCommand(IMoveable* moveable, ISmithAnimator* animator)
-    : m_moveImpl(new MoveImpl(moveable, animator))
+    : m_moveImpl(::MakeUnique<MoveImpl>(moveable, animator))
   { }
   MoveCommand::~MoveCommand()
   {

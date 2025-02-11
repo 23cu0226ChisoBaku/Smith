@@ -19,6 +19,9 @@ Encoding : UTF-8
 #ifndef SMITH_MAP_HELPER_LIB
 #define SMITH_MAP_HELPER_LIB
 
+enum class EMapDeployRule : uint8;
+struct FMapCoord;
+
 namespace UE::Smith
 {
   namespace Map
@@ -72,6 +75,7 @@ namespace UE::Smith
         /// @param y                Y座標
         ///
         static void DirectMapElementRotation(FSmithMap*, FRotator& outRotation, uint8 x, uint8 y);
+        static int32 GetMapCoordsByRule(FSmithMap*, EMapDeployRule, TArray<FMapCoord>& outCoords);
     };
   }
 }

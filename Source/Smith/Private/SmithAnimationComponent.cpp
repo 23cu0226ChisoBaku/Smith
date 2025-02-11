@@ -5,6 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "Debug.h"
+#include "AnimMontageHelperLibrary.h"
 
 // Sets default values for this component's properties
 USmithAnimationComponent::USmithAnimationComponent()
@@ -61,12 +62,12 @@ void USmithAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	m_animationSwitchDelayTimeCnt += DeltaTime;
 	if (m_animationSwitchDelayTimeCnt >= m_animationSwitchDelayTimeInterval)
 	{
-		SwitchAnimState(m_delayNextSectionName, 0.0f);
+		SwitchAnimState(m_delayNextSectionName);
 	}
 
 }
 
-void USmithAnimationComponent::SwitchAnimState(FName nextStateName, float animationDuration)
+void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 {
 	if (AnimInstance == nullptr)
 	{
@@ -85,7 +86,12 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName, float animat
 		return; 
 	}
 
-	m_curtAnimationTimeInterval = animationDuration;
+	const float duration = UAnimMontageHelperLibrary::GetSectionDuration(AnimInstance, CurrentMontage, nextStateName);
+
+	MDebug::LogWarning(FString::SanitizeFloat(duration));
+
+	m_curtAnimationTimeInterval = duration;
+
 	m_animationPlayTimeCnt = 0.0f;
 
 	// delayがあったら
