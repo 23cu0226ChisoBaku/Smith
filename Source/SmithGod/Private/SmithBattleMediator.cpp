@@ -9,10 +9,12 @@
 #include "ICanMakeAttack.h"
 #include "IAttackable.h"
 #include "ICanSetOnMap.h"
+#include "IHealable.h"
 
 #include "MoveCommand.h"
 #include "AttackCommand.h"
 #include "NullCommand.h"
+#include "HealCommand.h"
 
 #include "SmithCommandFormat.h"
 #include "FormatTransformer.h"
@@ -307,6 +309,29 @@ bool USmithBattleMediator::SendIdleCommand(AActor* requester)
   }
 
   m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::NullCommand>());
+  return true;
+
+}
+
+bool USmithBattleMediator::SendHealCommand(AActor* requester,IHealable* heal)
+{
+  if (!m_battleSys.IsValid())
+  {
+    return false;
+  }
+  
+  if (!::IsValid(requester))
+  {
+    return false;
+  }
+
+  ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
+  if (!IS_UINTERFACE_VALID(requesterTurnManageable))
+  {
+    return false;
+  }
+
+  m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::HealCommand>(heal));
   return true;
 
 }

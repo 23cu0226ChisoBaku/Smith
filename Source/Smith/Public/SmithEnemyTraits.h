@@ -9,6 +9,8 @@
 struct SmallGolem{};
 // ドラゴン
 struct Dragon{};
+// 薬草ゴーレム
+struct HerbGolem{};
 
 template<typename EnemyType> 
 struct SmithEnemyTraits
