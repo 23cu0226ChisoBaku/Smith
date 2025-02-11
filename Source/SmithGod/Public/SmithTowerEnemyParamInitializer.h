@@ -23,7 +23,7 @@ public:
 public:
 	FParams Initialize(SmallGolem, int32 currentLevel);
 	FParams Initialize(Dragon, int32 currentLevel);
-	FParams Initialize(HerbGolem, int32 currentLevel);
+	FParams Initialize(HerbGolem,int32 currentLevel);
 	
 private:
 	TMap<FString, FParams> m_paramList;

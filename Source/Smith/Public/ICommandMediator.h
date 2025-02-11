@@ -9,6 +9,7 @@
 class IMoveable;
 class ICanMakeAttack;
 class IAttackable;
+class IHealable;
 struct AttackHandle;
 struct FAttackHandle;
 struct FSmithSkillCenterSpotParameter;
@@ -41,6 +42,7 @@ public:
 
 	virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) = 0;
 	virtual bool SendSkillCommand(AActor*, ICanMakeAttack*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&) = 0;
+	virtual bool SendHealCommand(AActor*,IHealable*) = 0;
 
 	// TODO
 	virtual int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&) const = 0;
