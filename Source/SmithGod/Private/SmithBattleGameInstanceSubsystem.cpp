@@ -19,7 +19,7 @@ void USmithBattleGameInstanceSubsystem::DisplayGameOverWidget(UObject* worldCont
     }
   }
 
-  TSubclassOf<UUserWidget> GameOverWidgetSubClass = TSoftClassPtr<UUserWidget>(FSoftObjectPath("/Game/BP/WBP_GameOver_TextWidget.WBP_GameOver_TextWidget_C")).LoadSynchronous();
+  TSubclassOf<UUserWidget> GameOverWidgetSubClass = TSoftClassPtr<UUserWidget>(FSoftObjectPath("/Game/BP/WBP_GameOver.WBP_GameOver_C")).LoadSynchronous();
   UUserWidget* GameOverWidget = CreateWidget<UUserWidget>(world, GameOverWidgetSubClass);
 
   if (GameOverWidget != nullptr)
