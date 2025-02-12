@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "SmithEnemy.h"
 #include "ICanSetOnMap.h"
+#include "ISmithAnimator.h"
 #include "ISmithSimpleAIDriven.h"
 #include "MapObjType.h"
 #include "../Weapon/Params.h"
@@ -20,6 +21,8 @@ class USmithTurnBaseAIIdleStrategy;
 class USmithAttackComponent;
 class USmithPickable;
 class USmithBattleLogWorldSubsystem;
+
+class USmithAnimationComponent;
 
 struct FSmithAIStrategyContainer;
 
@@ -38,7 +41,8 @@ class SMITH_API ASmithBoss final: public ASmithEnemy,
                                   public ICanSetOnMap,
                                   public ISmithSimpleAIDriven,
                                   public ICanRequestEventPublishment,
-                                  public ISmithBattleLogger
+                                  public ISmithBattleLogger,
+                                  public ISmithAnimator
 {
   GENERATED_BODY()
 
@@ -61,6 +65,11 @@ public:
   uint8 GetOnMapSizeY() const override final;
   EMapObjType GetType() const override final;
   void TurnOnAI() override final;
+
+  void SwitchAnimation(uint8 animationState) override;
+  void SwitchAnimationDelay(uint8 animationState, float delay) override;
+  void UpdateAnimation(float deltaTime) override;
+  bool IsAnimationFinish() const override;
 
 public:
   FString GetName_Log() const override;
@@ -93,6 +102,8 @@ private:
   TObjectPtr<USmithAttackComponent> m_atkComponent;
   UPROPERTY(EditAnywhere)
   TObjectPtr<USmithMoveComponent> MoveComponent;
+  UPROPERTY(EditAnywhere)
+  TObjectPtr<USmithAnimationComponent> AnimComponent;
 
   // Attack Format
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
