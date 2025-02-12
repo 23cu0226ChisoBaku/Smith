@@ -13,10 +13,8 @@
 #include "IEventPublishMediator.h"
 #include "SmithBattleLogWorldSubsystem.h"
 #include "SmithEnemyParamInitializer.h"
+#include "SmithAnimationComponent.h"
 #include "MLibrary.h"
-
-// TODO
-#include "SmithDangerZoneDisplayer.h"
 
 ASmithBoss::ASmithBoss()
   : m_attackStrategy(nullptr)
@@ -32,6 +30,9 @@ ASmithBoss::ASmithBoss()
 
   m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
   check(m_atkComponent != nullptr);
+
+  AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("Anim Comp"));
+  check(AnimComponent != nullptr);
 }
 
 void ASmithBoss::BeginPlay()
@@ -40,8 +41,6 @@ void ASmithBoss::BeginPlay()
 
   m_attackStrategy = NewObject<USmithAIConditionAttackStrategy>(this);
   check(m_attackStrategy != nullptr);
-  m_moveStrategy = NewObject<USmithTurnBaseAIMoveStrategy>(this);
-  check(m_moveStrategy != nullptr);
   m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
   check(m_idleStrategy != nullptr);
 
@@ -90,8 +89,13 @@ void ASmithBoss::OnAttack(AttackHandle&& handle)
     m_logSystem->SendAttackLog(handle.Attacker, this);
     m_logSystem->SendDamageLog(this, handle.AttackPower);
   }
+
   if(EnemyParam.HP <= 0)
   {
+    if (OnDefeatEvent.IsBound())
+    {
+      OnDefeatEvent.Broadcast();
+    }
     Destroy();
   }
 }
@@ -222,4 +226,25 @@ EBattleLogType ASmithBoss::GetType_Log() const
 void ASmithBoss::InitializeParameter(int32 currentLevel)
 {
 	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
+}
+
+void ASmithBoss::SwitchAnimation(uint8 animationState)
+{
+
+}
+
+void ASmithBoss::SwitchAnimationDelay(uint8 animationState, float delay)
+{
+  
+}
+void ASmithBoss::UpdateAnimation(float deltaTime)
+{
+  if (AnimComponent != nullptr)
+  {
+    AnimComponent->UpdateAnim(deltaTime);
+  }
+}
+bool ASmithBoss::IsAnimationFinish() const
+{
+  return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
 }

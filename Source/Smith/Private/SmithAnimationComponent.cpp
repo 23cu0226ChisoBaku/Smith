@@ -88,10 +88,7 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 
 	const float duration = UAnimMontageHelperLibrary::GetSectionDuration(AnimInstance, CurrentMontage, nextStateName);
 
-	MDebug::LogWarning(FString::SanitizeFloat(duration));
-
 	m_curtAnimationTimeInterval = duration;
-
 	m_animationPlayTimeCnt = 0.0f;
 
 	// delayがあったら

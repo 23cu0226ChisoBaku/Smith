@@ -38,10 +38,16 @@
 
 // TODO
 #include "SmithNextLevelEvent.h"
+#include "SmithPickUpItemEvent.h"
+#include "SmithPickable.h"
+#include "NiagaraSystem.h"
+
+#include "SmithBattleGameInstanceSubsystem.h"
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/DateTime.h"
 #include "AudioKit.h"
+#include "ItemGenerationListRow.h"
 #include "MLibrary.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
@@ -73,7 +79,6 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
   Super::EndPlay(EndPlayReason);
 
   FSmithEnemyParamInitializer::DetachInitializer();
-  MLibrary::UE::Audio::AudioKit::DetachAudioPlayer();
 
   if (m_battleMediator != nullptr)
   {
@@ -147,6 +152,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
   {
     m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
     deployNextLevelEvent();
+    deployPickableEvent();
     m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
   }
 
@@ -247,7 +253,13 @@ void AMapGenerateGameMode_Test::startNewLevel()
         turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
         if (m_curtLevel % 5 == 0)
         {
-          turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
+          turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::processGameClear);
+          // TODO!!!!
+          ASmithPlayerActor* player = Cast<ASmithPlayerActor>(playerPawn);
+          if (player != nullptr)
+          {
+            turnBaseEnemy->OnDefeatEvent.AddUObject(player, &ASmithPlayerActor::OnGameClear)
+          }
         }
         turnBaseEnemy->InitializeParameter(m_curtLevel);
       }
@@ -410,5 +422,51 @@ FTimespan AMapGenerateGameMode_Test::GetCurrentPlayTime_Timespan() const
 
 void AMapGenerateGameMode_Test::processGameClear()
 {
-  
+  UWorld* world = GetWorld();
+  if (world != nullptr)
+  {
+    USmithBattleGameInstanceSubsystem* sub = world->GetGameInstance()->GetSubsystem<USmithBattleGameInstanceSubsystem>();
+    if (sub != nullptr)
+    {
+      sub->DisplayGameClearWidget(world);
+    }
+  }
+}
+
+void AMapGenerateGameMode_Test::deployPickableEvent()
+{
+  if (ItemGenerationRecipe == nullptr) [[unlikely]]
+  {
+    return;
+  }
+
+  TArray<FItemGenerationListRow*> itemRecipes;
+  ItemGenerationRecipe->GetAllRows<FItemGenerationListRow>(nullptr, itemRecipes);
+  // TODO
+  FString Path = TEXT("/Game/Resources/Effect/EventEffect/NS_ItemEffect.NS_ItemEffect");
+  UNiagaraSystem* itemEffect = Cast<UNiagaraSystem>(StaticLoadObject(UNiagaraSystem::StaticClass(), nullptr, *Path));
+  for (const auto& recipe : itemRecipes)
+  {
+    TArray<ISmithMapEvent*> itemEvents;
+    for (uint32 i = 0; i < recipe->SpawnCount; ++i)
+    {
+      USmithPickUpItemEvent* pickUpEvent = m_eventPublisher->PublishMapEvent<USmithPickUpItemEvent>(USmithPickUpItemEvent::StaticClass());
+      if (pickUpEvent == nullptr)
+      {
+        break;
+      }
+
+      UObject* obj = NewObject<UObject>(this, recipe->Item);
+      USmithPickable* pickable = Cast<USmithPickable>(obj);
+      if (pickable == nullptr)
+      {
+        break;
+      }
+
+      pickUpEvent->AssignPickable(pickable, itemEffect);
+      itemEvents.Emplace(pickUpEvent);
+    }
+
+    m_mapMgr->InitPickableEvent(recipe->DeployRule, itemEvents);
+  }
 }

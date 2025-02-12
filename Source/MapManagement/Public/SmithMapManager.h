@@ -41,6 +41,7 @@ namespace UE::Smith
 }
 
 enum class EDirection : uint8;
+enum class EMapDeployRule : uint8;
 
 struct FMapCoord;
 struct FSmithMapBluePrint;
@@ -115,7 +116,7 @@ namespace UE::Smith
         void InitMapObjs(UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
         // TODO
         void InitNextLevelEvent(ISmithMapEvent*);
-        void InitPickableEvent(const TArray<FItemGenerationListRow>&);
+        void InitPickableEvent(EMapDeployRule, const TArray<ISmithMapEvent*>&);
         /// 
         /// @brief                                マップオブジェクトを配置する
         /// @param ICanSetOnMap                   マップオブジェクト

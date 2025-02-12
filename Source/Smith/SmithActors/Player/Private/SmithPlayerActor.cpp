@@ -153,6 +153,7 @@ void ASmithPlayerActor::BeginPlay()
 			check((playerCtrl != nullptr));
 			HPComponent->CreateHP(playerCtrl);
 			HPComponent->SetHP(1.0f);
+			HPComponent->SetHPNumber(m_maxHP, m_maxHP);
 		}
 	}
 

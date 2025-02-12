@@ -19,5 +19,6 @@ class SMITHGOD_API USmithBattleGameInstanceSubsystem : public UGameInstanceSubsy
 public:
 	UFUNCTION(BlueprintCallable)
 	void DisplayGameOverWidget(UObject* worldContextObject);
-	
+	UFUNCTION(BlueprintCallable)
+	void DisplayGameClearWidget(UObject* worldContextObject);
 };
