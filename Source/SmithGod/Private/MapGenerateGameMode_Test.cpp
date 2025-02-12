@@ -136,7 +136,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
   ICanSetOnMap* mapPlayer = Cast<ICanSetOnMap>(playerPawn);
   check(mapPlayer != nullptr);
 
-  m_chasePlayerTracker->SetupTracker(m_mapMgr, mapPlayer);
+  m_chasePlayerTracker->SetupTracker(m_mapMgr);
 
   if (m_curtLevel % 5 == 0)
   {
@@ -245,6 +245,10 @@ void AMapGenerateGameMode_Test::startNewLevel()
       {
         ATurnBaseActor* turnBaseEnemy = Cast<ATurnBaseActor>(enemy);
         turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
+        if (m_curtLevel % 5 == 0)
+        {
+          turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
+        }
         turnBaseEnemy->InitializeParameter(m_curtLevel);
       }
     }
@@ -402,4 +406,9 @@ int32 AMapGenerateGameMode_Test::GetCurrentPlayTime_Second() const
 FTimespan AMapGenerateGameMode_Test::GetCurrentPlayTime_Timespan() const
 {
   return FDateTime::Now() - m_startDateTime;
+}
+
+void AMapGenerateGameMode_Test::processGameClear()
+{
+  
 }

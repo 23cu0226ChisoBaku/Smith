@@ -21,6 +21,8 @@ Encoding : UTF-8
 #ifndef SMITH_MAP_EVENT_DIRECTOR
 #define SMITH_MAP_EVENT_DIRECTOR
 
+enum class EMapDeployRule : uint8;
+
 namespace UE::Smith
 {
   namespace Map
@@ -75,7 +77,7 @@ namespace UE::Smith
         /// @param outY(OUT)                Y座標
         ///
         void DirectNextLevelEventCoord(uint8& outX, uint8& outY);
-
+        bool GetDeployableCoord(EMapDeployRule, uint8& outX, uint8& outY);
       private:
         /// @brief 実装クラス
         class EventDirectorImpl;

@@ -12,9 +12,7 @@
 USmithAIConditionAttackStrategy::USmithAIConditionAttackStrategy(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
   , m_bIsDisplayingDangerZone(false)
-{
-
-}
+{ }
 
 void USmithAIConditionAttackStrategy::BeginDestroy()
 {

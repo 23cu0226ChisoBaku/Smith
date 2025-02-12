@@ -72,6 +72,7 @@ private:
 	void deployNextLevelEvent(bool bIsActiveWhenDeploy = true);
 	void goToNextLevel();
 	void addDefeatedEnemyCount();
+	void processGameClear();
 
 private:
 	/** ダンジョンマップ設計図 */
@@ -85,6 +86,8 @@ private:
 	FSmithMapBluePrint BossMapBluePrint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint BossGenerateBluePrint;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true",RequiredAssetDataTags = "RowStructure=/Script/MapManagement.ItemGenerationListRow"))
+	TObjectPtr<UDataTable> ItemGenerationRecipe;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UGameLogWidget> LogWidgetSub;
 	UPROPERTY()
@@ -115,6 +118,8 @@ private:
 	TObjectPtr<USmithNextLevelEvent> m_nextLevelEvent;
 	UPROPERTY(EditAnywhere, meta=(RequiredAssetDataTags = "RowStructure=/Script/SmithModel.SmithEnemyParamInitializerRow"))
 	TObjectPtr<UDataTable> EnemyDefaultParamList;
+	UPROPERTY(EditAnywhere, meta=(RequiredAssetDataTags = "RowStructure=/Script/Smith.SmithPickableDropRateListRow"))
+	TObjectPtr<UDataTable> EnemyDropLootList;
 	UPROPERTY()
 	TObjectPtr<USmithTowerEnemyParamInitializer> m_towerInitializer;
 

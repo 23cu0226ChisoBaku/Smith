@@ -28,7 +28,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SwitchAnimState(FName, float animationDuration);
+	void SwitchAnimState(FName);
 	void SwitchAnimStateDelay(FName, float delay);
 	void UpdateAnim(float);
 	bool IsCurrentAnimationFinish() const;
@@ -36,6 +36,7 @@ public:
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+private:
 	UPROPERTY(VisibleAnywhere)
 	UAnimMontage* MontageToPlay;
 	UPROPERTY(VisibleAnywhere)
