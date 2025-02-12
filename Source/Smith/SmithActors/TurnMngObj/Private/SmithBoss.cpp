@@ -8,18 +8,22 @@
 #include "SmithTurnBaseAIMoveStrategy.h"
 #include "SmithTurnBaseAIIdleStrategy.h"
 #include "SmithAttackComponent.h"
+#include "SmithAnimationComponent.h"
 #include "FormatInfo_Import.h"
 #include "SmithPickable.h"
 #include "IEventPublishMediator.h"
 #include "SmithBattleLogWorldSubsystem.h"
 #include "SmithEnemyParamInitializer.h"
-#include "SmithAnimationComponent.h"
 #include "MLibrary.h"
+
+// TODO
+#include "SmithDangerZoneDisplayer.h"
 
 ASmithBoss::ASmithBoss()
   : m_attackStrategy(nullptr)
   , m_idleStrategy(nullptr)
   , m_atkComponent(nullptr)
+  , AnimComponent(nullptr)
   , m_wingsCnt(0)
   , m_breathCnt(0)
   , m_sweepCnt(0)
@@ -30,9 +34,8 @@ ASmithBoss::ASmithBoss()
 
   m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
   check(m_atkComponent != nullptr);
-
-  AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("Anim Comp"));
-  check(AnimComponent != nullptr);
+  AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("anim comp"));
+  check(AnimComponent != nullptr)
 }
 
 void ASmithBoss::BeginPlay()
@@ -41,8 +44,12 @@ void ASmithBoss::BeginPlay()
 
   m_attackStrategy = NewObject<USmithAIConditionAttackStrategy>(this);
   check(m_attackStrategy != nullptr);
+  m_moveStrategy = NewObject<USmithTurnBaseAIMoveStrategy>(this);
+  check(m_moveStrategy != nullptr);
   m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
   check(m_idleStrategy != nullptr);
+
+  AnimComponent->SwitchAnimState(TEXT("Idle"));
 
   UWorld* world = GetWorld();
   if (::IsValid(world))
@@ -89,13 +96,8 @@ void ASmithBoss::OnAttack(AttackHandle&& handle)
     m_logSystem->SendAttackLog(handle.Attacker, this);
     m_logSystem->SendDamageLog(this, handle.AttackPower);
   }
-
   if(EnemyParam.HP <= 0)
   {
-    if (OnDefeatEvent.IsBound())
-    {
-      OnDefeatEvent.Broadcast();
-    }
     Destroy();
   }
 }
@@ -155,6 +157,77 @@ void ASmithBoss::TurnOnAI()
 void ASmithBoss::SetEventPublishMediator(IEventPublishMediator* eventMediator)
 {
   m_eventMediator = eventMediator;
+}
+
+void ASmithBoss::SwitchAnimation(uint8 animationState)
+{
+	//MDebug::Log(TEXT("called animation"));
+
+	if (AnimComponent == nullptr)
+	{
+		return;
+	}
+
+	using namespace UE::Smith;
+	FName StateName;
+	switch (animationState)
+	{
+	case SMITH_ANIM_IDLE:
+		StateName = TEXT("Idle");
+		break;
+	case	SMITH_ANIM_WALK:
+		StateName = TEXT("Walk");
+		break;
+	case SMITH_ANIM_ATTACK:
+		StateName = TEXT("Attack");
+		break;
+	case SMITH_ANIM_DAMAGED:
+		StateName = TEXT("Damaged");
+		break;
+	case SMITH_ANIM_DEAD:
+		StateName = TEXT("Dead");
+		break;
+	default:
+		break;
+	}
+	AnimComponent->SwitchAnimState(StateName);
+}
+
+void ASmithBoss::UpdateAnimation(float deltaTime)
+{
+	AnimComponent->UpdateAnim(deltaTime);
+}
+
+void ASmithBoss::SwitchAnimationDelay(uint8 animationState, float delay)
+{
+	using namespace UE::Smith;
+	FName StateName;
+	switch (animationState)
+	{
+	case SMITH_ANIM_IDLE:
+		StateName = TEXT("Idle");
+		break;
+	case	SMITH_ANIM_WALK:
+		StateName = TEXT("Walk");
+		break;
+	case SMITH_ANIM_ATTACK:
+		StateName = TEXT("Attack");
+		break;
+	case SMITH_ANIM_DAMAGED:
+		StateName = TEXT("Damaged");
+		break;
+	case SMITH_ANIM_DEAD:
+		StateName = TEXT("Dead");
+		break;
+	default:
+		break;
+	}
+	AnimComponent->SwitchAnimStateDelay(StateName, delay);
+}
+
+bool ASmithBoss::IsAnimationFinish() const
+{
+	return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
 }
 
 bool ASmithBoss::RageCondition()
@@ -226,25 +299,4 @@ EBattleLogType ASmithBoss::GetType_Log() const
 void ASmithBoss::InitializeParameter(int32 currentLevel)
 {
 	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
-}
-
-void ASmithBoss::SwitchAnimation(uint8 animationState)
-{
-
-}
-
-void ASmithBoss::SwitchAnimationDelay(uint8 animationState, float delay)
-{
-  
-}
-void ASmithBoss::UpdateAnimation(float deltaTime)
-{
-  if (AnimComponent != nullptr)
-  {
-    AnimComponent->UpdateAnim(deltaTime);
-  }
-}
-bool ASmithBoss::IsAnimationFinish() const
-{
-  return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
 }
