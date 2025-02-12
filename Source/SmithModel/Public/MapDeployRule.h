@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 
 UENUM()
-enum class EMapDeployRule
+enum class EMapDeployRule : uint8
 {
 	Random UMETA(DisplayName="Random Deployment"),
 	Corner UMETA(DisplayName="Corner Deployment"),
