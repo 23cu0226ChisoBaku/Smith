@@ -38,6 +38,50 @@ namespace UE::Smith
     class MapRoomCoordFinderStrategy;
     class MapRoomSideFinderStrategy;
 
+    class MapCornerFinderStratergy
+    {
+      public:
+        MapCornerFinderStratergy() = default;
+        ~MapCornerFinderStratergy() = default;
+
+      public:
+        void GetCoords(FSmithMap* map, TArray<FMapCoord>& coords)
+        {
+          if (map == nullptr)
+          {
+            return;
+          }
+          
+          coords.Reset();
+          const uint8 sectionRow = map->GetRow();
+          const uint8 sectionColumn = map->GetColumn();
+          for (uint8 row = 0u; row < sectionRow; ++row)
+          {
+            for (uint8 column = 0u; column < sectionColumn; ++column)
+            {
+              FSmithSection* section = map->GetSection(row, column);
+              if (section == nullptr || !section->HasRoom())
+              {
+                continue;
+              }
+
+              const uint8 sectionLeft = map->GetSectionLeft(column);
+              const uint8 sectionTop = map->GetSectionTop(row);
+              const uint8 roomLeft = section->GetRoomLeft() + sectionLeft;
+              const uint8 roomRight = roomLeft + section->GetRoomWidth() - 1u;
+              const uint8 roomTop = section->GetRoomTop() + sectionTop;
+              const uint8 roomBottom = roomTop + section->GetRoomHeight() - 1u;
+
+              coords.Emplace(FMapCoord(roomLeft, roomTop));
+              coords.Emplace(FMapCoord(roomLeft, roomBottom));
+              coords.Emplace(FMapCoord(roomRight, roomTop));
+              coords.Emplace(FMapCoord(roomRight, roomBottom));
+            }
+          }
+        }
+    };
+
+
     bool FSmithMapHelperLibrary::IsInSameRoom(FSmithMap* map, uint8 x1, uint8 y1, uint8 x2, uint8 y2)
     {
       if (map == nullptr)
@@ -251,50 +295,11 @@ namespace UE::Smith
         }
         break;
       }
+
+      return outCoords.Num();
     }
 
-    class MapCornerFinderStratergy
-    {
-      public:
-        MapCornerFinderStratergy() = default;
-        ~MapCornerFinderStratergy() = default;
-
-      public:
-        void GetCoords(FSmithMap* map, TArray<FMapCoord>& coords)
-        {
-          if (map == nullptr)
-          {
-            return;
-          }
-
-          const uint8 sectionRow = map->GetRow();
-          const uint8 sectionColumn = map->GetColumn();
-          for (uint8 row = 0u; row < sectionRow; ++row)
-          {
-            for (uint8 column = 0u; column < sectionColumn; ++column)
-            {
-              FSmithSection* section = map->GetSection(row, column);
-              if (section == nullptr || !section->HasRoom())
-              {
-                continue;
-              }
-
-              const uint8 sectionLeft = map->GetSectionLeft(column);
-              const uint8 sectionTop = map->GetSectionTop(row);
-              const uint8 roomLeft = section->GetRoomLeft() + sectionLeft;
-              const uint8 roomRight = roomLeft + section->GetRoomWidth() - 1u;
-              const uint8 roomTop = section->GetRoomTop() + sectionTop;
-              const uint8 roomBottom = roomTop + section->GetRoomHeight() - 1u;
-
-              coords.Emplace(FMapCoord(roomLeft, roomTop));
-              coords.Emplace(FMapCoord(roomLeft, roomBottom));
-              coords.Emplace(FMapCoord(roomRight, roomTop));
-              coords.Emplace(FMapCoord(roomRight, roomBottom));
-            }
-          }
-        }
-    };
-
+   
     class MapRoomCoordFinderStrategy
     {
 
