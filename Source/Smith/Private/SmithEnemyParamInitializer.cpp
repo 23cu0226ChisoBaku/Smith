@@ -3,14 +3,14 @@
 
 #include "SmithEnemyParamInitializer.h"
 
-IParamInitializer* FSmithEnemyParamInitializer::ParamInitializer = nullptr;
+IParamInitializer* FSmithEnemyParamInitializer::gParamInitializer = nullptr;
 
 void FSmithEnemyParamInitializer::AssignInitializer(IParamInitializer* initializer)
 {
-  ParamInitializer = initializer;
+  gParamInitializer = initializer;
 }
 
 void FSmithEnemyParamInitializer::DetachInitializer()
 {
-  ParamInitializer = nullptr;
+  gParamInitializer = nullptr;
 }

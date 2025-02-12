@@ -22,6 +22,7 @@
 #include "MLibrary.h"
 
 #include "SmithEnemyParamInitializer.h"
+#include "SmithEnemyLootGenerator.h"
 
 ATurnActor_Test::ATurnActor_Test()
 	: m_attackStrategy(nullptr)
@@ -122,10 +123,11 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 
 		if (m_eventMediator.IsValid())
 		{
-			if (DropUpgradeTable.Num() > 0)
+			IPickable* pickable = FSmithEnemyLootGenerator::GetLoot(this);
+			if (pickable != nullptr)
 			{
-				int32 idx = FMath::RandRange(0, DropUpgradeTable.Num() - 1);
-				m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[idx]);
+				USmithPickable* smithPickable = Cast<USmithPickable>(pickable);
+				m_eventMediator->PublishPickUpEvent(this, smithPickable);
 			}
 		}
 
@@ -135,7 +137,6 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 		}
 
 		Destroy();
-		DropUpgradeTable.Reset();
 	}
 }
 

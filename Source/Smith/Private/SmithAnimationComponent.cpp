@@ -82,6 +82,9 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 	UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
 	if (CurrentMontage == nullptr)
 	{
+		m_curtAnimationTimeInterval = 0.0f;
+		m_animationPlayTimeCnt = 0.0f;
+		AnimInstance->Montage_JumpToSection(nextStateName);
 		return;
 	}
 
@@ -106,8 +109,7 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 		SetComponentTickEnabled(false);
 	}
 
-	AnimInstance->Montage_Play(MontageToPlay);
-	AnimInstance->Montage_JumpToSection(nextStateName, MontageToPlay);
+	AnimInstance->Montage_JumpToSection(nextStateName);
 }
 
 void USmithAnimationComponent::SwitchAnimStateDelay(FName nextStateName, float delay)

@@ -5,9 +5,6 @@
 #include "CoreMinimal.h"
 #include "SmithPickableLootHandle.generated.h"
 
-/**
- * 
- */
 USTRUCT()
 struct SMITH_API FSmithPickableLootHandle
 {

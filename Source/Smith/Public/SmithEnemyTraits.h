@@ -5,14 +5,24 @@
 #ifndef SMITH_ENEMY_TRAITS
 #define SMITH_ENEMY_TRAITS
 
+#include "CoreMinimal.h"
 #include <type_traits>
 
 // 小ゴーレム
-struct SmallGolem{};
+struct SmallGolem
+{
+	static const FString NAME;
+};
 // ドラゴン
-struct Dragon{};
+struct Dragon
+{
+	static const FString NAME;
+};
 // 薬草ゴーレム
-struct HerbGolem{};
+struct HerbGolem
+{
+	static const FString NAME;
+};
 
 template<typename EnemyType, bool bIsPtr> struct SmithEnemyTraits;
 

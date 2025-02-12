@@ -43,6 +43,8 @@
 #include "NiagaraSystem.h"
 
 #include "SmithBattleGameInstanceSubsystem.h"
+#include "SmithLootGameInstanceSubsystem.h"
+#include "SmithEnemyLootGenerator.h"
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/DateTime.h"
@@ -79,6 +81,7 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
   Super::EndPlay(EndPlayReason);
 
   FSmithEnemyParamInitializer::DetachInitializer();
+  FSmithEnemyLootGenerator::DetachLootGenerator();
 
   if (m_battleMediator != nullptr)
   {
@@ -371,6 +374,18 @@ void AMapGenerateGameMode_Test::initializeGame()
 
     m_towerInitializer->AssignEnemyParamList(EnemyDefaultParamList);
     FSmithEnemyParamInitializer::AssignInitializer(m_towerInitializer);
+
+    UGameInstance* gameInstance = world->GetGameInstance();
+    if (gameInstance != nullptr)
+    {
+      USmithLootGameInstanceSubsystem* lootSub = gameInstance->GetSubsystem<USmithLootGameInstanceSubsystem>();
+      if (lootSub != nullptr)
+      {
+        lootSub->AssignLootList(EnemyDropLootList);
+      }
+
+      FSmithEnemyLootGenerator::AssignLootGenerator(lootSub);
+    }
   }
 }
 
