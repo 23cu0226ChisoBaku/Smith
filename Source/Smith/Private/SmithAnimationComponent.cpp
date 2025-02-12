@@ -74,6 +74,11 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 		return;
 	}
 
+	if (nextStateName.IsNone())
+	{
+		return;
+	}
+
 	UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
 	if (CurrentMontage == nullptr)
 	{

@@ -98,6 +98,10 @@ void ASmithBoss::OnAttack(AttackHandle&& handle)
   }
   if(EnemyParam.HP <= 0)
   {
+    if (OnDefeatEvent.IsBound())
+    {
+      OnDefeatEvent.Broadcast();
+    }
     Destroy();
   }
 }
@@ -175,9 +179,6 @@ void ASmithBoss::SwitchAnimation(uint8 animationState)
 	case SMITH_ANIM_IDLE:
 		StateName = TEXT("Idle");
 		break;
-	case	SMITH_ANIM_WALK:
-		StateName = TEXT("Walk");
-		break;
 	case SMITH_ANIM_ATTACK:
 		StateName = TEXT("Attack");
 		break;
@@ -187,6 +188,14 @@ void ASmithBoss::SwitchAnimation(uint8 animationState)
 	case SMITH_ANIM_DEAD:
 		StateName = TEXT("Dead");
 		break;
+  case SMITH_ANIM_SKILL_ONE:
+    StateName = TEXT("WingAttack_Active");
+    break;
+  case SMITH_ANIM_SKILL_TWO:
+    StateName = TEXT("Breath_Active");
+    break;
+  case SMITH_ANIM_SKILL_THREE:
+    StateName = TEXT("Press_Active");
 	default:
 		break;
 	}
@@ -200,29 +209,29 @@ void ASmithBoss::UpdateAnimation(float deltaTime)
 
 void ASmithBoss::SwitchAnimationDelay(uint8 animationState, float delay)
 {
-	using namespace UE::Smith;
-	FName StateName;
-	switch (animationState)
-	{
-	case SMITH_ANIM_IDLE:
-		StateName = TEXT("Idle");
-		break;
-	case	SMITH_ANIM_WALK:
-		StateName = TEXT("Walk");
-		break;
-	case SMITH_ANIM_ATTACK:
-		StateName = TEXT("Attack");
-		break;
-	case SMITH_ANIM_DAMAGED:
-		StateName = TEXT("Damaged");
-		break;
-	case SMITH_ANIM_DEAD:
-		StateName = TEXT("Dead");
-		break;
-	default:
-		break;
-	}
-	AnimComponent->SwitchAnimStateDelay(StateName, delay);
+	// using namespace UE::Smith;
+	// FName StateName;
+	// switch (animationState)
+	// {
+	// case SMITH_ANIM_IDLE:
+	// 	StateName = TEXT("Idle");
+	// 	break;
+	// case	SMITH_ANIM_WALK:
+	// 	StateName = TEXT("Walk");
+	// 	break;
+	// case SMITH_ANIM_ATTACK:
+	// 	StateName = TEXT("Attack");
+	// 	break;
+	// case SMITH_ANIM_DAMAGED:
+	// 	StateName = TEXT("Damaged");
+	// 	break;
+	// case SMITH_ANIM_DEAD:
+	// 	StateName = TEXT("Dead");
+	// 	break;
+	// default:
+	// 	break;
+	// }
+	// AnimComponent->SwitchAnimStateDelay(StateName, delay);
 }
 
 bool ASmithBoss::IsAnimationFinish() const
@@ -247,6 +256,10 @@ bool ASmithBoss::RageCondition()
 
 bool ASmithBoss::WingsCondition()
 {
+  if (m_wingsCnt == 0 && AnimComponent != nullptr)
+  {
+    AnimComponent->SwitchAnimState(TEXT("WingAttack"));
+  }
   m_wingsCnt++;
   if(m_wingsCnt >= 5)
   {
@@ -259,6 +272,10 @@ bool ASmithBoss::WingsCondition()
 
 bool ASmithBoss::BreathCondition()
 {
+  if (m_breathCnt == 0 && AnimComponent != nullptr)
+  {
+    AnimComponent->SwitchAnimState(TEXT("Breath"));
+  }
   m_breathCnt++;
   if(m_breathCnt >= 3)
   {
@@ -269,8 +286,12 @@ bool ASmithBoss::BreathCondition()
   return false;
 }
 
-bool ASmithBoss::SweepCondition()
+bool ASmithBoss::PressCondition()
 {
+  if (m_sweepCnt == 0 && AnimComponent != nullptr)
+  {
+    AnimComponent->SwitchAnimState(TEXT("Press"));
+  }
   m_sweepCnt++;
   if(m_sweepCnt >= 3)
   {

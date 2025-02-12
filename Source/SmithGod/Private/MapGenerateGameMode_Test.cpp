@@ -258,7 +258,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
           ASmithPlayerActor* player = Cast<ASmithPlayerActor>(playerPawn);
           if (player != nullptr)
           {
-            turnBaseEnemy->OnDefeatEvent.AddUObject(player, &ASmithPlayerActor::OnGameClear)
+            turnBaseEnemy->OnDefeatEvent.AddUObject(player, &ASmithPlayerActor::OnGameClear);
           }
         }
         turnBaseEnemy->InitializeParameter(m_curtLevel);
