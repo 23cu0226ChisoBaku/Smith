@@ -43,7 +43,7 @@ FBattleResult USmithDungeonDamageCalculator::CalculateDamage( const FBattleAttac
   }
   
   // 攻撃力　＊　定数^(攻撃者レベル　ー　攻撃を喰らう者のレベル) * 軽減率・小数点切り捨て
-  int32 damage = FMath::FloorToInt32(StaticCast<double>(attacker.AttackPoint) * FMath::Pow(m_constant, StaticCast<double>(levelDifference)) * damageReductionRate); 
+  int32 damage = FMath::FloorToInt32(StaticCast<double>(attacker.AttackPoint) * FMath::Pow(m_constant, StaticCast<double>(levelDifference)) * damageReductionRate * attacker.MotionValue); 
 
   FBattleResult result;
   result.Damage = damage;
