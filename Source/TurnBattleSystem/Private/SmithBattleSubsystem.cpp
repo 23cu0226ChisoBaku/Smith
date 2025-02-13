@@ -211,9 +211,16 @@ void USmithBattleSubsystem::Tick(float DeltaTime)
     return;
   }
 
-  if (m_bCanExecuteCmd && m_battleCmdMgr != nullptr) 
+  if (m_battleCmdMgr != nullptr)
   {
-    m_battleCmdMgr->ExecuteCommands(DeltaTime);
+    if (m_bCanExecuteCmd) 
+    {
+      m_battleCmdMgr->ExecuteCommands(DeltaTime);
+    }
+    else
+    {
+      m_battleCmdMgr->CheckTurnManageableValidate();
+    }
   }
 }
 

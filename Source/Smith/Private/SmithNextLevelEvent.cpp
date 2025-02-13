@@ -82,6 +82,7 @@ void USmithNextLevelEvent::DiscardEvent()
 
 void USmithNextLevelEvent::RaiseEvent()
 {
+  MLibrary::UE::Audio::AudioKit::PlaySE("Next_Level");
   m_bIsDisposed = true;
   OnNextLevel.ExecuteIfBound();
 }

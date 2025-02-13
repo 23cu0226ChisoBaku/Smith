@@ -57,4 +57,7 @@ class TURNBATTLESYSTEM_API ITurnManageable
 	private:
 		ETurnPriority m_priority = ETurnPriority::PlayerSelf;
 		uint8 m_bIsCmdSendable : 1 = false;
+
+	public:
+		TMulticastDelegate<void()> OnTurnPass;
 };

@@ -241,6 +241,7 @@ bool ASmithBoss::WingsCondition()
   m_wingsCnt++;
   if(m_wingsCnt >= 2)
   {
+    MLibrary::UE::Audio::AudioKit::PlaySE3D(TEXT("Dragon_Wing"), 0.7f, GetActorLocation());
     m_wingsCnt = 0;
     return true;
   }
@@ -257,6 +258,7 @@ bool ASmithBoss::BreathCondition()
   m_breathCnt++;
   if(m_breathCnt >= 3)
   {
+    MLibrary::UE::Audio::AudioKit::PlaySE3D(TEXT("Dragon_Breath"), 0.7f, GetActorLocation());
     m_breathCnt = 0;
     return true;
   }
@@ -273,6 +275,7 @@ bool ASmithBoss::PressCondition()
   m_sweepCnt++;
   if(m_sweepCnt >= 3)
   {
+    MLibrary::UE::Audio::AudioKit::PlaySE3D(TEXT("Dragon_Press"), 0.7f, GetActorLocation());
     m_sweepCnt = 0;
     return true;
   }

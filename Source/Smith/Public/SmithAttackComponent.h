@@ -44,6 +44,9 @@ private:
 	TWeakInterfacePtr<IAttackable> m_attackTarget;
 	AttackHandle m_attackHandle;
 
+	UPROPERTY(EditAnywhere)
+	FString AttackSEName;
+
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
 	// TSubclassOf<USmithAIAttackStrategy> AIStrategySubclass;
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))

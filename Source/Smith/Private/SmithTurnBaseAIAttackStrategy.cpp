@@ -7,6 +7,7 @@
 #include "Direction.h"
 #include "AttackHandle.h"
 #include "ISmithBattleLogger.h"
+#include "SmithModelHelperFunctionLibrary.h"
 #include "MLibrary.h"
 
 USmithTurnBaseAIAttackStrategy::USmithTurnBaseAIAttackStrategy(const FObjectInitializer& ObjectInitializer)
@@ -77,6 +78,12 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
       bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *format.Value, handle, false);
       if (success)
       {
+        if (OnChangeDirectionDelegate.IsBound())
+        {
+          
+          m_mediator->GetPlayerDirection(atkDir, GetOwner());
+          OnChangeDirectionDelegate.Execute(atkDir);
+        }
         return true;
       }
     }

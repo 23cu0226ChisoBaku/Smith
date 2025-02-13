@@ -63,6 +63,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, m_maxHP(0)
 	, m_rotateSpeed(720.0f)
 	, m_rotatingDirection(0)
+	, m_turnCnt(0)
 	, m_camDir(EDirection::North)
 	, m_actorFaceDir(EDirection::North)
 	, m_bCanMove(true)
@@ -70,6 +71,7 @@ ASmithPlayerActor::ASmithPlayerActor()
 	, m_bRotatingCamera(false)
 	, m_bIsInMenu(false)
 	, m_bCanReceiveInput(true)
+	, m_bIsDamaged(false)
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -189,6 +191,8 @@ void ASmithPlayerActor::BeginPlay()
 
 	m_actorFaceDir = EDirection::South;
 	SetActorRotation(FRotator{0.0, 180.0, 0.0});
+
+	OnTurnPass.AddUObject(this, &ASmithPlayerActor::turnPassRecover);
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -208,6 +212,19 @@ void ASmithPlayerActor::Tick(float DeltaTime)
 	if (m_curtHP <= 0)
 	{
 		return;
+	}
+
+	if (m_bIsDamaged)
+	{
+		if (AnimationComponent != nullptr)
+		{
+			AnimationComponent->UpdateAnim(DeltaTime);
+			if (AnimationComponent->IsCurrentAnimationFinish())
+			{
+				m_bIsDamaged = false;
+				m_bCanReceiveInput = true;
+			}
+		}
 	}
 
 	if (m_bRotatingCamera)
@@ -254,12 +271,16 @@ void ASmithPlayerActor::SelectNextMenuItem(float selectDirection)
 	if (selectDirection < 0)
 	{
 		UpgradeInteractiveComponent->SelectNextItem(ESelectDirection::Up);
+		AudioKit::PlaySE(TEXT("Player_Select_1"));
 	}
 	// 下のアイテムを選択
 	else if (selectDirection > 0)
 	{
 		UpgradeInteractiveComponent->SelectNextItem(ESelectDirection::Down);
+		AudioKit::PlaySE(TEXT("Player_Select_2"));
 	}
+
+
 }
 bool ASmithPlayerActor::InteractMenu()
 {
@@ -561,6 +582,8 @@ bool ASmithPlayerActor::enhanceImpl(int32 idx)
 		return false;
 	}
 
+	AudioKit::PlaySE(TEXT("Hit_Iron_1"));
+
 	// TODO
 	CloseMenu();
 
@@ -614,6 +637,8 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 			changeForwardImpl(newDir);
 		}
 
+		m_bIsDamaged = true;
+		m_bCanReceiveInput = false;
 		m_curtHP -= attack.AttackPower;
 		if (m_curtHP < 0)
 		{
@@ -632,7 +657,6 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 			m_logSystem->SendAttackLog(attack.Attacker, this);
 			m_logSystem->SendDamageLog(this, attack.AttackPower);
 		}
-
 	}
 	else
 	{
@@ -671,7 +695,6 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 		if (AnimationComponent != nullptr)
 		{
 			AnimationComponent->SwitchAnimState(TEXT("Damaged"));
-			AnimationComponent->SwitchAnimStateDelay(TEXT("Idle"), 0.5f);
 		}
 	}
 }
@@ -778,6 +801,9 @@ void ASmithPlayerActor::UseItem(USmithHPItem* item)
 		HPComponent->SetHP(curtHPPercentage);
 		HPComponent->SetHPNumber(m_maxHP, m_curtHP);
 	}
+
+	// TODO
+	AudioKit::PlaySE(TEXT("Recover_1"));
 }
 
 void ASmithPlayerActor::SwitchAnimationDelay(uint8 animationState, float delay)
@@ -894,4 +920,21 @@ FBattleDefenseParamHandle ASmithPlayerActor::GetDefenseParam() const
 	handle.Level = Weapon->GetLevel();
 
 	return handle;
+}
+
+void ASmithPlayerActor::turnPassRecover()
+{
+	++m_turnCnt;
+	if (m_turnCnt % 2 == 0)
+	{
+		if (m_curtHP < m_maxHP)
+		{
+			++m_curtHP;
+			if (HPComponent != nullptr)
+			{
+				HPComponent->SetHP(StaticCast<float>(m_curtHP)/ StaticCast<float>(m_maxHP));
+				HPComponent->SetHPNumber(m_maxHP, m_curtHP);
+			}
+		}
+	}
 }

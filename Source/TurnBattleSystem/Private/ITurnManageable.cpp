@@ -8,6 +8,11 @@
 void ITurnManageable::SetCommandSendable(bool value)
 {
   m_bIsCmdSendable = value;
+  
+  if (!m_bIsCmdSendable && OnTurnPass.IsBound())
+  {
+    OnTurnPass.Broadcast();
+  }
 }
 
 void ITurnManageable::SetTurnPriority(ETurnPriority priority)

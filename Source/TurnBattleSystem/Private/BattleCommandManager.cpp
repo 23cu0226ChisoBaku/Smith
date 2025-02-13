@@ -154,3 +154,33 @@ void UBattleCommandManager::Reset()
   m_requestCmdWaitList.Reset();
   m_commandLists.Reset();
 }
+
+void UBattleCommandManager::CheckTurnManageableValidate()
+{
+  if (m_requestCmdWaitList.Num() == 0)
+  {
+    m_bIsExecutingCommand = true;
+    if (OnStartExecuteEvent.IsBound())
+    {
+      OnStartExecuteEvent.Broadcast();
+      for (auto& registeredCmd : m_commandLists)
+      {
+        if (registeredCmd.IsValid())
+        {
+          registeredCmd->Start();
+        }
+      }
+    }
+  }
+  int32 idx = 0;
+  while (idx < m_requestCmdWaitList.Num())
+  {
+    if (!m_requestCmdWaitList[idx].IsValid())
+    {
+      m_requestCmdWaitList.RemoveAt(idx);
+      continue;
+    }
+
+    ++idx;
+  }
+}

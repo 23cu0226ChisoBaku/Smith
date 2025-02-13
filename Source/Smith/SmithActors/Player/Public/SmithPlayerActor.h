@@ -194,6 +194,7 @@ private:
 	void updateCamera(float deltaTime);
 	void updateParam(FParams upgradeParam);
 	void changeForwardImpl(EDirection);
+	void turnPassRecover();
 #pragma endregion Private Functions
 
 public:
@@ -273,6 +274,7 @@ private:
 	int32 m_maxHP;
 	float m_rotateSpeed;
 	int32 m_rotatingDirection;
+	int32 m_turnCnt;
 	EDirection m_camDir;
 	EDirection m_actorFaceDir;
 	uint8 m_bCanMove : 1;
@@ -280,6 +282,7 @@ private:
 	uint8 m_bRotatingCamera : 1;
 	uint8 m_bIsInMenu : 1;
 	uint8 m_bCanReceiveInput : 1;
+	uint8 m_bIsDamaged : 1;
 
 #pragma endregion Private Properties
 // end of Private Properties
