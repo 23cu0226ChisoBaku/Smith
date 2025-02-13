@@ -81,6 +81,54 @@ namespace UE::Smith
         }
     };
 
+       
+    class MapRoomCoordFinderStrategy
+    {
+      public:
+      MapRoomCoordFinderStrategy() = default;
+      ~MapRoomCoordFinderStrategy() = default;
+
+    public:
+      void GetCoords(FSmithMap* map, TArray<FMapCoord>& coords)
+      {
+        if (map == nullptr)
+        {
+          return;
+        }
+        
+        coords.Reset();
+        const uint8 sectionRow = map->GetRow();
+        const uint8 sectionColumn = map->GetColumn();
+        for (uint8 row = 0u; row < sectionRow; ++row)
+        {
+          for (uint8 column = 0u; column < sectionColumn; ++column)
+          {
+            FSmithSection* section = map->GetSection(row, column);
+            if (section == nullptr || !section->HasRoom())
+            {
+              continue;
+            }
+
+            const uint8 sectionLeft = map->GetSectionLeft(column);
+            const uint8 sectionTop = map->GetSectionTop(row);
+            const uint8 roomLeft = section->GetRoomLeft() + sectionLeft;
+            const uint8 roomRight = roomLeft + section->GetRoomWidth() - 1u;
+            const uint8 roomTop = section->GetRoomTop() + sectionTop;
+            const uint8 roomBottom = roomTop + section->GetRoomHeight() - 1u;
+
+            for (uint8 roomCoordX = roomLeft; roomCoordX <= roomRight; ++roomCoordX)
+            {
+              for (uint8 roomCoordY = roomTop; roomCoordY <= roomBottom; ++roomCoordY)
+              {
+                coords.Emplace(FMapCoord(roomCoordX, roomCoordY));
+              }
+            }
+          }
+        }
+      }
+    };
+
+
 
     bool FSmithMapHelperLibrary::IsInSameRoom(FSmithMap* map, uint8 x1, uint8 y1, uint8 x2, uint8 y2)
     {
@@ -279,7 +327,8 @@ namespace UE::Smith
 
         case EMapDeployRule::Random:
         {
-
+          TSharedPtr<MapRoomCoordFinderStrategy> strategy = ::MakeShared<MapRoomCoordFinderStrategy>();
+          strategy->GetCoords(map, outCoords);
         }
         break;
 
@@ -299,11 +348,6 @@ namespace UE::Smith
       return outCoords.Num();
     }
 
-   
-    class MapRoomCoordFinderStrategy
-    {
-
-    };
 
     class MapRoomSideFinderStrategy
     {

@@ -10,9 +10,6 @@
 #include <type_traits>
 #include "MLibrary.h"
 
-/**
- * 
- */
 class SMITH_API FSmithEnemyParamInitializer
 {
 private:
@@ -26,11 +23,11 @@ public:
 	template<typename EnemyType>
 	static FParams GetParams(const EnemyType& Enemy, int32 currentLevel)
 	{
-		return IS_UINTERFACE_VALID(ParamInitializer) ? ParamInitializer->Initialize(typename SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type{}, currentLevel) : FParams{};
+		return IS_UINTERFACE_VALID(gParamInitializer) ? gParamInitializer->Initialize(typename SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type{}, currentLevel) : FParams{};
 	}
 
 private:
-	static IParamInitializer* ParamInitializer;
+	static IParamInitializer* gParamInitializer;
 };
 
 #endif
