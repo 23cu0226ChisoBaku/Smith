@@ -70,6 +70,7 @@ private:
 	void startNewLevel();
 	void clearCurrentLevel();
 	void deployNextLevelEvent(bool bIsActiveWhenDeploy = true);
+	void deployPickableEvent();
 	void goToNextLevel();
 	void addDefeatedEnemyCount();
 	void processGameClear();
@@ -86,7 +87,7 @@ private:
 	FSmithMapBluePrint BossMapBluePrint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true"))
 	FSmithEnemyGenerateBluePrint BossGenerateBluePrint;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true",RequiredAssetDataTags = "RowStructure=/Script/MapManagement.ItemGenerationListRow"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapGeneration, meta = (AllowPrivateAccess = "true",RequiredAssetDataTags = "RowStructure=/Script/SmithModel.ItemGenerationListRow"))
 	TObjectPtr<UDataTable> ItemGenerationRecipe;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UGameLogWidget> LogWidgetSub;

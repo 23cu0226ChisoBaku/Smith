@@ -85,7 +85,7 @@ private:
   UFUNCTION()
   bool BreathCondition();
   UFUNCTION()
-  bool SweepCondition();
+  bool PressCondition();
   bool NormalCondition();
 
 public:

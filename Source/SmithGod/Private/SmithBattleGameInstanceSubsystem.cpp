@@ -29,3 +29,27 @@ void USmithBattleGameInstanceSubsystem::DisplayGameOverWidget(UObject* worldCont
 
 }
 
+void USmithBattleGameInstanceSubsystem::DisplayGameClearWidget(UObject* worldContextObject)
+{
+  UWorld* world = nullptr;
+  if (::IsValid(worldContextObject))
+  {
+    world = worldContextObject->GetWorld();
+  }
+  else
+  {
+    if (GEngine != nullptr)
+    {
+      world = GEngine->GetWorld();
+    }
+  }
+
+  TSubclassOf<UUserWidget> GameClearWidgetSubClass = TSoftClassPtr<UUserWidget>(FSoftObjectPath("/Game/BP/WBP_GameClear.WBP_GameClear_C")).LoadSynchronous();
+  UUserWidget* GameClearWidget = CreateWidget<UUserWidget>(world, GameClearWidgetSubClass);
+
+  if (GameClearWidget != nullptr)
+  {
+    GameClearWidget->AddToViewport();
+  }
+}
+

@@ -49,8 +49,8 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<USmithBattleSubsystem> m_battleSys;
 
+	
+	private:
 	TWeakInterfacePtr<ISmithDamageCalculator> m_damageCalculator;
-
-private:
 	TWeakPtr<MapManager> m_mapMgr;
 };

@@ -153,6 +153,7 @@ void ASmithPlayerActor::BeginPlay()
 			check((playerCtrl != nullptr));
 			HPComponent->CreateHP(playerCtrl);
 			HPComponent->SetHP(1.0f);
+			HPComponent->SetHPNumber(m_maxHP, m_maxHP);
 		}
 	}
 
@@ -289,7 +290,16 @@ void ASmithPlayerActor::Move(EDirection newDirection)
 	// 移動コマンドを出す
 	if (::IsValid(MoveComponent) && m_commandMediator.IsValid())
 	{
-		m_commandMediator->SendMoveCommand(this, MoveComponent, newDirection, 1);
+		bool success = m_commandMediator->SendMoveCommand(this, MoveComponent, newDirection, 1);
+		if (!success)
+		{
+			if (AnimationComponent != nullptr)
+			{
+				FName outName;
+				convertAnimState(UE::Smith::SMITH_ANIM_IDLE, outName);
+				AnimationComponent->SwitchAnimState(outName);
+			}
+		}
 	}
 }
 

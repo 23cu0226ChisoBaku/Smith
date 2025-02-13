@@ -28,6 +28,7 @@ struct FBattleAttackParamHandle
 {
   int32 AttackPoint;
   int32 CriticalPoint;
+  int32 DefensePoint;
   int32 Level;
   double MotionValue;
 

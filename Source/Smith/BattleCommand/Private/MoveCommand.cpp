@@ -64,7 +64,7 @@ namespace UE::Smith::Command
         // TODO ステート切り替え方法見直し
         if (m_animator.IsValid())
         {
-          m_animator->SwitchAnimationDelay(SMITH_ANIM_IDLE, 0.3f);
+          m_animator->SwitchAnimationDelay(SMITH_ANIM_IDLE, 0.2f);
         }
       }
       bool IsFinish() const
