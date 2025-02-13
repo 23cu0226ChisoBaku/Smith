@@ -27,7 +27,6 @@ Encoding : UTF-8
 */
 //---------------------------------------
 struct FSmithMapConstructionBluePrint;
-enum class ETileType : uint8;
 
 namespace UE::Smith
 {
@@ -39,6 +38,7 @@ namespace UE::Smith
     */
     //---------------------------------------
     class FSmithRect;
+    class FSmithMap;
 
     ///
     /// @brief マップオブジェクトを配置するクラス
@@ -73,6 +73,7 @@ namespace UE::Smith
         ///
         ///	@brief				マップタイルアクターを破棄する
         ///
+        void ConstructDecoration(UWorld*, FSmithMap*, TSubclassOf<AActor>, int32 count, TArray<AActor*>& outDecorations);
         void DestructMap();
       #pragma endregion FSmithMapConstructor Interface
       // end of FSmithMapConstructor Interface

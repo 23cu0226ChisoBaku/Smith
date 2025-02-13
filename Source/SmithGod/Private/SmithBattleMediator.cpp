@@ -14,6 +14,7 @@
 #include "AttackCommand.h"
 #include "NullCommand.h"
 #include "HealCommand.h"
+#include "SkillCommand.h"
 
 #include "SmithCommandFormat.h"
 #include "FormatTransformer.h"
@@ -231,7 +232,7 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
   }
 }
 
-bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* attacker, FSmithSkillCenterSpotParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle)
+bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* attacker, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle)
 {
   if (!m_battleSys.IsValid())
   {
@@ -255,15 +256,16 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* a
     return false;
   }
 
-  UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, skillParameter.Direction);
+  // TODO
+  UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, skillParameter.ActiveDirection);
   TArray<FAttackableInfoHandle> attackables{};
   mapMgr_shared->FindAttackableMapObjsFromCoord(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat, skillParameter.OffsetToLeft, skillParameter.OffsetToTop);
-
+  
    // TODO Safe Cast may cause performance issue
   ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
+  ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
   if (attackables.Num() > 0)
   {
-    ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
     for(const auto& attackableInfo : attackables)
     {
       // TODO 修正案ー＞BattleModelを作成し、Data Assetsで設定できるようにする
@@ -286,9 +288,13 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* a
       }
 
       attackHandle.AttackFrom = attackableInfo.AttackFrom;
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, attackableInfo.Attackable, ::MoveTemp(attackHandle), animator));
+      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::SkillCommand>(attacker, attackableInfo.Attackable, ::MoveTemp(attackHandle), animator, skillParameter.SkillSlot));
     }
     return true;
+  }
+  else
+  {
+    m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::SkillCommand>(nullptr, nullptr, AttackHandle::NullHandle, animator, skillParameter.SkillSlot));
   }
 
   return false;
@@ -340,7 +346,8 @@ bool USmithBattleMediator::SendHealCommand(AActor* requester,IHealable* heal)
 
 }
 
-int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillCenterSpotParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format) const
+// TODO 悪い参照渡し 
+int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format) const
 { 
   using namespace UE::Smith::Battle;
   outLocations.Reset();
@@ -375,7 +382,7 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
     return outLocations.Num();
   }
 
-  FSmithCommandFormat rotatedFormat = FFormatTransformer::GetRotatedFormat(format, skillParameter.Direction);
+  FSmithCommandFormat rotatedFormat = FFormatTransformer::GetRotatedFormat(format, skillParameter.ActiveDirection);
   auto formattedMapCoords = FFormatTransformer::FormatToMapCoord(rotatedFormat, FMapCoord(mapObjOriginCoordX + skillParameter.OffsetToLeft, mapObjOriginCoordY + skillParameter.OffsetToTop));
 
   for (int32 row = 0; row < rotatedFormat.GetRow(); ++row)
@@ -410,5 +417,16 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
   }
 
   return outLocations.Num();
+}
+
+void USmithBattleMediator::GetPlayerDirection(EDirection& outDirection, AActor* requester, uint8 offsetToLeft, uint8 offsetToTop)
+{
+  TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
+  if (!mapMgr_shared.IsValid())
+  {
+    return;
+  }
+
+  mapMgr_shared->GetPlayerDirection(outDirection, Cast<ICanSetOnMap>(requester), offsetToLeft, offsetToTop);
 }
 

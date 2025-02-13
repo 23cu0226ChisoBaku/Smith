@@ -16,7 +16,8 @@ void UScreenFade::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
   Super::NativeTick(MyGeometry,InDeltaTime);
 
-  if(m_status == None)
+  // TODO
+  if(!m_animFinish)
   {
    return;
   }
@@ -28,18 +29,20 @@ void UScreenFade::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
   }
 
   if(IsFinish())
-  {
-    if(m_status == In)
+  {    
+    // TODO
+    if(m_status == Out)
     {
-      OnFadeInEndEvent.Broadcast();
+      OnFadeOutEndEvent.Broadcast();
     }
     else
     {
-      OnFadeOutEndEvent.Broadcast();
+      OnFadeInEndEvent.Broadcast();
     }
 
     m_status = None;
     m_animFinish = false;
+
   }
 }
 
@@ -50,6 +53,7 @@ bool UScreenFade::IsFinish()
 
 void UScreenFade::StartFade(FadeStatus status)
 {
+  SetVisibility(ESlateVisibility::Visible);
   if(status == In)
   {
     if(OnFadeInStartEvent.IsBound())

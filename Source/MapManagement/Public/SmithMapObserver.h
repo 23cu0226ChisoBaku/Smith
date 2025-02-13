@@ -99,6 +99,9 @@ namespace UE::Smith
         bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius);
         /// TODO
         bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y);
+        // TODO
+        void GetPlayerCoord(FMapCoord& outPlayerCoord);
+
       #pragma endregion FSmithMapObserver Interface
       // end of FSmithMapObserver Interface
       private:

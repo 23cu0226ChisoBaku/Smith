@@ -40,8 +40,6 @@ EDirection FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(const FMapCo
     angleTwoPI = crossWithNorthVec < 0.0 ? angle : -angle;
   }
 
-  MDebug::LogError(FString::SanitizeFloat(angleTwoPI));
-
   if (-30.0 < angleTwoPI && angleTwoPI < 30.0)
   {
     return EDirection::North;

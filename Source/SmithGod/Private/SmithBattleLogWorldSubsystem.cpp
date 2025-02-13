@@ -74,7 +74,7 @@ void USmithBattleLogWorldSubsystem::SetLogWidget(UGameLogWidget* logWidget)
   m_logWidget = logWidget;
   if (m_logWidget != nullptr)
   {
-    m_logWidget->AddToViewport();
+    m_logWidget->AddToViewport(-1);
     m_logWidget->SetVisibility(ESlateVisibility::Hidden);
   }
 }

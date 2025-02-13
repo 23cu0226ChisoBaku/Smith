@@ -5,14 +5,17 @@
 #include "CoreMinimal.h"
 #include "IBattleCommand.h"
 
-class ISkillable;
+class ICanMakeAttack;
+class IAttackable;
+class ISmithAnimator;
+struct AttackHandle;
 
 namespace UE::Smith::Command
 {
   class SMITH_API SkillCommand : public IBattleCommand
   {
   public:
-    SkillCommand(ISkillable*);
+    SkillCommand(ICanMakeAttack*, IAttackable*, AttackHandle, ISmithAnimator* = nullptr, uint8 skillSlot = 0u);
     ~SkillCommand();
 
   public:

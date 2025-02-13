@@ -71,8 +71,11 @@ private:
 	void InMenuSelect(const FInputActionValue&);
 	void InMenuInteract(const FInputActionValue&);
 
-	void disablePlayerInput();
-	void enablePlayerInput();
+public:
+	UFUNCTION()
+	void DisablePlayerInput();
+	UFUNCTION()
+	void EnablePlayerInput();
 
 private:
 	UPROPERTY()

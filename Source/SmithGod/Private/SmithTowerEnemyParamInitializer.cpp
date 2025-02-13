@@ -48,8 +48,8 @@ FParams USmithTowerEnemyParamInitializer::Initialize(SmallGolem, int32 currentLe
 
   FParams returnParams = m_paramList[tag];
   returnParams.HP = returnParams.HP + FMath::FloorToInt(StaticCast<double>(returnParams.HP * (currentLevel - 1)) * 0.4);
-  returnParams.ATK = returnParams.ATK + FMath::FloorToInt(StaticCast<double>(returnParams.ATK * (currentLevel - 1)) * 0.2);
-  returnParams.DEF = returnParams.DEF + FMath::FloorToInt(StaticCast<double>(returnParams.DEF * (currentLevel - 1)) * 0.2);
+  returnParams.ATK = returnParams.ATK + FMath::FloorToInt(StaticCast<double>(returnParams.ATK * (currentLevel - 1)) * 0.4);
+  returnParams.DEF = returnParams.DEF + FMath::FloorToInt(StaticCast<double>(returnParams.DEF * (currentLevel - 1)) * 0.4);
   returnParams.CRT = returnParams.CRT + FMath::FloorToInt(StaticCast<double>(returnParams.CRT * (currentLevel - 1)) * 0.1);
 
   return returnParams;

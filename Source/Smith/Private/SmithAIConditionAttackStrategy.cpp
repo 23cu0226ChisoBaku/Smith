@@ -11,7 +11,11 @@
 #include "SmithDangerZoneDisplayer.h"
 USmithAIConditionAttackStrategy::USmithAIConditionAttackStrategy(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
+  , m_atk(0)
+  , m_crt(0)
+  , m_level(1)
   , m_bIsDisplayingDangerZone(false)
+  , m_bIsWaitCondition(false)
 { }
 
 void USmithAIConditionAttackStrategy::BeginDestroy()
@@ -48,7 +52,14 @@ void USmithAIConditionAttackStrategy::Initialize(ICanMakeAttack *attacker, IComm
   }
 }
 
-void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)> &condition, FSmithSkillCenterSpotParameter skillParameter)
+void USmithAIConditionAttackStrategy::SetAttackParam(int32 attackPower, int32 critical, int32 level)
+{
+  m_atk = attackPower;
+  m_crt = critical;
+  m_level = level;
+}
+
+void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)> &condition, FSmithSkillParameter skillParameter)
 {
   if (condition.IsBound())
   {
@@ -78,23 +89,49 @@ bool USmithAIConditionAttackStrategy::executeImpl()
   {
     return false;
   }
-  
-  if (!m_bIsDisplayingDangerZone && m_dangerZoneDisplayer != nullptr)
-  {
-    const TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>& format = m_attackFormatTables[curtConditionAttatkHandle->Name];
-    TArray<FVector> dangerZoneDisplayLocations;
-    int32 num = m_mediator->GetRangeLocations(dangerZoneDisplayLocations, GetOwner(), curtConditionAttatkHandle->SkillParameter, *format);
 
-    if (num > 0)
+  if (!m_bIsWaitCondition)
+  {
+    m_bIsWaitCondition = true;
+    EDirection playerDirection;
+    AActor* owner = GetOwner();
+    m_mediator->GetPlayerDirection(playerDirection, GetOwner(), curtConditionAttatkHandle->SkillParameter.OffsetToLeft, curtConditionAttatkHandle->SkillParameter.OffsetToTop);
+    curtConditionAttatkHandle->SkillParameter.ActiveDirection = playerDirection;
+  
+    if (playerDirection != EDirection::Invalid)
     {
-      m_dangerZoneDisplayer->SetupDisplayLocations(dangerZoneDisplayLocations);
-      m_bIsDisplayingDangerZone = true;
+      // TODO
+      uint8 directionNum = StaticCast<uint8>(playerDirection);
+      if (directionNum % 2 != 0)
+      {
+        directionNum -= 1;
+      }
+
+      if (::IsValid(owner))
+      {
+        const double newYaw = StaticCast<double>(directionNum) * 360.0 / StaticCast<double>(EDirection::DirectionCount);
+        owner->SetActorRotation(FRotator{0.0, newYaw, 0.0});
+      }
+    }
+
+    if (!m_bIsDisplayingDangerZone && m_dangerZoneDisplayer != nullptr)
+    {
+      const TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>& format = m_attackFormatTables[curtConditionAttatkHandle->Name];
+      TArray<FVector> dangerZoneDisplayLocations;
+      int32 num = m_mediator->GetRangeLocations(dangerZoneDisplayLocations, GetOwner(), curtConditionAttatkHandle->SkillParameter, *format);
+  
+      if (num > 0)
+      {
+        m_dangerZoneDisplayer->SetupDisplayLocations(dangerZoneDisplayLocations);
+        m_bIsDisplayingDangerZone = true;
+      }
     }
   }
 
   // 条件を満たしているか
   if (curtConditionAttatkHandle->Condition.Execute())
   {
+    m_bIsWaitCondition = false;
     FConditionHandle curtHandleInstance{};
     m_conditions.Dequeue(curtHandleInstance);
     // 攻撃
@@ -120,10 +157,11 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     FAttackHandle handle;
     handle.Attacker = logger;
     handle.AttackPower = m_atk;
-    handle.Level = 1;
-    handle.MotionValue = 1.0;
+    handle.CriticalPower = m_crt;
+    handle.Level = m_level;
+    handle.MotionValue = curtConditionAttatkHandle->SkillParameter.MotionValue;
 
-    m_mediator->SendSkillCommand(GetOwner(), m_attacker.Get(), curtHandleInstance.SkillParameter, *format, handle);
+    bool success = m_mediator->SendSkillCommand(GetOwner(), m_attacker.Get(), curtHandleInstance.SkillParameter, *format, handle);
     m_conditions.Enqueue(curtHandleInstance);
 
     // TODO
@@ -133,7 +171,7 @@ bool USmithAIConditionAttackStrategy::executeImpl()
       m_dangerZoneDisplayer->Dispose();
     }
 
-    return true;
+    return success;
   }
 
   return false;

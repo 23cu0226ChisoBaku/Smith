@@ -7,6 +7,7 @@
 #include "Direction.h"
 #include "AttackHandle.h"
 #include "ISmithBattleLogger.h"
+#include "SmithModelHelperFunctionLibrary.h"
 #include "MLibrary.h"
 
 USmithTurnBaseAIAttackStrategy::USmithTurnBaseAIAttackStrategy(const FObjectInitializer& ObjectInitializer)
@@ -15,6 +16,8 @@ USmithTurnBaseAIAttackStrategy::USmithTurnBaseAIAttackStrategy(const FObjectInit
   , m_mediator(nullptr)
   , m_attacker(nullptr)
   , m_atk(0)
+  , m_crt(0)
+  , m_level(0)
 { }
 
 void USmithTurnBaseAIAttackStrategy::Initialize(ICanMakeAttack* attacker, ICommandMediator* mediator, int32 attackPower)
@@ -22,6 +25,13 @@ void USmithTurnBaseAIAttackStrategy::Initialize(ICanMakeAttack* attacker, IComma
   m_mediator = mediator;
   m_attacker = attacker;
   m_atk = attackPower;
+}
+
+void USmithTurnBaseAIAttackStrategy::SetAttackParam(int32 attackPower, int32 critical, int32 level)
+{
+  m_atk = attackPower;
+  m_crt = critical;
+  m_level = level;
 }
 
 void USmithTurnBaseAIAttackStrategy::BeginDestroy()
@@ -48,6 +58,12 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
   }
 
   ISmithBattleLogger* attackerLogger = Cast<ISmithBattleLogger>(GetOwner());
+  FAttackHandle handle;
+  handle.Attacker = attackerLogger;
+  handle.AttackPower = m_atk;
+  handle.CriticalPower = m_crt;
+  handle.Level = m_level;
+  handle.MotionValue = 1.0;
   for (auto& format : m_attackFormatTables)
   {
     if (!format.Value.IsValid())
@@ -55,12 +71,19 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
       continue;
     }
 
+    
     for (uint8 i = 0u; i < 4u; ++i)
     {
       EDirection atkDir = StaticCast<EDirection>(i * 2u);
-      bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *format.Value, AttackHandle{attackerLogger, m_atk}, false);
+      bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *format.Value, handle, false);
       if (success)
       {
+        if (OnChangeDirectionDelegate.IsBound())
+        {
+          
+          m_mediator->GetPlayerDirection(atkDir, GetOwner());
+          OnChangeDirectionDelegate.Execute(atkDir);
+        }
         return true;
       }
     }

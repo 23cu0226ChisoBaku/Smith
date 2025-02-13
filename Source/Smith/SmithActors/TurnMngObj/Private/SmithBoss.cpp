@@ -89,7 +89,6 @@ void ASmithBoss::Tick(float DeltaTime)
 void ASmithBoss::OnAttack(AttackHandle&& handle)
 {
   EnemyParam.HP -= handle.AttackPower;
-
   if (m_logSystem != nullptr)
   {
     // TODO
@@ -127,6 +126,7 @@ void ASmithBoss::TurnOnAI()
   {
     m_attackStrategy->SetOwner(this);
     m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get(), EnemyParam.ATK);
+    m_attackStrategy->SetAttackParam(EnemyParam.ATK, EnemyParam.CRT, m_level);
   }
 
 	for (const auto& [AttackName, ConditionBindHandle] : ConditionAttackFormatTables)
@@ -209,29 +209,7 @@ void ASmithBoss::UpdateAnimation(float deltaTime)
 
 void ASmithBoss::SwitchAnimationDelay(uint8 animationState, float delay)
 {
-	// using namespace UE::Smith;
-	// FName StateName;
-	// switch (animationState)
-	// {
-	// case SMITH_ANIM_IDLE:
-	// 	StateName = TEXT("Idle");
-	// 	break;
-	// case	SMITH_ANIM_WALK:
-	// 	StateName = TEXT("Walk");
-	// 	break;
-	// case SMITH_ANIM_ATTACK:
-	// 	StateName = TEXT("Attack");
-	// 	break;
-	// case SMITH_ANIM_DAMAGED:
-	// 	StateName = TEXT("Damaged");
-	// 	break;
-	// case SMITH_ANIM_DEAD:
-	// 	StateName = TEXT("Dead");
-	// 	break;
-	// default:
-	// 	break;
-	// }
-	// AnimComponent->SwitchAnimStateDelay(StateName, delay);
+
 }
 
 bool ASmithBoss::IsAnimationFinish() const
@@ -261,8 +239,9 @@ bool ASmithBoss::WingsCondition()
     AnimComponent->SwitchAnimState(TEXT("WingAttack"));
   }
   m_wingsCnt++;
-  if(m_wingsCnt >= 5)
+  if(m_wingsCnt >= 2)
   {
+    MLibrary::UE::Audio::AudioKit::PlaySE3D(TEXT("Dragon_Wing"), 0.7f, GetActorLocation());
     m_wingsCnt = 0;
     return true;
   }
@@ -279,6 +258,7 @@ bool ASmithBoss::BreathCondition()
   m_breathCnt++;
   if(m_breathCnt >= 3)
   {
+    MLibrary::UE::Audio::AudioKit::PlaySE3D(TEXT("Dragon_Breath"), 0.7f, GetActorLocation());
     m_breathCnt = 0;
     return true;
   }
@@ -295,6 +275,7 @@ bool ASmithBoss::PressCondition()
   m_sweepCnt++;
   if(m_sweepCnt >= 3)
   {
+    MLibrary::UE::Audio::AudioKit::PlaySE3D(TEXT("Dragon_Press"), 0.7f, GetActorLocation());
     m_sweepCnt = 0;
     return true;
   }
@@ -320,4 +301,5 @@ EBattleLogType ASmithBoss::GetType_Log() const
 void ASmithBoss::InitializeParameter(int32 currentLevel)
 {
 	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
+  m_level = 1 + (currentLevel - 1) * 4;
 }

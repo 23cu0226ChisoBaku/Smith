@@ -78,6 +78,7 @@ public:
 	///	@brief						コマンドマネージャーリセット
 	///
 	void Reset();
+	void CheckTurnManageableValidate();
 #pragma endregion
 // end of UBattleCommandManager Interface
 

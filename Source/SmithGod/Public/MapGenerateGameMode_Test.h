@@ -8,6 +8,7 @@
 #include "SmithMapConstructionBluePrint.h"
 #include "SmithEnemyGenerateBluePrint.h"
 #include "Misc/DateTime.h"
+#include "SmithMapDecoration.h"
 #include "MapGenerateGameMode_Test.generated.h"
 
 class USmithBattleMediator;
@@ -25,6 +26,7 @@ class USmithTowerEnemyParamInitializer;
 // Damage
 class USmithDungeonDamageCalculator;
 class UGameLogWidget;
+class UScreenFade;
 
 namespace UE::Smith
 {
@@ -116,6 +118,10 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUI_CurrentLevel> LevelUISub;
 	UPROPERTY()
+	TObjectPtr<UScreenFade> m_fadeWidget;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UScreenFade> FadeSub;
+	UPROPERTY()
 	TObjectPtr<USmithNextLevelEvent> m_nextLevelEvent;
 	UPROPERTY(EditAnywhere, meta=(RequiredAssetDataTags = "RowStructure=/Script/SmithModel.SmithEnemyParamInitializerRow"))
 	TObjectPtr<UDataTable> EnemyDefaultParamList;
@@ -123,6 +129,9 @@ private:
 	TObjectPtr<UDataTable> EnemyDropLootList;
 	UPROPERTY()
 	TObjectPtr<USmithTowerEnemyParamInitializer> m_towerInitializer;
+
+	UPROPERTY(EditAnywhere)
+	FSmithMapDecoration TEMP_Decoration;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
