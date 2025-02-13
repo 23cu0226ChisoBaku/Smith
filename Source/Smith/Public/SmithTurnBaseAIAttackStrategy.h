@@ -24,6 +24,7 @@ class SMITH_API USmithTurnBaseAIAttackStrategy final: public USmithAIAttackStrat
 public:
 	USmithTurnBaseAIAttackStrategy(const FObjectInitializer&);
 	void Initialize(ICanMakeAttack*, ICommandMediator*, int32 attackPower);
+	void SetAttackParam(int32 attackPower, int32 critical, int32 level);
 	void BeginDestroy() override final;
 
 private:
@@ -35,5 +36,9 @@ public:
 private:
 	TWeakInterfacePtr<ICommandMediator> m_mediator;
 	TWeakInterfacePtr<ICanMakeAttack> m_attacker;
+
+	// TODO
 	int32 m_atk;
+	int32 m_crt;
+	int32 m_level;
 };

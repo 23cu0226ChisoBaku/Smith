@@ -160,11 +160,12 @@ public:
 
 	public:
 		void UseItem(USmithHPItem*);
-	
-	private:
-		void convertAnimState(uint8 animationState, FName& outName);
-	public:
+
 		void SetEnhanceSystem(IEnhanceSystem*);
+
+		FBattleDefenseParamHandle GetDefenseParam() const override;
+		private:
+			void convertAnimState(uint8 animationState, FName& outName);
 
 #pragma endregion Interfaces Override
 // end of Interfaces Override

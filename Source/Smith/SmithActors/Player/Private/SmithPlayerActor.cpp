@@ -615,6 +615,11 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 		}
 
 		m_curtHP -= attack.AttackPower;
+		if (m_curtHP < 0)
+		{
+			m_curtHP = 0;
+		}
+		
 		if (HPComponent != nullptr && m_maxHP > 0)
 		{
 			const float curtHPPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
@@ -874,4 +879,19 @@ bool ASmithPlayerActor::CanReceiveInputEvent() const
 void ASmithPlayerActor::OnGameClear()
 {
 	m_bCanReceiveInput = false;
+}
+
+FBattleDefenseParamHandle ASmithPlayerActor::GetDefenseParam() const
+{
+	if (Weapon == nullptr)
+	{
+		return IAttackable::GetDefenseParam();		
+	}
+
+	FBattleDefenseParamHandle handle;
+	FParams param = Weapon->GetParam();
+	handle.DefensePoint = param.DEF;
+	handle.Level = Weapon->GetLevel();
+
+	return handle;
 }

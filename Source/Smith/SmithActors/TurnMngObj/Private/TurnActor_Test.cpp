@@ -179,6 +179,7 @@ void ATurnActor_Test::TurnOnAI()
 	{
 		m_attackStrategy->SetOwner(this);
 		m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get(), EnemyParam.ATK);
+		m_attackStrategy->SetAttackParam(EnemyParam.ATK, EnemyParam.CRT, m_level);
 	}
 
 	for (auto& pair : AttackFormatTables)
