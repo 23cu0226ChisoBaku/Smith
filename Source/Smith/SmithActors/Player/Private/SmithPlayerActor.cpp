@@ -290,7 +290,16 @@ void ASmithPlayerActor::Move(EDirection newDirection)
 	// 移動コマンドを出す
 	if (::IsValid(MoveComponent) && m_commandMediator.IsValid())
 	{
-		m_commandMediator->SendMoveCommand(this, MoveComponent, newDirection, 1);
+		bool success = m_commandMediator->SendMoveCommand(this, MoveComponent, newDirection, 1);
+		if (!success)
+		{
+			if (AnimationComponent != nullptr)
+			{
+				FName outName;
+				convertAnimState(UE::Smith::SMITH_ANIM_IDLE, outName);
+				AnimationComponent->SwitchAnimState(outName);
+			}
+		}
 	}
 }
 

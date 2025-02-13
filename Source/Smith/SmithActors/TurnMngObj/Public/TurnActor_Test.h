@@ -81,6 +81,9 @@ public:
 	FString GetName_Log() const override;
 	EBattleLogType GetType_Log() const override;
 
+	FBattleDefenseParamHandle GetDefenseParam() const override;
+	
+
 public:
 	void InitializeParameter(int32 currentLevel) override final;
 
@@ -114,10 +117,11 @@ private:
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
 	FParams EnemyParam;
-
-	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
-
 	// TODO
 	UPROPERTY()
 	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
+	
+private:
+	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
+	int32 m_level;
 };

@@ -24,6 +24,8 @@
 #include "SmithEnemyParamInitializer.h"
 #include "SmithEnemyLootGenerator.h"
 
+#include "BattleParamHandle.h"
+
 ATurnActor_Test::ATurnActor_Test()
 	: m_attackStrategy(nullptr)
 	, m_moveStrategy(nullptr)
@@ -31,6 +33,7 @@ ATurnActor_Test::ATurnActor_Test()
 	, m_atkComponent(nullptr)
 	, MoveComponent(nullptr)
 	, AnimComponent(nullptr)
+	, m_level(1)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
@@ -302,6 +305,8 @@ EBattleLogType ATurnActor_Test::GetType_Log() const
 void ATurnActor_Test::InitializeParameter(int32 currentLevel)
 {
 	EnemyParam = FSmithEnemyParamInitializer::GetParams(*this, currentLevel);
+	// TODO
+	m_level = 1 + (currentLevel - 1) * 3;
 }
 
 void ATurnActor_Test::faceToDirection(EDirection newDirection)
@@ -313,4 +318,12 @@ void ATurnActor_Test::faceToDirection(EDirection newDirection)
 
 	const double newYaw = StaticCast<double>(newDirection) * 360.0 / StaticCast<double>(EDirection::DirectionCount);
 	SetActorRotation(FRotator{0.0, newYaw, 0.0});
+}
+
+FBattleDefenseParamHandle ATurnActor_Test::GetDefenseParam() const
+{
+	FBattleDefenseParamHandle handle;
+	handle.DefensePoint = EnemyParam.DEF;
+	handle.Level = m_level;
+	return handle;
 }

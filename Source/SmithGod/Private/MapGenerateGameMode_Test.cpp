@@ -172,9 +172,34 @@ void AMapGenerateGameMode_Test::startNewLevel()
     {
       for (auto& obj : canCmdMediateObjs)
       {
-        // TODO componentをInterfaceに変換
         ICanCommandMediate* mediatable = Cast<ICanCommandMediate>(obj);
         mediatable->SetCommandMediator(m_battleMediator);
+      }
+    }
+  }
+
+  // 敵パラメーターや倒された時のコールバック
+  {
+    TArray<AActor*> turnBaseEnemies;
+    UGameplayStatics::GetAllActorsOfClass(world, ATurnBaseActor::StaticClass(), turnBaseEnemies);
+
+    if (turnBaseEnemies.Num() > 0)
+    {
+      for (const auto& enemy : turnBaseEnemies)
+      {
+        ATurnBaseActor* turnBaseEnemy = Cast<ATurnBaseActor>(enemy);
+        turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
+        if (m_curtLevel % 5 == 0)
+        {
+          turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::processGameClear);
+          // TODO!!!!
+          ASmithPlayerActor* player = Cast<ASmithPlayerActor>(playerPawn);
+          if (player != nullptr)
+          {
+            turnBaseEnemy->OnDefeatEvent.AddUObject(player, &ASmithPlayerActor::OnGameClear);
+          }
+        }
+        turnBaseEnemy->InitializeParameter(m_curtLevel);
       }
     }
   }
@@ -244,30 +269,6 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
-  {
-    TArray<AActor*> turnBaseEnemies;
-    UGameplayStatics::GetAllActorsOfClass(world, ATurnBaseActor::StaticClass(), turnBaseEnemies);
-
-    if (turnBaseEnemies.Num() > 0)
-    {
-      for (const auto& enemy : turnBaseEnemies)
-      {
-        ATurnBaseActor* turnBaseEnemy = Cast<ATurnBaseActor>(enemy);
-        turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
-        if (m_curtLevel % 5 == 0)
-        {
-          turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::processGameClear);
-          // TODO!!!!
-          ASmithPlayerActor* player = Cast<ASmithPlayerActor>(playerPawn);
-          if (player != nullptr)
-          {
-            turnBaseEnemy->OnDefeatEvent.AddUObject(player, &ASmithPlayerActor::OnGameClear);
-          }
-        }
-        turnBaseEnemy->InitializeParameter(m_curtLevel);
-      }
-    }
-  }
 
   m_eventSystem->Reset();
 
