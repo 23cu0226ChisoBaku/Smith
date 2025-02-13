@@ -128,6 +128,7 @@ private:
 
 private:
   int32 m_maxHp;
+  int32 m_level;
   int32 m_wingsCnt;
   int32 m_breathCnt;
   int32 m_sweepCnt;

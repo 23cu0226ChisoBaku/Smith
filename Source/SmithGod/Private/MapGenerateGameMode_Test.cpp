@@ -31,10 +31,13 @@
 #include "SmithPlayerActor.h"
 #include "SmithMapBaseMoveDirector.h"
 #include "GameLogWidget.h"
+#include "ScreenFade.h"
 #include "SmithDungeonDamageCalculator.h"
 #include "UI_CurrentLevel.h"
 #include "SmithTowerEnemyParamInitializer.h"
 #include "SmithEnemyParamInitializer.h"
+
+#include "SmithBattlePlayerController.h"
 
 // TODO
 #include "SmithNextLevelEvent.h"
@@ -157,6 +160,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
     deployNextLevelEvent();
     deployPickableEvent();
     m_mapMgr->InitMapObjs(GetWorld(), playerPawn, EnemyGenerateBluePrint);
+    m_mapMgr->InitDecoration(GetWorld(), TEMP_Decoration);
   }
 
   m_battleSystem->InitializeBattle();
@@ -288,6 +292,11 @@ void AMapGenerateGameMode_Test::clearCurrentLevel()
   m_mapMgr->Reset();
   m_battleSystem->ResetBattle();
 
+  // TODO
+  if (m_fadeWidget != nullptr)
+  {
+    m_fadeWidget->StartFade(FadeStatus::In);
+  }
 }
 
 void AMapGenerateGameMode_Test::initializeGame()
@@ -360,6 +369,27 @@ void AMapGenerateGameMode_Test::initializeGame()
       CurtLevelUI->SetLevel(StaticCast<int32>(m_curtLevel));
     }
 
+    if (FadeSub != nullptr)
+    {
+      m_fadeWidget = CreateWidget<UScreenFade>(world, FadeSub);
+
+      if (m_fadeWidget != nullptr)
+      {
+        APlayerController* playerCtrl = world->GetFirstPlayerController();
+        ASmithBattlePlayerController* smithPlayerCtrl = Cast<ASmithBattlePlayerController>(playerCtrl);
+        if (smithPlayerCtrl != nullptr)
+        {
+          m_fadeWidget->OnFadeInStartEvent.AddUObject(this, &AMapGenerateGameMode_Test::startNewLevel);
+          m_fadeWidget->OnFadeInEndEvent.AddUObject(smithPlayerCtrl, &ASmithBattlePlayerController::EnablePlayerInput);
+          m_fadeWidget->OnFadeOutStartEvent.AddUObject(smithPlayerCtrl, &ASmithBattlePlayerController::DisablePlayerInput);
+          m_fadeWidget->OnFadeOutEndEvent.AddUObject(this, &AMapGenerateGameMode_Test::clearCurrentLevel);
+        }
+
+        m_fadeWidget->AddToViewport(1);
+        m_fadeWidget->SetVisibility(ESlateVisibility::Hidden);
+      }
+    }
+
     m_nextLevelEvent = m_eventPublisher->PublishMapEvent<USmithNextLevelEvent>(USmithNextLevelEvent::StaticClass());
     if (m_nextLevelEvent == nullptr)
     {
@@ -392,9 +422,11 @@ void AMapGenerateGameMode_Test::initializeGame()
 
 void AMapGenerateGameMode_Test::goToNextLevel()
 {
-  clearCurrentLevel();
   ++m_curtLevel;
-  startNewLevel();
+  if (m_fadeWidget != nullptr)
+  {
+    m_fadeWidget->StartFade(FadeStatus::Out);
+  }
 }
 
 void AMapGenerateGameMode_Test::deployNextLevelEvent(bool bIsActiveWhenDeploy)

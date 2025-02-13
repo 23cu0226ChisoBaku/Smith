@@ -42,6 +42,10 @@ Encoding : UTF-8
 #include "AttackableInfoHandle.h"
 #include "ItemGenerationListRow.h"
 #include "SmithModelHelperFunctionLibrary.h"
+#include "SmithMapDecoration.h"
+
+// TODO マネージャーは仕事をしない筈
+#include "SmithMapHelperLibrary.h"
 
 #include "MLibrary.h"
 
@@ -203,7 +207,67 @@ namespace UE::Smith
             ++idx;
           }
         }
+        void InitDecoration(UWorld* world, const FSmithMapDecoration& decoration)
+        {
+          TArray<AActor*> decorationActors;
+          int32 generateCount = 0;
+          switch (decoration.DeployRule)
+          {
+            case EMapDeployRule::Corner:
+            {
+              generateCount = FSmithMapHelperLibrary::GetRoomCount(m_map.Get());
+            }
+            break;
 
+            default:
+            {
+              unimplemented();
+            }
+            break;
+          }
+          m_mapConstructor->ConstructDecoration(world, m_map.Get(), decoration.MapDecoration, generateCount, decorationActors);
+          TArray<FMapCoord> deployMapCoords;
+          FSmithMapHelperLibrary::GetMapCoordByRule_PerRoom(m_map.Get(), decoration.DeployRule, deployMapCoords);
+          check(deployMapCoords.Num() == generateCount);
+          check(decorationActors.Num() == generateCount);
+
+          FUECollectionsLibrary::Shuffle(deployMapCoords);
+
+          // TODO need decorationDirector
+          for (int32 i = 0; i < generateCount; ++i)
+          {    
+            if (::IsValid(decorationActors[i]))
+            {
+              FRotator decorationRotator;
+              const FMapCoord mapCoord = deployMapCoords[i];
+              FSmithMapHelperLibrary::DirectMapElementRotation(m_map.Get(), decorationRotator, mapCoord.x, mapCoord.y);
+
+              // 壁に付けるように修正
+              FMapCoord diffMapCoord;
+              if (FSmithMapHelperLibrary::IsSameTileNearby(m_map.Get(), mapCoord, diffMapCoord))
+              {
+                decorationActors[i]->Destroy();
+                continue;
+              }
+              else
+              {
+                EDirection direction = FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(diffMapCoord, mapCoord);
+                if (direction != EDirection::Invalid)
+                {
+                  const double yawOfDirection = StaticCast<double>(direction) * 360.0 / StaticCast<double>(EDirection::DirectionCount);
+                  decorationRotator.Yaw = yawOfDirection;
+                }
+              }
+              const FVector decorationWorldCoord = FVector
+                                                          {
+                                                            m_model->OriginWorldCoord.X + StaticCast<double>(mapCoord.x) * StaticCast<double>(m_model->MapTileSize),      
+                                                            m_model->OriginWorldCoord.Y + StaticCast<double>(mapCoord.y) * StaticCast<double>(m_model->MapTileSize),      
+                                                            m_model->OriginWorldCoord.Z    
+                                                          };
+              decorationActors[i]->SetActorLocationAndRotation(decorationWorldCoord, decorationRotator);
+            }
+          }
+        }
         void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
         {
           m_deployDirector->DeployMapObj(mapObj, x, y);
@@ -328,6 +392,10 @@ namespace UE::Smith
     void FSmithMapManager::InitPickableEvent(EMapDeployRule rule, const TArray<ISmithMapEvent*>& events)
     {
       m_pImpl->InitPickableEvent(rule, events);
+    }
+    void FSmithMapManager::InitDecoration(UWorld* world, const FSmithMapDecoration& decoration)
+    {
+      m_pImpl->InitDecoration(world, decoration);
     }
     void FSmithMapManager::DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
     {

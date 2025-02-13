@@ -31,5 +31,5 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<URichTextBlock> AttackPowerRichText;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<URichTextBlock> CriticalRichText;
+	TObjectPtr<URichTextBlock> DefensePowerRichText;
 };

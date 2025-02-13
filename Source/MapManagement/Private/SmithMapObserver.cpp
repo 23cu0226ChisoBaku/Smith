@@ -240,6 +240,8 @@ namespace UE::Smith
                                                   + mapObjoffset;
                                                      
                   enemy->SetActorLocation(worldLocation);
+                  // TODO
+                  enemy->SetActorRotation(FRotator{0.0, 180.0, 0.0});
                   outMapObjs.Emplace(bossCoord, mapObj);
 
                   for (uint8 mapCoordOffsetX = 0; mapCoordOffsetX < mapSizeX; ++mapCoordOffsetX)

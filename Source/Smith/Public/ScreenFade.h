@@ -14,7 +14,6 @@ enum FadeStatus	: uint8
 };
 
 class UBorder;
-class UUserWidget;
 /**
  *
  */

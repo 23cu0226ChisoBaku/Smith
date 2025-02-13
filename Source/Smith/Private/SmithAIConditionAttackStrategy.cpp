@@ -59,7 +59,7 @@ void USmithAIConditionAttackStrategy::SetAttackParam(int32 attackPower, int32 cr
   m_level = level;
 }
 
-void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)> &condition, FSmithSkillCenterSpotParameter skillParameter)
+void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)> &condition, FSmithSkillParameter skillParameter)
 {
   if (condition.IsBound())
   {
@@ -94,8 +94,25 @@ bool USmithAIConditionAttackStrategy::executeImpl()
   {
     m_bIsWaitCondition = true;
     EDirection playerDirection;
+    AActor* owner = GetOwner();
     m_mediator->GetPlayerDirection(playerDirection, GetOwner(), curtConditionAttatkHandle->SkillParameter.OffsetToLeft, curtConditionAttatkHandle->SkillParameter.OffsetToTop);
     curtConditionAttatkHandle->SkillParameter.ActiveDirection = playerDirection;
+  
+    if (playerDirection != EDirection::Invalid)
+    {
+      // TODO
+      uint8 directionNum = StaticCast<uint8>(playerDirection);
+      if (directionNum % 2 != 0)
+      {
+        directionNum -= 1;
+      }
+
+      if (::IsValid(owner))
+      {
+        const double newYaw = StaticCast<double>(directionNum) * 360.0 / StaticCast<double>(EDirection::DirectionCount);
+        owner->SetActorRotation(FRotator{0.0, newYaw, 0.0});
+      }
+    }
 
     if (!m_bIsDisplayingDangerZone && m_dangerZoneDisplayer != nullptr)
     {
@@ -108,9 +125,6 @@ bool USmithAIConditionAttackStrategy::executeImpl()
         m_dangerZoneDisplayer->SetupDisplayLocations(dangerZoneDisplayLocations);
         m_bIsDisplayingDangerZone = true;
       }
-
-      MDebug::LogError(FString::FromInt(StaticCast<uint8>(curtConditionAttatkHandle->SkillParameter.ActiveDirection)));
-
     }
   }
 

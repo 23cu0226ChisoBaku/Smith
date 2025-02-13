@@ -24,7 +24,7 @@ class SMITH_API USmithAIConditionAttackStrategy : public USmithAIAttackStrategy
 	{
 		FString Name;
 		TDelegate<bool(void)> Condition;
-		FSmithSkillCenterSpotParameter SkillParameter;
+		FSmithSkillParameter SkillParameter;
 	};
 public:
 	USmithAIConditionAttackStrategy(const FObjectInitializer&);
@@ -33,7 +33,7 @@ public:
 	void Initialize(ICanMakeAttack*, ICommandMediator*, int32 attackPower);
 	void SetAttackParam(int32 attackPower, int32 critical, int32 level);
 	// 条件の登録
-	void ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)>&, FSmithSkillCenterSpotParameter);
+	void ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)>&, FSmithSkillParameter);
 
 private:
 	virtual bool executeImpl() override;

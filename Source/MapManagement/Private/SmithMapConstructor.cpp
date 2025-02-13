@@ -18,7 +18,10 @@ Encoding : UTF-8
 
 #include "SmithMapConstructor.h"
 #include "SmithRect.h"
+#include "SmithMap.h"
 #include "SmithMapConstructionBluePrint.h"
+#include "SmithMapDecoration.h"
+#include "SmithMapHelperLibrary.h"
 
 #include "MLibrary.h"
 
@@ -89,6 +92,25 @@ namespace UE::Smith
           
         }
       }
+    }
+
+    void FSmithMapConstructor::ConstructDecoration(UWorld* world, FSmithMap* map, TSubclassOf<AActor> decorationSub, int32 count, TArray<AActor*>& outDecorations)
+    {
+      if (!::IsValid(world) || (map == nullptr) || (decorationSub == nullptr))
+      {
+        return;
+      }
+
+      outDecorations.Reset();
+
+      for (int32 i = 0; i < count; ++i)
+      {
+        AActor* decorationActor = world->SpawnActor(decorationSub);
+        outDecorations.Emplace(decorationActor);
+        m_mapMaterials.Emplace(decorationActor);
+      }
+
+
     }
     void FSmithMapConstructor::DestructMap()
     {

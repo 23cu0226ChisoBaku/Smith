@@ -48,6 +48,7 @@ struct FSmithMapBluePrint;
 struct FSmithMapConstructionBluePrint;
 struct FSmithEnemyGenerateBluePrint;
 struct FItemGenerationListRow;
+struct FSmithMapDecoration;
 
 namespace UE::Smith
 {
@@ -123,6 +124,7 @@ namespace UE::Smith
         /// @param x                              X座標
         /// @param y                              Y座標
         ///
+        void InitDecoration(UWorld*, const FSmithMapDecoration&);
         void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
         void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y);
         ///

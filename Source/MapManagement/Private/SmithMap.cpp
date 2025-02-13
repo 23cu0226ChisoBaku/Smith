@@ -374,20 +374,20 @@ namespace UE::Smith
           const uint8 toRight = roomTo.OriginCoord.X + m_sections[roomTo.SectionIdx]->GetRoomWidth() - 1;
           const uint8 toBottom = roomTo.OriginCoord.Y + m_sections[roomTo.SectionIdx]->GetRoomHeight() - 1;
 
-          uint8 fromRandX = FMath::RandRange(roomFrom.OriginCoord.X, fromRight);
-          uint8 fromRandY = FMath::RandRange(roomFrom.OriginCoord.Y, fromBottom);
-          const uint8 toRandX = FMath::RandRange(roomTo.OriginCoord.X, toRight);
-          const uint8 toRandY = FMath::RandRange(roomTo.OriginCoord.Y, toBottom);
+          uint8 fromRandX = FMath::RandRange(roomFrom.OriginCoord.X + 1, fromRight - 1);
+          uint8 fromRandY = FMath::RandRange(roomFrom.OriginCoord.Y + 1, fromBottom - 1);
+          const uint8 toRandX = FMath::RandRange(roomTo.OriginCoord.X + 1, toRight - 1);
+          const uint8 toRandY = FMath::RandRange(roomTo.OriginCoord.Y + 1, toBottom - 1);
 
           // XからもしくはYから道を伸ばすかをランダムに決める
-          switch(FMath::RandRange(0, 1))
-          {
             // Xから
-            case 0:
+            if (FMath::Abs(roomFrom.OriginCoord.X - roomTo.OriginCoord.X) > FMath::Abs(roomFrom.OriginCoord.Y - roomTo.OriginCoord.Y))
             {
-              // 曲がる所の座標追加
-              outCoordArr.Emplace(FUint32Vector2(toRandX, fromRandY));
-              while (fromRandX != toRandX)
+              const uint8 centerX = roomFrom.OriginCoord.X > roomTo.OriginCoord.X ?
+                                    StaticCast<uint8>(StaticCast<int32>(toRight + roomFrom.OriginCoord.X) / 2) :
+                                    StaticCast<uint8>(StaticCast<int32>(fromRight + roomTo.OriginCoord.X) / 2) ;
+
+              while (fromRandX != centerX)
               {
                 if (fromRandX < toRandX)
                 {
@@ -410,17 +410,30 @@ namespace UE::Smith
                 {
                   --fromRandY;
                 }
-                outCoordArr.Emplace(FUint32Vector2(fromRandX, fromRandY));
+                outCoordArr.Emplace(FUint32Vector2(centerX, fromRandY));
+              }
+
+              while (fromRandX != toRandX)
+              {
+                if (fromRandX < toRandX)
+                {
+                  ++fromRandX;         
+                }
+                else if (fromRandX > toRandX)
+                {
+                  --fromRandX;
+                }
+                outCoordArr.Emplace(FUint32Vector2(fromRandX, toRandY));
               }
             }
-            break;
-
             // Yから
-            case 1:
+            else
             {
-              // 曲がる所の座標追加
-              outCoordArr.Emplace(FUint32Vector2(fromRandX, toRandY));
-              while (fromRandY != toRandY)
+              const uint8 centerY = roomFrom.OriginCoord.Y > roomTo.OriginCoord.Y ?
+                                    StaticCast<uint8>(StaticCast<int32>(toBottom + roomFrom.OriginCoord.Y) / 2) :
+                                    StaticCast<uint8>(StaticCast<int32>(fromBottom + roomTo.OriginCoord.Y) / 2);
+
+              while (fromRandY != centerY)
               {
                 if (fromRandY < toRandY)
                 {
@@ -443,12 +456,23 @@ namespace UE::Smith
                 {
                   --fromRandX;
                 }
+                outCoordArr.Emplace(FUint32Vector2(fromRandX, centerY));
+              }
+
+              while (fromRandY != toRandY)
+              {
+                if (fromRandY < toRandY)
+                {
+                  ++fromRandY;
+                }
+                else if (fromRandY > toRandY)
+                {
+                  --fromRandY;
+                }
                 outCoordArr.Emplace(FUint32Vector2(fromRandX, fromRandY));
               }
             }
-            break;
           }
-        }
       private:
         TMap<uint8, TSharedPtr<FSmithSection>> m_sections;
         FSmithRect m_mapRect;
