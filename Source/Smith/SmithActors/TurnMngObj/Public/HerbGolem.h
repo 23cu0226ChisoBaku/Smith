@@ -50,7 +50,7 @@ class SMITH_API AHerbGolem final:  public ATurnBaseActor, public IAttackable,
 
 // Enemy Traits
 public:
-	using Type = SmallGolem;
+	using Type = HerbGolem;
 
 public:
 	AHerbGolem();
@@ -103,8 +103,8 @@ private:
 	TObjectPtr<USmithAttackComponent> m_atkComponent;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USmithMoveComponent> MoveComponent;
-	// UPROPERTY(EditAnywhere)
-	// TObjectPtr<USmithAnimationComponent> AnimComponent;
+	//UPROPERTY(EditAnywhere)
+	//TObjectPtr<USmithAnimationComponent> AnimComponent;
 
 		// Attack Format
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
