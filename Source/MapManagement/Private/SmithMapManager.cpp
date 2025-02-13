@@ -187,9 +187,20 @@ namespace UE::Smith
           m_eventDirector->DirectNextLevelEventCoord(nextLevelEventCoordX, nextLevelEventCoordY);
           DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY);
         }
-        void InitPickableEvent(const TArray<FItemGenerationListRow>& recipe)
+        void InitPickableEvent(EMapDeployRule rule, const TArray<ISmithMapEvent*>& events)
         {
+          int32 idx = 0;
+          uint8 x = 0u;
+          uint8 y = 0u;
+          while (idx < events.Num())
+          {
+            if (m_eventDirector->GetDeployableCoord(rule, x, y))
+            {
+              DeployEvent(events[idx], x, y);
+            }
 
+            ++idx;
+          }
         }
 
         void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
@@ -298,9 +309,9 @@ namespace UE::Smith
     {
       m_pImpl->InitNextLevelEvent(nextLevelEvent);
     }
-    void FSmithMapManager::InitPickableEvent(const TArray<FItemGenerationListRow>& recipe)
+    void FSmithMapManager::InitPickableEvent(EMapDeployRule rule, const TArray<ISmithMapEvent*>& events)
     {
-      m_pImpl->InitPickableEvent(recipe);
+      m_pImpl->InitPickableEvent(rule, events);
     }
     void FSmithMapManager::DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
     {

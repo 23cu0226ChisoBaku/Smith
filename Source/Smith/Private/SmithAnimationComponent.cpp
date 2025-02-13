@@ -74,9 +74,17 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 		return;
 	}
 
+	if (nextStateName.IsNone())
+	{
+		return;
+	}
+
 	UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
 	if (CurrentMontage == nullptr)
 	{
+		m_curtAnimationTimeInterval = 0.0f;
+		m_animationPlayTimeCnt = 0.0f;
+		AnimInstance->Montage_JumpToSection(nextStateName);
 		return;
 	}
 
@@ -88,10 +96,7 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 
 	const float duration = UAnimMontageHelperLibrary::GetSectionDuration(AnimInstance, CurrentMontage, nextStateName);
 
-	MDebug::LogWarning(FString::SanitizeFloat(duration));
-
 	m_curtAnimationTimeInterval = duration;
-
 	m_animationPlayTimeCnt = 0.0f;
 
 	// delayがあったら
@@ -104,8 +109,7 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 		SetComponentTickEnabled(false);
 	}
 
-	AnimInstance->Montage_Play(MontageToPlay);
-	AnimInstance->Montage_JumpToSection(nextStateName, MontageToPlay);
+	AnimInstance->Montage_JumpToSection(nextStateName);
 }
 
 void USmithAnimationComponent::SwitchAnimStateDelay(FName nextStateName, float delay)

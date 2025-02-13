@@ -1,5 +1,8 @@
 /.git
+<<<<<<< HEAD
 /.github
+=======
+>>>>>>> origin/main
 /.vs
 /.vscode
 /Content

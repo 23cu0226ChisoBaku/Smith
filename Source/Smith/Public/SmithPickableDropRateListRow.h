@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SmithPickableLootHandle.h"
+#include "DropRatioMode.h"
 #include "SmithPickableDropRateListRow.generated.h"
 
 /**
@@ -18,4 +19,6 @@ struct SMITH_API FSmithPickableDropRateListRow : public FTableRowBase
 	FString ListOwnerName;
 	UPROPERTY(EditAnywhere)
 	TArray<FSmithPickableLootHandle> DropLootList;
+	UPROPERTY(EditAnywhere)
+	EDropRatioMode Mode;
 };

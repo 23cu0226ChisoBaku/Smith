@@ -19,6 +19,7 @@ Encoding : UTF-8
 #include "SmithSection.h"
 #include "SmithMapDataModel.h"
 #include "ItemGenerationListRow.h"
+#include "SmithMapHelperLibrary.h"
 #include "MLibrary.h"
 
 namespace UE::Smith
@@ -157,35 +158,23 @@ namespace UE::Smith
           }
 
           TArray<FMapCoord> deployableCoords{};
+          
+          // TODO Need efficiency refactoring
+          FSmithMapHelperLibrary::GetMapCoordsByRule(map_shared.Get(), rule, deployableCoords);
+          FUECollectionsLibrary::Shuffle(deployableCoords);
 
-          switch (rule)
+          for (const auto& coord : deployableCoords)
           {
-            case EMapDeployRule::Random:
+            if (model_shared->StaySpaceTable.Contains(coord) && model_shared->StaySpaceTable[coord]->GetEvent() == nullptr)
             {
-
+              outX = coord.x;
+              outY = coord.y;
+              return true;
             }
-            break;
-
-            case EMapDeployRule::Corner:
-            {
-
-            }
-            break;
-
-            case EMapDeployRule::Sides_With_Corner:
-            {
-
-            }
-            break;
-
-            case EMapDeployRule::Sides_Without_Corner:
-            {
-
-            }
-            break;
           }
 
-          return true;
+          return false;
+
         }
         private:
         ///
