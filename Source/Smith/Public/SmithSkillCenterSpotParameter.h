@@ -15,9 +15,11 @@ struct SMITH_API FSmithSkillCenterSpotParameter
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere)
-	EDirection Direction;
-	UPROPERTY(EditAnywhere)
 	uint8 OffsetToLeft;
 	UPROPERTY(EditAnywhere)
 	uint8 OffsetToTop;
+	UPROPERTY(EditAnywhere, meta = (ClampMin = 0.0, ClampMax = 5.0))
+	double MotionValue;
+
+	EDirection ActiveDirection = EDirection::Invalid;
 };

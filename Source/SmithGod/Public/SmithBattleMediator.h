@@ -45,6 +45,7 @@ public:
 
 public:
 	int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&) const override final;
+	void GetPlayerDirection(EDirection& outDirection, AActor*, uint8 offsetToLeft, uint8 offsetToTop) override final;
 private:
 	UPROPERTY()
 	TWeakObjectPtr<USmithBattleSubsystem> m_battleSys;

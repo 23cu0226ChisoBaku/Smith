@@ -26,7 +26,7 @@ void USmithPickUpItemEvent::BeginDestroy()
 
   if (m_itemEventNiagaraComp != nullptr)
   {
-    m_itemEventNiagaraComp->Deactivate();
+    m_itemEventNiagaraComp->DeactivateImmediate();
   }
 }
 

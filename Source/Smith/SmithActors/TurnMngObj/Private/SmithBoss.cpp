@@ -261,7 +261,7 @@ bool ASmithBoss::WingsCondition()
     AnimComponent->SwitchAnimState(TEXT("WingAttack"));
   }
   m_wingsCnt++;
-  if(m_wingsCnt >= 5)
+  if(m_wingsCnt >= 2)
   {
     m_wingsCnt = 0;
     return true;

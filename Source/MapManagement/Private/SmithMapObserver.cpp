@@ -321,7 +321,6 @@ namespace UE::Smith
             return false;
           }
 
-          TQueue<int32> a;
           TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared->OnMapObjsCoordTable.Contains(mapObj))
           {
@@ -405,6 +404,23 @@ namespace UE::Smith
                     + model_shared->OriginWorldCoord;
 
         return true;
+      }
+      void GetPlayerCoord(FMapCoord& outPlayerCoord)
+      {
+        outPlayerCoord.x = 0;
+        outPlayerCoord.y = 0;
+
+        TSharedPtr<Model> model_shared = m_model.Pin();
+        if (!model_shared.IsValid())
+        {
+          return;
+        }
+        
+        if (model_shared->OnMapObjsCoordTable.Contains(m_player))
+        {
+          outPlayerCoord.x = model_shared->OnMapObjsCoordTable[m_player].x;
+          outPlayerCoord.y = model_shared->OnMapObjsCoordTable[m_player].y;
+        }
       }
       private:
         bool isInSameSection(ICanSetOnMap* chaser, ICanSetOnMap* target)
@@ -690,6 +706,11 @@ namespace UE::Smith
     bool FSmithMapObserver::ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y)
     {
       return m_pImpl->ConvertMapCoordToWorldLocation(outLocation, x, y);
+    }
+
+    void FSmithMapObserver::GetPlayerCoord(FMapCoord& outPlayerCoord)
+    {
+      m_pImpl->GetPlayerCoord(outPlayerCoord);
     }
 
   }

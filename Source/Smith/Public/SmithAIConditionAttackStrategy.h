@@ -31,6 +31,7 @@ public:
 	virtual void BeginDestroy() override;
 	// 初期化
 	void Initialize(ICanMakeAttack*, ICommandMediator*, int32 attackPower);
+	void SetAttackParam(int32 attackPower, int32 critical, int32 level);
 	// 条件の登録
 	void ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)>&, FSmithSkillCenterSpotParameter);
 
@@ -44,7 +45,10 @@ private:
 	TWeakInterfacePtr<ICommandMediator> m_mediator;
 	TWeakInterfacePtr<ICanMakeAttack> m_attacker;
 	int32 m_atk;
+	int32 m_crt;
+	int32 m_level;
 
 	uint8 m_bIsDisplayingDangerZone : 1;
+	uint8 m_bIsWaitCondition : 1;
 };
 

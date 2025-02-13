@@ -46,4 +46,5 @@ public:
 
 	// TODO
 	virtual int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&) const = 0;
+	virtual void GetPlayerDirection(EDirection& outDirection, AActor*, uint8 offsetToLeft = 0, uint8 offsetToTop = 0) = 0;
 };

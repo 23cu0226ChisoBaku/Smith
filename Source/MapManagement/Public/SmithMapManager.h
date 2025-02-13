@@ -133,6 +133,7 @@ namespace UE::Smith
         ///
         void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
         void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
+        bool GetPlayerDirection(EDirection& outDirection, ICanSetOnMap* origin, uint8 offsetLeft = 0, uint8 offsetTop = 0);
         ///
         /// @brief                                マップオブジェクトを移動
         /// @param ICanSetOnMap                   マップオブジェクト

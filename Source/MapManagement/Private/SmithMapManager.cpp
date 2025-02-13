@@ -41,6 +41,7 @@ Encoding : UTF-8
 // TODO
 #include "AttackableInfoHandle.h"
 #include "ItemGenerationListRow.h"
+#include "SmithModelHelperFunctionLibrary.h"
 
 #include "MLibrary.h"
 
@@ -224,6 +225,21 @@ namespace UE::Smith
         {
           m_mapOperator->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
         }
+        bool GetPlayerDirection(EDirection& outDirection, ICanSetOnMap* origin, uint8 offsetLeft, uint8 offsetTop)
+        {
+          // TODO
+          uint8 x = 0;
+          uint8 y = 0;
+          if (!GetMapObjectCoord(origin, x, y))
+          {
+            return false;
+          }
+          FMapCoord playerCoord;
+          m_mapObserver->GetPlayerCoord(playerCoord);
+          outDirection = FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(FMapCoord(x + offsetLeft, y + offsetTop), playerCoord);
+
+          return outDirection != EDirection::Invalid;
+        }
         void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
           m_mapOperator->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
@@ -328,6 +344,10 @@ namespace UE::Smith
     void FSmithMapManager::FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
     {
       m_pImpl->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
+    }
+    bool FSmithMapManager::GetPlayerDirection(EDirection& outDirection, ICanSetOnMap* origin, uint8 offsetLeft, uint8 offsetTop)
+    {
+      return m_pImpl->GetPlayerDirection(outDirection, origin, offsetLeft, offsetTop);
     }
     void FSmithMapManager::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     {
