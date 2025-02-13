@@ -81,7 +81,7 @@ namespace UE::Smith::Command
   // end of MoveCommand PImpl
 
   MoveCommand::MoveCommand(IMoveable* moveable, ISmithAnimator* animator)
-    : m_moveImpl(new MoveImpl(moveable, animator))
+    : m_moveImpl(::MakeUnique<MoveImpl>(moveable, animator))
   { }
   MoveCommand::~MoveCommand()
   {

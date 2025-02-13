@@ -18,6 +18,8 @@ Encoding : UTF-8
 #include "SmithMap.h"
 #include "SmithSection.h"
 #include "SmithMapDataModel.h"
+#include "ItemGenerationListRow.h"
+#include "SmithMapHelperLibrary.h"
 #include "MLibrary.h"
 
 namespace UE::Smith
@@ -141,6 +143,40 @@ namespace UE::Smith
             }
           }
         }
+        bool GetDeployableCoord(EMapDeployRule rule, uint8& outX, uint8& outY)
+        {
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared.IsValid())
+          {
+            return false;
+          }
+
+          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+          if (!map_shared.IsValid())
+          {
+            return false;
+          }
+
+          TArray<FMapCoord> deployableCoords{};
+          
+          // TODO Need efficiency refactoring
+          FSmithMapHelperLibrary::GetMapCoordsByRule(map_shared.Get(), rule, deployableCoords);
+          FUECollectionsLibrary::Shuffle(deployableCoords);
+
+          for (const auto& coord : deployableCoords)
+          {
+            if (model_shared->StaySpaceTable.Contains(coord) && model_shared->StaySpaceTable[coord]->GetEvent() == nullptr)
+            {
+              outX = coord.x;
+              outY = coord.y;
+              return true;
+            }
+          }
+
+          return false;
+
+        }
+        private:
         ///
         /// @brief 座標にイベントを置けるかをチェック
         ///
@@ -236,6 +272,10 @@ namespace UE::Smith
     void FSmithMapEventDirector::DirectNextLevelEventCoord(uint8& outX, uint8& outY)
     {
       m_pImpl->DirectNextLevelEventCoord(outX, outY);
+    }
+    bool FSmithMapEventDirector::GetDeployableCoord(EMapDeployRule rule, uint8& outX, uint8& outY)
+    {
+      return m_pImpl->GetDeployableCoord(rule, outX, outY);
     }
   }
 }

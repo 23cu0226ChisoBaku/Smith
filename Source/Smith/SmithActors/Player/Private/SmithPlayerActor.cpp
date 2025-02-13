@@ -153,6 +153,7 @@ void ASmithPlayerActor::BeginPlay()
 			check((playerCtrl != nullptr));
 			HPComponent->CreateHP(playerCtrl);
 			HPComponent->SetHP(1.0f);
+			HPComponent->SetHPNumber(m_maxHP, m_maxHP);
 		}
 	}
 
@@ -185,6 +186,9 @@ void ASmithPlayerActor::BeginPlay()
 			m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
 		}
 	}
+
+	m_actorFaceDir = EDirection::South;
+	SetActorRotation(FRotator{0.0, 180.0, 0.0});
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -286,7 +290,16 @@ void ASmithPlayerActor::Move(EDirection newDirection)
 	// 移動コマンドを出す
 	if (::IsValid(MoveComponent) && m_commandMediator.IsValid())
 	{
-		m_commandMediator->SendMoveCommand(this, MoveComponent, newDirection, 1);
+		bool success = m_commandMediator->SendMoveCommand(this, MoveComponent, newDirection, 1);
+		if (!success)
+		{
+			if (AnimationComponent != nullptr)
+			{
+				FName outName;
+				convertAnimState(UE::Smith::SMITH_ANIM_IDLE, outName);
+				AnimationComponent->SwitchAnimState(outName);
+			}
+		}
 	}
 }
 
@@ -338,8 +351,13 @@ void ASmithPlayerActor::ChangeForward(EDirection newDirection)
 		return;
 	}
 
+	changeForwardImpl(newDirection);
+}
+
+void ASmithPlayerActor::changeForwardImpl(EDirection newDirection)
+{
 	using namespace SmithPlayerActor::Private;
-	
+
 	m_actorFaceDir = newDirection;
 	const double newYaw = StaticCast<double>(m_actorFaceDir) * ANGLE_PER_DIRECTION;
 	SetActorRotation(FRotator{0.0, newYaw, 0.0});
@@ -590,11 +608,18 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 {
 	if (attack.AttackPower > 0)
 	{
+		if (attack.AttackFrom != EDirection::Invalid)
+		{
+			const EDirection newDir = StaticCast<EDirection>((StaticCast<uint8>(attack.AttackFrom) + 4u) % StaticCast<uint8>(EDirection::DirectionCount));
+			changeForwardImpl(newDir);
+		}
+
 		m_curtHP -= attack.AttackPower;
 		if (HPComponent != nullptr && m_maxHP > 0)
 		{
 			const float curtHPPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
 			HPComponent->SetHP(curtHPPercentage);
+			HPComponent->SetHPNumber(m_maxHP, m_curtHP);
 		}
 
 		if (m_logSystem != nullptr)
@@ -621,7 +646,7 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 
 		if (AnimationComponent!= nullptr)
 		{
-			AnimationComponent->SwitchAnimState(TEXT("Dead"), 0.0f);
+			AnimationComponent->SwitchAnimState(TEXT("Dead"));
 		}
 
 		UWorld* world = GetWorld();
@@ -640,7 +665,7 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 	{
 		if (AnimationComponent != nullptr)
 		{
-			AnimationComponent->SwitchAnimState(TEXT("Damaged"),0.0f);
+			AnimationComponent->SwitchAnimState(TEXT("Damaged"));
 			AnimationComponent->SwitchAnimStateDelay(TEXT("Idle"), 0.5f);
 		}
 	}
@@ -668,8 +693,9 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 		return;
 	}
 
-	// TODO?
 	event->RaiseEvent();
+	m_actorFaceDir = EDirection::South;
+	SetActorRotation(FRotator{0.0, 180.0, 0.0});
 }
 
 // TODO Refactoring
@@ -720,10 +746,9 @@ void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
 	}
 
 	FName StateName;
-	float durationTime;
-	convertAnimState(animationState, StateName, durationTime);
+	convertAnimState(animationState, StateName);
 
-	AnimationComponent->SwitchAnimState(StateName, durationTime);
+	AnimationComponent->SwitchAnimState(StateName);
 }
 
 void ASmithPlayerActor::UseItem(USmithHPItem* item)
@@ -746,6 +771,7 @@ void ASmithPlayerActor::UseItem(USmithHPItem* item)
 	if (HPComponent != nullptr)
 	{
 		HPComponent->SetHP(curtHPPercentage);
+		HPComponent->SetHPNumber(m_maxHP, m_curtHP);
 	}
 }
 
@@ -757,8 +783,7 @@ void ASmithPlayerActor::SwitchAnimationDelay(uint8 animationState, float delay)
 	}
 
 	FName StateName;
-	float dummy;
-	convertAnimState(animationState, StateName, dummy);
+	convertAnimState(animationState, StateName);
 	AnimationComponent->SwitchAnimStateDelay(StateName, delay);
 }
 
@@ -777,11 +802,10 @@ bool ASmithPlayerActor::IsAnimationFinish() const
 	return AnimationComponent == nullptr ? true : AnimationComponent->IsCurrentAnimationFinish();
 }
 
-void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName, float& outDurationTime)
+void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName)
 {
 	using namespace UE::Smith;
 	outName = TEXT("");
-	outDurationTime = 0.0f;
 
 	switch (animationState)
 	{
@@ -793,7 +817,6 @@ void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName, f
 			break;
 		case SMITH_ANIM_ATTACK:
 			outName = TEXT("Attack");
-			outDurationTime = 1.0f;
 			break;
 		case SMITH_ANIM_DAMAGED:
 			outName = TEXT("Damaged");
@@ -823,7 +846,7 @@ EDirection ASmithPlayerActor::GetCameraDirection() const
 
 void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
 {
-	OnAttack(AttackHandle{this, damage});
+	OnAttack(AttackHandle{this, damage, EDirection::Invalid});
 }
 
 void ASmithPlayerActor::updateParam(FParams upgradeParam)
@@ -838,6 +861,7 @@ void ASmithPlayerActor::updateParam(FParams upgradeParam)
 		if (HPComponent != nullptr)
 		{
 			HPComponent->SetHP(StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP));
+			HPComponent->SetHPNumber(m_maxHP, m_curtHP);
 		}
 	}
 }
@@ -845,4 +869,9 @@ void ASmithPlayerActor::updateParam(FParams upgradeParam)
 bool ASmithPlayerActor::CanReceiveInputEvent() const
 {
 	return m_bCanReceiveInput;
+}
+
+void ASmithPlayerActor::OnGameClear()
+{
+	m_bCanReceiveInput = false;
 }

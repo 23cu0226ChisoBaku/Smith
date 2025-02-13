@@ -10,6 +10,7 @@
 class IMoveable;
 class ICommandMediator;
 class USmithMoveDirector;
+enum class EDirection : uint8;
 /**
  * 
  */
@@ -28,6 +29,8 @@ public:
 private:
 	virtual bool executeImpl() override;
 
+public:
+	TDelegate<void(EDirection)> OnMoveToEvent;
 private:
 	TWeakInterfacePtr<ICommandMediator> m_mediator;
 	TWeakObjectPtr<USmithMoveDirector> m_moveDirector;

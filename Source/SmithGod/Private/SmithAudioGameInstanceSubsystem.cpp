@@ -28,6 +28,7 @@ void USmithAudioGameInstanceSubsystem::Deinitialize()
     m_bgmComp->DestroyComponent();
   }
   m_bIsTickable = false;
+  MLibrary::UE::Audio::AudioKit::DetachAudioPlayer();
 
   Super::Deinitialize();
 }

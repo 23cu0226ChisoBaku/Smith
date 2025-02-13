@@ -15,12 +15,16 @@
 
 #include "FormatInfo_Import.h"
 #include "SmithMoveDirector.h"
+#include "Direction.h"
 #include "SmithPickable.h"
 #include "IEventPublishMediator.h"
 #include "SmithBattleLogWorldSubsystem.h"
 #include "MLibrary.h"
 
 #include "SmithEnemyParamInitializer.h"
+#include "SmithEnemyLootGenerator.h"
+
+#include "BattleParamHandle.h"
 
 ATurnActor_Test::ATurnActor_Test()
 	: m_attackStrategy(nullptr)
@@ -29,6 +33,7 @@ ATurnActor_Test::ATurnActor_Test()
 	, m_atkComponent(nullptr)
 	, MoveComponent(nullptr)
 	, AnimComponent(nullptr)
+	, m_level(1)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
@@ -55,7 +60,7 @@ void ATurnActor_Test::BeginPlay()
 	m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
 	check(m_idleStrategy != nullptr);
 
-  AnimComponent->SwitchAnimState(TEXT("Idle"), 0.0f);
+  AnimComponent->SwitchAnimState(TEXT("Idle"));
 
 	UWorld* world = GetWorld();
 	if (world != nullptr)
@@ -93,6 +98,11 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 {
 	if (handle.AttackPower > 0)
 	{
+		if (handle.AttackFrom != EDirection::Invalid)
+		{
+			const EDirection faceTo = StaticCast<EDirection>((StaticCast<uint8>(handle.AttackFrom) + 4u) % StaticCast<uint8>(EDirection::DirectionCount)); 
+			faceToDirection(faceTo);
+		}
 		EnemyParam.HP -= handle.AttackPower;
 
 		if (m_logSystem != nullptr)
@@ -116,10 +126,11 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 
 		if (m_eventMediator.IsValid())
 		{
-			if (DropUpgradeTable.Num() > 0)
+			IPickable* pickable = FSmithEnemyLootGenerator::GetLoot(this);
+			if (pickable != nullptr)
 			{
-				int32 idx = FMath::RandRange(0, DropUpgradeTable.Num() - 1);
-				m_eventMediator->PublishPickUpEvent(this, DropUpgradeTable[idx]);
+				USmithPickable* smithPickable = Cast<USmithPickable>(pickable);
+				m_eventMediator->PublishPickUpEvent(this, smithPickable);
 			}
 		}
 
@@ -129,7 +140,6 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 		}
 
 		Destroy();
-		DropUpgradeTable.Reset();
 	}
 }
 
@@ -188,6 +198,7 @@ void ATurnActor_Test::TurnOnAI()
 	{
 		m_moveStrategy->SetOwner(this);
 		m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, MoveComponent, 1);
+		m_moveStrategy->OnMoveToEvent.BindUObject(this, &ATurnActor_Test::faceToDirection);
 	}
 
 	if (m_idleStrategy != nullptr)
@@ -241,7 +252,7 @@ void ATurnActor_Test::SwitchAnimation(uint8 animationState)
 	default:
 		break;
 	}
-	AnimComponent->SwitchAnimState(StateName, 0.0f);
+	AnimComponent->SwitchAnimState(StateName);
 }
 
 void ATurnActor_Test::UpdateAnimation(float deltaTime)
@@ -293,5 +304,26 @@ EBattleLogType ATurnActor_Test::GetType_Log() const
 
 void ATurnActor_Test::InitializeParameter(int32 currentLevel)
 {
-	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
+	EnemyParam = FSmithEnemyParamInitializer::GetParams(*this, currentLevel);
+	// TODO
+	m_level = 1 + (currentLevel - 1) * 3;
+}
+
+void ATurnActor_Test::faceToDirection(EDirection newDirection)
+{
+	if (StaticCast<uint8>(newDirection) >= StaticCast<uint8>(EDirection::DirectionCount))
+	{
+		return;
+	}
+
+	const double newYaw = StaticCast<double>(newDirection) * 360.0 / StaticCast<double>(EDirection::DirectionCount);
+	SetActorRotation(FRotator{0.0, newYaw, 0.0});
+}
+
+FBattleDefenseParamHandle ATurnActor_Test::GetDefenseParam() const
+{
+	FBattleDefenseParamHandle handle;
+	handle.DefensePoint = EnemyParam.DEF;
+	handle.Level = m_level;
+	return handle;
 }

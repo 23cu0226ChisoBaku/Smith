@@ -26,4 +26,5 @@ class SMITH_API IParamInitializer
 public:
 	virtual FParams Initialize(SmallGolem, int32 currentLevel) = 0;
 	virtual FParams Initialize(Dragon, int32 currentLevel) = 0;
+	virtual FParams Initialize(HerbGolem, int32 currentLevel) = 0;
 };

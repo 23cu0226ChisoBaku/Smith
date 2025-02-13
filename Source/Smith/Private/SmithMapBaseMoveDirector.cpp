@@ -4,8 +4,6 @@
 #include "SmithMapBaseMoveDirector.h"
 #include "ITargetTracker.h"
 #include "ICanSetOnMap.h"
-#include "Direction.h"
-
 #include "MLibrary.h"
 
 USmithMapBaseMoveDirector::USmithMapBaseMoveDirector(const FObjectInitializer& ObjectInitializer)

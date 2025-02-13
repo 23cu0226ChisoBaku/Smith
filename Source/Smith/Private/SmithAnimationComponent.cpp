@@ -5,6 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "Debug.h"
+#include "AnimMontageHelperLibrary.h"
 
 // Sets default values for this component's properties
 USmithAnimationComponent::USmithAnimationComponent()
@@ -61,14 +62,19 @@ void USmithAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	m_animationSwitchDelayTimeCnt += DeltaTime;
 	if (m_animationSwitchDelayTimeCnt >= m_animationSwitchDelayTimeInterval)
 	{
-		SwitchAnimState(m_delayNextSectionName, 0.0f);
+		SwitchAnimState(m_delayNextSectionName);
 	}
 
 }
 
-void USmithAnimationComponent::SwitchAnimState(FName nextStateName, float animationDuration)
+void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 {
 	if (AnimInstance == nullptr)
+	{
+		return;
+	}
+
+	if (nextStateName.IsNone())
 	{
 		return;
 	}
@@ -76,6 +82,9 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName, float animat
 	UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
 	if (CurrentMontage == nullptr)
 	{
+		m_curtAnimationTimeInterval = 0.0f;
+		m_animationPlayTimeCnt = 0.0f;
+		AnimInstance->Montage_JumpToSection(nextStateName);
 		return;
 	}
 
@@ -85,7 +94,9 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName, float animat
 		return; 
 	}
 
-	m_curtAnimationTimeInterval = animationDuration;
+	const float duration = UAnimMontageHelperLibrary::GetSectionDuration(AnimInstance, CurrentMontage, nextStateName);
+
+	m_curtAnimationTimeInterval = duration;
 	m_animationPlayTimeCnt = 0.0f;
 
 	// delayがあったら
@@ -98,8 +109,7 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName, float animat
 		SetComponentTickEnabled(false);
 	}
 
-	AnimInstance->Montage_Play(MontageToPlay);
-	AnimInstance->Montage_JumpToSection(nextStateName, MontageToPlay);
+	AnimInstance->Montage_JumpToSection(nextStateName);
 }
 
 void USmithAnimationComponent::SwitchAnimStateDelay(FName nextStateName, float delay)

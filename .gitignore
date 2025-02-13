@@ -82,3 +82,22 @@ DerivedDataCache/*
 *.code-workspace
 
 
+Content/Resources/Audio/BGM/Boss.wav
+Content/Resources/Audio/BGM/Dungeon1.wav
+Content/Resources/Audio/BGM/Dungeon2.wav
+Content/Resources/Audio/BGM/DungeonIntro.wav
+Content/Resources/Audio/BGM/DungeonLoop.wav
+Content/Resources/SoundEffect/Decision1.wav
+Content/Resources/SoundEffect/Decision2.wav
+Content/Resources/SoundEffect/DragonBreath.wav
+Content/Resources/SoundEffect/DragonCry1.wav
+Content/Resources/SoundEffect/DragonCry2.wav
+Content/Resources/SoundEffect/DragonPress.wav
+Content/Resources/SoundEffect/DragonSwingDown.wav
+Content/Resources/SoundEffect/DragonWing.wav
+Content/Resources/SoundEffect/GoleamLightAttack.wav
+Content/Resources/SoundEffect/GoleamStrongAttack.wav
+Content/Resources/SoundEffect/Slach1.wav
+Content/Resources/SoundEffect/Slach2.wav
+Content/Resources/SoundEffect/Strike1.wav
+Content/Resources/SoundEffect/Strike2.wav

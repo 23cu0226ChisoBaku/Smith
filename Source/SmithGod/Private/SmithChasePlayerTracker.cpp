@@ -10,30 +10,26 @@
 USmithChasePlayerTracker::USmithChasePlayerTracker(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
   , m_mapMgr(nullptr)
-  , m_targetPlayer(nullptr)
 { }
 
-void USmithChasePlayerTracker::SetupTracker(TSharedPtr<UE::Smith::Map::FSmithMapManager> mapMgr, ICanSetOnMap* player)
+void USmithChasePlayerTracker::SetupTracker(TSharedPtr<UE::Smith::Map::FSmithMapManager> mapMgr)
 {
   m_mapMgr = mapMgr;
-  m_targetPlayer = player;
 }
 
 bool USmithChasePlayerTracker::TrackTarget(EDirection& outDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
 {
-  using namespace UE::Smith::Map;
-
-  if (!m_mapMgr.IsValid() || !m_targetPlayer.IsValid())
-  {
-    return false;
-  }
-
   if (!IS_UINTERFACE_VALID(chaser))
   {
     return false;
   }
 
-  TSharedPtr<FSmithMapManager> mapMgr_shared = m_mapMgr.Pin();
+  TSharedPtr<UE::Smith::Map::FSmithMapManager> mapMgr_shared = m_mapMgr.Pin();
+  if (!mapMgr_shared.IsValid())
+  {
+    return false;
+  }
+
   return mapMgr_shared->ChasePlayerTarget(outDirection, chaser, chaseRadius);
 }
 

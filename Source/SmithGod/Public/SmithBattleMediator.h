@@ -41,6 +41,7 @@ public:
 	bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) override final;
 	bool SendSkillCommand(AActor*, ICanMakeAttack*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&) override final;
 	bool SendIdleCommand(AActor*) override final;
+	bool SendHealCommand(AActor*,IHealable*) override final;
 
 public:
 	int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillCenterSpotParameter, const UE::Smith::Battle::FSmithCommandFormat&) const override final;
@@ -48,8 +49,8 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<USmithBattleSubsystem> m_battleSys;
 
+	
+	private:
 	TWeakInterfacePtr<ISmithDamageCalculator> m_damageCalculator;
-
-private:
 	TWeakPtr<MapManager> m_mapMgr;
 };

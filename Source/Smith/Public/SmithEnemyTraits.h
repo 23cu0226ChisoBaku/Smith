@@ -5,15 +5,40 @@
 #ifndef SMITH_ENEMY_TRAITS
 #define SMITH_ENEMY_TRAITS
 
-// 小ゴーレム
-struct SmallGolem{};
-// ドラゴン
-struct Dragon{};
+#include "CoreMinimal.h"
+#include <type_traits>
 
-template<typename EnemyType> 
-struct SmithEnemyTraits
+// 小ゴーレム
+struct SmallGolem
 {
-	using Type = EnemyType::Type;
+	static const FString NAME;
 };
+// ドラゴン
+struct Dragon
+{
+	static const FString NAME;
+};
+// 薬草ゴーレム
+struct HerbGolem
+{
+	static const FString NAME;
+};
+
+template<typename EnemyType, bool bIsPtr> struct SmithEnemyTraits;
+
+// ポインタだったら
+template<typename EnemyType>
+struct SmithEnemyTraits<EnemyType, true>
+{
+	using Type = typename std::remove_pointer_t<EnemyType>::Type;
+};
+
+// インスタントだったら
+template<typename EnemyType>
+struct SmithEnemyTraits<EnemyType, false>
+{
+	using Type = typename std::decay_t<EnemyType>::Type;
+};
+
 
 #endif

@@ -61,6 +61,12 @@ FMapCoord operator+(const FMapCoord& lhs, const FMapCoord& rhs)
   return FMapCoord(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
+FMapCoord operator-(const FMapCoord& lhs, const FMapCoord& rhs)
+{
+  return FMapCoord(lhs.x - rhs.x, lhs.y - rhs.y);
+}
+
+
 #if UE_BUILD_DEBUG
 uint32 GetTypeHash(const FMapCoord& Thing)
 {

@@ -150,12 +150,7 @@ namespace UE::Smith
             TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
 
             // イベントの向きを決める
-            bool success = FSmithMapHelperLibrary::DirectMapElementRotation(map_shared.Get(), eventRotation, x, y);
-            // 例外が発生した場合は抜ける
-            if (!success)
-            {
-              return;
-            }
+            FSmithMapHelperLibrary::DirectMapElementRotation(map_shared.Get(), eventRotation, x, y);
 
             const double eventLocationX = StaticCast<double>(x) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.X;
             const double eventLocationY = StaticCast<double>(y) * StaticCast<double>(model_shared->MapTileSize) + model_shared->OriginWorldCoord.Y;

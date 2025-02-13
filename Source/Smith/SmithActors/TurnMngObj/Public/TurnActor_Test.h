@@ -7,9 +7,7 @@
 #include "IAttackable.h"
 #include "ICanSetOnMap.h"
 #include "IMoveDirector.h"
-
 #include "ISmithAnimator.h"
-
 #include "ISmithSimpleAIDriven.h"
 #include "MapObjType.h"
 #include "../Weapon/Params.h"
@@ -31,6 +29,8 @@ class USmithMoveDirector;
 class USmithPickable;
 
 class USmithAnimationComponent;
+
+enum class EDirection : uint8;
 
 // TODO
 class USmithBattleLogWorldSubsystem;
@@ -81,9 +81,14 @@ public:
 	FString GetName_Log() const override;
 	EBattleLogType GetType_Log() const override;
 
+	FBattleDefenseParamHandle GetDefenseParam() const override;
+	
+
 public:
 	void InitializeParameter(int32 currentLevel) override final;
 
+private:
+	void faceToDirection(EDirection);
 private:
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIAttackStrategy> m_attackStrategy;
@@ -109,17 +114,14 @@ private:
 	EMapObjType MapObjectType;
 	UPROPERTY()
 	TObjectPtr<USmithMoveDirector> m_moveDirector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = DropItemTable, meta = (AllowPrivateAccess = "true"))
-	TArray<TObjectPtr<USmithPickable>> DropUpgradeTable; 
-
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
 	FParams EnemyParam;
-
-	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
-
 	// TODO
 	UPROPERTY()
 	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
+	
+private:
+	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
+	int32 m_level;
 };

@@ -43,6 +43,14 @@ bool USmithTurnBaseAIMoveStrategy::executeImpl()
   }
 
   EDirection moveDir = m_moveDirector->GetNextDirection();
-
-  return m_mediator->SendMoveCommand(GetOwner(), m_move.Get(), moveDir, m_moveSpeed);
+  
+  bool success = m_mediator->SendMoveCommand(GetOwner(), m_move.Get(), moveDir, m_moveSpeed);
+  if (success)
+  {
+    if (OnMoveToEvent.IsBound())
+    {
+      OnMoveToEvent.Execute(moveDir);
+    }
+  }
+  return success;
 }
