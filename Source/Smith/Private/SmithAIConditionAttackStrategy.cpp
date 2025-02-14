@@ -159,7 +159,7 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     handle.AttackPower = m_atk;
     handle.CriticalPower = m_crt;
     handle.Level = m_level;
-    handle.MotionValue = curtConditionAttatkHandle->SkillParameter.MotionValue;
+    handle.MotionValue = curtHandleInstance.SkillParameter.MotionValue;
 
     bool success = m_mediator->SendSkillCommand(GetOwner(), m_attacker.Get(), curtHandleInstance.SkillParameter, *format, handle);
     m_conditions.Enqueue(curtHandleInstance);

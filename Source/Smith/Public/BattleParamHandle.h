@@ -36,7 +36,7 @@ struct FBattleAttackParamHandle
     : AttackPoint(0)
     , CriticalPoint(0)
     , Level(0)
-    , MotionValue(0)
+    , MotionValue(1.0)
   {}
 };
 
