@@ -129,7 +129,6 @@ private:
 	TObjectPtr<UDataTable> EnemyDropLootList;
 	UPROPERTY()
 	TObjectPtr<USmithTowerEnemyParamInitializer> m_towerInitializer;
-
 	UPROPERTY(EditAnywhere)
 	FSmithMapDecoration TEMP_Decoration;
 

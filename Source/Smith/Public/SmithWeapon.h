@@ -6,6 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "IEnhanceable.h"
 #include "Params.h"
+#include "ISmithBattleLogger.h"
 #include "SmithWeapon.generated.h"
 
 class UTexture2D;
@@ -34,7 +35,7 @@ struct FSmithWeaponInfoHandle
  * 
  */
 UCLASS(EditInlineNew)
-class SMITH_API USmithWeapon : public UObject, public IEnhanceable
+class SMITH_API USmithWeapon : public UObject, public IEnhanceable, public ISmithBattleLogger
 {
 	GENERATED_BODY()
 public:
@@ -51,12 +52,15 @@ public:
 		return handle;
 	}
 
+	FString GetName_Log() const override;
+	EBattleLogType GetType_Log() const override;
+
 // TODO
 public:
 	TMulticastDelegate<void(FParams)> OnUpgrade;
 	
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = WeaponParameter, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = WeaponParameter)
 	FParams WeaponParam;
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	FString Name;

@@ -136,24 +136,17 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
 
 void AMapGenerateGameMode_Test::startNewLevel()
 {
-  check(m_mapMgr.IsValid());
-  check(m_battleSystem != nullptr);
-  check(m_battleMediator != nullptr); 
-  check(m_chasePlayerTracker != nullptr);
-  check(m_enhanceSystem != nullptr);
-  check(m_eventMediator != nullptr);
-
   APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
   ICanSetOnMap* mapPlayer = Cast<ICanSetOnMap>(playerPawn);
   check(mapPlayer != nullptr);
 
-  m_chasePlayerTracker->SetupTracker(m_mapMgr);
-
+  // ボス階層初期化
   if (m_curtLevel % 5 == 0)
   {
     m_mapMgr->InitMap(GetWorld(), BossMapBluePrint, MapConstructionBluePrint);
     m_mapMgr->InitMapObjs(GetWorld(), playerPawn, BossGenerateBluePrint);
   }
+  // 普通階層初期化
   else
   {
     m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
@@ -193,6 +186,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
       {
         ATurnBaseActor* turnBaseEnemy = Cast<ATurnBaseActor>(enemy);
         turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
+        // TODO 
         if (m_curtLevel % 5 == 0)
         {
           turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::processGameClear);
@@ -203,6 +197,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
             turnBaseEnemy->OnDefeatEvent.AddUObject(player, &ASmithPlayerActor::OnGameClear);
           }
         }
+
         turnBaseEnemy->InitializeParameter(m_curtLevel);
       }
     }
@@ -273,7 +268,6 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
-
   m_eventSystem->Reset();
 
   if (CurtLevelUI != nullptr)
@@ -284,15 +278,9 @@ void AMapGenerateGameMode_Test::startNewLevel()
 
 void AMapGenerateGameMode_Test::clearCurrentLevel()
 {
-  check(m_mapMgr.IsValid());
-  check(m_battleSystem != nullptr);
-  check(m_battleMediator != nullptr); 
-  check(m_chasePlayerTracker != nullptr);
-
   m_mapMgr->Reset();
   m_battleSystem->ResetBattle();
 
-  // TODO
   if (m_fadeWidget != nullptr)
   {
     m_fadeWidget->StartFade(FadeStatus::In);
@@ -300,9 +288,10 @@ void AMapGenerateGameMode_Test::clearCurrentLevel()
 }
 
 void AMapGenerateGameMode_Test::initializeGame()
-{
+{ 
   UWorld* world = GetWorld();
   check(world != nullptr);
+
   ASmithTurnBattleWorldSettings* worldSettings = Cast<ASmithTurnBattleWorldSettings>(world->GetWorldSettings());
 
   if (worldSettings != nullptr && worldSettings->IsBattleLevel())
@@ -325,12 +314,15 @@ void AMapGenerateGameMode_Test::initializeGame()
     m_mapMgr = ::MakeShared<UE::Smith::Map::FSmithMapManager>();
     check(m_mapMgr.IsValid());
 
+    m_chasePlayerTracker->SetupTracker(m_mapMgr);
+
     m_damageCalculator = NewObject<USmithDungeonDamageCalculator>(this);
     check(m_damageCalculator != nullptr);
+    // ダメージ計算用定数初期化
     m_damageCalculator->SetConstantNumber(TEST_DAMAGE_CALCULATOR_CONSTANT);
-
+    // コマンド仲介初期化
     m_battleMediator->SetupMediator(m_battleSystem, m_damageCalculator, m_mapMgr);
-
+    // イベント登録システムを注入
     m_mapMgr->AssignEventRegister(m_eventSystem);
     m_battleSystem->AssignEventExecutor(m_eventSystem);
 
@@ -338,6 +330,7 @@ void AMapGenerateGameMode_Test::initializeGame()
     check(m_enhanceSystem != nullptr);
 
     APawn* playerPawn = UGameplayStatics::GetPlayerPawn(world, 0);
+    // 強化システムを注入
     ICanUseEnhanceSystem* enhanceUser = Cast<ICanUseEnhanceSystem>(playerPawn);
     check(enhanceUser != nullptr);
     enhanceUser->SetEnhanceSystem(m_enhanceSystem);
@@ -356,12 +349,13 @@ void AMapGenerateGameMode_Test::initializeGame()
       m_logSubsystem->SetLogWidget(logWidget);
     }
 
+    // リザルト変数初期化
     m_curtLevel = 1;
     m_defeatedEnemyCount = 0;
     m_startPlayTime = FMath::FloorToInt32(world->GetTimeSeconds());
     m_startDateTime = FDateTime::Now();
 
-    // TODO
+    // 階層表示ウイジェット
     CurtLevelUI = CreateWidget<UUI_CurrentLevel>(world, LevelUISub);
     if (CurtLevelUI != nullptr)
     {
@@ -390,6 +384,7 @@ void AMapGenerateGameMode_Test::initializeGame()
       }
     }
 
+    // 階層上りイベント
     m_nextLevelEvent = m_eventPublisher->PublishMapEvent<USmithNextLevelEvent>(USmithNextLevelEvent::StaticClass());
     if (m_nextLevelEvent == nullptr)
     {
@@ -417,6 +412,7 @@ void AMapGenerateGameMode_Test::initializeGame()
 
       FSmithEnemyLootGenerator::AssignLootGenerator(lootSub);
     }
+
   }
 }
 

@@ -147,7 +147,7 @@ void ASmithBoss::TurnOnAI()
   if (m_idleStrategy != nullptr)
   {
     m_idleStrategy->SetOwner(this);
-    m_idleStrategy->Initialize(m_commandMediator.Get());
+    m_idleStrategy->Initialize(m_commandMediator.Get(), 0.2f);
   }
 
   if (m_aiBehaviorProcessor != nullptr)

@@ -11,7 +11,8 @@ enum class EBattleLogType : uint8
 	Player = 0,
 	Enemy = 1,
 	Item = 2,
-	None = 3,
+	Enhance = 3,
+	None,
 };
 
 // This class does not need to be modified.

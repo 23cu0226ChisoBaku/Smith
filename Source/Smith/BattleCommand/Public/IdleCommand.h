@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 /*
 
-NullCommand.h
+IdleCommand.h
 
 Author : MAI ZHICONG(バクチソウ)
 
@@ -29,17 +29,21 @@ namespace UE::Smith::Command
   /// namespace UE::Smith::Command
   /// implemented IBattleCommand
   ///
-  class SMITH_API NullCommand final: public IBattleCommand
+  class SMITH_API IdleCommand final: public IBattleCommand
   {
     public:
-      NullCommand();
-      ~NullCommand();
+      IdleCommand(float idleTime = 0.0f);
+      ~IdleCommand();
 
     public:
       void Start() override final;
       void Execute(float deltaTime) override final;
       void End() override final;
       bool IsFinish() const override final;
+
+    private:
+      class IdleImpl;
+      TUniquePtr<IdleImpl> m_pImpl;
   };
 }
 

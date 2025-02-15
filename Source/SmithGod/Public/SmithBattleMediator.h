@@ -40,7 +40,7 @@ public:
 	bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&, bool bAttackEvenNoTarget) override final;
 	bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) override final;
 	bool SendSkillCommand(AActor*, ICanMakeAttack*, FSmithSkillParameter, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&) override final;
-	bool SendIdleCommand(AActor*) override final;
+	bool SendIdleCommand(AActor*, float idleTime) override final;
 	bool SendHealCommand(AActor*,IHealable*) override final;
 
 public:

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "SmithAIAttackStrategy.h"
 #include "UObject/WeakInterfacePtr.h"
-#include "SmithSkillCenterSpotParameter.h"
+#include "SmithSkillParameter.h"
 #include "SmithAIConditionAttackStrategy.generated.h"
 
 class ICommandMediator;
@@ -47,6 +47,7 @@ private:
 	int32 m_atk;
 	int32 m_crt;
 	int32 m_level;
+	int32 m_curtConditionCooldown;
 
 	uint8 m_bIsDisplayingDangerZone : 1;
 	uint8 m_bIsWaitCondition : 1;

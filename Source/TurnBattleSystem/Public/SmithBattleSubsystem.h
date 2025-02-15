@@ -50,7 +50,6 @@ public:
   void Initialize(FSubsystemCollectionBase& Collection) override final;
   /** Implement this for deinitialization of instances of the system */
   void Deinitialize() override final;
-
   ///
   /// @brief バトルシステムを初期化
   /// 
@@ -87,7 +86,6 @@ public:
   /// @param TSharedPtr<IBattleCommand>   コマンド
   ///
   void RegisterCommand(ITurnManageable*, TSharedPtr<IBattleCommand>);
-
 
 private:
   /// 

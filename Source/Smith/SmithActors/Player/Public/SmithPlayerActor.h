@@ -236,6 +236,8 @@ private:
 	// TODO
 	UPROPERTY(EditAnywhere, Instanced, Category = Weapon)
 	TObjectPtr<USmithWeapon> Weapon;
+	UPROPERTY(EditAnywhere, Category = PlayerInfo)
+	FString PlayerName;
 
 	// TODO
 	UPROPERTY()

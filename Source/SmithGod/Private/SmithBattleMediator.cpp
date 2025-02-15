@@ -12,7 +12,7 @@
 
 #include "MoveCommand.h"
 #include "AttackCommand.h"
-#include "NullCommand.h"
+#include "IdleCommand.h"
 #include "HealCommand.h"
 #include "SkillCommand.h"
 
@@ -30,7 +30,7 @@
 
 // TODO
 #include "AttackHandle.h"
-#include "SmithSkillCenterSpotParameter.h"
+#include "SmithSkillParameter.h"
 #include "FormatType.h"
 #include "AttackableInfoHandle.h"
 
@@ -300,7 +300,7 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* a
   return false;
 }
 
-bool USmithBattleMediator::SendIdleCommand(AActor* requester)
+bool USmithBattleMediator::SendIdleCommand(AActor* requester, float idleTime)
 {
   if (!m_battleSys.IsValid())
   {
@@ -318,7 +318,7 @@ bool USmithBattleMediator::SendIdleCommand(AActor* requester)
     return false;
   }
 
-  m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::NullCommand>());
+  m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::IdleCommand>(idleTime));
   return true;
 
 }

@@ -25,13 +25,20 @@ public:
 	static void DetachLootGenerator();
 
 	template<typename EnemyType>
-	static IPickable* GetLoot(const EnemyType& Enemy)
-	{
-		return IS_UINTERFACE_VALID(gLootGenerator) ? gLootGenerator->GetLoot(SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type::NAME) : nullptr;
-	}
+	static IPickable* GetLoot(const EnemyType& Enemy);
 
 private:
 	static ILootGeneratable* gLootGenerator;
 };
+
+template<typename EnemyType>
+static IPickable* FSmithEnemyLootGenerator::GetLoot(const EnemyType& Enemy)
+{
+	if (gLootGenerator == nullptr)
+	{
+		MDebug::LogError("Loot Generator nullptr");
+	}
+	return IS_UINTERFACE_VALID(gLootGenerator) ? gLootGenerator->GetLoot(SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type::NAME) : nullptr;
+}
 
 #endif

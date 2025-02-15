@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SmithSkillCenterSpotParameter.h"
+#include "SmithSkillParameter.h"
 #include "SmithAIConditionBindHandle.generated.h"
 
 /**

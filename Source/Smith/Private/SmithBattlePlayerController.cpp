@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "SmithPlayerActor.h"
+#include "SmithModelHelperFunctionLibrary.h"
 #include "Direction.h"
 
 #include "MLibrary.h"
@@ -22,9 +23,10 @@ namespace SmithPlayerController::Private
 
 		const double angle = FMath::RadiansToDegrees(acos(dot));
 		// (1,0,0)(※EDirection::Northを表すベクトル)から時計回りに回転しdirectionまで回転した角度を計算
-		const double angleClockwise =  cross.Z > 0.0 ? (360.0 - angle) : angle; 
-		const EDirection dir = StaticCast<EDirection>(StaticCast<uint8>(round(angleClockwise / ANGLE_PER_DIRECTION)) % DIRECTION_COUNT);
-		return dir;
+		const double angleClockwise =  cross.Z > 0.0 ? - angle : angle; 
+
+	
+		return FSmithModelHelperFunctionLibrary::GetDirectionOfDegree(angleClockwise);
 	}
 
   EDirection CalculateDirectionRelativeCamera(EDirection cameraDirection, const FVector2D& inputValue)
@@ -92,7 +94,7 @@ void ASmithBattlePlayerController::SetupInputComponent()
 		inputComp->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASmithBattlePlayerController::Move);
 		inputComp->BindAction(AttackAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::Attack);
 		inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::ChangeCameraAngle);
-		inputComp->BindAction(ChangeForwardAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::ChangeForward);
+		inputComp->BindAction(ChangeForwardAction, ETriggerEvent::Triggered, this, &ASmithBattlePlayerController::ChangeForward);
 		inputComp->BindAction(OpenMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::OpenMenu);
 		inputComp->BindAction(CloseMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::CloseMenu);
     inputComp->BindAction(UseRecoveryAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::UseRecovery);

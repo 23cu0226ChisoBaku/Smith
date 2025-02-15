@@ -14,6 +14,7 @@ USmithAIConditionAttackStrategy::USmithAIConditionAttackStrategy(const FObjectIn
   , m_atk(0)
   , m_crt(0)
   , m_level(1)
+  , m_curtConditionCooldown(0)
   , m_bIsDisplayingDangerZone(false)
   , m_bIsWaitCondition(false)
 { }
@@ -84,6 +85,12 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     return false;
   }
 
+  if (m_curtConditionCooldown > 0)
+  {
+    --m_curtConditionCooldown;
+    return false;
+  }
+
   FConditionHandle* curtConditionAttatkHandle = m_conditions.Peek();
   if (curtConditionAttatkHandle == nullptr)
   {
@@ -131,6 +138,7 @@ bool USmithAIConditionAttackStrategy::executeImpl()
   // 条件を満たしているか
   if (curtConditionAttatkHandle->Condition.Execute())
   {
+    m_curtConditionCooldown = curtConditionAttatkHandle->SkillParameter.CooldownAfterUse;
     m_bIsWaitCondition = false;
     FConditionHandle curtHandleInstance{};
     m_conditions.Dequeue(curtHandleInstance);

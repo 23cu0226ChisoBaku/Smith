@@ -21,13 +21,20 @@ public:
 	static void DetachInitializer();
 	// 敵パラメーター初期化関数
 	template<typename EnemyType>
-	static FParams GetParams(const EnemyType& Enemy, int32 currentLevel)
-	{
-		return IS_UINTERFACE_VALID(gParamInitializer) ? gParamInitializer->Initialize(typename SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type{}, currentLevel) : FParams{};
-	}
+	static FParams GetParams(const EnemyType& Enemy, int32 currentLevel);
 
 private:
 	static IParamInitializer* gParamInitializer;
 };
+
+template<typename EnemyType>
+FParams FSmithEnemyParamInitializer::GetParams(const EnemyType& Enemy, int32 currentLevel)
+{
+	if (gParamInitializer == nullptr)
+	{
+		MDebug::LogError("Parameter Initializer nullptr");
+	}
+	return IS_UINTERFACE_VALID(gParamInitializer) ? gParamInitializer->Initialize(typename SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type{}, currentLevel) : FParams{};
+}
 
 #endif

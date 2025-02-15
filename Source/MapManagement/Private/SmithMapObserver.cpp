@@ -271,8 +271,32 @@ namespace UE::Smith
           check(remainCoords.Num() > 0);
           FUECollectionsLibrary::Shuffle(remainCoords);
           
-          // プレイヤーを配置
-          const FMapCoord playerMapCoord = remainCoords[0];
+          FMapCoord playerMapCoord;
+          // TODO
+          if (generateBP.bShouldRandomGenerate)
+          {
+            // プレイヤーを配置
+            playerMapCoord = remainCoords[0];
+          }
+          // TODO
+          else
+          {
+            FSmithSection* bossSection = map_shared->GetSection(0,0);
+            if (bossSection == nullptr)
+            {
+              playerMapCoord = remainCoords[0];
+            }
+            else
+            {
+              const uint8 sectionLeft = map_shared->GetSectionLeft(0);
+              const uint8 sectionTop = map_shared->GetSectionTop(0);
+              const uint8 roomLeft = sectionLeft + bossSection->GetRoomLeft();
+              const uint8 roomTop = sectionTop + bossSection->GetRoomTop();
+              playerMapCoord.x = roomLeft;
+              playerMapCoord.y = roomTop + generateBP.GenerateRoomCoord_Y;
+            }
+          }
+
           const FVector playerWorldCoord = FVector(
                                                     model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(playerMapCoord.x) * model_shared->MapTileSize),
                                                     model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(playerMapCoord.y) * model_shared->MapTileSize),

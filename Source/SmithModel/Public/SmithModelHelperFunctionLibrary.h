@@ -21,6 +21,7 @@ class SMITHMODEL_API FSmithModelHelperFunctionLibrary
 
 	public:
 		static EDirection GetDirectionOfMapCoord(const FMapCoord& from, const FMapCoord& to);
+		static EDirection GetDirectionOfDegree(double angleDegree);
 };
 
 #endif

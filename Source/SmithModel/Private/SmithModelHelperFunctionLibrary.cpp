@@ -40,41 +40,91 @@ EDirection FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(const FMapCo
     angleTwoPI = crossWithNorthVec < 0.0 ? angle : -angle;
   }
 
-  if (-30.0 < angleTwoPI && angleTwoPI < 30.0)
+  // if (-30.0 < angleTwoPI && angleTwoPI < 30.0)
+  // {
+  //   return EDirection::North;
+  // }
+
+  // if (30.0 <= angleTwoPI && angleTwoPI <= 60.0)
+  // {
+  //   return EDirection::NorthEast;
+  // }
+
+  // if (60 < angleTwoPI && angleTwoPI < 120.0)
+  // {
+  //   return EDirection::East;
+  // }
+
+  // if (120.0 <= angleTwoPI && angleTwoPI <= 150.0)
+  // {
+  //   return EDirection::SouthEast;
+  // }
+
+  // if (-60.0 <= angleTwoPI && angleTwoPI <= -30.0)
+  // {
+  //   return EDirection::NorthWest;
+  // }
+
+  // if (-120.0 < angleTwoPI && angleTwoPI < -60.0)
+  // {
+  //   return EDirection::West;
+  // }
+
+  // if (-150.0 <= angleTwoPI && angleTwoPI <= -120.0)
+  // {
+  //   return EDirection::SouthWest;
+  // }
+
+  // return EDirection::South;
+  return GetDirectionOfDegree(angleTwoPI);
+}
+
+EDirection FSmithModelHelperFunctionLibrary::GetDirectionOfDegree(double angleDegree)
+{
+  while (angleDegree < -180.0)
+  {
+    angleDegree += 180.0;
+  }
+
+  while(angleDegree > 180.0)
+  {
+    angleDegree -= 180.0;
+  }
+
+  if (-20.0 < angleDegree && angleDegree < 20.0)
   {
     return EDirection::North;
   }
 
-  if (30.0 <= angleTwoPI && angleTwoPI <= 60.0)
+  if (20.0 <= angleDegree && angleDegree <= 70.0)
   {
     return EDirection::NorthEast;
   }
 
-  if (60 < angleTwoPI && angleTwoPI < 120.0)
+  if (70.0 < angleDegree && angleDegree < 110.0)
   {
     return EDirection::East;
   }
 
-  if (120.0 <= angleTwoPI && angleTwoPI <= 150.0)
+  if (110.0 <= angleDegree && angleDegree <= 160.0)
   {
     return EDirection::SouthEast;
   }
 
-  if (-60.0 <= angleTwoPI && angleTwoPI <= -30.0)
+  if (-70.0 <= angleDegree && angleDegree <= -20.0)
   {
     return EDirection::NorthWest;
   }
 
-  if (-120.0 < angleTwoPI && angleTwoPI < -60.0)
+  if (-110.0 < angleDegree && angleDegree < -70.0)
   {
     return EDirection::West;
   }
 
-  if (-150.0 <= angleTwoPI && angleTwoPI <= -120.0)
+  if (-160.0 <= angleDegree && angleDegree <= -110.0)
   {
     return EDirection::SouthWest;
   }
 
   return EDirection::South;
-
 }

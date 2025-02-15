@@ -41,34 +41,6 @@ void USmithBattleLogWorldSubsystem::Deinitialize()
   }
 }
 
-void USmithBattleLogWorldSubsystem::Tick(float DeltaTime)
-{
-
-}
-
-bool USmithBattleLogWorldSubsystem::IsTickable() const
-{
-  return true;
-}
-
-TStatId USmithBattleLogWorldSubsystem::GetStatId() const
-{
-  RETURN_QUICK_DECLARE_CYCLE_STAT(USmithBattleLogWorldSubsystem, STATGROUP_Tickables);
-}
-
-bool USmithBattleLogWorldSubsystem::IsTickableWhenPaused() const
-{
-  return true;
-}
-bool USmithBattleLogWorldSubsystem::IsTickableInEditor() const
-{
-  return true;
-}
-UWorld* USmithBattleLogWorldSubsystem::GetTickableGameObjectWorld() const
-{
-  return GetWorld();
-}
-
 void USmithBattleLogWorldSubsystem::SetLogWidget(UGameLogWidget* logWidget)
 {
   m_logWidget = logWidget;
@@ -174,11 +146,30 @@ void USmithBattleLogWorldSubsystem::SendInteractEventLog(ISmithBattleLogger* int
 
 }
 
+void USmithBattleLogWorldSubsystem::SendEnhanceLog(ISmithBattleLogger* enhance)
+{
+  if (m_logWidget == nullptr)
+  {
+    return;
+  }
+
+  FString enhanceName = enhance != nullptr ? enhance->GetName_Log() : TEXT("とある装備");
+  const EBattleLogType enhanceType = enhance != nullptr ? enhance->GetType_Log() : EBattleLogType::None;
+
+  convertLogColor(enhanceName, enhanceType);
+
+  const FString resultLog = enhanceName + TEXT("を強化した。\n");
+
+  m_logWidget->AddLogMessage(resultLog);
+  m_logWidget->OutputLog();
+}
+
 void USmithBattleLogWorldSubsystem::convertLogColor(FString& outLog, EBattleLogType logType)
 {
   switch (logType)
   {
     case EBattleLogType::Player:
+    case EBattleLogType::Enhance:
     {
       outLog = TEXT("<LogColorStyle.Player>") + outLog;
     }

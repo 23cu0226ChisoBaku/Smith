@@ -22,12 +22,12 @@ public:
 	virtual void BeginDestroy() override;
 
 public:
-	void Initialize(ICommandMediator*);
+	void Initialize(ICommandMediator*, float idleTime = 0.0f);
 
 private:
 	bool executeImpl() override final;
 
 private: 
 	TWeakInterfacePtr<ICommandMediator> m_mediator;
-	
+	float m_idleTime;
 };

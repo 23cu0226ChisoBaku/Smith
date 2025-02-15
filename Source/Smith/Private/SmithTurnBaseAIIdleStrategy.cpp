@@ -8,6 +8,7 @@
 USmithTurnBaseAIIdleStrategy::USmithTurnBaseAIIdleStrategy(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
   , m_mediator(nullptr)
+  , m_idleTime(0.0f)
 { }
 
 void USmithTurnBaseAIIdleStrategy::BeginDestroy()
@@ -17,9 +18,10 @@ void USmithTurnBaseAIIdleStrategy::BeginDestroy()
   Super::BeginDestroy();
 }
 
-void USmithTurnBaseAIIdleStrategy::Initialize(ICommandMediator* mediator)
+void USmithTurnBaseAIIdleStrategy::Initialize(ICommandMediator* mediator, float idleTime)
 {
   m_mediator = mediator;
+  m_idleTime = idleTime;
 }
 
 bool USmithTurnBaseAIIdleStrategy::executeImpl()
@@ -30,5 +32,5 @@ bool USmithTurnBaseAIIdleStrategy::executeImpl()
     return false;
   }
 
-  return m_mediator->SendIdleCommand(GetOwner());
+  return m_mediator->SendIdleCommand(GetOwner(), m_idleTime);
 }

@@ -141,6 +141,7 @@ void ASmithPlayerActor::BeginPlay()
 			Weapon->SetParam(FParams{50, 10, 10, 10});
 		}
 	}
+
 	Weapon->OnUpgrade.AddUObject(this, &ASmithPlayerActor::updateParam);
 	Weapon->Rename(nullptr, this);
 
@@ -173,8 +174,9 @@ void ASmithPlayerActor::BeginPlay()
 		{
 			USmithHPItem* item = NewObject<USmithHPItem>();
 			// TODO Modelをいい感じに
-			// 30%
-			item->SetRecoveryPercentage(0.3);
+			// 40%
+			// TODO!!!!!!!!
+			item->SetRecoveryPercentage(0.4);
 			bool insertResult = InventoryComponent->Insert(TEXT("ConsumeItem"), item);
 		}
 	}
@@ -862,7 +864,7 @@ void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName)
 
 FString ASmithPlayerActor::GetName_Log() const
 {
-	return TEXT("鍛冶師");
+	return PlayerName.IsEmpty() ? TEXT("鍛冶師") : PlayerName;
 }
 
 EBattleLogType ASmithPlayerActor::GetType_Log() const
@@ -895,11 +897,17 @@ void ASmithPlayerActor::updateParam(FParams upgradeParam)
 			HPComponent->SetHPNumber(m_maxHP, m_curtHP);
 		}
 	}
+
+	// TODO
+	if (m_logSystem != nullptr)
+	{
+		m_logSystem->SendEnhanceLog(Weapon);
+	}
 }
 
 bool ASmithPlayerActor::CanReceiveInputEvent() const
 {
-	return m_bCanReceiveInput;
+	return m_bCanReceiveInput && IsCommandSendable();
 }
 
 void ASmithPlayerActor::OnGameClear()
