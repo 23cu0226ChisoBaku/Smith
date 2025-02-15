@@ -376,6 +376,8 @@ void AMapGenerateGameMode_Test::initializeGame()
           m_fadeWidget->OnFadeInStartEvent.AddUObject(this, &AMapGenerateGameMode_Test::startNewLevel);
           m_fadeWidget->OnFadeInEndEvent.AddUObject(smithPlayerCtrl, &ASmithBattlePlayerController::EnablePlayerInput);
           m_fadeWidget->OnFadeOutStartEvent.AddUObject(smithPlayerCtrl, &ASmithBattlePlayerController::DisablePlayerInput);
+          // TODO
+          m_fadeWidget->OnFadeOutStartEvent.AddUObject(m_battleSystem, &USmithBattleSubsystem::ResetBattle);
           m_fadeWidget->OnFadeOutEndEvent.AddUObject(this, &AMapGenerateGameMode_Test::clearCurrentLevel);
         }
 

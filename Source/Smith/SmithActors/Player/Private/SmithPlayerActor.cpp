@@ -592,10 +592,10 @@ bool ASmithPlayerActor::enhanceImpl(int32 idx)
 	m_enhanceSystem->Enhance(Weapon, absorbItem);
 	InventoryComponent->Remove(TEXT("UpgradeMaterial"), idx);
 	m_commandMediator->SendIdleCommand(this);
-
+	// TODO
 	if (m_logSystem != nullptr)
 	{
-		m_logSystem->SendEnhanceLog(this);
+		m_logSystem->SendEnhanceLog(Weapon);
 	}
 	return true;
 	
@@ -902,11 +902,6 @@ void ASmithPlayerActor::updateParam(FParams upgradeParam)
 		}
 	}
 
-	// TODO
-	if (m_logSystem != nullptr)
-	{
-		m_logSystem->SendEnhanceLog(Weapon);
-	}
 }
 
 bool ASmithPlayerActor::CanReceiveInputEvent() const

@@ -91,5 +91,6 @@ private:
 	TWeakInterfacePtr<IEventExecutor> m_eventExecutor;
 	uint8 m_bIsExecutingCommand : 1;
 	uint8 m_bCanRegister : 1;
+	uint8 m_bIsReset : 1;
 
 };
