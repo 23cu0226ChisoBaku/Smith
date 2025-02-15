@@ -17,6 +17,7 @@ Encoding : UTF-8
 #include "SmithMapHelperLibrary.h"
 #include "SmithSection.h"
 #include "SmithMap.h"
+#include "SmithRect.h"
 #include "MapCoord.h"
 #include "MapDeployRule.h"
 #include "MLibrary.h"
@@ -79,8 +80,62 @@ namespace UE::Smith
             }
           }
         }
-    };
 
+        void GetCoordsPerRoom(FSmithMap* map, TArray<FMapCoord>& coords)
+        {
+          if (map == nullptr)
+          {
+            return;
+          }
+          
+          coords.Reset();
+          const uint8 sectionRow = map->GetRow();
+          const uint8 sectionColumn = map->GetColumn();
+          for (uint8 row = 0u; row < sectionRow; ++row)
+          {
+            for (uint8 column = 0u; column < sectionColumn; ++column)
+            {
+              FSmithSection* section = map->GetSection(row, column);
+              if (section == nullptr || !section->HasRoom())
+              {
+                continue;
+              }
+
+              const uint8 sectionLeft = map->GetSectionLeft(column);
+              const uint8 sectionTop = map->GetSectionTop(row);
+              const uint8 roomLeft = section->GetRoomLeft() + sectionLeft;
+              const uint8 roomRight = roomLeft + section->GetRoomWidth() - 1u;
+              const uint8 roomTop = section->GetRoomTop() + sectionTop;
+              const uint8 roomBottom = roomTop + section->GetRoomHeight() - 1u;
+
+              int32 rand = FMath::RandRange(0,3);
+              switch (rand)
+              {
+                case 0:
+                {
+                  coords.Emplace(FMapCoord(roomLeft, roomTop));  
+                }
+                break;
+                case 1:
+                {
+                  coords.Emplace(FMapCoord(roomLeft, roomBottom));
+                }
+                break;
+                case 2:
+                {
+                  coords.Emplace(FMapCoord(roomRight, roomTop));
+                }
+                break;
+                case 3:
+                {
+                  coords.Emplace(FMapCoord(roomRight, roomBottom));
+                }
+                break;
+              }
+            }
+          }
+        }
+    };
        
     class MapRoomCoordFinderStrategy
     {
@@ -346,6 +401,119 @@ namespace UE::Smith
       }
 
       return outCoords.Num();
+    }
+
+    int32 FSmithMapHelperLibrary::GetMapCoordByRule_PerRoom(FSmithMap* map, EMapDeployRule rule, TArray<FMapCoord>& outCoords)
+    {
+      if (map == nullptr)
+      {
+        return 0;
+      }
+  
+      switch (rule)
+      {
+        case EMapDeployRule::Corner:
+        {
+          TSharedPtr<MapCornerFinderStratergy> strategy = ::MakeShared<MapCornerFinderStratergy>();
+          strategy->GetCoordsPerRoom(map, outCoords);
+        }
+        break;
+
+        case EMapDeployRule::Random:
+        {
+          TSharedPtr<MapRoomCoordFinderStrategy> strategy = ::MakeShared<MapRoomCoordFinderStrategy>();
+          strategy->GetCoords(map, outCoords);
+        }
+        break;
+
+        case EMapDeployRule::Sides_With_Corner:
+        {
+
+        }
+        break;
+
+        case EMapDeployRule::Sides_Without_Corner:
+        {
+
+        }
+        break;
+      }
+
+      return outCoords.Num();
+    }
+
+    uint8 FSmithMapHelperLibrary::GetRoomCount(FSmithMap* map)
+    {
+      if (map == nullptr)
+      {
+        return 0u;
+      }
+      
+      uint8 count = 0u;
+
+      for (int32 sectionRow = 0; sectionRow < map->GetRow(); ++sectionRow)
+      {
+        for (int32 sectionColumn = 0; sectionColumn < map->GetColumn(); ++sectionColumn)
+        {
+          FSmithSection* section = map->GetSection(sectionRow, sectionColumn);
+          if (section == nullptr || !section->HasRoom())
+          {
+            continue;
+          }
+
+          ++count;
+        }
+      }
+
+      return count;
+    }
+
+    bool FSmithMapHelperLibrary::IsSameTileNearby(FSmithMap* map, const FMapCoord& originCoord, FMapCoord& outDiffTileCoord)
+    {
+      if (map == nullptr)
+      {
+        return false;
+      }
+
+      if (map->GetMapWidth() < originCoord.x + 1
+        ||map->GetMapHeight() < originCoord.y + 1)
+      {
+        return false;
+      }
+
+      FSmithRect mapRect = map->GetMap();
+
+      uint8 tileData = mapRect.GetRect(originCoord.x, originCoord.y);
+
+      if (tileData != mapRect.GetRect(originCoord.x + 1, originCoord.y))
+      {
+        outDiffTileCoord.x = originCoord.x + 1;
+        outDiffTileCoord.y = originCoord.y;
+        return false;
+      }
+
+      if (tileData != mapRect.GetRect(originCoord.x - 1, originCoord.y))
+      {
+        outDiffTileCoord.x = originCoord.x - 1;
+        outDiffTileCoord.y = originCoord.y;
+        return false;
+      }
+
+      if (tileData != mapRect.GetRect(originCoord.x, originCoord.y + 1))
+      {
+        outDiffTileCoord.x = originCoord.x;
+        outDiffTileCoord.y = originCoord.y + 1;
+        return false;
+      }
+
+      if (tileData != mapRect.GetRect(originCoord.x, originCoord.y - 1))
+      {
+        outDiffTileCoord.x = originCoord.x;
+        outDiffTileCoord.y = originCoord.y - 1;
+        return false;
+      }
+
+      return true;
     }
 
 

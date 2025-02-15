@@ -26,7 +26,7 @@ void USmithPickUpItemEvent::BeginDestroy()
 
   if (m_itemEventNiagaraComp != nullptr)
   {
-    m_itemEventNiagaraComp->Deactivate();
+    m_itemEventNiagaraComp->DeactivateImmediate();
   }
 }
 
@@ -87,6 +87,19 @@ void USmithPickUpItemEvent::DiscardEvent()
 void USmithPickUpItemEvent::RaiseEvent()
 {
   m_isPicked = true;
+
+  if (m_pickable != nullptr)
+  {
+    const FString picktype = m_pickable->GetPickType();
+    if (picktype == TEXT("ConsumeItem"))
+    {
+      MLibrary::UE::Audio::AudioKit::PlaySE(TEXT("Get_HErb"));
+    }
+    else if(picktype == TEXT("UpgradeMaterial"))
+    {
+      MLibrary::UE::Audio::AudioKit::PlaySE(TEXT("Get_Item"));
+    }
+  }
 }
 
 bool USmithPickUpItemEvent::IsDisposed() const

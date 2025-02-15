@@ -30,16 +30,17 @@ ATurnActor_Test::ATurnActor_Test()
 	: m_attackStrategy(nullptr)
 	, m_moveStrategy(nullptr)
 	, m_idleStrategy(nullptr)
-	, m_atkComponent(nullptr)
+	, AtkComponent(nullptr)
 	, MoveComponent(nullptr)
 	, AnimComponent(nullptr)
 	, m_level(1)
+	, m_bIsPlayingDeadAnimation(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
 
-	m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
-	check(m_atkComponent != nullptr);
+	AtkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
+	check(AtkComponent != nullptr);
 
 	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
 	check(MoveComponent != nullptr);
@@ -88,6 +89,18 @@ void ATurnActor_Test::Tick(float DeltaTime)
 		return;
 	}
 
+	if (m_bIsPlayingDeadAnimation)
+	{
+		if (AnimComponent != nullptr && AnimComponent->IsCurrentAnimationFinish())
+		{
+			SetActorTickEnabled(false);
+			Destroy();
+		}
+		AnimComponent->UpdateAnim(DeltaTime);
+
+		return;
+	}
+
 	if (m_aiBehaviorProcessor != nullptr)
 	{
 		m_aiBehaviorProcessor->TickBehaviorProcessor(DeltaTime);
@@ -111,6 +124,10 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 			m_logSystem->SendDamageLog(this,handle.AttackPower);
 		}
 
+		if (AnimComponent != nullptr)
+		{
+			AnimComponent->SwitchAnimState(TEXT("Damaged"));
+		}
 	}
 	else
 	{
@@ -139,7 +156,11 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 			OnDefeatEvent.Broadcast();
 		}
 
-		Destroy();
+		if (AnimComponent != nullptr)
+		{
+			AnimComponent->SwitchAnimState(TEXT("Dead"));
+			m_bIsPlayingDeadAnimation = true;
+		}
 	}
 }
 
@@ -178,7 +199,9 @@ void ATurnActor_Test::TurnOnAI()
 	if (m_attackStrategy != nullptr)
 	{
 		m_attackStrategy->SetOwner(this);
-		m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get(), EnemyParam.ATK);
+		m_attackStrategy->Initialize(AtkComponent, m_commandMediator.Get(), EnemyParam.ATK);
+		m_attackStrategy->SetAttackParam(EnemyParam.ATK, EnemyParam.CRT, m_level);
+		m_attackStrategy->OnChangeDirectionDelegate.BindUObject(this, &ATurnActor_Test::faceToDirection);
 	}
 
 	for (auto& pair : AttackFormatTables)

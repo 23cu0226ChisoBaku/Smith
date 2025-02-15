@@ -74,7 +74,7 @@ void USmithBattleLogWorldSubsystem::SetLogWidget(UGameLogWidget* logWidget)
   m_logWidget = logWidget;
   if (m_logWidget != nullptr)
   {
-    m_logWidget->AddToViewport();
+    m_logWidget->AddToViewport(-1);
     m_logWidget->SetVisibility(ESlateVisibility::Hidden);
   }
 }
@@ -168,6 +168,26 @@ void USmithBattleLogWorldSubsystem::SendInteractEventLog(ISmithBattleLogger* int
   const FString eventResultLog = bIsInteractSuccess ? event->GetSucceedMessage() : event->GetFailedMessage();
 
   const FString resultLog = interacterName + TEXT("は") + eventEntityName + eventResultLog + TEXT("\n"); 
+
+  m_logWidget->AddLogMessage(resultLog);
+  m_logWidget->OutputLog();
+
+}
+
+void USmithBattleLogWorldSubsystem::SendEnhanceLog(ISmithBattleLogger* enhancer)
+{
+  if (m_logWidget == nullptr)
+  {
+    return;
+  }
+
+  FString enhanceLog = enhancer != nullptr ? enhancer->GetName_Log() : TEXT("とある対象");
+  const EBattleLogType enhanceLogType = enhancer != nullptr ? enhancer->GetType_Log() : EBattleLogType::None;
+
+  convertLogColor(enhanceLog, enhanceLogType);
+
+  const FString enhancedLog = TEXT("が武器を強化した\n");
+  const FString resultLog = enhanceLog + enhancedLog;
 
   m_logWidget->AddLogMessage(resultLog);
   m_logWidget->OutputLog();

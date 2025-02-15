@@ -18,5 +18,5 @@ struct SMITH_API FSmithAIConditionBindHandle
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UDataTable> FormatMasterData;
 	UPROPERTY(EditAnywhere)
-	FSmithSkillCenterSpotParameter SkillParameter;
+	FSmithSkillParameter SkillParameter;
 };

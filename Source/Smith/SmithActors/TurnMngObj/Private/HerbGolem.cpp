@@ -30,8 +30,8 @@ AHerbGolem::AHerbGolem()
   , m_healStrategy(nullptr)
 	, m_atkComponent(nullptr)
 	, MoveComponent(nullptr)
-  , m_healCnt(1)
-	// , AnimComponent(nullptr)
+	, AnimComponent(nullptr)
+	, m_healCnt(1)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
@@ -42,8 +42,8 @@ AHerbGolem::AHerbGolem()
 	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
 	check(MoveComponent != nullptr);
 
-	// AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("anim comp"));
-	// check(AnimComponent != nullptr)
+	AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("anim comp"));
+	check(AnimComponent != nullptr)
 
 }
 
@@ -60,7 +60,7 @@ void AHerbGolem::BeginPlay()
   m_healStrategy = NewObject<USmithTurnBaseAIHealStrategy>(this);
   check(m_healStrategy != nullptr);
 
-  //AnimComponent->SwitchAnimState(TEXT("Idle"), 0.0f);
+  AnimComponent->SwitchAnimState(TEXT("Idle"));
 
 	UWorld* world = GetWorld();
 	if (world != nullptr)
@@ -230,76 +230,76 @@ void AHerbGolem::SetEventPublishMediator(IEventPublishMediator* eventMediator)
 	m_eventMediator = eventMediator;
 }
 
-// void AHerbGolem::SwitchAnimation(uint8 animationState)
-// {
-// 	//MDebug::Log(TEXT("called animation"));
+void AHerbGolem::SwitchAnimation(uint8 animationState)
+{
+	//MDebug::Log(TEXT("called animation"));
 
-// 	if (AnimComponent == nullptr)
-// 	{
-// 		return;
-// 	}
+	if (AnimComponent == nullptr)
+	{
+		return;
+	}
 
-// 	using namespace UE::Smith;
-// 	FName StateName;
-// 	switch (animationState)
-// 	{
-// 	case SMITH_ANIM_IDLE:
-// 		StateName = TEXT("Idle");
-// 		break;
-// 	case	SMITH_ANIM_WALK:
-// 		StateName = TEXT("Walk");
-// 		break;
-// 	case SMITH_ANIM_ATTACK:
-// 		StateName = TEXT("Attack");
-// 		break;
-// 	case SMITH_ANIM_DAMAGED:
-// 		StateName = TEXT("Damaged");
-// 		break;
-// 	case SMITH_ANIM_DEAD:
-// 		StateName = TEXT("Dead");
-// 		break;
-// 	default:
-// 		break;
-// 	}
-// 	AnimComponent->SwitchAnimState(StateName, 0.0f);
-// }
+	using namespace UE::Smith;
+	FName StateName;
+	switch (animationState)
+	{
+	case SMITH_ANIM_IDLE:
+		StateName = TEXT("Idle");
+		break;
+	case	SMITH_ANIM_WALK:
+		StateName = TEXT("Walk");
+		break;
+	case SMITH_ANIM_ATTACK:
+		StateName = TEXT("Attack");
+		break;
+	case SMITH_ANIM_DAMAGED:
+		StateName = TEXT("Damaged");
+		break;
+	case SMITH_ANIM_DEAD:
+		StateName = TEXT("Dead");
+		break;
+	default:
+		break;
+	}
+	AnimComponent->SwitchAnimState(StateName);
+}
 
-// void AHerbGolem::UpdateAnimation(float deltaTime)
-// {
-// 	AnimComponent->UpdateAnim(deltaTime);
-// }
+void AHerbGolem::UpdateAnimation(float deltaTime)
+{
+	AnimComponent->UpdateAnim(deltaTime);
+}
 
-// void AHerbGolem::SwitchAnimationDelay(uint8 animationState, float delay)
-// {
-//   using namespace UE::Smith;
-// 	FName StateName;
-// 	switch (animationState)
-// 	{
-// 	case SMITH_ANIM_IDLE:
-// 		StateName = TEXT("Idle");
-// 		break;
-// 	case	SMITH_ANIM_WALK:
-// 		StateName = TEXT("Walk");
-// 		break;
-// 	case SMITH_ANIM_ATTACK:
-// 		StateName = TEXT("Attack");
-// 		break;
-// 	case SMITH_ANIM_DAMAGED:
-// 		StateName = TEXT("Damaged");
-// 		break;
-// 	case SMITH_ANIM_DEAD:
-// 		StateName = TEXT("Dead");
-// 		break;
-// 	default:
-// 		break;
-// 	}
-//   AnimComponent->SwitchAnimStateDelay(StateName, delay);
-// }
+void AHerbGolem::SwitchAnimationDelay(uint8 animationState, float delay)
+{
+  using namespace UE::Smith;
+	FName StateName;
+	switch (animationState)
+	{
+	case SMITH_ANIM_IDLE:
+		StateName = TEXT("Idle");
+		break;
+	case	SMITH_ANIM_WALK:
+		StateName = TEXT("Walk");
+		break;
+	case SMITH_ANIM_ATTACK:
+		StateName = TEXT("Attack");
+		break;
+	case SMITH_ANIM_DAMAGED:
+		StateName = TEXT("Damaged");
+		break;
+	case SMITH_ANIM_DEAD:
+		StateName = TEXT("Dead");
+		break;
+	default:
+		break;
+	}
+  AnimComponent->SwitchAnimStateDelay(StateName, delay);
+}
 
-// bool AHerbGolem::IsAnimationFinish() const
-// {
-// 	return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
-// }
+bool AHerbGolem::IsAnimationFinish() const
+{
+	return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
+}
 
 FString AHerbGolem::GetName_Log() const
 {

@@ -96,8 +96,8 @@ private:
 	TObjectPtr<USmithTurnBaseAIMoveStrategy> m_moveStrategy;
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
-	UPROPERTY()
-	TObjectPtr<USmithAttackComponent> m_atkComponent;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USmithAttackComponent> AtkComponent;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USmithMoveComponent> MoveComponent;
 	UPROPERTY(EditAnywhere)
@@ -124,4 +124,5 @@ private:
 private:
 	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
 	int32 m_level;
+	uint8 m_bIsPlayingDeadAnimation : 1;
 };

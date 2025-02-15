@@ -31,5 +31,5 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> AttackPowerText;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> CriticalText;
+	TObjectPtr<UTextBlock> DefensePowerText;
 };

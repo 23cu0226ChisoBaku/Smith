@@ -9,7 +9,7 @@ namespace SmithRichUpgradeParam::Private
 {
   const FString HEALTH_PRE_TEXT = TEXT("体力    ");
   const FString ATTACK_PRE_TEXT = TEXT("攻撃力  ");
-  const FString CRITICAL_PRE_TEXT = TEXT("会心力  ");
+  const FString DEFENSE_PRE_TEXT = TEXT("防御力  ");
 }
 
 USmithRichUpgradeParam::USmithRichUpgradeParam(const FObjectInitializer& ObjectInitializer)  
@@ -26,7 +26,7 @@ void USmithRichUpgradeParam::UpdateParam(FParams beforeParam, FParams upgradePar
 {
   using namespace SmithRichUpgradeParam::Private;
 
-  if (HealthPointRichText == nullptr || AttackPowerRichText == nullptr || CriticalRichText == nullptr)
+  if (HealthPointRichText == nullptr || AttackPowerRichText == nullptr || DefensePowerRichText == nullptr)
   {
     return;
   }
@@ -39,9 +39,9 @@ void USmithRichUpgradeParam::UpdateParam(FParams beforeParam, FParams upgradePar
   convertParamText(attackPowerText, upgradeParam.ATK);
   AttackPowerRichText->SetText(FText::FromString(attackPowerText));
 
-  FString criticalText = CRITICAL_PRE_TEXT + FString::FromInt(beforeParam.CRT + upgradeParam.CRT);
-  convertParamText(criticalText, upgradeParam.CRT);
-  CriticalRichText->SetText(FText::FromString(criticalText));
+  FString defenseText = DEFENSE_PRE_TEXT + FString::FromInt(beforeParam.DEF + upgradeParam.DEF);
+  convertParamText(defenseText, upgradeParam.DEF);
+  DefensePowerRichText->SetText(FText::FromString(defenseText));
 }
 
 void USmithRichUpgradeParam::ResetWidget()
@@ -56,9 +56,9 @@ void USmithRichUpgradeParam::ResetWidget()
     AttackPowerRichText->SetText(FText{});
   }
 
-  if (CriticalRichText != nullptr)
+  if (DefensePowerRichText != nullptr)
   {
-    CriticalRichText->SetText(FText{});
+    DefensePowerRichText->SetText(FText{});
   }
 }
 

@@ -48,6 +48,7 @@ public:
 	void SendDamageLog(ISmithBattleLogger* defender, int32 damage);
 	void SendDefeatedLog(ISmithBattleLogger* downed);
 	void SendInteractEventLog(ISmithBattleLogger* interacter, ISmithEventLogger* event, bool bIsInteractSuccess);
+	void SendEnhanceLog(ISmithBattleLogger* enhancer);
 
 private:
 	void convertLogColor(FString& outLog, EBattleLogType);

@@ -75,8 +75,8 @@ void ASmithBattlePlayerController::BeginPlay()
   m_player = Cast<ASmithPlayerActor>(GetPawn());
   if (m_player != nullptr)
   {
-    m_player->OnStartCameraRotation.AddUObject(this, &ASmithBattlePlayerController::disablePlayerInput);
-    m_player->OnFinishCameraRotation.AddUObject(this, &ASmithBattlePlayerController::enablePlayerInput);
+    m_player->OnStartCameraRotation.AddUObject(this, &ASmithBattlePlayerController::DisablePlayerInput);
+    m_player->OnFinishCameraRotation.AddUObject(this, &ASmithBattlePlayerController::EnablePlayerInput);
   }
 
 }
@@ -247,11 +247,11 @@ void ASmithBattlePlayerController::InMenuInteract(const FInputActionValue& input
   }
 }
 
-void ASmithBattlePlayerController::disablePlayerInput()
+void ASmithBattlePlayerController::DisablePlayerInput()
 {
   DisableInput(this);
 }
-void ASmithBattlePlayerController::enablePlayerInput()
+void ASmithBattlePlayerController::EnablePlayerInput()
 {
   EnableInput(this);
 }

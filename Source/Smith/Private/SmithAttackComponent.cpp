@@ -4,6 +4,7 @@
 #include "IAttackable.h"
 #include "SmithTestAIAttackStrategy.h"
 #include "SmithCommandFormat.h"
+#include "AudioKit.h"
 
 // Sets default values for this component's properties
 USmithAttackComponent::USmithAttackComponent()
@@ -64,5 +65,7 @@ void USmithAttackComponent::Attack()
 	{
 		m_attackTarget->OnAttack(::MoveTemp(m_attackHandle));
 		m_attackHandle = AttackHandle::NullHandle;
+		MLibrary::UE::Audio::AudioKit::PlaySE(AttackSEName);
 	}
+
 }
