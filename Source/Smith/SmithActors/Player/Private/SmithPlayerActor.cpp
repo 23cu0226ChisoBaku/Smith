@@ -593,6 +593,10 @@ bool ASmithPlayerActor::enhanceImpl(int32 idx)
 	InventoryComponent->Remove(TEXT("UpgradeMaterial"), idx);
 	m_commandMediator->SendIdleCommand(this);
 
+	if (m_logSystem != nullptr)
+	{
+		m_logSystem->SendEnhanceLog(this);
+	}
 	return true;
 	
 }
