@@ -48,14 +48,14 @@ namespace UE::Smith
 
       // タイルアクターのリフレクションクラスポインタを入れるバッファ
       TMap<ETileType,UClass*> tileActorUClassBuffer;
-      tileActorUClassBuffer.Reserve(blueprint.TileBuildingMaterialPaths.Num());
+      tileActorUClassBuffer.Reserve(blueprint.TileBuildingMaterialSubClass.Num());
 
       for (uint8 y = 0 ; y < mapRow; ++y)
       {
         for (uint8 x = 0; x < mapColumn; ++x)
         {
           const ETileType tileType = StaticCast<ETileType>(mapRect.GetRect(x,y));
-          if (!blueprint.TileBuildingMaterialPaths.Contains(tileType))
+          if (!blueprint.TileBuildingMaterialSubClass.Contains(tileType))
           {
             MDebug::LogError("Invalid Tile Type");
             continue;
@@ -65,15 +65,14 @@ namespace UE::Smith
           if (!tileActorUClassBuffer.Contains(tileType))
           {
             // マップ素材のBPクラスを取得
-            TSubclassOf<AActor> subClass = TSoftClassPtr<AActor>(FSoftObjectPath(*blueprint.TileBuildingMaterialPaths[tileType])).LoadSynchronous();
-
-            if (subClass == nullptr)
+            TSubclassOf<AActor> mapMatSubclass = blueprint.TileBuildingMaterialSubClass[tileType];
+            if (mapMatSubclass == nullptr)
             {
-              MDebug::LogError("Invalid Building Material Path");
+              MDebug::LogError("Invalid Building Material Subclass");
               return;
             }
 
-            tileActorUClassBuffer.Emplace(tileType, subClass);
+            tileActorUClassBuffer.Emplace(tileType, mapMatSubclass);
           }
 
           const FVector spawnCoord(

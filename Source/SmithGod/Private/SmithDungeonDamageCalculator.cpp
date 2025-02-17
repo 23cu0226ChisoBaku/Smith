@@ -22,28 +22,29 @@ FBattleResult USmithDungeonDamageCalculator::CalculateDamage( const FBattleAttac
   int32 levelDifference = attacker.Level - defender.Level;
 
   // ダメージ軽減率は　攻撃と防御の差で 防御*0.33333(70%)~防御*2(100%)の範囲内でイーズする
-  double damageReductionRate = 1.0;
+  double damageScaling = 1.0;
   // 攻撃と防御の差
   int32 atkDefDifference = attacker.AttackPoint - defender.DefensePoint;
 
-  // 差が防御*0.333333(70%)以下の
+  // 差が防御*0.333333(70%ダメージ※30%軽減率)以下
   if (attacker.AttackPoint < 0 || atkDefDifference < defender.DefensePoint / 3)
   {
-    damageReductionRate = 0.7;
+    damageScaling = 0.7;
   }
-  else if (defender.DefensePoint <= 0 || atkDefDifference >= FMath::FloorToInt(StaticCast<float>(defender.DefensePoint) * 1.5f))
+  // 差が防御*2(100%※0%軽減率)以上
+  else if (defender.DefensePoint <= 0 || atkDefDifference >= FMath::FloorToInt(StaticCast<float>(defender.DefensePoint)))
   {
-    damageReductionRate = 1.0;
+    damageScaling = 1.0;
   }
   else
   {
-    const float funcVariableX = (PI * 0.333333f / StaticCast<float>(defender.DefensePoint) * StaticCast<float>(atkDefDifference))  - (PI * 0.1666666f);
+    const float funcVariableX = (PI * 0.3f / StaticCast<float>(defender.DefensePoint) * StaticCast<float>(atkDefDifference))  - (PI * 0.1f);
     
-    damageReductionRate = FMath::Sin(funcVariableX) * 0.3f + 0.7f;
+    damageScaling = FMath::Sin(funcVariableX) * 0.3f + 0.7f;
   }
   
-  // 攻撃力　＊　定数^(攻撃者レベル　ー　攻撃を喰らう者のレベル) * 軽減率・小数点切り捨て
-  int32 damage = FMath::FloorToInt32(StaticCast<double>(attacker.AttackPoint) * FMath::Pow(m_constant, StaticCast<double>(levelDifference)) * damageReductionRate * attacker.MotionValue); 
+  // 攻撃力　＊　定数^(攻撃者レベル　ー　攻撃を喰らう者のレベル) * 軽減率 * モーション値  ※小数点切り捨て
+  int32 damage = FMath::FloorToInt32(StaticCast<double>(attacker.AttackPoint) * FMath::Pow(m_constant, StaticCast<double>(levelDifference)) * damageScaling * attacker.MotionValue); 
 
   FBattleResult result;
   result.Damage = damage;
