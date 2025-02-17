@@ -46,8 +46,10 @@ void USmithEnhanceSubsystem::Enhance(IEnhanceable* enhanceable,IParamAbsorbable*
   }
 
   enhanceable->Upgrade(absorbItem);
-
   ++m_upgradeCount;
+
+  using namespace MLibrary::UE::Audio;
+  AudioKit::PlaySE(TEXT("Hit_Iron_1"));
 }
 
 int32 USmithEnhanceSubsystem::GetUpgradeCount() const

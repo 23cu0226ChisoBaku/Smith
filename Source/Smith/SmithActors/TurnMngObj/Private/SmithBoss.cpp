@@ -300,6 +300,6 @@ EBattleLogType ASmithBoss::GetType_Log() const
 
 void ASmithBoss::InitializeParameter(int32 currentLevel)
 {
-	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
+	EnemyParam = USmithEnemyParamInitializer::GetParams(this, currentLevel);
   m_level = 1 + (currentLevel - 1) * 4;
 }

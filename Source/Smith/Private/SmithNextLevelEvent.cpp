@@ -58,11 +58,6 @@ void USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
     return;
   }
 
-  if (mapObj->GetType() != EMapObjType::Player)
-  {
-    return;
-  }
-
   IEventTriggerable* eventTriggerable = Cast<IEventTriggerable>(mapObj);
   if (eventTriggerable == nullptr)
   {

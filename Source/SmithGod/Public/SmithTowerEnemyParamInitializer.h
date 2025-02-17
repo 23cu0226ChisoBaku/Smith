@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "IParamInitializer.h"
 #include "SmithTowerEnemyParamInitializer.generated.h"
 
@@ -11,13 +11,16 @@
  * 
  */
 UCLASS()
-class SMITHGOD_API USmithTowerEnemyParamInitializer : public UObject, public IParamInitializer
+class SMITHGOD_API USmithTowerEnemyParamInitializer : public UGameInstanceSubsystem, public IParamInitializer
 {
 	GENERATED_BODY()
 
 public:
 	USmithTowerEnemyParamInitializer();
 	virtual void BeginDestroy() override;
+
+public:
+	UFUNCTION(BlueprintCallable)
 	void AssignEnemyParamList(UDataTable* paramList);
 
 public:

@@ -3,14 +3,19 @@
 
 #include "SmithEnemyParamInitializer.h"
 
-IParamInitializer* FSmithEnemyParamInitializer::gParamInitializer = nullptr;
+IParamInitializer* USmithEnemyParamInitializer::gParamInitializer = nullptr;
 
-void FSmithEnemyParamInitializer::AssignInitializer(IParamInitializer* initializer)
+void USmithEnemyParamInitializer::AssignInitializer(TScriptInterface<IParamInitializer> initializer)
 {
-  gParamInitializer = initializer;
+  gParamInitializer = initializer.GetInterface();
 }
 
-void FSmithEnemyParamInitializer::DetachInitializer()
+void USmithEnemyParamInitializer::DetachInitializer()
 {
   gParamInitializer = nullptr;
+}
+
+bool USmithEnemyParamInitializer::IsParamInitializerValid()
+{
+  return IS_UINTERFACE_VALID(gParamInitializer);
 }

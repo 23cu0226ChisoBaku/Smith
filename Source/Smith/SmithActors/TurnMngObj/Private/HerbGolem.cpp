@@ -313,7 +313,7 @@ EBattleLogType AHerbGolem::GetType_Log() const
 
 void AHerbGolem::InitializeParameter(int32 currentLevel)
 {
-	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
+	EnemyParam = USmithEnemyParamInitializer::GetParams(this, currentLevel);
   m_maxHp = EnemyParam.HP;
 }
 

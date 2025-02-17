@@ -143,7 +143,8 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 
 		if (m_eventMediator.IsValid())
 		{
-			IPickable* pickable = FSmithEnemyLootGenerator::GetLoot(this);
+			// TODO will return null when RECOMPILE!!!!!!!
+			IPickable* pickable = USmithEnemyLootGenerator::GetLoot(this);
 			if (pickable != nullptr)
 			{
 				USmithPickable* smithPickable = Cast<USmithPickable>(pickable);
@@ -327,7 +328,8 @@ EBattleLogType ATurnActor_Test::GetType_Log() const
 
 void ATurnActor_Test::InitializeParameter(int32 currentLevel)
 {
-	EnemyParam = FSmithEnemyParamInitializer::GetParams(*this, currentLevel);
+	// TODO will return null when RECOMPILE!!!!!!!
+	EnemyParam = USmithEnemyParamInitializer::GetParams(*this, currentLevel);
 	// TODO
 	m_level = 1 + (currentLevel - 1) * 3;
 }

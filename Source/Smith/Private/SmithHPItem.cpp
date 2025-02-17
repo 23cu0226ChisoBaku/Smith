@@ -7,9 +7,7 @@
 
 USmithHPItem::USmithHPItem(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
-{
-
-}
+{ }
 
 void USmithHPItem::BeginDestroy()
 {
@@ -23,7 +21,10 @@ void USmithHPItem::useImpl(IItemUseable* user)
     return;
   }
 
+  using namespace MLibrary::UE::Audio;
+
   user->UseItem(this);
+  AudioKit::PlaySE(TEXT("Recover_1"));
 }
 
 void USmithHPItem::SetRecoveryPercentage(double percentage)

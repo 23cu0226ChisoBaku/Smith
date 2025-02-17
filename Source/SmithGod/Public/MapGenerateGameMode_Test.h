@@ -21,7 +21,6 @@ class USmithEventPublishMediator;
 class USmithBattleLogWorldSubsystem;
 class UUI_CurrentLevel;
 class USmithNextLevelEvent;
-class USmithTowerEnemyParamInitializer;
 
 // Damage
 class USmithDungeonDamageCalculator;
@@ -76,6 +75,7 @@ private:
 	void goToNextLevel();
 	void addDefeatedEnemyCount();
 	void processGameClear();
+	void processGameOver();
 
 private:
 	/** ダンジョンマップ設計図 */
@@ -127,8 +127,6 @@ private:
 	TObjectPtr<UDataTable> EnemyDefaultParamList;
 	UPROPERTY(EditAnywhere, meta=(RequiredAssetDataTags = "RowStructure=/Script/Smith.SmithPickableDropRateListRow"))
 	TObjectPtr<UDataTable> EnemyDropLootList;
-	UPROPERTY()
-	TObjectPtr<USmithTowerEnemyParamInitializer> m_towerInitializer;
 	UPROPERTY(EditAnywhere)
 	FSmithMapDecoration TEMP_Decoration;
 

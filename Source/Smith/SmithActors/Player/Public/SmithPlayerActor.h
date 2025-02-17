@@ -113,7 +113,6 @@ protected:
 
 public:	
 	void Tick(float DeltaTime) override final;
-	void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override final;
 #pragma endregion Lifecycle
 // end of Lifecycle
 
@@ -164,7 +163,7 @@ public:
 		void SetEnhanceSystem(IEnhanceSystem*);
 
 		FBattleDefenseParamHandle GetDefenseParam() const override;
-		private:
+	private:
 			void convertAnimState(uint8 animationState, FName& outName);
 
 #pragma endregion Interfaces Override

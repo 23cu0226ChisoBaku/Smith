@@ -2,23 +2,27 @@
 
 #pragma once
 
-#ifndef SMITH_ENEMY_PARAM_INITIALIZER
-#define SMITH_ENEMY_PARAM_INITIALIZER
-
 #include "CoreMinimal.h"
+#include "UObject/ScriptInterface.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "IParamInitializer.h"
 #include <type_traits>
 #include "MLibrary.h"
+#include "SmithEnemyParamInitializer.generated.h"
 
-class SMITH_API FSmithEnemyParamInitializer
+UCLASS()
+class SMITH_API USmithEnemyParamInitializer : public UBlueprintFunctionLibrary
 {
-private:
-	FSmithEnemyParamInitializer() = delete;
-	~FSmithEnemyParamInitializer() = delete;
+	GENERATED_BODY()
 
 public:
-	static void AssignInitializer(IParamInitializer*);
+	UFUNCTION(BlueprintCallable, Category = "Parameter Initializer")
+	static void AssignInitializer(TScriptInterface<IParamInitializer> initializer);
+	UFUNCTION(BlueprintCallable, Category = "Parameter Initializer")
 	static void DetachInitializer();
+	UFUNCTION(BlueprintCallable, Category = "Parameter Initializer")
+	static bool IsParamInitializerValid();
+	
 	// 敵パラメーター初期化関数
 	template<typename EnemyType>
 	static FParams GetParams(const EnemyType& Enemy, int32 currentLevel);
@@ -28,13 +32,7 @@ private:
 };
 
 template<typename EnemyType>
-FParams FSmithEnemyParamInitializer::GetParams(const EnemyType& Enemy, int32 currentLevel)
+FParams USmithEnemyParamInitializer::GetParams(const EnemyType& Enemy, int32 currentLevel)
 {
-	if (gParamInitializer == nullptr)
-	{
-		MDebug::LogError("Parameter Initializer nullptr");
-	}
 	return IS_UINTERFACE_VALID(gParamInitializer) ? gParamInitializer->Initialize(typename SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type{}, currentLevel) : FParams{};
 }
-
-#endif

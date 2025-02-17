@@ -3,14 +3,19 @@
 
 #include "SmithEnemyLootGenerator.h"
 
-void FSmithEnemyLootGenerator::AssignLootGenerator(ILootGeneratable* generatable)
+ILootGeneratable* USmithEnemyLootGenerator::gLootGenerator = nullptr;
+
+void USmithEnemyLootGenerator::AssignLootGenerator(TScriptInterface<ILootGeneratable> generatable)
 {
-  gLootGenerator = generatable;
+  gLootGenerator = generatable.GetInterface();
 }
 
-void FSmithEnemyLootGenerator::DetachLootGenerator()
+void USmithEnemyLootGenerator::DetachLootGenerator()
 {
   gLootGenerator = nullptr;
 }
 
-ILootGeneratable* FSmithEnemyLootGenerator::gLootGenerator = nullptr;
+bool USmithEnemyLootGenerator::IsLootGeneratorValid()
+{
+  return IS_UINTERFACE_VALID(gLootGenerator);
+}

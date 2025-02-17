@@ -83,8 +83,8 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
 {
   Super::EndPlay(EndPlayReason);
 
-  FSmithEnemyParamInitializer::DetachInitializer();
-  FSmithEnemyLootGenerator::DetachLootGenerator();
+  USmithEnemyParamInitializer::DetachInitializer();
+  USmithEnemyLootGenerator::DetachLootGenerator();
 
   if (m_battleMediator != nullptr)
   {
@@ -126,10 +126,6 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
     m_nextLevelEvent->ConditionalBeginDestroy();
   }
 
-  if (m_towerInitializer != nullptr)
-  {
-    m_towerInitializer->MarkAsGarbage();
-  }
 
   m_mapMgr.Reset();
 }
@@ -335,6 +331,12 @@ void AMapGenerateGameMode_Test::initializeGame()
     check(enhanceUser != nullptr);
     enhanceUser->SetEnhanceSystem(m_enhanceSystem);
 
+    ASmithPlayerActor* player = Cast<ASmithPlayerActor>(playerPawn);
+    if (player != nullptr)
+    {
+      player->OnDead.AddUObject(this, &AMapGenerateGameMode_Test::processGameOver);
+    }
+
     m_eventMediator = NewObject<USmithEventPublishMediator>(this);
     check(m_eventMediator != nullptr)
 
@@ -397,24 +399,23 @@ void AMapGenerateGameMode_Test::initializeGame()
       m_nextLevelEvent->OnNextLevel.BindUObject(this, &AMapGenerateGameMode_Test::goToNextLevel);
     }
 
-    m_towerInitializer = NewObject<USmithTowerEnemyParamInitializer>(this);
-    check(m_towerInitializer != nullptr);
-
-    m_towerInitializer->AssignEnemyParamList(EnemyDefaultParamList);
-    FSmithEnemyParamInitializer::AssignInitializer(m_towerInitializer);
-
     UGameInstance* gameInstance = world->GetGameInstance();
     if (gameInstance != nullptr)
     {
-      USmithLootGameInstanceSubsystem* lootSub = gameInstance->GetSubsystem<USmithLootGameInstanceSubsystem>();
-      if (lootSub != nullptr)
+      USmithLootGameInstanceSubsystem* lootGenerator = gameInstance->GetSubsystem<USmithLootGameInstanceSubsystem>();
+      if (lootGenerator != nullptr)
       {
-        lootSub->AssignLootList(EnemyDropLootList);
+        lootGenerator->AssignLootList(EnemyDropLootList);
+        USmithEnemyLootGenerator::AssignLootGenerator(lootGenerator);
       }
 
-      FSmithEnemyLootGenerator::AssignLootGenerator(lootSub);
+      USmithTowerEnemyParamInitializer* paramInitializer = gameInstance->GetSubsystem<USmithTowerEnemyParamInitializer>();
+      if (paramInitializer != nullptr)
+      {
+        paramInitializer->AssignEnemyParamList(EnemyDefaultParamList);
+        USmithEnemyParamInitializer::AssignInitializer(paramInitializer);
+      }
     }
-
   }
 }
 
@@ -514,5 +515,19 @@ void AMapGenerateGameMode_Test::deployPickableEvent()
     }
 
     m_mapMgr->InitPickableEvent(recipe->DeployRule, itemEvents);
+  }
+}
+
+void AMapGenerateGameMode_Test::processGameOver()
+{
+  UWorld* world = GetWorld();
+  if (world != nullptr)
+  {
+    UGameInstance* gameInstance = world->GetGameInstance();
+    USmithBattleGameInstanceSubsystem* battleInstanceSubsystem = gameInstance->GetSubsystem<USmithBattleGameInstanceSubsystem>();
+    if (battleInstanceSubsystem != nullptr)
+    {
+      battleInstanceSubsystem->DisplayGameOverWidget(this);
+    }
   }
 }
