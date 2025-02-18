@@ -707,7 +707,7 @@ namespace UE::Smith
     }
     void FSmithMapObserver::GenerateNewEnemy()
     {
-      check(false, "unimplemented");
+      check(false);
       unimplemented();
     }
     bool FSmithMapObserver::ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
