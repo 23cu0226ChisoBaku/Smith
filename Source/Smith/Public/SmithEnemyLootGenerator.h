@@ -29,12 +29,20 @@ public:
 	static IPickable* GetLoot(const EnemyType& Enemy);
 
 private:
-	static ILootGeneratable* gLootGenerator;
+	static inline ILootGeneratable* gLootGenerator = nullptr;
 };
 
 template<typename EnemyType>
 static IPickable* USmithEnemyLootGenerator::GetLoot(const EnemyType& Enemy)
 {
+	if (gLootGenerator)
+	{
+		MDebug::LogWarning("Not null");
+	}
+	else
+	{
+		MDebug::LogError("Null");
+	}
 	return IS_UINTERFACE_VALID(gLootGenerator) ? gLootGenerator->GetLoot(SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type::NAME) : nullptr;
 }
 

@@ -28,11 +28,19 @@ public:
 	static FParams GetParams(const EnemyType& Enemy, int32 currentLevel);
 
 private:
-	static IParamInitializer* gParamInitializer;
+	static inline IParamInitializer* gParamInitializer = nullptr;
 };
 
 template<typename EnemyType>
 FParams USmithEnemyParamInitializer::GetParams(const EnemyType& Enemy, int32 currentLevel)
 {
+	if (gParamInitializer)
+	{
+		MDebug::LogWarning("Not null");
+	}
+	else
+	{
+		MDebug::LogError("Null");
+	}
 	return IS_UINTERFACE_VALID(gParamInitializer) ? gParamInitializer->Initialize(typename SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type{}, currentLevel) : FParams{};
 }
