@@ -31,6 +31,19 @@ namespace UE::Smith
 {
   namespace Map
   {
+    namespace Private
+    {
+      FVector ConvertMapCoordToWorldLocation_Internal(const FMapCoord& mapCoord, int32 tileSize, const FVector& originWorldLocation)
+      {
+        const double worldLocationX = StaticCast<double>(StaticCast<int32>(mapCoord.x) * tileSize);
+        const double worldLocationY = StaticCast<double>(StaticCast<int32>(mapCoord.y) * tileSize);
+        const double worldLocationZ = 0.0;
+
+        const FVector worldLocation = FVector(worldLocationX, worldLocationY, worldLocationZ) + originWorldLocation;
+
+        return worldLocation;
+      }
+    }
     ///
     /// @brief FSmithMapObserver実装クラス 
     ///
@@ -38,10 +51,8 @@ namespace UE::Smith
     {
       using Model = typename FSmithMapDataModel;
       public:
-        MapObserverImpl()
-        { }
-        ~MapObserverImpl()
-        { }
+        MapObserverImpl() = default;
+        ~MapObserverImpl() = default;
       public:
         void AssignMap(TSharedPtr<Model> pModel)
         {
@@ -49,6 +60,8 @@ namespace UE::Smith
         }
         void InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
         {
+          using namespace Private;
+
           TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared.IsValid())
           {
@@ -68,7 +81,7 @@ namespace UE::Smith
 
           // マップに置けないプレイヤーだと初期化しない
           ICanSetOnMap* playerMapObj = Cast<ICanSetOnMap>(player);
-          if (playerMapObj == nullptr)
+          if (!IS_UINTERFACE_VALID(playerMapObj))
           {
             return;
           }
@@ -177,18 +190,13 @@ namespace UE::Smith
                     continue;
                   }
 
-                  const FVector mapObjoffset = FVector(
-                                                       StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize * 0.5),
-                                                       StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize * 0.5),
-                                                       0.0
-                                                     );
+                  const double mapObjOffsetX = StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize * 0.5);
+                  const double mapObjOffsetY = StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize * 0.5);
+                  const double mapObjOffsetZ = 0.0;
+                  const FVector mapObjoffset = FVector(mapObjOffsetX, mapObjOffsetY, mapObjOffsetZ);
 
-                  const FVector worldLocation = FVector(
-                                                          model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(mapCoord.x) * model_shared->MapTileSize),
-                                                          model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(mapCoord.y) * model_shared->MapTileSize),
-                                                          model_shared->OriginWorldCoord.Z
-                                                        )
-                                                  + mapObjoffset;
+                  const FVector worldLocation = ConvertMapCoordToWorldLocation_Internal(mapCoord, model_shared->MapTileSize, model_shared->OriginWorldCoord)
+                                              + mapObjoffset;
 
                   FRotator worldRotation;
                   FSmithMapHelperLibrary::DirectMapElementRotation(map_shared.Get(), worldRotation, mapCoord.x, mapCoord.y);
@@ -213,35 +221,31 @@ namespace UE::Smith
                 if (model_shared->StaySpaceTable.Contains(bossCoord))
                 {
 
-                  AActor* enemy = world->SpawnActor<AActor>(subClass, FVector::ZeroVector, FRotator::ZeroRotator);
+                  AActor* boss = world->SpawnActor<AActor>(subClass, FVector::ZeroVector, FRotator::ZeroRotator);
 
                   // 生成した敵がマップに置けないと処理を中断する
-                  ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(enemy);
+                  ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(boss);
                   if (mapObj == nullptr)
                   {
                     MDebug::LogError("Can not place actor on map because it is not implemented ICanSetOnMap");
-                    enemy->Destroy();
+                    boss->Destroy();
                     return;
                   }
                   
                   const uint8 mapSizeX = mapObj->GetOnMapSizeX();
                   const uint8 mapSizeY = mapObj->GetOnMapSizeY();
-                  const FVector mapObjoffset = FVector(
-                                                       StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize) * 0.5,
-                                                       StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize) * 0.5,
-                                                       0.0
-                                                     );
 
-                  const FVector worldLocation = FVector(
-                                                          model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(bossCoord.x) * model_shared->MapTileSize),
-                                                          model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(bossCoord.y) * model_shared->MapTileSize),
-                                                          model_shared->OriginWorldCoord.Z
-                                                          )
-                                                  + mapObjoffset;
+                  const double mapObjOffsetX = StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize) * 0.5;
+                  const double mapObjOffsetY = StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize) * 0.5;
+                  const double mapObjOffsetZ = 0.0;
+                  const FVector mapObjOffset = FVector(mapObjOffsetX, mapObjOffsetY, mapObjOffsetZ);
+
+                  const FVector bossWorldLocation = ConvertMapCoordToWorldLocation_Internal(bossCoord, model_shared->MapTileSize, model_shared->OriginWorldCoord)
+                                                  + mapObjOffset;
                                                      
-                  enemy->SetActorLocation(worldLocation);
-                  // TODO
-                  enemy->SetActorRotation(FRotator{0.0, 180.0, 0.0});
+                  boss->SetActorLocation(bossWorldLocation);
+                  boss->SetActorRotation(FRotator{0.0, 180.0, 0.0});
+
                   outMapObjs.Emplace(bossCoord, mapObj);
 
                   for (uint8 mapCoordOffsetX = 0; mapCoordOffsetX < mapSizeX; ++mapCoordOffsetX)
@@ -297,11 +301,8 @@ namespace UE::Smith
             }
           }
 
-          const FVector playerWorldCoord = FVector(
-                                                    model_shared->OriginWorldCoord.X + StaticCast<double>(StaticCast<int32>(playerMapCoord.x) * model_shared->MapTileSize),
-                                                    model_shared->OriginWorldCoord.Y + StaticCast<double>(StaticCast<int32>(playerMapCoord.y) * model_shared->MapTileSize),
-                                                    model_shared->OriginWorldCoord.Z
-                                                  ); 
+          const FVector playerWorldCoord = ConvertMapCoordToWorldLocation_Internal(playerMapCoord, model_shared->MapTileSize, model_shared->OriginWorldCoord);
+
           player->SetActorLocation(playerWorldCoord);
           outMapObjs.Emplace(playerMapCoord, playerMapObj);
 
@@ -310,13 +311,12 @@ namespace UE::Smith
         }
         void ClearMapObjs_IgnorePlayer()
         {
-          check(m_model.IsValid())
-          if (!m_model.IsValid())
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared.IsValid())
           {
             return;
           }
 
-          TSharedPtr<Model> model_shared = m_model.Pin();
           for (const auto& onMapObj : model_shared->OnMapObjsCoordTable)
           {
             if (!onMapObj.Key.IsValid() || onMapObj.Key.Get() == m_player.Get())
@@ -365,13 +365,12 @@ namespace UE::Smith
         }
         bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
         {
-          outChaseDirection = EDirection::Invalid;
-
-          check(m_model.IsValid())
-          if (!m_model.IsValid())
+          TSharedPtr<Model> model_shared = m_model.Pin();
+          if (!model_shared.IsValid()) [[unlikely]]
           {
             return false;
           }
+
           // TODO
           // Chase Player Use Only
           if (!m_player.IsValid() || m_player != target)
@@ -384,11 +383,7 @@ namespace UE::Smith
             return false;
           }
 
-          TSharedPtr<Model> model_shared = m_model.Pin();
-          if (!model_shared.IsValid())
-          {
-            return false;
-          }
+          outChaseDirection = EDirection::Invalid;
 
           if (!model_shared->OnMapObjsCoordTable.Contains(chaser)
               || !model_shared->OnMapObjsCoordTable.Contains(target))
@@ -409,6 +404,7 @@ namespace UE::Smith
         }
       bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y)
       {
+        using namespace Private;
         outLocation = FVector::ZeroVector;
         TSharedPtr<Model> model_shared = m_model.Pin();
         if (!model_shared.IsValid())
@@ -422,12 +418,7 @@ namespace UE::Smith
           return false;
         }
 
-        outLocation = FVector(
-                              StaticCast<double>(StaticCast<int32>(x) * model_shared->MapTileSize),
-                              StaticCast<double>(StaticCast<int32>(y) * model_shared->MapTileSize),
-                              0.0
-                             )
-                    + model_shared->OriginWorldCoord;
+        outLocation = ConvertMapCoordToWorldLocation_Internal(FMapCoord(x, y), model_shared->MapTileSize, model_shared->OriginWorldCoord);
 
         return true;
       }
@@ -478,19 +469,13 @@ namespace UE::Smith
         }
         void chaseTarget_internal(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
         {
-          if (!m_model.IsValid()) [[unlikely]]
-          {
-            MDebug::LogError("model invalid --- chaseTarget_internal");
-            return;
-          } 
-
           TSharedPtr<FSmithMapDataModel> model_shared = m_model.Pin();
-          if (!model_shared->Map.IsValid()) [[unlikely]]
+          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+          if (!map_shared.IsValid()) [[unlikely]]
           {
             MDebug::LogError("map invalid --- chaseTarget_internal");
             return;
-          } 
-          TSharedPtr<FSmithMap> map_shared = model_shared->Map.Pin();
+          }
 
           const uint8 chaserMapSizeX = chaser->GetOnMapSizeX();
           const uint8 chaserMapSizeY = chaser->GetOnMapSizeY();
@@ -500,9 +485,9 @@ namespace UE::Smith
           int32 chaseCoordX_Offset = chaseRadius;
           int32 chaseCoordY_Offset = 0;
 
-          for (uint8 coordOffsetX = 0; coordOffsetX < chaserMapSizeX; ++ coordOffsetX)
+          for (uint8 coordOffsetX = 0; coordOffsetX < chaserMapSizeX; ++coordOffsetX)
           {
-            for (uint8 coordOffsetY = 0; coordOffsetY < chaserMapSizeY; ++ coordOffsetY)
+            for (uint8 coordOffsetY = 0; coordOffsetY < chaserMapSizeY; ++coordOffsetY)
             {
               const uint8 chaserCoordX = model_shared->OnMapObjsCoordTable[chaser].x + coordOffsetX;
               const uint8 chaserCoordY = model_shared->OnMapObjsCoordTable[chaser].y + coordOffsetY;
@@ -722,7 +707,8 @@ namespace UE::Smith
     }
     void FSmithMapObserver::GenerateNewEnemy()
     {
-
+      check(false, "unimplemented");
+      unimplemented();
     }
     bool FSmithMapObserver::ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
     {
@@ -738,6 +724,5 @@ namespace UE::Smith
     {
       m_pImpl->GetPlayerCoord(outPlayerCoord);
     }
-
   }
 }
