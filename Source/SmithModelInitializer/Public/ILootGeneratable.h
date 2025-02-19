@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "SkillAbsorbable.generated.h"
+#include "SmithEnemyTraits.h"
+#include "ILootGeneratable.generated.h"
 
-struct FSkill;
-
+class IPickable;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class USkillAbsorbable : public UInterface
+class ULootGeneratable : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -18,12 +18,11 @@ class USkillAbsorbable : public UInterface
 /**
  * 
  */
-class SMITH_API ISkillAbsorbable
+class SMITHMODELINITIALIZER_API ILootGeneratable
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual FSkill GetSkills() = 0;
-	virtual void SetSkills(FSkill*) = 0;
+	virtual IPickable* GetLoot(const FString& EnemyTypeName) const = 0;
 };

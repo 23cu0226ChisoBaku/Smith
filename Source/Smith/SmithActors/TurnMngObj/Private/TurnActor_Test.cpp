@@ -144,6 +144,7 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 		if (m_eventMediator.IsValid())
 		{
 			// TODO will return null when RECOMPILE!!!!!!!
+			// Reason: dll make copy of static member variable
 			IPickable* pickable = USmithEnemyLootGenerator::GetLoot(this);
 			if (pickable != nullptr)
 			{

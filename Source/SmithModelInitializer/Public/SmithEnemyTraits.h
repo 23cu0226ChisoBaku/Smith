@@ -11,17 +11,17 @@
 // 小ゴーレム
 struct SmallGolem
 {
-	static const FString NAME;
+	SMITHMODELINITIALIZER_API static const FString NAME;
 };
 // ドラゴン
 struct Dragon
 {
-	static const FString NAME;
+	SMITHMODELINITIALIZER_API static const FString NAME;
 };
 // 薬草ゴーレム
 struct HerbGolem
 {
-	static const FString NAME;
+	SMITHMODELINITIALIZER_API static const FString NAME;
 };
 
 template<typename EnemyType, bool bIsPtr> struct SmithEnemyTraits;

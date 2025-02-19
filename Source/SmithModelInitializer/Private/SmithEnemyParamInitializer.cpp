@@ -6,10 +6,6 @@
 void USmithEnemyParamInitializer::AssignInitializer(TScriptInterface<IParamInitializer> initializer)
 {
   gParamInitializer = initializer.GetInterface();
-  MDebug::LogError(FString::FromInt(reinterpret_cast<int64>(gParamInitializer)));
-  MDebug::LogError(FString::FromInt(reinterpret_cast<int64>(&gParamInitializer)));
-  UE_LOG(LogTemp, Log, TEXT("Param %s"), *FString::FromInt(reinterpret_cast<int64>(gParamInitializer)));
-  UE_LOG(LogTemp, Log, TEXT("Param Ptr Address %s"), *FString::FromInt(reinterpret_cast<int64>(&gParamInitializer)));
 }
 
 void USmithEnemyParamInitializer::DetachInitializer()

@@ -399,6 +399,9 @@ void AMapGenerateGameMode_Test::initializeGame()
       m_nextLevelEvent->OnNextLevel.BindUObject(this, &AMapGenerateGameMode_Test::goToNextLevel);
     }
 
+    // TODO DLLをロードすると、スタティック変数のコピーが生成される
+    // 故に、違う値に代入してしまう
+    // 解決策：ヘルパーDLLを用意して、他のDLLがそのDLLをアクセスすると値の一致性が保障される？
     UGameInstance* gameInstance = world->GetGameInstance();
     if (gameInstance != nullptr)
     {

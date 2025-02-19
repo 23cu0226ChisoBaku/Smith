@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "ISmithMenu.generated.h"
+#include "SmithEnemyTraits.h"
+#include "IParamInitializer.generated.h"
 
+struct FParams;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class USmithMenu : public UInterface
+class UParamInitializer : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,11 +18,13 @@ class USmithMenu : public UInterface
 /**
  * 
  */
-class SMITH_API ISmithMenu
+class SMITHMODELINITIALIZER_API IParamInitializer
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Execute() = 0;
+	virtual FParams Initialize(SmallGolem, int32 currentLevel) = 0;
+	virtual FParams Initialize(Dragon, int32 currentLevel) = 0;
+	virtual FParams Initialize(HerbGolem, int32 currentLevel) = 0;
 };

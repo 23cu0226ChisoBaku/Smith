@@ -26,6 +26,8 @@ Encoding : UTF-8
 
 #include <string>
 
+DECLARE_LOG_CATEGORY_EXTERN(MDebugLog, Log, All);
+
 namespace UE::MLibrary
 {
   class MLIBRARY_API Debug

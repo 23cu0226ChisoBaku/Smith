@@ -11,7 +11,7 @@
 #include "SmithEnemyParamInitializer.generated.h"
 
 UCLASS()
-class SMITH_API USmithEnemyParamInitializer : public UBlueprintFunctionLibrary
+class SMITHMODELINITIALIZER_API USmithEnemyParamInitializer : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -25,22 +25,11 @@ public:
 	
 	// 敵パラメーター初期化関数
 	template<typename EnemyType>
-	static FParams GetParams(const EnemyType& Enemy, int32 currentLevel);
+	static FParams GetParams(const EnemyType& Enemy, int32 currentLevel)
+	{
+		return IS_UINTERFACE_VALID(gParamInitializer) ? gParamInitializer->Initialize(typename SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type{}, currentLevel) : FParams{};
+	}
 
 private:
 	static inline IParamInitializer* gParamInitializer = nullptr;
 };
-
-template<typename EnemyType>
-FParams USmithEnemyParamInitializer::GetParams(const EnemyType& Enemy, int32 currentLevel)
-{
-	if (gParamInitializer)
-	{
-		MDebug::LogWarning("Not null");
-	}
-	else
-	{
-		MDebug::LogError("Null");
-	}
-	return IS_UINTERFACE_VALID(gParamInitializer) ? gParamInitializer->Initialize(typename SmithEnemyTraits<EnemyType, std::is_pointer_v<EnemyType>>::Type{}, currentLevel) : FParams{};
-}
