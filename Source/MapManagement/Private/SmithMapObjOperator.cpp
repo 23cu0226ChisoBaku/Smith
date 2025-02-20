@@ -269,7 +269,7 @@ namespace UE::Smith
         }
         void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
-          destination = InvalidValues::MAP_COORD_WORLD_INVALID;
+          destination = InvalidValues::MapInvalidCoord_World;
           // 安全性チェック
           #pragma region Safe Check
           {

@@ -87,7 +87,7 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, E
 
   mapMgrSharedPtr->MoveMapObj(Cast<ICanSetOnMap>(requester), moveDirection, moveDistance, destinationVector);
 
-  if (destinationVector.Equals(InvalidValues::MAP_COORD_WORLD_INVALID))
+  if (destinationVector.Equals(InvalidValues::MapInvalidCoord_World))
   {
     return false;
   }

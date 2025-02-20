@@ -96,16 +96,15 @@ namespace UE::Smith
           // 入力値チェック
           ensure((row != 0) && (column != 0) && (widthPerSection != 0) && (heightPerSection != 0));
           ensure(StaticCast<int32>(row) * StaticCast<int32>(column) <= 256);
-          ensure(StaticCast<int32>(widthPerSection) * StaticCast<int32>(column) + StaticCast<int32>((column + 1u) * sectionGap) <= 256);
-          ensure(StaticCast<int32>(heightPerSection) * StaticCast<int32>(row) + StaticCast<int32>((row + 1u) * sectionGap) <= 256);
+          ensure(StaticCast<int32>(widthPerSection) * StaticCast<int32>(column) + StaticCast<int32>((column + 1) * sectionGap) <= 256);
+          ensure(StaticCast<int32>(heightPerSection) * StaticCast<int32>(row) + StaticCast<int32>((row + 1) * sectionGap) <= 256);
 
-          // セクションギャップの大きさを計算
-          const uint8 widthGap = (column + 1u) * sectionGap;
-          const uint8 heightGap = (row + 1u) * sectionGap;
+          // ギャップを設ける
+          const uint8 widthGap = (column + 1) * sectionGap;
+          const uint8 heightGap = (row + 1) * sectionGap;
           const uint8 mapWidth = column * widthPerSection + widthGap;
           const uint8 mapHeight = row * heightPerSection + heightGap;
 
-          // 例外安全
           // 一時的なマップ矩形作成
           FSmithRect tempRect{};
           tempRect.GenerateRect(mapWidth, mapHeight, defaultValue);
@@ -114,17 +113,17 @@ namespace UE::Smith
           tempSections.Reserve(row * column);
 
           // セクションを作成
-          for (uint8 y = 0u; y < row; ++y)
+          for (uint8 y = 0; y < row; ++y)
           {
-            for (uint8 x = 0u; x < column; ++x)
+            for (uint8 x = 0; x < column; ++x)
             {
               const uint8 sectionIdx = y * column + x;
-              const uint8 gapX = (x + 1u) * sectionGap;
-              const uint8 gapY = (y + 1u) * sectionGap;
+              const uint8 gapX = (x + 1) * sectionGap;
+              const uint8 gapY = (y + 1) * sectionGap;
               const uint8 left = x * widthPerSection + gapX;
               const uint8 top = y * heightPerSection + gapY;
-              const uint8 right = left + widthPerSection - 1u; 
-              const uint8 bottom = top + heightPerSection - 1u;
+              const uint8 right = left + widthPerSection - 1; 
+              const uint8 bottom = top + heightPerSection - 1;
 
               TSharedPtr<FSmithSection> section = ::MakeShared<FSmithSection>(sectionIdx);
               section->GenerateSection(left, top, right, bottom, defaultValue);
@@ -172,14 +171,14 @@ namespace UE::Smith
           const uint8 roomHeight = StaticCast<uint8>(FMath::RandRange(roomMinHeight, roomMaxHeight));
           const uint8 roomMaxLeft = sectionWidth - roomWidth; 
           const uint8 roomMaxTop = sectionHeight - roomHeight;
-          const uint8 roomLeft = StaticCast<uint8>(FMath::RandRange(0, roomMaxLeft));
-          const uint8 roomTop = StaticCast<uint8>(FMath::RandRange(0, roomMaxTop));
-          const uint8 roomRight = roomLeft + roomWidth - 1;
-          const uint8 roomBottom = roomTop + roomHeight - 1;
+          const uint8 left = StaticCast<uint8>(FMath::RandRange(0, roomMaxLeft));
+          const uint8 top = StaticCast<uint8>(FMath::RandRange(0, roomMaxTop));
+          const uint8 right = left + roomWidth - 1;
+          const uint8 bottom = top + roomHeight - 1;
 
-          m_sections[sectionIdx]->GenerateRoom(roomLeft, roomTop, roomRight, roomBottom, defaultValue);
+          m_sections[sectionIdx]->GenerateRoom(left, top, right, bottom, defaultValue);
 
-          // マップ矩形にデータを書き込む
+          // TODO マップ矩形にデータを書き込む
           FSmithRect sectionRect = m_sections[sectionIdx]->GetSectionRect();
           const uint8 sectionRow = sectionIdx / m_column;
           const uint8 sectionColumn = sectionIdx % m_column;
@@ -197,7 +196,7 @@ namespace UE::Smith
         }
         void ConnectRooms(uint8 corridorData)
         {
-          // マップ初期化される前にこの以降は実行しない
+          // 初期化チェック
           const int32 sectionNum = m_sections.Num();
           if (sectionNum == 0)
           {
@@ -221,15 +220,16 @@ namespace UE::Smith
             // 部屋情報を取得
             const uint8 sectionRow = section->GetSectionIdx() / m_column;
             const uint8 sectionColumn = section->GetSectionIdx() % m_column;
-            const uint8 leftGap = sectionColumn * (section->GetWidth() + m_sectionGap) + m_sectionGap;
-            const uint8 topGap = sectionRow * (section->GetHeight() + m_sectionGap) + m_sectionGap;
-            const int32 onMapRoomLeft = StaticCast<int32>(section->GetRoomLeft()) + StaticCast<int32>(leftGap);
-            const int32 onMapRoomTop = StaticCast<int32>(section->GetRoomTop()) + StaticCast<int32>(topGap);
-            roomInfos.Emplace(RoomInfo{ section->GetSectionIdx(), FInt32Vector2(onMapRoomLeft, onMapRoomTop)});
+            const uint8 leftOffset = sectionColumn * (section->GetWidth() + m_sectionGap) + m_sectionGap;
+            const uint8 topOffset = sectionRow * (section->GetHeight() + m_sectionGap) + m_sectionGap;
+            const int32 left = StaticCast<int32>(section->GetRoomLeft()) + StaticCast<int32>(leftOffset);
+            const int32 top = StaticCast<int32>(section->GetRoomTop()) + StaticCast<int32>(topOffset);
+            roomInfos.Emplace(RoomInfo{ section->GetSectionIdx(), FInt32Vector2(left, top)});
           }
 
           // 始点部屋をランダムに決める
           const int32 randomStartIdx = FMath::RandRange(0, roomInfos.Num() - 1);
+
           RoomInfo currentRoom = roomInfos[randomStartIdx];
           roomInfos.Remove(currentRoom);
 
@@ -276,7 +276,6 @@ namespace UE::Smith
             return nullptr;
           }
 
-          // 初期化チェック
           const uint8 sectionIdx = rowIdx * m_column + columnIdx;
           if (!m_sections.Contains(sectionIdx))
           {
@@ -288,12 +287,6 @@ namespace UE::Smith
 
         FSmithSection* GetSectionByCoord(uint8 x, uint8 y) const
         {
-          // 初期化チェック
-          if (m_sectionHeight == 0u || m_sectionWidth == 0u)
-          {
-            return nullptr;
-          }
-
           // 座標がギャップの範囲内にあるか（あったらnullptr返し）
           if ((x % (m_sectionWidth + m_sectionGap)) < m_sectionGap 
               || (y % (m_sectionHeight + m_sectionGap)) < m_sectionGap)
@@ -311,7 +304,7 @@ namespace UE::Smith
           // 入力値チェック（無効値255u）
           if (columnIdx >= m_column)
           {
-            return InvalidValues::MAP_COORD_INVALID;
+            return 255u;
           }
 
           const uint8 sectionLeft = (columnIdx * m_sectionWidth) + ((columnIdx + 1) * m_sectionGap); 
@@ -323,7 +316,7 @@ namespace UE::Smith
           // 入力値チェック（無効値255u）
           if (rowIdx >= m_row)
           {
-            return InvalidValues::MAP_COORD_INVALID;
+            return 255u;
           }
 
           const uint8 sectionTop = (rowIdx * m_sectionHeight) + ((rowIdx + 1) * m_sectionGap);  
