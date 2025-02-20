@@ -54,6 +54,8 @@ void UHPUIComponent::CreateHP(APlayerController* playerCtrl)
   }
 
   AActor* owner = GetOwner();
+  
+  // プレイヤーしか使わないようにする
   if (owner == StaticCast<AActor*>(playerCtrl->GetPawn()))
   {
     if (HPWidgetSubclass == nullptr)

@@ -5,9 +5,9 @@ BattleResult.h
 
 Author : MAI ZHICONG(バクチソウ)
 
-Description : [ファイル説明]
+Description : バトルリザルト
 
-Update History: [20xx/xx/xx] [コメント]
+Update History: 2025/01/29 作成
 
 Version : alpha_1.0.0
 
@@ -32,7 +32,13 @@ class ISmithBattleLogger;
 ///
 struct FBattleResult
 {
+  ///
+  /// @brief 戦う相手のLog出力用ポインタ
+  ///
   ISmithBattleLogger* ResultLogger;
+  ///
+  /// @brief ダメージ
+  ///
   int32 Damage;
 
   constexpr FBattleResult()

@@ -27,7 +27,7 @@ Encoding : UTF-8
 //---------------------------------------
 class USmithPlayerHP;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SMITH_API UHPUIComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -60,7 +60,7 @@ public:
 	///	@param maxHp					    最大HP
 	/// @param currentHp					現在のHP
 	///
-	void SetHPNumber(int32 maxHp,int32 currentHp);
+	void SetHPNumber(int32 maxHp, int32 currentHp);
   ///
   /// @brief                    HPバーの可視性設定
   /// @param bIsVisible         見えるようにする    ->  true
