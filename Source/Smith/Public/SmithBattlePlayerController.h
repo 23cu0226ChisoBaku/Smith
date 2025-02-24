@@ -20,6 +20,10 @@ class SMITH_API ASmithBattlePlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	TMulticastDelegate<void()> OnOpenMenu;
+  TMulticastDelegate<void()> OnCloseMenu;
+
+public:
 	ASmithBattlePlayerController(const FObjectInitializer&);
 
 protected:
@@ -71,6 +75,9 @@ private:
 	void InMenuSelect(const FInputActionValue&);
 	void InMenuInteract(const FInputActionValue&);
 
+	void Debug_SetOnlyDiagonalMoveState(const FInputActionValue&);
+	void Debug_RemoveOnlyDiagonalMoveState(const FInputActionValue&);
+
 public:
 	UFUNCTION()
 	void DisablePlayerInput();
@@ -80,4 +87,5 @@ public:
 private:
 	UPROPERTY()
 	TObjectPtr<ASmithPlayerActor> m_player;
+	uint8 m_bIsDiagonal : 1;
 };

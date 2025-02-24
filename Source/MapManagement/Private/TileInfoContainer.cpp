@@ -23,10 +23,12 @@ namespace UE::Smith
   {
     FTileInfoContainer::FTileInfoContainer(ETileType type)
       : m_tileType(type) 
+      , m_tileActor(nullptr)
     { }
 
     FTileInfoContainer::FTileInfoContainer(const FTileInfoContainer& other) noexcept
       : m_tileType(other.m_tileType)
+      , m_tileActor(other.m_tileActor)
     { }
     
     FTileInfoContainer& FTileInfoContainer::operator=(const FTileInfoContainer& other) noexcept
@@ -34,13 +36,15 @@ namespace UE::Smith
       if (this != &other)
       {
         m_tileType = other.m_tileType;
+        m_tileActor = other.m_tileActor;
       }
 
       return *this;
     }
 
     FTileInfoContainer::FTileInfoContainer(FTileInfoContainer&& other) noexcept
-      : m_tileType(other.m_tileType)
+      : m_tileType(::MoveTemp(other.m_tileType))
+      , m_tileActor(::MoveTemp(other.m_tileActor))
     { }
 
     FTileInfoContainer& FTileInfoContainer::operator=(FTileInfoContainer&& other) noexcept
@@ -48,7 +52,9 @@ namespace UE::Smith
       if (this != &other)
       {
         m_tileType = ::MoveTemp(other.m_tileType);
+        m_tileActor = ::MoveTemp(other.m_tileActor);
         other.m_tileType = StaticCast<ETileType>(0);
+        other.m_tileActor = nullptr;
       }
 
       return *this;

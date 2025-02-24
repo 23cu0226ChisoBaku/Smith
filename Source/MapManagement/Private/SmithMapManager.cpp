@@ -23,6 +23,7 @@ Encoding : UTF-8
 
 #include "MapCoord.h"
 #include "TileType.h"
+#include "MapObjType.h"
 #include "SmithCommandFormat.h"
 
 #include "SmithMapBuilder.h"
@@ -37,6 +38,8 @@ Encoding : UTF-8
 #include "SmithMapDataModel.h"
 #include "SmithEventPublisher.h"
 #include "IEventRegister.h"
+#include "IMinimapDisplayer.h"
+#include "IMinimapDisplayable.h"
 
 // TODO
 #include "AttackableInfoHandle.h"
@@ -46,6 +49,12 @@ Encoding : UTF-8
 
 // TODO マネージャーは仕事をしない筈
 #include "SmithMapHelperLibrary.h"
+#include "UObject/WeakInterfacePtr.h"
+
+// TODO
+#include "DataStructure/Dimension2ArrayHandle.h"
+#include "MinimapDisplayTypeFactory.h"
+#include "MinimapDisplayType.h"
 
 #include "MLibrary.h"
 
@@ -77,6 +86,7 @@ namespace UE::Smith
           , m_model(::MakeShared<Model>())
           , m_map(nullptr)
           , m_mapEvents{}
+          , m_minimapDisplayer(nullptr)
         { }
         ~MapMgrImpl()
         { 
@@ -90,6 +100,8 @@ namespace UE::Smith
           m_map.Reset();
 
           discardEvents();
+
+          m_minimapDisplayer = nullptr;
         }
         void AssignEventRegister(IEventRegister* eventRegister)
         {
@@ -146,6 +158,85 @@ namespace UE::Smith
           m_eventDirector->AssignMap(m_model);
 
           discardEvents();
+
+          // TODO 実装優先のため、ぐちゃぐちゃ
+          const TArray<AActor*> mapMats = m_mapConstructor->GetMapMaterials();
+          for (int32 i = 0; i < mapMats.Num(); ++i)
+          {
+            AActor* matActor = mapMats[i];
+            if (!::IsValid(matActor))
+            {
+              continue;
+            }
+
+            const FVector matLocation = matActor->GetActorLocation();
+            const uint8 coordX = StaticCast<uint8>(FMath::RoundHalfToEven(matLocation.X / StaticCast<double>(m_model->MapTileSize)));
+            const uint8 coordY = StaticCast<uint8>(FMath::RoundHalfToEven(matLocation.Y / StaticCast<double>(m_model->MapTileSize)));
+            
+            const FMapCoord matCoord(coordX, coordY);
+
+            if (m_model->ObstacleTable.Contains(matCoord))
+            {
+              m_model->ObstacleTable[matCoord]->SetTileActor(matActor);
+            }
+            else if(m_model->StaySpaceTable.Contains(matCoord))
+            {
+              m_model->StaySpaceTable[matCoord]->SetTileActor(matActor);
+            }
+          }
+
+          if (m_minimapDisplayer.IsValid())
+          {
+            m_minimapDisplayer->ResetMap();
+            // const auto& mapDataHandle = mapRect.GetDataHandle();
+            TArray<UObject*> alignedMapMats;
+            const auto& mapRect = m_map->GetMap();
+            const int32 mapTotalRow = StaticCast<int32>(mapRect.GetHeight());
+            const int32 mapTotalColumn = StaticCast<int32>(mapRect.GetWidth());
+            
+            if (m_factory.IsValid())
+            {
+              const int32 mapMatsCount = mapTotalRow * mapTotalColumn;
+              for (int32 i = 0; i < mapMatsCount; ++i)
+              {
+                const uint8 curtRow = StaticCast<uint8>(i / mapTotalColumn);
+                const uint8 curtColumn = StaticCast<uint8>(i % mapTotalColumn);
+
+                const uint8 mapData = mapRect.GetRect(curtColumn, curtRow);
+                IMinimapDisplayable* displayable = nullptr;
+                switch (mapData)
+                {
+                  case (uint8)ETileType::Ground:
+                  case (uint8)ETileType::Corridor:
+                  {
+                    displayable = m_factory->GetDisplayable(EMinimapDisplayType::Ground);
+                  }
+                  break;
+                  case (uint8)ETileType::Wall:
+                  {
+                    displayable = m_factory->GetDisplayable(EMinimapDisplayType::Wall);
+                  }
+                  break;
+                  default:
+                  {
+                    check(false);
+                  }
+                  break;
+                }
+                
+                if (displayable == nullptr)
+                {
+                  alignedMapMats.Emplace(nullptr);
+                }
+                else
+                {
+                  alignedMapMats.Emplace(displayable->_getUObject());
+                }
+              }
+            }
+
+            m_minimapDisplayer->AssignMapData(alignedMapMats, mapTotalRow, mapTotalColumn);
+          }
         }
         void InitMapObjs(UWorld* world, AActor* player, const FSmithEnemyGenerateBluePrint& generateBP)
         {
@@ -171,6 +262,45 @@ namespace UE::Smith
           {
             m_deployDirector->DeployMapObj(mapObj, mapCoord.x, mapCoord.y);
           }
+
+          if (m_minimapDisplayer.IsValid() && m_factory.IsValid())
+          {
+            for(const auto& [mapCoord, mapObj] : deployMapObjs)
+            {
+              const uint8 sizeX = mapObj->GetOnMapSizeX();
+              const uint8 sizeY = mapObj->GetOnMapSizeY();
+              const int32 typeObjCnt = StaticCast<int32>(sizeX) * StaticCast<int32>(sizeY);
+
+              const EMapObjType type = mapObj->GetType();
+              TArray<UObject*> tileTypeObjs;
+              EMinimapDisplayType displayType = EMinimapDisplayType::Default;
+              switch (type)
+              {
+                case EMapObjType::Player:
+                {
+                  displayType = EMinimapDisplayType::Player;
+                }
+                break;
+                case EMapObjType::Enemy:
+                {
+                  displayType = EMinimapDisplayType::Enemy;
+                }
+                break;
+              }
+
+              for (int32 i = 0; i < typeObjCnt; ++i)
+              {
+                IMinimapDisplayable* displayable = m_factory->GetDisplayable(displayType);
+                if (displayable != nullptr)
+                {
+                  tileTypeObjs.Emplace(displayable->_getUObject());
+                }
+              }
+
+              m_minimapDisplayer->ReplaceTiles(tileTypeObjs, mapCoord, sizeX, sizeY);
+            }
+          }
+
         }
         void InitNextLevelEvent(ISmithMapEvent* nextLevelEvent)
         {
@@ -191,21 +321,36 @@ namespace UE::Smith
 
           m_eventDirector->DirectNextLevelEventCoord(nextLevelEventCoordX, nextLevelEventCoordY);
           DeployEvent(nextLevelEvent, nextLevelEventCoordX, nextLevelEventCoordY);
+
+          
+          if (m_minimapDisplayer.IsValid() && m_factory.IsValid())
+          {
+            TArray<UObject*> tileTypeObjects;
+            tileTypeObjects.Emplace(nextLevelEvent->_getUObject());
+            m_minimapDisplayer->ReplaceTiles(tileTypeObjects, FMapCoord(nextLevelEventCoordX, nextLevelEventCoordY), 1u, 1u);
+          }
         }
         void InitPickableEvent(EMapDeployRule rule, const TArray<ISmithMapEvent*>& events)
         {
           int32 idx = 0;
           uint8 x = 0u;
           uint8 y = 0u;
+
           while (idx < events.Num())
           {
             if (m_eventDirector->GetDeployableCoord(rule, x, y))
             {
               DeployEvent(events[idx], x, y);
+              if (m_minimapDisplayer.IsValid() && m_factory.IsValid())
+              {
+                TArray<UObject*> tileTypeObjects;
+                tileTypeObjects.Emplace(events[idx]->_getUObject());
+                m_minimapDisplayer->ReplaceTiles(tileTypeObjects, FMapCoord(x, y), 1u, 1u);
+              }
             }
 
             ++idx;
-          }
+          }       
         }
         void InitDecoration(UWorld* world, const FSmithMapDecoration& decoration)
         {
@@ -268,6 +413,38 @@ namespace UE::Smith
             }
           }
         }
+        void AssignMinimapDisplayer(IMinimapDisplayer* minimapDisplayer)
+        {
+          if (!IS_UINTERFACE_VALID(minimapDisplayer))
+          {
+            return;
+          }
+
+          m_minimapDisplayer = minimapDisplayer;
+
+          // TODO Bind Minimap Update Event
+          TDelegate<void(UObject*, const FMapCoord&, uint8, uint8)> minimapUpdateEventDelegate;
+
+          // TODO ミニマップ更新ラムダ式
+          auto minimapUpdateLambda = [this](UObject* displayable, const FMapCoord& coord, uint8 sizeX, uint8 sizeY) 
+          {
+            if (!m_minimapDisplayer.IsValid())
+            {
+              return;
+            }
+            
+            m_minimapDisplayer->UpdateMinimap(displayable, coord, sizeX, sizeY);
+          };
+          minimapUpdateEventDelegate.BindLambda(minimapUpdateLambda);
+
+          m_deployDirector->AddUpdateMinimapDelegate(minimapUpdateEventDelegate);
+          m_mapOperator->AddUpdateMinimapDelegate(minimapUpdateEventDelegate);
+
+        }
+        void AssignMinimapDisplayTypeFactory(UMinimapDisplayTypeFactory* factory)
+        {
+          m_factory = factory;
+        }
         void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
         {
           m_deployDirector->DeployMapObj(mapObj, x, y);
@@ -289,7 +466,7 @@ namespace UE::Smith
         {
           m_mapOperator->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
         }
-        bool GetPlayerDirection(EDirection& outDirection, ICanSetOnMap* origin, uint8 offsetLeft, uint8 offsetTop)
+        bool GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, ICanSetOnMap* origin, uint8 offsetLeft, uint8 offsetTop)
         {
           // TODO
           uint8 x = 0;
@@ -300,7 +477,9 @@ namespace UE::Smith
           }
           FMapCoord playerCoord;
           m_mapObserver->GetPlayerCoord(playerCoord);
-          outDirection = FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(FMapCoord(x + offsetLeft, y + offsetTop), playerCoord);
+
+          // TODO 仮引数追加予定
+          outDirection = FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(FMapCoord(x + offsetLeft, y + offsetTop), playerCoord, directionStrategy);
 
           return outDirection != EDirection::Invalid;
         }
@@ -365,6 +544,8 @@ namespace UE::Smith
         TSharedPtr<Model> m_model;
         TSharedPtr<FSmithMap> m_map;
         TArray<ISmithMapEvent*> m_mapEvents;
+        TWeakInterfacePtr<IMinimapDisplayer> m_minimapDisplayer;
+        TWeakObjectPtr<UMinimapDisplayTypeFactory> m_factory;
     };
     FSmithMapManager::FSmithMapManager()
       : m_pImpl(::MakeUnique<MapMgrImpl>())
@@ -397,6 +578,14 @@ namespace UE::Smith
     {
       m_pImpl->InitDecoration(world, decoration);
     }
+    void FSmithMapManager::AssignMinimapDisplayer(IMinimapDisplayer* minimapDisplayer)
+    {
+      m_pImpl->AssignMinimapDisplayer(minimapDisplayer);
+    }
+    void FSmithMapManager::AssignMinimapDisplayTypeFactory(UMinimapDisplayTypeFactory* factory)
+    {
+      m_pImpl->AssignMinimapDisplayTypeFactory(factory);
+    }
     void FSmithMapManager::DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
     {
       m_pImpl->DeployMapObj(mapObj, x, y);
@@ -413,9 +602,9 @@ namespace UE::Smith
     {
       m_pImpl->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
     }
-    bool FSmithMapManager::GetPlayerDirection(EDirection& outDirection, ICanSetOnMap* origin, uint8 offsetLeft, uint8 offsetTop)
+    bool FSmithMapManager::GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, ICanSetOnMap* origin, uint8 offsetLeft, uint8 offsetTop)
     {
-      return m_pImpl->GetPlayerDirection(outDirection, origin, offsetLeft, offsetTop);
+      return m_pImpl->GetPlayerDirection(outDirection, directionStrategy, origin, offsetLeft, offsetTop);
     }
     void FSmithMapManager::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     {

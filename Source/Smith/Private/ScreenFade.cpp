@@ -53,7 +53,7 @@ bool UScreenFade::IsFinish()
 
 void UScreenFade::StartFade(FadeStatus status)
 {
-  SetVisibility(ESlateVisibility::Visible);
+  SetVisibility(ESlateVisibility::HitTestInvisible);
   if(status == In)
   {
     if(OnFadeInStartEvent.IsBound())

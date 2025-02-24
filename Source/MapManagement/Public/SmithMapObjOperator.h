@@ -26,9 +26,11 @@ Encoding : UTF-8
                   前方宣言
 */
 //---------------------------------------
-struct FAttackableInfoHandle;
 class ICanSetOnMap;
 class IEventRegister;
+class UObject;
+struct FAttackableInfoHandle;
+struct FMapCoord;
 enum class EDirection : uint8;
 namespace UE::Smith
 {
@@ -109,6 +111,7 @@ namespace UE::Smith
         /// @param FVector									移動先の座標
         ///
         void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
+        void AddUpdateMinimapDelegate(const TDelegate<void(UObject*, const FMapCoord&, uint8, uint8)>&);
       #pragma endregion FSmithMapObjOperator Interface
       // end of FSmithMapObjOperator Interface
       private:

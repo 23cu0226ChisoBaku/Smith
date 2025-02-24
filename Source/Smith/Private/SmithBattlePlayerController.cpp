@@ -16,20 +16,24 @@ namespace SmithPlayerController::Private
   constexpr double MOVE_DEAD_ZONE_SCALAR = 0.5;
   constexpr uint8 DIRECTION_COUNT = (uint8)EDirection::DirectionCount;
   // ベクトルを方向列挙に変換する(X,Yだけ,Zは無視)
-	EDirection VectorDirToEDir(const FVector& direction)
+	EDirection VectorDirToEDir(const FVector& direction , bool bOnlyDiagonal = false)
 	{
 		const double dot = direction.Dot(FVector::ForwardVector);
 		const FVector cross = direction.Cross(FVector::ForwardVector);
-
 		const double angle = FMath::RadiansToDegrees(acos(dot));
 		// (1,0,0)(※EDirection::Northを表すベクトル)から時計回りに回転しdirectionまで回転した角度を計算
 		const double angleClockwise =  cross.Z > 0.0 ? - angle : angle; 
 
-	
-		return FSmithModelHelperFunctionLibrary::GetDirectionOfDegree(angleClockwise);
+    EDirectionStrategy strategy = EDirectionStrategy::Ordinal;
+    if (bOnlyDiagonal)
+    {
+      strategy = EDirectionStrategy::Diagonal;
+    }
+
+		return FSmithModelHelperFunctionLibrary::GetDirectionOfDegree(angleClockwise, strategy);
 	}
 
-  EDirection CalculateDirectionRelativeCamera(EDirection cameraDirection, const FVector2D& inputValue)
+  EDirection CalculateDirectionRelativeCamera(EDirection cameraDirection, const FVector2D& inputValue, bool bOnlyDiagonal = false)
   {
     const FVector2D normalizedInput = inputValue.GetSafeNormal();
     if (normalizedInput.IsNearlyZero())
@@ -53,7 +57,7 @@ namespace SmithPlayerController::Private
       directionY = 0.0;
     }
 
-    const EDirection newDirection = VectorDirToEDir(FVector{directionX, directionY, 0.0});
+    const EDirection newDirection = VectorDirToEDir(FVector{directionX, directionY, 0.0}, bOnlyDiagonal);
     return newDirection;
   }
 }
@@ -93,7 +97,7 @@ void ASmithBattlePlayerController::SetupInputComponent()
 	{
 		inputComp->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASmithBattlePlayerController::Move);
 		inputComp->BindAction(AttackAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::Attack);
-		inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::ChangeCameraAngle);
+		//inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::ChangeCameraAngle);
 		inputComp->BindAction(ChangeForwardAction, ETriggerEvent::Triggered, this, &ASmithBattlePlayerController::ChangeForward);
 		inputComp->BindAction(OpenMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::OpenMenu);
 		inputComp->BindAction(CloseMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::CloseMenu);
@@ -101,6 +105,11 @@ void ASmithBattlePlayerController::SetupInputComponent()
 		inputComp->BindAction(SelectMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::InMenuSelect);
 		inputComp->BindAction(InteractMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::InMenuInteract);
 		inputComp->BindAction(DebugAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::Debug_SelfDamage);
+
+    // Debug
+    // Not CameraAction actually. Need change name
+    inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::Debug_SetOnlyDiagonalMoveState);
+    inputComp->BindAction(CameraAction, ETriggerEvent::Completed, this, &ASmithBattlePlayerController::Debug_RemoveOnlyDiagonalMoveState);
 	}
 
 }
@@ -120,7 +129,7 @@ void ASmithBattlePlayerController::Move(const FInputActionValue& inputValue)
   }
 
   const EDirection cameraDirection = m_player->GetCameraDirection();
-  const EDirection newDirection = CalculateDirectionRelativeCamera(cameraDirection, movementInput);
+  const EDirection newDirection = CalculateDirectionRelativeCamera(cameraDirection, movementInput, m_bIsDiagonal);
 	
   m_player->Move(newDirection);
 }
@@ -185,14 +194,21 @@ void ASmithBattlePlayerController::OpenMenu(const FInputActionValue& inputValue)
   {
     return;
   }
-  UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-  if (enhancedInputSubsystem != nullptr)
+  if (m_player->OpenMenu())
   {
-    enhancedInputSubsystem->RemoveMappingContext(MappingContext_Battle);
-    enhancedInputSubsystem->AddMappingContext(MappingContext_Menu, 0);
+    UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+    if (enhancedInputSubsystem != nullptr)
+    {
+      enhancedInputSubsystem->RemoveMappingContext(MappingContext_Battle);
+      enhancedInputSubsystem->AddMappingContext(MappingContext_Menu, 0);
+    }
+
+    if (OnOpenMenu.IsBound())
+    {
+      OnOpenMenu.Broadcast();
+    }
   }
 
-  m_player->OpenMenu();
 }
 
 void ASmithBattlePlayerController::CloseMenu(const FInputActionValue& inputValue)
@@ -202,14 +218,20 @@ void ASmithBattlePlayerController::CloseMenu(const FInputActionValue& inputValue
     return;
   }
 
-  UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-  if (enhancedInputSubsystem != nullptr)
+  if (m_player->CloseMenu())
   {
-    enhancedInputSubsystem->RemoveMappingContext(MappingContext_Menu);
-    enhancedInputSubsystem->AddMappingContext(MappingContext_Battle, 0);
-  }
+    UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+    if (enhancedInputSubsystem != nullptr)
+    {
+      enhancedInputSubsystem->RemoveMappingContext(MappingContext_Menu);
+      enhancedInputSubsystem->AddMappingContext(MappingContext_Battle, 0);
+    }
 
-  m_player->CloseMenu();
+    if (OnCloseMenu.IsBound())
+    {
+      OnCloseMenu.Broadcast();
+    }
+  }  
 }
 
 void ASmithBattlePlayerController::UseRecovery(const FInputActionValue& inputValue)
@@ -246,6 +268,11 @@ void ASmithBattlePlayerController::InMenuInteract(const FInputActionValue& input
       enhancedInputSubsystem->RemoveMappingContext(MappingContext_Menu);
       enhancedInputSubsystem->AddMappingContext(MappingContext_Battle, 0);
     }
+
+    if (OnCloseMenu.IsBound())
+    {
+      OnCloseMenu.Broadcast();
+    }
   }
 }
 
@@ -256,4 +283,13 @@ void ASmithBattlePlayerController::DisablePlayerInput()
 void ASmithBattlePlayerController::EnablePlayerInput()
 {
   EnableInput(this);
+}
+
+void ASmithBattlePlayerController::Debug_SetOnlyDiagonalMoveState(const FInputActionValue& inputValue)
+{
+  m_bIsDiagonal = true;
+}
+void ASmithBattlePlayerController::Debug_RemoveOnlyDiagonalMoveState(const FInputActionValue& inputValue)
+{
+  m_bIsDiagonal = false;
 }

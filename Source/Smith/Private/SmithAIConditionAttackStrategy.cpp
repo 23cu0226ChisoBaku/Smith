@@ -8,6 +8,8 @@
 #include "Direction.h"
 #include "MLibrary.h"
 
+#include "SmithModelHelperFunctionLibrary.h"
+
 #include "SmithDangerZoneDisplayer.h"
 USmithAIConditionAttackStrategy::USmithAIConditionAttackStrategy(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -102,7 +104,8 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     m_bIsWaitCondition = true;
     EDirection playerDirection;
     AActor* owner = GetOwner();
-    m_mediator->GetPlayerDirection(playerDirection, GetOwner(), curtConditionAttatkHandle->SkillParameter.OffsetToLeft, curtConditionAttatkHandle->SkillParameter.OffsetToTop);
+    // TODO 設計を見直し
+    m_mediator->GetPlayerDirection(playerDirection, EDirectionStrategy::Cardinal, GetOwner(), curtConditionAttatkHandle->SkillParameter.OffsetToLeft, curtConditionAttatkHandle->SkillParameter.OffsetToTop);
     curtConditionAttatkHandle->SkillParameter.ActiveDirection = playerDirection;
   
     if (playerDirection != EDirection::Invalid)

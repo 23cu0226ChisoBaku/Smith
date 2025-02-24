@@ -75,11 +75,13 @@ namespace UE::Smith
         ///
         void ConstructDecoration(UWorld*, FSmithMap*, TSubclassOf<AActor>, int32 count, TArray<AActor*>& outDecorations);
         void DestructMap();
+        TArray<AActor*> GetMapMaterials() const; 
       #pragma endregion FSmithMapConstructor Interface
       // end of FSmithMapConstructor Interface
       private:
         /// @brief マップを構成するタイルアクターのコンテナ
         TArray<TWeakObjectPtr<AActor>> m_mapMaterials;
+        TArray<TWeakObjectPtr<AActor>> m_mapDecorations;
     };
   }
 }

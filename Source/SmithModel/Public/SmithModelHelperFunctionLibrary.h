@@ -10,9 +10,16 @@
 enum class EDirection : uint8;
 struct FMapCoord;
 
-/**
- * 
- */
+enum class EDirectionStrategy : uint8
+{
+	// 八方位
+	Ordinal,
+	// 四方位
+	Cardinal,
+	// 四方位(斜め)
+	Diagonal,
+};
+
 class SMITHMODEL_API FSmithModelHelperFunctionLibrary
 {
 	private:
@@ -20,8 +27,10 @@ class SMITHMODEL_API FSmithModelHelperFunctionLibrary
 		~FSmithModelHelperFunctionLibrary() = delete;
 
 	public:
-		static EDirection GetDirectionOfMapCoord(const FMapCoord& from, const FMapCoord& to);
-		static EDirection GetDirectionOfDegree(double angleDegree);
+		static EDirection GetDirectionOfMapCoord(const FMapCoord& from, const FMapCoord& to, EDirectionStrategy = EDirectionStrategy::Ordinal);
+		static EDirection GetDirectionOfDegree(double angleDegree, EDirectionStrategy = EDirectionStrategy::Ordinal);
+	private:
+		static void adjustInputAngle(double& angleDegree);
 };
 
 #endif

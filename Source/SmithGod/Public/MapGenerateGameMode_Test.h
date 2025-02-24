@@ -21,6 +21,8 @@ class USmithEventPublishMediator;
 class USmithBattleLogWorldSubsystem;
 class UUI_CurrentLevel;
 class USmithNextLevelEvent;
+class USmithMinimap;
+class UMinimapDisplayTypeFactory;
 
 // Damage
 class USmithDungeonDamageCalculator;
@@ -76,6 +78,8 @@ private:
 	void addDefeatedEnemyCount();
 	void processGameClear();
 	void processGameOver();
+	void showMinimap();
+	void hideMinimap();
 
 private:
 	/** ダンジョンマップ設計図 */
@@ -129,6 +133,17 @@ private:
 	TObjectPtr<UDataTable> EnemyDropLootList;
 	UPROPERTY(EditAnywhere)
 	FSmithMapDecoration TEMP_Decoration;
+
+
+	UPROPERTY(EditAnywhere, Category = "Minimap")
+	TSubclassOf<USmithMinimap> MinimapWidgetSub;
+	UPROPERTY()
+	TObjectPtr<USmithMinimap> m_minimap;
+
+	UPROPERTY(EditAnywhere, Category = "Minimap")
+	TSubclassOf<UMinimapDisplayTypeFactory> MinimapTypeFactorySub;
+	UPROPERTY()
+	TObjectPtr<UMinimapDisplayTypeFactory> m_factory;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;

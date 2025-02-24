@@ -21,6 +21,7 @@
 #include "SmithCommandFormat.h"
 #include "FormatInfo_Import.h"
 #include "MapObjType.h"
+#include "MinimapDisplayType.h"
 
 // イベント
 #include "SmithNextLevelEvent.h"
@@ -113,7 +114,6 @@ ASmithPlayerActor::ASmithPlayerActor()
   UpgradeInteractiveComponent = CreateDefaultSubobject<USmithUpgradeInteractiveComponent>(TEXT("Smith UpgradeInteractiveComponent"));
   check(UpgradeInteractiveComponent != nullptr);
 
-  SetTurnPriority(ETurnPriority::PlayerSelf);
 }
 
 // Called when the game starts or when spawned
@@ -121,7 +121,7 @@ void ASmithPlayerActor::BeginPlay()
 {
   Super::BeginPlay();
   
-  // TODO
+  // 攻撃フォーマットを登録
   for (auto& pair : AttackFormatTables)
   {
     if (!pair.Value.IsValid())
@@ -132,20 +132,24 @@ void ASmithPlayerActor::BeginPlay()
     registerAttackFormat(pair.Key, pair.Value.Get());
   }
 
-  // TODO
-  if (Weapon == nullptr)
+  // 装備初期化
   {
-    Weapon = NewObject<USmithWeapon>(this);
-    check(Weapon != nullptr);
-    if (Weapon != nullptr)
+    if (Weapon == nullptr)
     {
-      Weapon->SetParam(FParams{50, 10, 10, 10});
+      Weapon = NewObject<USmithWeapon>(this);
+      check(Weapon != nullptr);
+      if (Weapon != nullptr)
+      {
+        Weapon->SetParam(FParams{50, 10, 10, 10});
+      }
     }
+  
+    Weapon->OnUpgrade.AddUObject(this, &ASmithPlayerActor::updateParam);
+    Weapon->Rename(nullptr, this);
   }
 
-  Weapon->OnUpgrade.AddUObject(this, &ASmithPlayerActor::updateParam);
-  Weapon->Rename(nullptr, this);
-
+  // HP初期化
+  // TODO View関係を別クラスで処理する
   {
     m_maxHP += Weapon->GetParam().HP;
     m_curtHP = m_maxHP;
@@ -161,6 +165,7 @@ void ASmithPlayerActor::BeginPlay()
     }
   }
 
+  // ログシステム初期化
   {
     UWorld* world = GetWorld();
     if (world != nullptr)
@@ -169,34 +174,35 @@ void ASmithPlayerActor::BeginPlay()
     }
   }
 
-  // TODO
+  // TODO 初期に持たせる薬草
   if (InventoryComponent != nullptr)
   {
     for (int32 i = 0; i < 3; ++i)
     {
       USmithHPItem* item = NewObject<USmithHPItem>();
-      // TODO Modelをいい感じに
+      // TODO 初期化する方法を変える
       // 40%
-      // TODO!!!!!!!!
       item->SetRecoveryPercentage(0.4);
       bool insertResult = InventoryComponent->Insert(TEXT("ConsumeItem"), item);
     }
-  }
 
-  if (HerbUISub != nullptr)
-  {
-    m_herbUI = CreateWidget<UHerbWidget>(GetWorld(), HerbUISub);
-    if (m_herbUI != nullptr && InventoryComponent != nullptr) 
+    if (HerbUISub != nullptr)
     {
-      m_herbUI->AddToViewport();
-      m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
+      m_herbUI = CreateWidget<UHerbWidget>(GetWorld(), HerbUISub);
+      if (m_herbUI != nullptr) 
+      {
+        m_herbUI->AddToViewport();
+        m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
+      }
     }
   }
 
   m_actorFaceDir = EDirection::South;
   SetActorRotation(FRotator{0.0, 180.0, 0.0});
 
-  OnTurnPass.AddUObject(this, &ASmithPlayerActor::turnPassRecover);
+  // ターン優先順位を設定
+  SetTurnPriority(ETurnPriority::PlayerSelf);
+  //OnTurnPass.AddUObject(this, &ASmithPlayerActor::turnPassRecover);
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -223,6 +229,8 @@ void ASmithPlayerActor::Tick(float DeltaTime)
     updateCamera(DeltaTime);
   }
 
+  // ダメージアニメーション再生中操作停止
+  // TODO もっと良い感じで設計
   if (m_bIsDamaged)
   {
     if (AnimationComponent != nullptr)
@@ -254,12 +262,7 @@ void ASmithPlayerActor::SelectNextMenuItem(float selectDirection)
     return;
   }
 
-  if (!m_bIsInMenu)
-  {
-    return;
-  }
-
-  if (UpgradeInteractiveComponent == nullptr)
+  if (UpgradeInteractiveComponent == nullptr || !m_bIsInMenu)
   {
     return;
   }
@@ -276,8 +279,6 @@ void ASmithPlayerActor::SelectNextMenuItem(float selectDirection)
     UpgradeInteractiveComponent->SelectNextItem(ESelectDirection::Down);
     AudioKit::PlaySE(TEXT("Player_Select_2"));
   }
-
-
 }
 bool ASmithPlayerActor::InteractMenu()
 {
@@ -292,7 +293,6 @@ bool ASmithPlayerActor::InteractMenu()
   }
 
   int32 idx = UpgradeInteractiveComponent->GetSelectingItemIdx();
-
   return enhanceImpl(idx);
 }
 
@@ -358,11 +358,12 @@ void ASmithPlayerActor::Attack()
     m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], paramHandle);
   }
 
-  int32 ran = FMath::RandRange(1, 2);
-
-  FString atkSE = TEXT("Player_Slash_") + FString::FromInt(ran);
-  AudioKit::PlaySE(atkSE);
-
+  // 攻撃エフェクト音再生
+  {
+    int32 ran = FMath::RandRange(1, 2);
+    FString atkSE = TEXT("Player_Slash_") + FString::FromInt(ran);
+    AudioKit::PlaySE(atkSE);
+  }
 }
 
 void ASmithPlayerActor::ChangeForward(EDirection newDirection)
@@ -407,26 +408,28 @@ void ASmithPlayerActor::ChangeCameraDirection(EDirection newDirection, bool bIsC
 
 }
 
-void ASmithPlayerActor::OpenMenu()
+bool ASmithPlayerActor::OpenMenu()
 {
   if (!IsCommandSendable())
   {
-    return;
+    return false;
   }
 
-  if (UpgradeInteractiveComponent == nullptr)
+  if (UpgradeInteractiveComponent == nullptr || m_bIsInMenu)
   {
-    return;
+    return false;
   }
 
-  if (!m_bIsInMenu)
+  m_bIsInMenu = true;
+
+  // UI情報更新
+  // TODO Viewを別クラスで処理
   {
-    m_bIsInMenu = true;
     if (Weapon != nullptr)
     {
       UpgradeInteractiveComponent->SetWeaponInfo(Weapon->GetHandle());
     }
-
+  
     if (InventoryComponent != nullptr)
     {
       TArray<UObject*> itemList;
@@ -437,47 +440,52 @@ void ASmithPlayerActor::OpenMenu()
       }
     } 
     UpgradeInteractiveComponent->ActivateUpgradeMenu();
-
+  
     if (HPComponent != nullptr)
     {
       HPComponent->SetWidgetVisibility(!m_bIsInMenu);
     }
-
+  
     if (m_herbUI != nullptr)
     {
       m_herbUI->SetVisibility(ESlateVisibility::Hidden);
     }
   }
 
+  return true;
+
 }
 
-void ASmithPlayerActor::CloseMenu()
+bool ASmithPlayerActor::CloseMenu()
 {
   if (!IsCommandSendable())
   {
-    return;
+    return false;
   }
 
-  if (UpgradeInteractiveComponent == nullptr)
+  if (UpgradeInteractiveComponent == nullptr || !m_bIsInMenu)
   {
-    return;
+    return false;
   }
 
-  if (m_bIsInMenu)
+  m_bIsInMenu = false;
+
+  // UI情報更新
+  // TODO Viewを別クラスで処理
   {
-    m_bIsInMenu = false;
     UpgradeInteractiveComponent->DeactivateUpgradeMenu();
     if (HPComponent != nullptr)
     {
       HPComponent->SetWidgetVisibility(!m_bIsInMenu);
     }
-
+  
     if (m_herbUI != nullptr)
     {
       m_herbUI->SetVisibility(ESlateVisibility::Visible);
     }
   }
 
+  return true;
 }
 
 void ASmithPlayerActor::RecoverHealth()
@@ -492,7 +500,9 @@ void ASmithPlayerActor::RecoverHealth()
     return;
   }
 
-  UObject* consume = InventoryComponent->Get(TEXT("ConsumeItem"), 0);
+  const FString consumeInventoryName = TEXT("ConsumeItem");
+
+  UObject* consume = InventoryComponent->Get(consumeInventoryName, 0);
   USmithConsumeItem* consumeItem = Cast<USmithConsumeItem>(consume);
   if (consumeItem == nullptr)
   {
@@ -500,11 +510,11 @@ void ASmithPlayerActor::RecoverHealth()
   }
 
   consumeItem->Use(this);
-  InventoryComponent->Remove(TEXT("ConsumeItem"), 0);
+  InventoryComponent->Remove(consumeInventoryName, 0);
   
   if (m_herbUI != nullptr)
   {
-    m_herbUI->SetNum(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
+    m_herbUI->SetNum(InventoryComponent->GetQuantity(consumeInventoryName));
   }
 
   if (m_commandMediator.IsValid())
@@ -544,6 +554,7 @@ bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTab
   const uint8 formatColumn = arr[0]->Column;
   const size_t dataCnt = formatRow * formatColumn;
 
+  // データの要素数チェック
   check((arr.Num() - 1) == StaticCast<int32>(dataCnt));
   if ((arr.Num() - 1) != StaticCast<int32>(dataCnt))
   {
@@ -551,12 +562,12 @@ bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTab
   }
 
   TArray<ESmithFormatType> typeSrcData;
-
-  for (int i = 1; i < arr.Num(); ++i)
+  for (int32 i = 1; i < arr.Num(); ++i)
   {
     typeSrcData.Emplace(arr[i]->Type);
   }
 
+  // TODO 生データで初期化する設計を見直し
   TSharedPtr<UE::Smith::Battle::FSmithCommandFormat> formatPtr = ::MakeShared<UE::Smith::Battle::FSmithCommandFormat>(typeSrcData.GetData(), dataCnt, formatRow, formatColumn);
   m_normalAttackFormatBuffer.Emplace(name, formatPtr);
 
@@ -570,7 +581,9 @@ bool ASmithPlayerActor::enhanceImpl(int32 idx)
     return false;
   }
 
-  UObject* material = InventoryComponent->Get(TEXT("UpgradeMaterial"), idx);
+  const FString upgradeInventoryName = TEXT("UpgradeMaterial");
+
+  UObject* material = InventoryComponent->Get(upgradeInventoryName, idx);
   if (material == nullptr)
   {
     return false;
@@ -581,13 +594,13 @@ bool ASmithPlayerActor::enhanceImpl(int32 idx)
   {
     return false;
   }
-  // TODO
+
   CloseMenu();
 
   m_enhanceSystem->Enhance(Weapon, absorbItem);
-  InventoryComponent->Remove(TEXT("UpgradeMaterial"), idx);
+  InventoryComponent->Remove(upgradeInventoryName, idx);
   m_commandMediator->SendIdleCommand(this);
-  // TODO
+
   if (m_logSystem != nullptr)
   {
     m_logSystem->SendEnhanceLog(Weapon);
@@ -650,13 +663,13 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
   {
     m_curtHP = 0;
     m_bCanReceiveInput = false;
-    // TODO
+
     if (OnDead.IsBound())
     {
       OnDead.Broadcast();
     }
 
-    if (AnimationComponent!= nullptr)
+    if (AnimationComponent != nullptr)
     {
       AnimationComponent->SwitchAnimState(TEXT("Dead"));
     }
@@ -759,7 +772,6 @@ void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
 
   FName StateName;
   convertAnimState(animationState, StateName);
-
   AnimationComponent->SwitchAnimState(StateName);
 }
 
@@ -918,4 +930,10 @@ void ASmithPlayerActor::turnPassRecover()
       }
     }
   }
+}
+
+// TODO
+UTexture2D* ASmithPlayerActor::GetMinimapDisplayTexture_Implementation()
+{
+  return MinimapTexture;
 }

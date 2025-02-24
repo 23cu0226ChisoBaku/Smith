@@ -39,6 +39,9 @@
 
 #include "SmithBattlePlayerController.h"
 
+#include "SmithMinimap.h"
+#include "MinimapDisplayTypeFactory.h"
+
 // TODO
 #include "SmithNextLevelEvent.h"
 #include "SmithPickUpItemEvent.h"
@@ -276,6 +279,7 @@ void AMapGenerateGameMode_Test::clearCurrentLevel()
 {
   m_mapMgr->Reset();
   m_battleSystem->ResetBattle();
+  m_minimap->ResetMap();
 
   if (m_fadeWidget != nullptr)
   {
@@ -365,6 +369,22 @@ void AMapGenerateGameMode_Test::initializeGame()
       CurtLevelUI->SetLevel(StaticCast<int32>(m_curtLevel));
     }
 
+    // Minimap
+    {
+      m_minimap = CreateWidget<USmithMinimap>(world, MinimapWidgetSub);
+      check(m_minimap != nullptr)
+      if (m_minimap != nullptr)
+      {
+        m_minimap->AddToViewport();
+      }
+  
+      m_factory = NewObject<UMinimapDisplayTypeFactory>(world, MinimapTypeFactorySub);
+      check(m_factory != nullptr);
+      
+      m_mapMgr->AssignMinimapDisplayer(m_minimap);
+      m_mapMgr->AssignMinimapDisplayTypeFactory(m_factory);
+    }
+
     if (FadeSub != nullptr)
     {
       m_fadeWidget = CreateWidget<UScreenFade>(world, FadeSub);
@@ -381,6 +401,9 @@ void AMapGenerateGameMode_Test::initializeGame()
           // TODO
           m_fadeWidget->OnFadeOutStartEvent.AddUObject(m_battleSystem, &USmithBattleSubsystem::ResetBattle);
           m_fadeWidget->OnFadeOutEndEvent.AddUObject(this, &AMapGenerateGameMode_Test::clearCurrentLevel);
+
+          smithPlayerCtrl->OnOpenMenu.AddUObject(this, &AMapGenerateGameMode_Test::hideMinimap);
+          smithPlayerCtrl->OnCloseMenu.AddUObject(this, &AMapGenerateGameMode_Test::showMinimap);
         }
 
         m_fadeWidget->AddToViewport(1);
@@ -419,6 +442,8 @@ void AMapGenerateGameMode_Test::initializeGame()
         USmithEnemyParamInitializer::AssignInitializer(paramInitializer);
       }
     }
+
+
   }
 }
 
@@ -532,5 +557,21 @@ void AMapGenerateGameMode_Test::processGameOver()
     {
       battleInstanceSubsystem->DisplayGameOverWidget(this);
     }
+  }
+}
+
+void AMapGenerateGameMode_Test::hideMinimap()
+{
+  if (m_minimap != nullptr)
+  {
+    m_minimap->SetVisibility(false);
+  }
+}
+
+void AMapGenerateGameMode_Test::showMinimap()
+{
+  if (m_minimap != nullptr)
+  {
+    m_minimap->SetVisibility(true);
   }
 }

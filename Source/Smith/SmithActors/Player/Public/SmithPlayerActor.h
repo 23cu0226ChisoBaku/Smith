@@ -8,7 +8,7 @@ Author : MAI ZHICONG
 Description : プレイヤークラス（Pawn）
 
 Update History: 2024/12/12 開始日
-								..../12/20 アルファ完成
+                ..../12/20 アルファ完成
 
 Version : alpha_1.0.0
 
@@ -31,6 +31,7 @@ Encoding : UTF-8
 #include "ISmithAnimator.h"
 #include "ISmithBattleLogger.h"
 #include "IItemUseable.h"
+#include "IMinimapDisplayable.h"
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -72,10 +73,10 @@ struct FParams;
 
 namespace UE::Smith
 {
-	namespace Battle
-	{
-		class FSmithCommandFormat;
-	}
+  namespace Battle
+  {
+    class FSmithCommandFormat;
+  }
 }
 #pragma endregion Forward Declaration
 // end of Forward Declaration
@@ -85,12 +86,13 @@ namespace UE::Smith
 ///
 UCLASS()
 class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
-																			 , public IAttackable, public ICanCommandMediate
-																			 , public ICanSetOnMap, public IEventTriggerable
-																			 , public ICanUseEnhanceSystem, public ISmithAnimator
-																			 , public ISmithBattleLogger, public IItemUseable
+                                      , public IAttackable, public ICanCommandMediate
+                                      , public ICanSetOnMap, public IEventTriggerable
+                                      , public ICanUseEnhanceSystem, public ISmithAnimator
+                                      , public ISmithBattleLogger, public IItemUseable
+                                      , public IMinimapDisplayable
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 //---------------------------------------
 /*
@@ -98,21 +100,21 @@ class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
 */
 //---------------------------------------
 public:
-	ASmithPlayerActor();
+  ASmithPlayerActor();
 
 //---------------------------------------
 /*
-           アクター ライフサイクル
+          アクター ライフサイクル
 */
 //---------------------------------------
 // Lifecycle
 #pragma region Lifecycle
 protected:
-	void BeginPlay() override final;
-	void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
+  void BeginPlay() override final;
+  void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
 public:	
-	void Tick(float DeltaTime) override final;
+  void Tick(float DeltaTime) override final;
 #pragma endregion Lifecycle
 // end of Lifecycle
 
@@ -124,80 +126,84 @@ public:
 // Interfaces Override
 #pragma region Interfaces Override
 
-	// IAttackable (Smith Module)
-	#pragma region IAttackable
-	public:
-		void OnAttack(AttackHandle&&) override final;
-	#pragma endregion IAttackable
-	// end of IAttackable
+  // IAttackable (Smith Module)
+  #pragma region IAttackable
+  public:
+    void OnAttack(AttackHandle&&) override final;
+  #pragma endregion IAttackable
+  // end of IAttackable
 
-	// ICanCommandMediate (Smith Module)
-	#pragma region ICanCommandMediate
-	public:
-		void SetCommandMediator(ICommandMediator*) override final;
-	#pragma endregion ICanCommandMediate
-	// end of ICanCommandMediate
+  // ICanCommandMediate (Smith Module)
+  #pragma region ICanCommandMediate
+  public:
+    void SetCommandMediator(ICommandMediator*) override final;
+  #pragma endregion ICanCommandMediate
+  // end of ICanCommandMediate
 
-	public:
-		uint8 GetOnMapSizeX() const override final;
-		uint8 GetOnMapSizeY() const override final;
-		EMapObjType GetType() const override final;
+  public:
+    uint8 GetOnMapSizeX() const override final;
+    uint8 GetOnMapSizeY() const override final;
+    EMapObjType GetType() const override final;
 
-	public:
-		void OnTriggerEvent(USmithNextLevelEvent*) override final;
-		void OnTriggerEvent(USmithPickUpItemEvent*) override final;
+  public:
+    void OnTriggerEvent(USmithNextLevelEvent*) override final;
+    void OnTriggerEvent(USmithPickUpItemEvent*) override final;
 
-	public:
-		void SwitchAnimation(uint8 animationState) override final;
-		void SwitchAnimationDelay(uint8 animationState, float delay) override final;
-		void UpdateAnimation(float deltaTime) override final;
-		bool IsAnimationFinish() const override final;
+  public:
+    void SwitchAnimation(uint8 animationState) override final;
+    void SwitchAnimationDelay(uint8 animationState, float delay) override final;
+    void UpdateAnimation(float deltaTime) override final;
+    bool IsAnimationFinish() const override final;
 
-	public:
-		FString GetName_Log() const override;
-		EBattleLogType GetType_Log() const override;
+  public:
+    FString GetName_Log() const override;
+    EBattleLogType GetType_Log() const override;
 
-	public:
-		void UseItem(USmithHPItem*);
+  public:
+    void UseItem(USmithHPItem*);
 
-		void SetEnhanceSystem(IEnhanceSystem*);
+    void SetEnhanceSystem(IEnhanceSystem*);
 
-		FBattleDefenseParamHandle GetDefenseParam() const override;
-	private:
-			void convertAnimState(uint8 animationState, FName& outName);
+    FBattleDefenseParamHandle GetDefenseParam() const override;
+
+  public:
+    UTexture2D* GetMinimapDisplayTexture_Implementation() override final;
+
+  private:
+      void convertAnimState(uint8 animationState, FName& outName);
 
 #pragma endregion Interfaces Override
 // end of Interfaces Override
 
 public:
-	EDirection GetCameraDirection() const;
-	bool CanReceiveInputEvent() const;
+  EDirection GetCameraDirection() const;
+  bool CanReceiveInputEvent() const;
 
 public:
-	void Move(EDirection);
-	void Attack();
-	void ChangeForward(EDirection);
-	void ChangeCameraDirection(EDirection, bool bIsClockwise);
-	void OpenMenu();
-	void CloseMenu();
-	void SelectNextMenuItem(float direction);
-	bool InteractMenu();
-	void RecoverHealth();
-	bool registerAttackFormat(const FString&, const UDataTable*);
-	void SelfDamage_Debug(int32);
+  void Move(EDirection);
+  void Attack();
+  void ChangeForward(EDirection);
+  void ChangeCameraDirection(EDirection, bool bIsClockwise);
+  bool OpenMenu();
+  bool CloseMenu();
+  void SelectNextMenuItem(float direction);
+  bool InteractMenu();
+  void RecoverHealth();
+  bool registerAttackFormat(const FString&, const UDataTable*);
+  void SelfDamage_Debug(int32);
 
 // Private Functions
 #pragma region Private Functions
 private:
-	bool enhanceImpl(int32 idx);
-	void updateCamera(float deltaTime);
-	void updateParam(FParams upgradeParam);
-	void changeForwardImpl(EDirection);
-	void turnPassRecover();
+  bool enhanceImpl(int32 idx);
+  void updateCamera(float deltaTime);
+  void updateParam(FParams upgradeParam);
+  void changeForwardImpl(EDirection);
+  void turnPassRecover();
 #pragma endregion Private Functions
 
 public:
-	void OnGameClear();
+  void OnGameClear();
 // end of Private Functions
 
 //---------------------------------------
@@ -208,61 +214,62 @@ public:
 // UProperties
 #pragma region UProperties
 private:
-	// Components
-	/** カメラアーム */
-	UPROPERTY(VisibleAnywhere, Category = Player)
-	TObjectPtr<USpringArmComponent> CameraBoom;
-	/** カメラ */
-	UPROPERTY(VisibleAnywhere, Category = Player)
-	TObjectPtr<UCameraComponent> Camera;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USmithMoveComponent> MoveComponent;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USmithAttackComponent> AttackComponent;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USmithInventoryComponent> InventoryComponent;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USmithAnimationComponent> AnimationComponent;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UHPUIComponent> HPComponent;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USmithUpgradeInteractiveComponent> UpgradeInteractiveComponent;
-	
-	/** 攻撃フォーマット */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
-	TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
+  // Components
+  /** カメラアーム */
+  UPROPERTY(VisibleAnywhere, Category = Player)
+  TObjectPtr<USpringArmComponent> CameraBoom;
+  /** カメラ */
+  UPROPERTY(VisibleAnywhere, Category = Player)
+  TObjectPtr<UCameraComponent> Camera;
+  UPROPERTY(VisibleAnywhere)
+  TObjectPtr<USmithMoveComponent> MoveComponent;
+  UPROPERTY(VisibleAnywhere)
+  TObjectPtr<USmithAttackComponent> AttackComponent;
+  UPROPERTY(VisibleAnywhere)
+  TObjectPtr<USmithInventoryComponent> InventoryComponent;
+  UPROPERTY(VisibleAnywhere)
+  TObjectPtr<USmithAnimationComponent> AnimationComponent;
+  UPROPERTY(VisibleAnywhere)
+  TObjectPtr<UHPUIComponent> HPComponent;
+  UPROPERTY(VisibleAnywhere)
+  TObjectPtr<USmithUpgradeInteractiveComponent> UpgradeInteractiveComponent;
+  
+  /** 攻撃フォーマット */
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
+  TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
+  TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
 
-	// TODO
-	UPROPERTY(EditAnywhere, Instanced, Category = Weapon)
-	TObjectPtr<USmithWeapon> Weapon;
-	UPROPERTY(EditAnywhere, Category = PlayerInfo)
-	FString PlayerName;
+  // TODO　装備を増やすこと
+  UPROPERTY(EditAnywhere, Instanced, Category = Weapon)
+  TObjectPtr<USmithWeapon> Weapon;
+  UPROPERTY(EditAnywhere, Category = PlayerInfo)
+  FString PlayerName;
 
-	// TODO
-	UPROPERTY()
-	TObjectPtr<UHerbWidget> m_herbUI;
-	UPROPERTY(EditAnywhere, Category = RecoveryItem)
-	TSubclassOf<UHerbWidget> HerbUISub;
+  // TODO View関係のものを別のクラスに移す
+  UPROPERTY()
+  TObjectPtr<UHerbWidget> m_herbUI;
+  UPROPERTY(EditAnywhere, Category = RecoveryItem)
+  TSubclassOf<UHerbWidget> HerbUISub;
 
-	TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
+  TWeakInterfacePtr<ICommandMediator> m_commandMediator;        // コマンドを送る時に使う仲介
+  TWeakInterfacePtr<IEnhanceSystem> m_enhanceSystem;          // 強化
 
-	// コマンドを送る時に使う仲介
-	TWeakInterfacePtr<ICommandMediator> m_commandMediator;
-	// 強化
-	TWeakInterfacePtr<IEnhanceSystem> m_enhanceSystem;
+  // TODO インターフェースにしてより柔軟性のいい設計
+  UPROPERTY()
+  TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
 
-	// TODO インターフェースにしてより柔軟性のいい設計
-	UPROPERTY()
-	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
-
+  // TODO ミニマップの表示テクスチャをまとめて管理するように設計し直す
+  UPROPERTY(EditAnywhere)
+  TObjectPtr<UTexture2D> MinimapTexture;
 
 #pragma endregion UProperties
 // end of UProperties
 
 public:
-	TMulticastDelegate<void()> OnDead;
-	TMulticastDelegate<void()> OnStartCameraRotation;
-	TMulticastDelegate<void()> OnFinishCameraRotation;
+  TMulticastDelegate<void()> OnDead;
+  TMulticastDelegate<void()> OnStartCameraRotation;
+  TMulticastDelegate<void()> OnFinishCameraRotation;
+
 //---------------------------------------
 /*
             プライベートプロパティ
@@ -271,19 +278,27 @@ public:
 // Private Properties
 #pragma region Private Properties
 private:
-	int32 m_curtHP;
-	int32 m_maxHP;
-	float m_rotateSpeed;
-	int32 m_rotatingDirection;
-	int32 m_turnCnt;
-	EDirection m_camDir;
-	EDirection m_actorFaceDir;
-	uint8 m_bCanMove : 1;
-	uint8 m_bCanAttack : 1;
-	uint8 m_bRotatingCamera : 1;
-	uint8 m_bIsInMenu : 1;
-	uint8 m_bCanReceiveInput : 1;
-	uint8 m_bIsDamaged : 1;
+  // HP
+  int32 m_curtHP;
+  int32 m_maxHP;
+
+  // カメラ回転
+  // TODO 廃棄する予定
+  float m_rotateSpeed;
+  int32 m_rotatingDirection;
+
+  int32 m_turnCnt;
+
+  EDirection m_camDir;            // カメラ向き
+  EDirection m_actorFaceDir;      // プレイヤー向き
+
+  // bool変数
+  uint8 m_bCanMove : 1;
+  uint8 m_bCanAttack : 1;
+  uint8 m_bRotatingCamera : 1;
+  uint8 m_bIsInMenu : 1;
+  uint8 m_bCanReceiveInput : 1;
+  uint8 m_bIsDamaged : 1;
 
 #pragma endregion Private Properties
 // end of Private Properties

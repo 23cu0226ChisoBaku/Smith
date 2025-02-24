@@ -30,6 +30,8 @@ Encoding : UTF-8
 //---------------------------------------
 class ICanSetOnMap;
 class ISmithMapEvent;
+class UObject;
+struct FMapCoord;
 
 namespace UE::Smith
 {
@@ -100,6 +102,7 @@ namespace UE::Smith
         /// @param  y	                      Y座標
         ///
         void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y);
+        void AddUpdateMinimapDelegate(const TDelegate<void(UObject*, const FMapCoord&, uint8, uint8)>&);
       #pragma endregion FSmithMapDeployDirector Interface
       // end of FSmithMapDeployDirector Interface
       private:

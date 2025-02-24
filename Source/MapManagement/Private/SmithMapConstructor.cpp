@@ -106,7 +106,7 @@ namespace UE::Smith
       {
         AActor* decorationActor = world->SpawnActor(decorationSub);
         outDecorations.Emplace(decorationActor);
-        m_mapMaterials.Emplace(decorationActor);
+        m_mapDecorations.Emplace(decorationActor);
       }
 
 
@@ -122,6 +122,28 @@ namespace UE::Smith
       }
 
       m_mapMaterials.Reset();
+
+      for (const auto& decoration : m_mapDecorations)
+      {
+        if (decoration.IsValid())
+        {
+          decoration->Destroy();
+        }
+      }
+
+      m_mapDecorations.Reset();
+    }
+  
+    TArray<AActor*> FSmithMapConstructor::GetMapMaterials() const
+    {
+      TArray<AActor*> materials;
+      materials.Reserve(m_mapMaterials.Num());
+      for (int32 i = 0; i < m_mapMaterials.Num(); ++i)
+      {
+        materials.Add(m_mapMaterials[i].Get());
+      }
+
+      return materials;
     }
   }
 }

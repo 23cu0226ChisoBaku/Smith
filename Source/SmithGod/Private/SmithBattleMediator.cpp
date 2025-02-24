@@ -33,6 +33,7 @@
 #include "SmithSkillParameter.h"
 #include "FormatType.h"
 #include "AttackableInfoHandle.h"
+#include "SmithModelHelperFunctionLibrary.h"
 
 USmithBattleMediator::USmithBattleMediator()
   : m_battleSys(nullptr)
@@ -347,34 +348,38 @@ bool USmithBattleMediator::SendHealCommand(AActor* requester,IHealable* heal)
 }
 
 // TODO 悪い参照渡し 
-int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format) const
+int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format)
 { 
   using namespace UE::Smith::Battle;
   outLocations.Reset();
-
-  if (!::IsValid(requester))
-  {
-    return outLocations.Num();
-  }
 
   TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
   if (!mapMgr_shared.IsValid())
   {
     return outLocations.Num();
   }
-
-  if (format.GetRow() == 0 || format.GetColumn() == 0)
+  //入力値チェック
+  #pragma region Input Check
   {
-    MDebug::LogError("Format INVALID");
-    return outLocations.Num();
+    if (!::IsValid(requester))
+    {
+      return outLocations.Num();
+    }
+
+    if (format.GetRow() == 0 || format.GetColumn() == 0)
+    {
+      MDebug::LogError("Format INVALID");
+      return outLocations.Num();
+    }
+
+    if (!requester->Implements<UCanSetOnMap>())
+    {
+      return outLocations.Num();
+    }
   }
+  #pragma endregion Input Check
 
   ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(requester);
-  if (!IS_UINTERFACE_VALID(mapObj))
-  {
-    return outLocations.Num();
-  }
-
   uint8 mapObjOriginCoordX = 0u;
   uint8 mapObjOriginCoordY = 0u;
   if (!mapMgr_shared->GetMapObjectCoord(mapObj, mapObjOriginCoordX, mapObjOriginCoordY))
@@ -385,11 +390,11 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
   FSmithCommandFormat rotatedFormat = FFormatTransformer::GetRotatedFormat(format, skillParameter.ActiveDirection);
   auto formattedMapCoords = FFormatTransformer::FormatToMapCoord(rotatedFormat, FMapCoord(mapObjOriginCoordX + skillParameter.OffsetToLeft, mapObjOriginCoordY + skillParameter.OffsetToTop));
 
+  // フォーマットから効果範囲を座標に変換する
   for (int32 row = 0; row < rotatedFormat.GetRow(); ++row)
   {
     for (int32 column = 0; column < rotatedFormat.GetColumn(); ++column)
     {
-      // TODO
       switch(rotatedFormat.GetFormatData(column, row))
       {
         case ESmithFormatType::NO_EFFECT:
@@ -419,7 +424,7 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
   return outLocations.Num();
 }
 
-void USmithBattleMediator::GetPlayerDirection(EDirection& outDirection, AActor* requester, uint8 offsetToLeft, uint8 offsetToTop)
+void USmithBattleMediator::GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, AActor* requester, uint8 offsetToLeft, uint8 offsetToTop)
 {
   TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
   if (!mapMgr_shared.IsValid())
@@ -427,6 +432,6 @@ void USmithBattleMediator::GetPlayerDirection(EDirection& outDirection, AActor* 
     return;
   }
 
-  mapMgr_shared->GetPlayerDirection(outDirection, Cast<ICanSetOnMap>(requester), offsetToLeft, offsetToTop);
+  mapMgr_shared->GetPlayerDirection(outDirection, directionStrategy, Cast<ICanSetOnMap>(requester), offsetToLeft, offsetToTop);
 }
 

@@ -50,3 +50,8 @@ void ATurnBaseActor::InitializeParameter(int32 currentLevel)
 {
 	
 }
+
+UTexture2D* ATurnBaseActor::GetMinimapDisplayTexture_Implementation()
+{
+	return MinimapTexture;
+}

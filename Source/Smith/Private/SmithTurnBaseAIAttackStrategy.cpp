@@ -81,7 +81,7 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
         if (OnChangeDirectionDelegate.IsBound())
         {
           
-          m_mediator->GetPlayerDirection(atkDir, GetOwner());
+          m_mediator->GetPlayerDirection(atkDir, EDirectionStrategy::Ordinal, GetOwner());
           OnChangeDirectionDelegate.Execute(atkDir);
         }
         return true;
