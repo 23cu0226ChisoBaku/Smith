@@ -202,7 +202,7 @@ void ASmithPlayerActor::BeginPlay()
 
   // ターン優先順位を設定
   SetTurnPriority(ETurnPriority::PlayerSelf);
-  //OnTurnPass.AddUObject(this, &ASmithPlayerActor::turnPassRecover);
+  OnTurnPass.AddUObject(this, &ASmithPlayerActor::turnPassRecover);
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -918,7 +918,7 @@ FBattleDefenseParamHandle ASmithPlayerActor::GetDefenseParam() const
 void ASmithPlayerActor::turnPassRecover()
 {
   ++m_turnCnt;
-  if (m_turnCnt % 2 == 0)
+  if (m_turnCnt % 3 == 0)
   {
     if (m_curtHP < m_maxHP)
     {
