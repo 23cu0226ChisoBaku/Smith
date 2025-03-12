@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
 #include "UObject/WeakInterfacePtr.h"
 #include "AttackHandle.h"
 #include "ICanMakeAttack.h"
+
 #include "SmithAttackComponent.generated.h"
 
 class AMyPlayerCharacter;
@@ -36,24 +37,15 @@ protected:
 
 public:
 	virtual void Attack() override;
-	
 	virtual void SetAttackTarget(IAttackable*) override;
 	virtual void SetAttackHandle(AttackHandle&&) override;
 
 private:
+
 	TWeakInterfacePtr<IAttackable> m_attackTarget;
 	AttackHandle m_attackHandle;
 
 	UPROPERTY(EditAnywhere)
 	FString AttackSEName;
 
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
-	// TSubclassOf<USmithAIAttackStrategy> AIStrategySubclass;
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
-	// TMap<FString,TSoftObjectPtr<UDataTable>> AttackFormatTables;
-
-	// UPROPERTY()
-	// TObjectPtr<USmithAIAttackStrategy> m_aiStrategy;
-
-	//TSharedPtr<SmithAIAttackStrategy> m_aiAttackNode;
 };
