@@ -359,6 +359,7 @@ namespace UE::Smith
           switch (decoration.DeployRule)
           {
             case EMapDeployRule::Corner:
+            case EMapDeployRule::Corner_Per_Room:
             {
               generateCount = FSmithMapHelperLibrary::GetRoomCount(m_map.Get());
             }
@@ -372,7 +373,7 @@ namespace UE::Smith
           }
           m_mapConstructor->ConstructDecoration(world, m_map.Get(), decoration.MapDecoration, generateCount, decorationActors);
           TArray<FMapCoord> deployMapCoords;
-          FSmithMapHelperLibrary::GetMapCoordByRule_PerRoom(m_map.Get(), decoration.DeployRule, deployMapCoords);
+          FSmithMapHelperLibrary::GetMapCoordsByRule(m_map.Get(), decoration.DeployRule, deployMapCoords);
           check(deployMapCoords.Num() == generateCount);
           check(decorationActors.Num() == generateCount);
 
