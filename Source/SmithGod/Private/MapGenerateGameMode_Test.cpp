@@ -2,6 +2,7 @@
 
 
 #include "MapGenerateGameMode_Test.h"
+
 #include "SmithRect.h"
 #include "SmithMap.h"
 #include "SmithMapBuilder.h"
@@ -18,6 +19,7 @@
 #include "SmithBattleMediator.h"
 #include "SmithChasePlayerTracker.h"
 #include "SmithBattleSubsystem.h"
+#include "SmithDamageSubsystem.h"
 #include "SmithEnhanceSubsystem.h"
 #include "SmithEventPublisher.h"
 #include "SmithEventSystem.h"
@@ -320,8 +322,11 @@ void AMapGenerateGameMode_Test::initializeGame()
     check(m_damageCalculator != nullptr);
     // ダメージ計算用定数初期化
     m_damageCalculator->SetConstantNumber(TEST_DAMAGE_CALCULATOR_CONSTANT);
+
+    USmithDamageSubsystem* damageSys = world->GetSubsystem<USmithDamageSubsystem>();
     // コマンド仲介初期化
-    m_battleMediator->SetupMediator(m_battleSystem, m_damageCalculator, m_mapMgr);
+    m_battleMediator->SetupMediator(m_battleSystem, damageSys, m_damageCalculator, m_mapMgr);
+
     // イベント登録システムを注入
     m_mapMgr->AssignEventRegister(m_eventSystem);
     m_battleSystem->AssignEventExecutor(m_eventSystem);

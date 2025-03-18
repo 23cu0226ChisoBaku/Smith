@@ -6,10 +6,10 @@
 #include "SmithAIAttackStrategy.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "SmithSkillParameter.h"
+
 #include "SmithAIConditionAttackStrategy.generated.h"
 
 class ICommandMediator;
-class ICanMakeAttack;
 class ASmithDangerZoneDisplayer;
 
 /**
@@ -30,7 +30,7 @@ public:
 	USmithAIConditionAttackStrategy(const FObjectInitializer&);
 	virtual void BeginDestroy() override;
 	// 初期化
-	void Initialize(ICanMakeAttack*, ICommandMediator*, int32 attackPower);
+	void Initialize(ICommandMediator*, int32 attackPower);
 	void SetAttackParam(int32 attackPower, int32 critical, int32 level);
 	// 条件の登録
 	void ConditionResgister(const FString &name, const UDataTable *formatTable, const TDelegate<bool(void)>&, FSmithSkillParameter);
@@ -43,7 +43,6 @@ private:
 	TObjectPtr<ASmithDangerZoneDisplayer> m_dangerZoneDisplayer; 
 	TQueue<FConditionHandle> m_conditions;
 	TWeakInterfacePtr<ICommandMediator> m_mediator;
-	TWeakInterfacePtr<ICanMakeAttack> m_attacker;
 	int32 m_atk;
 	int32 m_crt;
 	int32 m_level;

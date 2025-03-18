@@ -2,7 +2,6 @@
 
 #include "SmithAIConditionAttackStrategy.h"
 #include "ICommandMediator.h"
-#include "ICanMakeAttack.h"
 #include "ISmithBattleLogger.h"
 #include "AttackHandle.h"
 #include "Direction.h"
@@ -11,6 +10,7 @@
 #include "SmithModelHelperFunctionLibrary.h"
 
 #include "SmithDangerZoneDisplayer.h"
+
 USmithAIConditionAttackStrategy::USmithAIConditionAttackStrategy(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
   , m_atk(0)
@@ -31,9 +31,8 @@ void USmithAIConditionAttackStrategy::BeginDestroy()
   Super::BeginDestroy();
 }
 
-void USmithAIConditionAttackStrategy::Initialize(ICanMakeAttack *attacker, ICommandMediator *mediator, int32 attackPower)
+void USmithAIConditionAttackStrategy::Initialize(ICommandMediator *mediator, int32 attackPower)
 {
-  m_attacker = attacker;
   m_mediator = mediator;
   m_atk = attackPower;
 
@@ -81,7 +80,7 @@ void USmithAIConditionAttackStrategy::ConditionResgister(const FString &name, co
 
 bool USmithAIConditionAttackStrategy::executeImpl()
 {
-  if (!m_mediator.IsValid() || !m_attacker.IsValid())
+  if (!m_mediator.IsValid())
   {
     MDebug::LogError("not initialize -- attack strategy");
     return false;
@@ -172,7 +171,7 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     handle.Level = m_level;
     handle.MotionValue = curtHandleInstance.SkillParameter.MotionValue;
 
-    bool success = m_mediator->SendSkillCommand(GetOwner(), m_attacker.Get(), curtHandleInstance.SkillParameter, *format, handle);
+    bool success = m_mediator->SendSkillCommand(GetOwner(), curtHandleInstance.SkillParameter, *format, handle);
     m_conditions.Enqueue(curtHandleInstance);
 
     // TODO

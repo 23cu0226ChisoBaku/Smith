@@ -23,7 +23,6 @@ struct FSmithAIStrategyContainer;
 class USmithTurnBaseAIAttackStrategy;
 class USmithTurnBaseAIMoveStrategy;
 class USmithTurnBaseAIIdleStrategy;
-class USmithAttackComponent;
 class USmithMoveComponent;
 class USmithMoveDirector;
 class USmithPickable;
@@ -96,8 +95,6 @@ private:
 	TObjectPtr<USmithTurnBaseAIMoveStrategy> m_moveStrategy;
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USmithAttackComponent> AtkComponent;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USmithMoveComponent> MoveComponent;
 	UPROPERTY(EditAnywhere)

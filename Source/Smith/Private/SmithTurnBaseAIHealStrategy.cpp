@@ -55,5 +55,7 @@ bool USmithTurnBaseAIHealStrategy::executeImpl()
     return false;
   }
   
-  return m_mediator->SendHealCommand(GetOwner(),m_healable);
+  //return m_mediator->SendHealCommand(GetOwner(),m_healable);
+
+  return false;
 }

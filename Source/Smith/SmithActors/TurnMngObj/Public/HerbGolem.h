@@ -99,8 +99,6 @@ private:
 	TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIHealStrategy> m_healStrategy;
-	UPROPERTY()
-	TObjectPtr<USmithAttackComponent> m_atkComponent;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USmithMoveComponent> MoveComponent;
 	UPROPERTY(EditAnywhere)

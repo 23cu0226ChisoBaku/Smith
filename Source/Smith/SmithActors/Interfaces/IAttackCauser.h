@@ -2,16 +2,13 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "ICanMakeAttack.generated.h"
 
-class IAttackable;
-struct AttackHandle;
+#include "IAttackCauser.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UCanMakeAttack : public UInterface
+class UAttackCauser : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -19,14 +16,12 @@ class UCanMakeAttack : public UInterface
 /**
  * 
  */
-class SMITH_API ICanMakeAttack
+class SMITH_API IAttackCauser
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Attack() = 0;
 
-	virtual void SetAttackTarget(IAttackable*) = 0;
-	virtual void SetAttackHandle(AttackHandle&&) = 0;
+	virtual void OnAttackExecuted();
 };

@@ -40,15 +40,14 @@ namespace UE::Smith
 			*/
 			//---------------------------------------
 			public:
-				FSmithCommandFormat();
 				FSmithCommandFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
-				~FSmithCommandFormat();
 
-				FSmithCommandFormat(const FSmithCommandFormat&);
-				FSmithCommandFormat& operator=(const FSmithCommandFormat&);
-
-				FSmithCommandFormat(FSmithCommandFormat&&) noexcept;
-				FSmithCommandFormat& operator=(FSmithCommandFormat&&) noexcept;
+				FSmithCommandFormat() = default;
+				~FSmithCommandFormat() = default;
+				FSmithCommandFormat(const FSmithCommandFormat&) = default;
+				FSmithCommandFormat& operator=(const FSmithCommandFormat&) = default;
+				FSmithCommandFormat(FSmithCommandFormat&&) noexcept = default;
+				FSmithCommandFormat& operator=(FSmithCommandFormat&&) noexcept = default;
 
 			public:
 				void SetupFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
@@ -58,6 +57,7 @@ namespace UE::Smith
 				uint64 GetColumn() const;
 				// TODO
 				ESmithFormatType GetFormatData(uint64 x, uint64 y) const;
+				bool IsValid() const;
 
 			private:
 				void setCNCoord();

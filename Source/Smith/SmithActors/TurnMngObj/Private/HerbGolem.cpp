@@ -9,7 +9,6 @@
 #include "SmithTurnBaseAIMoveStrategy.h"
 #include "SmithTurnBaseAIIdleStrategy.h"
 #include "SmithTurnBaseAIHealStrategy.h"
-#include "SmithAttackComponent.h"
 #include "SmithMoveComponent.h"
 
 #include "SmithAnimationComponent.h"
@@ -24,20 +23,15 @@
 #include "SmithEnemyParamInitializer.h"
 
 AHerbGolem::AHerbGolem()
-	: m_attackStrategy(nullptr)
-	, m_moveStrategy(nullptr)
+	: m_moveStrategy(nullptr)
 	, m_idleStrategy(nullptr)
   , m_healStrategy(nullptr)
-	, m_atkComponent(nullptr)
 	, MoveComponent(nullptr)
 	, AnimComponent(nullptr)
 	, m_healCnt(1)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
-
-	m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
-	check(m_atkComponent != nullptr);
 
 	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
 	check(MoveComponent != nullptr);
@@ -177,7 +171,7 @@ void AHerbGolem::TurnOnAI()
 	if (m_attackStrategy != nullptr)
 	{
 		m_attackStrategy->SetOwner(this);
-		m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get(), EnemyParam.ATK);
+		m_attackStrategy->Initialize(m_commandMediator.Get(), EnemyParam.ATK);
 	}
 
 	for (auto& pair : AttackFormatTables)

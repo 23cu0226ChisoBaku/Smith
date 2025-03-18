@@ -3,7 +3,6 @@
 
 #include "SmithTurnBaseAIAttackStrategy.h"
 #include "ICommandMediator.h"
-#include "ICanMakeAttack.h"
 #include "Direction.h"
 #include "AttackHandle.h"
 #include "ISmithBattleLogger.h"
@@ -14,16 +13,14 @@ USmithTurnBaseAIAttackStrategy::USmithTurnBaseAIAttackStrategy(const FObjectInit
   : Super(ObjectInitializer)
   , OnChangeDirectionDelegate{}
   , m_mediator(nullptr)
-  , m_attacker(nullptr)
   , m_atk(0)
   , m_crt(0)
   , m_level(0)
 { }
 
-void USmithTurnBaseAIAttackStrategy::Initialize(ICanMakeAttack* attacker, ICommandMediator* mediator, int32 attackPower)
+void USmithTurnBaseAIAttackStrategy::Initialize(ICommandMediator* mediator, int32 attackPower)
 {
   m_mediator = mediator;
-  m_attacker = attacker;
   m_atk = attackPower;
 }
 
@@ -37,7 +34,6 @@ void USmithTurnBaseAIAttackStrategy::SetAttackParam(int32 attackPower, int32 cri
 void USmithTurnBaseAIAttackStrategy::BeginDestroy()
 {
   m_mediator = nullptr;
-  m_attacker = nullptr;
   OnChangeDirectionDelegate.Unbind();
   
   Super::BeginDestroy();
@@ -51,7 +47,7 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
     return false;
   }
 
-  if (!m_mediator.IsValid() || !m_attacker.IsValid())
+  if (!m_mediator.IsValid())
   {
     MDebug::LogError("not initialize -- attack strategy");
     return false;
@@ -75,7 +71,7 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
     for (uint8 i = 0u; i < 4u; ++i)
     {
       EDirection atkDir = StaticCast<EDirection>(i * 2u);
-      bool success = m_mediator->SendAttackCommand(GetOwner(), m_attacker.Get(), atkDir, *format.Value, handle, false);
+      bool success = m_mediator->SendAttackCommand(GetOwner(), atkDir, *format.Value, handle, false);
       if (success)
       {
         if (OnChangeDirectionDelegate.IsBound())

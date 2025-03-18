@@ -97,7 +97,6 @@ void ASmithBattlePlayerController::SetupInputComponent()
 	{
 		inputComp->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASmithBattlePlayerController::Move);
 		inputComp->BindAction(AttackAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::Attack);
-		//inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::ChangeCameraAngle);
 		inputComp->BindAction(ChangeForwardAction, ETriggerEvent::Triggered, this, &ASmithBattlePlayerController::ChangeForward);
 		inputComp->BindAction(OpenMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::OpenMenu);
 		inputComp->BindAction(CloseMenuAction, ETriggerEvent::Started, this, &ASmithBattlePlayerController::CloseMenu);

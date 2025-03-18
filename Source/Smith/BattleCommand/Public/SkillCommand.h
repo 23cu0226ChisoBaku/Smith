@@ -2,30 +2,90 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "IBattleCommand.h"
 
-class ICanMakeAttack;
-class IAttackable;
+#include "UObject/WeakInterfacePtr.h"
+#include "ISmithAnimator.h"
+
 class ISmithAnimator;
-struct AttackHandle;
 
 namespace UE::Smith::Command
 {
-  class SMITH_API SkillCommand : public IBattleCommand
+  template<typename SkillStrategy>
+  class SkillCommand final : public IBattleCommand
   {
-  public:
-    SkillCommand(ICanMakeAttack*, IAttackable*, AttackHandle, ISmithAnimator* = nullptr, uint8 skillSlot = 0u);
-    ~SkillCommand();
+    public:
+      SkillCommand(SkillStrategy Strategy, ISmithAnimator* Animator = nullptr, uint8 SkillSlot = 0u)
+        : m_strategy(Strategy)
+        , m_animator(Animator)
+        , m_skillSlot(SkillSlot)
+      { }
+      virtual ~SkillCommand()
+      {
+        m_animator.Reset();
+      }
 
-  public:
-    void Start() override final;
-    void Execute(float deltaTime) override final;
-    void End() override final;
-    bool IsFinish() const override final;
+    public:
 
-  private:
-    class SkillImpl;
-    TUniquePtr<SkillImpl> m_skillImpl;
+      void Start() override final
+      {
+        if (m_animator.IsValid())
+        {
+          switch (m_skillSlot)
+          {
+            case 1:
+            {
+              m_animator->SwitchAnimation(SMITH_ANIM_SKILL_ONE);
+            }
+            break;
+            case 2:
+            {
+              m_animator->SwitchAnimation(SMITH_ANIM_SKILL_TWO);
+            }
+            break;
+            case 3:
+            {
+              m_animator->SwitchAnimation(SMITH_ANIM_SKILL_THREE);
+            }
+            break;
+            default:
+            {
+              m_animator->SwitchAnimation(SMITH_ANIM_IDLE);
+            }
+          }
+        }
+      }
+
+      void Execute(float DeltaTime) override final
+      {
+        if (m_animator.IsValid())
+        {
+          m_animator->UpdateAnimation(DeltaTime);
+        }
+      }
+
+      void End() override final
+      {
+        if (m_animator.IsValid())
+        {
+          m_animator->SwitchAnimation(SMITH_ANIM_IDLE);
+        }
+
+        m_strategy();
+      }
+
+      bool IsFinish() const override final
+      {
+        return m_animator.IsValid() ? m_animator->IsAnimationFinish() : true;
+      }
+
+    private:
+
+      SkillStrategy m_strategy;
+
+      TWeakInterfacePtr<ISmithAnimator> m_animator;
+
+      uint8 m_skillSlot = 0u;
+
   };
 }

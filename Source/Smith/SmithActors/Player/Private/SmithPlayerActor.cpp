@@ -10,7 +10,6 @@
 
 // Smithゲーム用コンポネント
 #include "SmithMoveComponent.h"
-#include "SmithAttackComponent.h"
 #include "SmithInventoryComponent.h"
 #include "SmithAnimationComponent.h"
 #include "SmithUpgradeInteractiveComponent.h"
@@ -57,7 +56,6 @@ ASmithPlayerActor::ASmithPlayerActor()
   : CameraBoom(nullptr)
   , Camera(nullptr)
   , MoveComponent(nullptr)
-  , AttackComponent(nullptr)
   , InventoryComponent(nullptr)
   , AnimationComponent(nullptr)
   , m_commandMediator(nullptr)
@@ -98,9 +96,6 @@ ASmithPlayerActor::ASmithPlayerActor()
 
   MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
   check(::IsValid(MoveComponent));
-
-  AttackComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Smith AttackComponent"));
-  check(::IsValid(AttackComponent));
 
   InventoryComponent = CreateDefaultSubobject<USmithInventoryComponent>(TEXT("Smith InventoryComponent"));
   check(::IsValid(InventoryComponent));
@@ -355,15 +350,9 @@ void ASmithPlayerActor::Attack()
     paramHandle.CriticalPower = attackParam.CRT;
     paramHandle.Level = Weapon->GetLevel();
     paramHandle.MotionValue = 1.0;
-    m_commandMediator->SendAttackCommand(this, AttackComponent, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], paramHandle);
+    m_commandMediator->SendAttackCommand(this, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], paramHandle);
   }
 
-  // 攻撃エフェクト音再生
-  {
-    int32 ran = FMath::RandRange(1, 2);
-    FString atkSE = TEXT("Player_Slash_") + FString::FromInt(ran);
-    AudioKit::PlaySE(atkSE);
-  }
 }
 
 void ASmithPlayerActor::ChangeForward(EDirection newDirection)
@@ -936,4 +925,11 @@ void ASmithPlayerActor::turnPassRecover()
 UTexture2D* ASmithPlayerActor::GetMinimapDisplayTexture_Implementation()
 {
   return MinimapTexture;
+}
+
+void ASmithPlayerActor::OnAttackExecuted()
+{
+  int32 ran = FMath::RandRange(1, 2);
+  FString atkSE = TEXT("Player_Slash_") + FString::FromInt(ran);
+  AudioKit::PlaySE(atkSE);
 }

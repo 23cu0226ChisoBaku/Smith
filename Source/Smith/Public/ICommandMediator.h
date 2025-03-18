@@ -42,7 +42,6 @@ Encoding : UTF-8
 */
 //---------------------------------------
 class IMoveable;
-class ICanMakeAttack;
 class IAttackable;
 class IHealable;
 struct AttackHandle;
@@ -73,12 +72,9 @@ class SMITH_API ICommandMediator
   // Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
   virtual bool SendMoveCommand(AActor*, IMoveable*, EDirection, uint8 moveDistance) = 0;
-  virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&, bool bAttackEvenNoTarget = true) = 0;
   virtual bool SendIdleCommand(AActor*, float idleTime = 0.0f) = 0;
-
-  virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) = 0;
-  virtual bool SendSkillCommand(AActor*, ICanMakeAttack*, FSmithSkillParameter, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&) = 0;
-  virtual bool SendHealCommand(AActor*,IHealable*) = 0;
+  virtual bool SendAttackCommand(AActor*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) = 0;
+  virtual bool SendSkillCommand(AActor*, FSmithSkillParameter, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&) = 0;
 
   // TODO 設計を見直す
   virtual int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillParameter, const UE::Smith::Battle::FSmithCommandFormat&) = 0;

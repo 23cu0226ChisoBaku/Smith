@@ -44,8 +44,6 @@ public:
 protected:
 	UPROPERTY()
 	TObjectPtr<USmithMoveComponent> m_moveComp;
-	UPROPERTY()
-	TObjectPtr<USmithAttackComponent> m_attackComp;
 
 protected:
 	// 数を整数値にする//

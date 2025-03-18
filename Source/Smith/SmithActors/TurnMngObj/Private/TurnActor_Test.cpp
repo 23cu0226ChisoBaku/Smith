@@ -8,7 +8,6 @@
 #include "SmithTurnBaseAIAttackStrategy.h"
 #include "SmithTurnBaseAIMoveStrategy.h"
 #include "SmithTurnBaseAIIdleStrategy.h"
-#include "SmithAttackComponent.h"
 #include "SmithMoveComponent.h"
 
 #include "SmithAnimationComponent.h"
@@ -30,7 +29,6 @@ ATurnActor_Test::ATurnActor_Test()
 	: m_attackStrategy(nullptr)
 	, m_moveStrategy(nullptr)
 	, m_idleStrategy(nullptr)
-	, AtkComponent(nullptr)
 	, MoveComponent(nullptr)
 	, AnimComponent(nullptr)
 	, m_level(1)
@@ -38,9 +36,6 @@ ATurnActor_Test::ATurnActor_Test()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
-
-	AtkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
-	check(AtkComponent != nullptr);
 
 	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
 	check(MoveComponent != nullptr);
@@ -201,7 +196,7 @@ void ATurnActor_Test::TurnOnAI()
 	if (m_attackStrategy != nullptr)
 	{
 		m_attackStrategy->SetOwner(this);
-		m_attackStrategy->Initialize(AtkComponent, m_commandMediator.Get(), EnemyParam.ATK);
+		m_attackStrategy->Initialize(m_commandMediator.Get(), EnemyParam.ATK);
 		m_attackStrategy->SetAttackParam(EnemyParam.ATK, EnemyParam.CRT, m_level);
 		m_attackStrategy->OnChangeDirectionDelegate.BindUObject(this, &ATurnActor_Test::faceToDirection);
 	}

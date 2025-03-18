@@ -13,12 +13,13 @@
 #include "SmithAIConditionBindHandle.h"
 #include "ISmithBattleLogger.h"
 #include "SmithEnemyTraits.h"
+#include "IAttackCauser.h"
+
 #include "SmithBoss.generated.h"
 
 class USmithAIConditionAttackStrategy;
 class USmithTurnBaseAIMoveStrategy;
 class USmithTurnBaseAIIdleStrategy;
-class USmithAttackComponent;
 class USmithPickable;
 class USmithBattleLogWorldSubsystem;
 
@@ -42,7 +43,8 @@ class SMITH_API ASmithBoss final: public ASmithEnemy,
                                   public ISmithSimpleAIDriven,
                                   public ICanRequestEventPublishment,
                                   public ISmithBattleLogger,
-                                  public ISmithAnimator
+                                  public ISmithAnimator,
+                                  public IAttackCauser
 {
   GENERATED_BODY()
 
@@ -77,6 +79,11 @@ public:
 
   void InitializeParameter(int32 currentLevel) override final;
 
+  void OnAttackExecuted() override
+  {
+    
+  }
+
 // その技を使う条件の関数
 private:
   bool RageCondition();
@@ -98,8 +105,6 @@ private:
   TObjectPtr<USmithTurnBaseAIMoveStrategy> m_moveStrategy;
   UPROPERTY()
   TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
-  UPROPERTY()
-  TObjectPtr<USmithAttackComponent> m_atkComponent;
   UPROPERTY(EditAnywhere)
   TObjectPtr<USmithMoveComponent> MoveComponent;
   UPROPERTY(EditAnywhere)

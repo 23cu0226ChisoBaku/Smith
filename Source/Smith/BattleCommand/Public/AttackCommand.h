@@ -21,19 +21,10 @@ Encoding : UTF-8
 #ifndef SMITH_BATTLE_ATTACK_COMMAND
 #define SMITH_BATTLE_ATTACK_COMMAND
 
-#include "CoreMinimal.h"
 #include "IBattleCommand.h"
 
-//---------------------------------------
-/*
-                  前方宣言
-*/
-//---------------------------------------
-class ICanMakeAttack;
-class IAttackable;
-class ISmithAnimator;
-// TODO
-struct AttackHandle;
+#include "UObject/WeakInterfacePtr.h"
+#include "ISmithAnimator.h"
 
 namespace UE::Smith::Command
 {
@@ -42,22 +33,57 @@ namespace UE::Smith::Command
   /// namespace UE::Smith::Command
   /// implemented IBattleCommand
   ///
-  class SMITH_API AttackCommand final: public IBattleCommand
+  template<typename AttackStrategy>
+  class AttackCommand final : public IBattleCommand
   {
     public:
-      AttackCommand(ICanMakeAttack*, IAttackable*, AttackHandle&&, ISmithAnimator* = nullptr);
-      ~AttackCommand();
+      AttackCommand(AttackStrategy Strategy, ISmithAnimator* Animator = nullptr)
+        : m_strategy(Strategy)
+        , m_animator(Animator)
+      { }
+      ~AttackCommand()
+      {
+        m_animator.Reset();
+      }
 
     public:
-      virtual void Start() override;
-      virtual void Execute(float deltaTime) override;
-      virtual void End() override;
-      virtual bool IsFinish() const override;
+
+      void Start() override final
+      {
+        if (m_animator.IsValid())
+        {
+          m_animator->SwitchAnimation(SMITH_ANIM_ATTACK);
+        }
+      }
+
+      void Execute(float DeltaTime) override final
+      {
+        if (m_animator.IsValid())
+        {
+          m_animator->UpdateAnimation(DeltaTime);
+        }
+      }
+
+      void End() override final
+      {
+        if (m_animator.IsValid())
+        {
+          m_animator->SwitchAnimation(SMITH_ANIM_IDLE);
+        }
+
+        m_strategy();
+      }
+
+      bool IsFinish() const override final
+      {
+        return m_animator.IsValid() ? m_animator->IsAnimationFinish() : true;
+      }
 
     private:
-      /// @brief 攻撃コマンド実装クラス(pImplイディオム)
-      class AttackImpl;
-      TUniquePtr<AttackImpl> m_attackImpl;
+      
+      AttackStrategy m_strategy;
+
+      TWeakInterfacePtr<ISmithAnimator> m_animator;
   };
 }
 

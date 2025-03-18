@@ -17,7 +17,6 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "Direction.h"
@@ -32,6 +31,8 @@ Encoding : UTF-8
 #include "ISmithBattleLogger.h"
 #include "IItemUseable.h"
 #include "IMinimapDisplayable.h"
+#include "IAttackCauser.h"
+
 #include "SmithPlayerActor.generated.h"
 
 //---------------------------------------
@@ -90,7 +91,7 @@ class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
                                       , public ICanSetOnMap, public IEventTriggerable
                                       , public ICanUseEnhanceSystem, public ISmithAnimator
                                       , public ISmithBattleLogger, public IItemUseable
-                                      , public IMinimapDisplayable
+                                      , public IMinimapDisplayable, public IAttackCauser
 {
   GENERATED_BODY()
 
@@ -169,6 +170,9 @@ public:
   public:
     UTexture2D* GetMinimapDisplayTexture_Implementation() override final;
 
+  public:
+    void OnAttackExecuted() override;
+
   private:
       void convertAnimState(uint8 animationState, FName& outName);
 
@@ -223,8 +227,6 @@ private:
   TObjectPtr<UCameraComponent> Camera;
   UPROPERTY(VisibleAnywhere)
   TObjectPtr<USmithMoveComponent> MoveComponent;
-  UPROPERTY(VisibleAnywhere)
-  TObjectPtr<USmithAttackComponent> AttackComponent;
   UPROPERTY(VisibleAnywhere)
   TObjectPtr<USmithInventoryComponent> InventoryComponent;
   UPROPERTY(VisibleAnywhere)

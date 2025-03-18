@@ -16,16 +16,13 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
-
 /**
  * 
  */
 ///
 /// @brief バトルコマンドインターフェース
-/// TODO 別のモジュールに置く
 ///
-class TURNBATTLESYSTEM_API IBattleCommand 
+class SMITH_API IBattleCommand 
 {
 public:
 	///
