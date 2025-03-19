@@ -15,8 +15,8 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "ICanSetOnMap.generated.h"
 
 //---------------------------------------
@@ -26,7 +26,6 @@ Encoding : UTF-8
 //---------------------------------------
 enum class EMapObjType : uint8;
 
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UCanSetOnMap : public UInterface
 {
@@ -39,7 +38,6 @@ class SMITH_API ICanSetOnMap
 {
   GENERATED_BODY()
 
-  // Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
   ///
   /// @brief                    マップのX方向サイズを取得

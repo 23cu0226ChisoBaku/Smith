@@ -15,8 +15,6 @@
 #include "../Weapon/Params.h"
 #include "ICanRequestEventPublishment.h"
 #include "ISmithBattleLogger.h"
-
-#include "IHealable.h"
 // TODO
 #include "SmithEnemyTraits.h"
 
@@ -26,7 +24,6 @@ struct FSmithAIStrategyContainer;
 class USmithTurnBaseAIAttackStrategy;
 class USmithTurnBaseAIMoveStrategy;
 class USmithTurnBaseAIIdleStrategy;
-class USmithTurnBaseAIHealStrategy;
 class USmithAttackComponent;
 class USmithMoveComponent;
 class USmithMoveDirector;
@@ -43,8 +40,7 @@ UCLASS()
 class SMITH_API AHerbGolem final:  public ATurnBaseActor, public IAttackable, 
 																	  public ICanSetOnMap, public IMoveDirector, 
 																		public ISmithSimpleAIDriven, public ICanRequestEventPublishment,
-																		public ISmithBattleLogger,public IHealable,
-																		public ISmithAnimator
+																		public ISmithBattleLogger, public ISmithAnimator
 {
 	GENERATED_BODY()
 
@@ -63,7 +59,16 @@ public:
 	void Tick(float DeltaTime) override final;
 
 public:
-	void OnAttack(AttackHandle&&) override final;
+	void OnAttack(const AttackHandle&) override final;
+	bool IsDefeated() const override final
+	{
+		return true;
+	}
+
+	void OnDefeated() override final
+	{
+		
+	}
 
 	uint8 GetOnMapSizeX() const override final;
 	uint8 GetOnMapSizeY() const override final;
@@ -84,7 +89,6 @@ public:
 	FString GetName_Log() const override;
 	EBattleLogType GetType_Log() const override;
 
-	void Heal() override final;
 	bool HealCondition();
 
 public:
@@ -97,8 +101,6 @@ private:
 	TObjectPtr<USmithTurnBaseAIMoveStrategy> m_moveStrategy;
 	UPROPERTY()
 	TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
-	UPROPERTY()
-	TObjectPtr<USmithTurnBaseAIHealStrategy> m_healStrategy;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USmithMoveComponent> MoveComponent;
 	UPROPERTY(EditAnywhere)

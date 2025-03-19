@@ -89,7 +89,7 @@ namespace UE::Smith
             return;
           }
 
-          if (format.GetRow() == 0 || format.GetColumn() == 0)
+          if (!format.IsValid())
           {
             return;
           }
@@ -189,7 +189,7 @@ namespace UE::Smith
             return;
           }
 
-          if (format.GetRow() == 0 || format.GetColumn() == 0)
+          if (!format.IsValid())
           {
             return;
           }

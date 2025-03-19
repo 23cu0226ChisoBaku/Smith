@@ -130,7 +130,9 @@ public:
   // IAttackable (Smith Module)
   #pragma region IAttackable
   public:
-    void OnAttack(AttackHandle&&) override final;
+    void OnAttack(const AttackHandle& Handle) override final;
+    bool IsDefeated() const override final;
+    void OnDefeated() override final;
   #pragma endregion IAttackable
   // end of IAttackable
 

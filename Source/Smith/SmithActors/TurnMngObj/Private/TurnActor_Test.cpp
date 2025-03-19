@@ -2,6 +2,7 @@
 
 
 #include "TurnActor_Test.h"
+
 #include "AttackHandle.h"
 #include "SmithAIBehaviorProcessor.h"
 #include "SmithAIStrategyContainer.h"
@@ -17,7 +18,6 @@
 #include "Direction.h"
 #include "SmithPickable.h"
 #include "IEventPublishMediator.h"
-#include "SmithBattleLogWorldSubsystem.h"
 #include "MLibrary.h"
 
 #include "SmithEnemyParamInitializer.h"
@@ -33,6 +33,7 @@ ATurnActor_Test::ATurnActor_Test()
 	, AnimComponent(nullptr)
 	, m_level(1)
 	, m_bIsPlayingDeadAnimation(false)
+	, m_bIsPlayingDamagedAnimation(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
@@ -57,12 +58,6 @@ void ATurnActor_Test::BeginPlay()
 	check(m_idleStrategy != nullptr);
 
   AnimComponent->SwitchAnimState(TEXT("Idle"));
-
-	UWorld* world = GetWorld();
-	if (world != nullptr)
-	{
-		m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
-	}
 }
 
 void ATurnActor_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -96,13 +91,24 @@ void ATurnActor_Test::Tick(float DeltaTime)
 		return;
 	}
 
+	if (m_bIsPlayingDamagedAnimation)
+	{
+		if (AnimComponent != nullptr && AnimComponent->IsCurrentAnimationFinish())
+		{
+			m_bIsPlayingDamagedAnimation = false;
+		}
+		AnimComponent->UpdateAnim(DeltaTime);
+
+		return;
+	}
+
 	if (m_aiBehaviorProcessor != nullptr)
 	{
 		m_aiBehaviorProcessor->TickBehaviorProcessor(DeltaTime);
 	}
 }
 
-void ATurnActor_Test::OnAttack(AttackHandle&& handle)
+void ATurnActor_Test::OnAttack(const AttackHandle& handle)
 {
 	if (handle.AttackPower > 0)
 	{
@@ -113,51 +119,43 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 		}
 		EnemyParam.HP -= handle.AttackPower;
 
-		if (m_logSystem != nullptr)
-		{
-			m_logSystem->SendAttackLog(handle.Attacker, this);
-			m_logSystem->SendDamageLog(this,handle.AttackPower);
-		}
-
 		if (AnimComponent != nullptr)
 		{
 			AnimComponent->SwitchAnimState(TEXT("Damaged"));
+			m_bIsPlayingDamagedAnimation = true;
 		}
 	}
-	else
+
+}
+
+bool ATurnActor_Test::IsDefeated() const
+{
+	return EnemyParam.HP <= 0;
+}	
+
+void ATurnActor_Test::OnDefeated()
+{
+	if (m_eventMediator.IsValid())
 	{
-		return;
+		// TODO will return null when RECOMPILE!!!!!!!
+		// Reason: dll make copy of static member variable
+		IPickable* pickable = USmithEnemyLootGenerator::GetLoot(this);
+		if (pickable != nullptr)
+		{
+			USmithPickable* smithPickable = Cast<USmithPickable>(pickable);
+			m_eventMediator->PublishPickUpEvent(this, smithPickable);
+		}
 	}
 
-	if (EnemyParam.HP <= 0)
+	if (OnDefeatEvent.IsBound())
 	{
-		if (m_logSystem != nullptr)
-		{
-			m_logSystem->SendDefeatedLog(this);
-		}
+		OnDefeatEvent.Broadcast();
+	}
 
-		if (m_eventMediator.IsValid())
-		{
-			// TODO will return null when RECOMPILE!!!!!!!
-			// Reason: dll make copy of static member variable
-			IPickable* pickable = USmithEnemyLootGenerator::GetLoot(this);
-			if (pickable != nullptr)
-			{
-				USmithPickable* smithPickable = Cast<USmithPickable>(pickable);
-				m_eventMediator->PublishPickUpEvent(this, smithPickable);
-			}
-		}
-
-		if (OnDefeatEvent.IsBound())
-		{
-			OnDefeatEvent.Broadcast();
-		}
-
-		if (AnimComponent != nullptr)
-		{
-			AnimComponent->SwitchAnimState(TEXT("Dead"));
-			m_bIsPlayingDeadAnimation = true;
-		}
+	if (AnimComponent != nullptr)
+	{
+		AnimComponent->SwitchAnimState(TEXT("Dead"));
+		m_bIsPlayingDeadAnimation = true;
 	}
 }
 

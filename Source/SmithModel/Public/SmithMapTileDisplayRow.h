@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "TileType.h"
 #include "SmithMapTileDisplayRow.generated.h"
@@ -10,7 +9,7 @@
 /**
  * 
  */
-USTRUCT(Blueprintable)
+USTRUCT(BlueprintType)
 struct SMITHMODEL_API FSmithMapTileDisplayRow : public FTableRowBase
 {
   GENERATED_BODY()

@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "ITargetTracker.h"
+
 #include "UObject/WeakInterfacePtr.h"
+
 #include "SmithChasePlayerTracker.generated.h"
 
 namespace UE::Smith
@@ -29,11 +30,12 @@ public:
 	USmithChasePlayerTracker(const FObjectInitializer&);
 
 public:
-	void SetupTracker(TSharedPtr<UE::Smith::Map::FSmithMapManager>);
+	void SetupTracker(const TSharedPtr<UE::Smith::Map::FSmithMapManager>& MapManager);
 
 public:
-	bool TrackTarget(EDirection& outDirection, ICanSetOnMap* chaser, uint8 chaseRadius) override final;
+	bool TrackTarget(/* OUT */EDirection& outDirection, ICanSetOnMap* chaser, uint8 chaseRadius) override final;
 
 private:
+
 	TWeakPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
 };

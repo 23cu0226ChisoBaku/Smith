@@ -11,7 +11,6 @@
 
 class USmithBattleSubsystem;
 class USmithDamageSubsystem;
-class ISmithDamageCalculator;
 
 namespace UE::Smith
 {
@@ -36,7 +35,7 @@ public:
 
 public:
 	void BeginDestroy() override final;
-	void SetupMediator(USmithBattleSubsystem*, USmithDamageSubsystem*, ISmithDamageCalculator*, TSharedPtr<MapManager>);
+	void SetupMediator(USmithBattleSubsystem*, USmithDamageSubsystem*, TSharedPtr<MapManager>);
 
 public:
 	bool SendMoveCommand(AActor*, IMoveable*, EDirection, uint8 moveDistance) override final;
@@ -56,7 +55,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<USmithDamageSubsystem> m_damageSys;
 
-	private:
-	TWeakInterfacePtr<ISmithDamageCalculator> m_damageCalculator;
+private:
+
 	TWeakPtr<MapManager> m_mapMgr;
 };

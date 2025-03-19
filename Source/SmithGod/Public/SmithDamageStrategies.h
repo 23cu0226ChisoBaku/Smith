@@ -6,12 +6,13 @@
 #define SMITH_DAMAGE_STRATEGY
 
 #include "AttackHandle.h"
+#include "Direction.h"
 
 class AActor;
 class USmithDamageSubsystem;
 
-// Strategy Dummy
-struct SMITHGOD_API SmithEmptyDamageStrategy
+// Dummy
+struct SMITHGOD_API SmithDummyStrategy
 {
 	void operator()()
 	{ }
@@ -24,7 +25,8 @@ struct SMITHGOD_API SmithDefaultDamageStrategy
 	AActor* Instigator = nullptr;
 	AActor* Causer = nullptr;
 	USmithDamageSubsystem* DamageSubsystem = nullptr;
-	AttackHandle Handle;
+	FAttackHandle Handle;
+	EDirection FromDirection;
 
 };
 

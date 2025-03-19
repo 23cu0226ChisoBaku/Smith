@@ -25,6 +25,8 @@ class SMITH_API IAttackable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void OnAttack(AttackHandle&&) = 0;
+	virtual void OnAttack(const AttackHandle& Handle) = 0;
+	virtual bool IsDefeated() const = 0;
+	virtual void OnDefeated() = 0;
 	virtual FBattleDefenseParamHandle GetDefenseParam() const;
 };

@@ -19,7 +19,7 @@ Encoding : UTF-8
 #ifndef SMITH_BATTLE_RESULT
 #define SMITH_BATTLE_RESULT
 
-#include "CoreMinimal.h"
+
 //---------------------------------------
 /*
                   前方宣言
@@ -44,6 +44,11 @@ struct FBattleResult
   constexpr FBattleResult()
     : ResultLogger(nullptr)
     , Damage(0)
+  {}
+
+  FBattleResult(ISmithBattleLogger* ResultLogger_, int32 Damage_)
+    : ResultLogger(ResultLogger_)
+    , Damage(Damage_)
   {}
 };
 

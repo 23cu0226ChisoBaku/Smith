@@ -25,7 +25,6 @@
 AHerbGolem::AHerbGolem()
 	: m_moveStrategy(nullptr)
 	, m_idleStrategy(nullptr)
-  , m_healStrategy(nullptr)
 	, MoveComponent(nullptr)
 	, AnimComponent(nullptr)
 	, m_healCnt(1)
@@ -51,8 +50,6 @@ void AHerbGolem::BeginPlay()
 	check(m_moveStrategy != nullptr);
 	m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
 	check(m_idleStrategy != nullptr);
-  m_healStrategy = NewObject<USmithTurnBaseAIHealStrategy>(this);
-  check(m_healStrategy != nullptr);
 
   AnimComponent->SwitchAnimState(TEXT("Idle"));
 
@@ -92,16 +89,16 @@ void AHerbGolem::Tick(float DeltaTime)
 	}
 }
 
-void AHerbGolem::OnAttack(AttackHandle&& handle)
+void AHerbGolem::OnAttack(const AttackHandle& Handle)
 {
-	if (handle.AttackPower > 0)
+	if (Handle.AttackPower > 0)
 	{
-		EnemyParam.HP -= handle.AttackPower;
+		EnemyParam.HP -= Handle.AttackPower;
 
 		if (m_logSystem != nullptr)
 		{
-			m_logSystem->SendAttackLog(handle.Attacker, this);
-			m_logSystem->SendDamageLog(this,handle.AttackPower);
+			m_logSystem->SendAttackLog(Handle.Attacker, this);
+			m_logSystem->SendDamageLog(this, Handle.AttackPower);
 		}
 
 	}
@@ -199,19 +196,8 @@ void AHerbGolem::TurnOnAI()
 		m_idleStrategy->Initialize(m_commandMediator.Get());
 	}
 
-  if (m_healStrategy != nullptr)
-  {
-    m_healStrategy->SetOwner(this);
-    m_healStrategy->Initialize(m_commandMediator.Get(),this);
-
-    TDelegate<bool()> condition;
-    condition.BindUObject(this,&AHerbGolem::HealCondition);
-    m_healStrategy->RegisterCondition(condition);
-  }
-
 	if (m_aiBehaviorProcessor != nullptr)
 	{
-		m_aiBehaviorProcessor->RegisterAIStrategy(0, m_healStrategy);
 		m_aiBehaviorProcessor->RegisterAIStrategy(1, m_attackStrategy);
 		m_aiBehaviorProcessor->RegisterAIStrategy(2, m_moveStrategy);
     m_aiBehaviorProcessor->RegisterAIStrategy(3,m_idleStrategy);
@@ -309,16 +295,6 @@ void AHerbGolem::InitializeParameter(int32 currentLevel)
 {
 	EnemyParam = USmithEnemyParamInitializer::GetParams(this, currentLevel);
   m_maxHp = EnemyParam.HP;
-}
-
-void AHerbGolem::Heal()
-{
-  float add = StaticCast<float>(m_maxHp) * 0.3f;
-  EnemyParam.HP += add;
-  if(EnemyParam.HP > m_maxHp)
-  {
-    EnemyParam.HP = m_maxHp;
-  }
 }
 
 bool AHerbGolem::HealCondition()

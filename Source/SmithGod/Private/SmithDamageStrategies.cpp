@@ -4,11 +4,12 @@
 
 #include "GameFramework/Actor.h"
 #include "SmithDamageSubsystem.h"
+#include "SmithBattleLogWorldSubsystem.h"
 
 void SmithDefaultDamageStrategy::operator()()
 {
   if (DamageSubsystem != nullptr)
   {
-    DamageSubsystem->ApplyDamage(Instigator, Causer, ::MoveTemp(Handle));
+    DamageSubsystem->ApplyDamage(Instigator, Causer, ::MoveTemp(Handle), FromDirection);
   }
 }

@@ -61,7 +61,10 @@ public:
   void Tick(float DeltaTime) override final;
 
 public:
-  void OnAttack(AttackHandle &&) override final;
+  //---Begin of IAttackable Interface
+  void OnAttack(const AttackHandle& Handle) override final;
+  bool IsDefeated() const override final;
+  void OnDefeated() override final;
 
   uint8 GetOnMapSizeX() const override final;
   uint8 GetOnMapSizeY() const override final;

@@ -630,7 +630,7 @@ void ASmithPlayerActor::updateCamera(float deltaTime)
   CameraBoom->SetWorldRotation(springArmNewRotator);		
 }
 
-void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
+void ASmithPlayerActor::OnAttack(const AttackHandle& attack)
 {
   if (attack.AttackPower <= 0)
   {
@@ -648,27 +648,40 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
 
   m_curtHP -= attack.AttackPower;
 
-  if (m_curtHP <= 0)
-  {
-    m_curtHP = 0;
-    m_bCanReceiveInput = false;
-
-    if (OnDead.IsBound())
-    {
-      OnDead.Broadcast();
-    }
-
-    if (AnimationComponent != nullptr)
-    {
-      AnimationComponent->SwitchAnimState(TEXT("Dead"));
-    }
-  }
-  else
+  if (!IsDefeated())
   {
     if (AnimationComponent != nullptr)
     {
       AnimationComponent->SwitchAnimState(TEXT("Damaged"));
     }
+  }
+
+  if (HPComponent != nullptr && m_maxHP > 0)
+  {
+    const float curtHPPercentage = StaticCast<float>(m_curtHP) / StaticCast<float>(m_maxHP);
+    HPComponent->SetHP(curtHPPercentage);
+    HPComponent->SetHPNumber(m_maxHP, m_curtHP);
+  }
+}
+
+bool ASmithPlayerActor::IsDefeated() const
+{
+  return m_curtHP <= 0;
+}
+
+void ASmithPlayerActor::OnDefeated()
+{
+  m_curtHP = 0;
+  m_bCanReceiveInput = false;
+
+  if (OnDead.IsBound())
+  {
+    OnDead.Broadcast();
+  }
+
+  if (AnimationComponent != nullptr)
+  {
+    AnimationComponent->SwitchAnimState(TEXT("Dead"));
   }
     
   if (HPComponent != nullptr && m_maxHP > 0)
@@ -678,11 +691,6 @@ void ASmithPlayerActor::OnAttack(AttackHandle&& attack)
     HPComponent->SetHPNumber(m_maxHP, m_curtHP);
   }
   
-  if (m_logSystem != nullptr)
-  {
-    m_logSystem->SendAttackLog(attack.Attacker, this);
-    m_logSystem->SendDamageLog(this, attack.AttackPower);
-  }
 }
 
 uint8 ASmithPlayerActor::GetOnMapSizeX() const

@@ -19,7 +19,7 @@ Encoding : UTF-8
 #ifndef SMITH_BATTLE_PARAM_HANDLE
 #define SMITH_BATTLE_PARAM_HANDLE
 
-#include "CoreMinimal.h"
+#include "GenericPlatform/GenericPlatform.h"    // int32
 
 ///
 /// @brief 攻撃パラメーターハンドル

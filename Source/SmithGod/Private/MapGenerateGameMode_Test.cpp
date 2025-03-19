@@ -34,7 +34,6 @@
 #include "SmithMapBaseMoveDirector.h"
 #include "GameLogWidget.h"
 #include "ScreenFade.h"
-#include "SmithDungeonDamageCalculator.h"
 #include "UI_CurrentLevel.h"
 #include "SmithTowerEnemyParamInitializer.h"
 #include "SmithEnemyParamInitializer.h"
@@ -58,7 +57,10 @@
 #include "Misc/DateTime.h"
 #include "AudioKit.h"
 #include "ItemGenerationListRow.h"
+
 #include "MLibrary.h"
+
+#include "DamageCalculationStrategies.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   : m_battleSystem(nullptr)
@@ -69,7 +71,6 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   , m_enhanceSystem(nullptr)
   , m_eventMediator(nullptr)
   , m_logSubsystem(nullptr)
-  , m_damageCalculator(nullptr)
   , m_mapMgr(nullptr)
   , m_defeatedEnemyCount(0)
   , m_curtLevel(0)
@@ -119,11 +120,6 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
   if (m_eventMediator != nullptr)
   {
     m_eventMediator->MarkAsGarbage();
-  }
-
-  if (m_damageCalculator != nullptr)
-  {
-    m_damageCalculator->MarkAsGarbage();
   }
 
   if (m_nextLevelEvent != nullptr)
@@ -318,14 +314,13 @@ void AMapGenerateGameMode_Test::initializeGame()
 
     m_chasePlayerTracker->SetupTracker(m_mapMgr);
 
-    m_damageCalculator = NewObject<USmithDungeonDamageCalculator>(this);
-    check(m_damageCalculator != nullptr);
-    // ダメージ計算用定数初期化
-    m_damageCalculator->SetConstantNumber(TEST_DAMAGE_CALCULATOR_CONSTANT);
-
     USmithDamageSubsystem* damageSys = world->GetSubsystem<USmithDamageSubsystem>();
+    if (damageSys != nullptr)
+    {
+      damageSys->SetDamageStrategy(FSmithReductionRateDCS{TEST_DAMAGE_CALCULATOR_CONSTANT});
+    }
     // コマンド仲介初期化
-    m_battleMediator->SetupMediator(m_battleSystem, damageSys, m_damageCalculator, m_mapMgr);
+    m_battleMediator->SetupMediator(m_battleSystem, damageSys, m_mapMgr);
 
     // イベント登録システムを注入
     m_mapMgr->AssignEventRegister(m_eventSystem);
@@ -447,8 +442,6 @@ void AMapGenerateGameMode_Test::initializeGame()
         USmithEnemyParamInitializer::AssignInitializer(paramInitializer);
       }
     }
-
-
   }
 }
 
@@ -515,7 +508,7 @@ void AMapGenerateGameMode_Test::processGameClear()
 
 void AMapGenerateGameMode_Test::deployPickableEvent()
 {
-  if (ItemGenerationRecipe == nullptr) [[unlikely]]
+  if (ItemGenerationRecipe == nullptr)
   {
     return;
   }

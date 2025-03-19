@@ -11,23 +11,21 @@ class ISmithBattleLogger;
 class ISmithEventLogger;
 
 enum class EBattleLogType : uint8;
-/**
- * 
- */
+
 UCLASS()
-class SMITHGOD_API USmithBattleLogWorldSubsystem final: public UWorldSubsystem
+class SMITHGOD_API USmithBattleLogWorldSubsystem final : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
 public:
+	//---Begin of USubsystem Interface
 	bool ShouldCreateSubsystem(UObject* Outer) const override final;
-
-/** Implement this for initialization of instances of the system */
 	void Initialize(FSubsystemCollectionBase& Collection) override final;
-	/** Implement this for deinitialization of instances of the system */
 	void Deinitialize() override final;
+	//---End of USubsystem Interface
 
 public:
+
 	void SetLogWidget(UGameLogWidget*);
 	void SendAttackLog(ISmithBattleLogger* attacker, ISmithBattleLogger* defender);
 	void SendDamageLog(ISmithBattleLogger* defender, int32 damage);
@@ -37,7 +35,9 @@ public:
 
 private:
 	void convertLogColor(FString& outLog, EBattleLogType);
+
 private:
+
 	UPROPERTY()
 	TObjectPtr<UGameLogWidget> m_logWidget;
 };

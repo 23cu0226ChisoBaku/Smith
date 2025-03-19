@@ -24,8 +24,6 @@ class USmithNextLevelEvent;
 class USmithMinimap;
 class UMinimapDisplayTypeFactory;
 
-// Damage
-class USmithDungeonDamageCalculator;
 class UGameLogWidget;
 class UScreenFade;
 
@@ -113,8 +111,6 @@ private:
 	TObjectPtr<USmithEventPublishMediator> m_eventMediator;
 	UPROPERTY()
 	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSubsystem;
-	UPROPERTY()
-	TObjectPtr<USmithDungeonDamageCalculator> m_damageCalculator;
 	UPROPERTY(EditAnywhere)
 	double TEST_DAMAGE_CALCULATOR_CONSTANT;
 	UPROPERTY()

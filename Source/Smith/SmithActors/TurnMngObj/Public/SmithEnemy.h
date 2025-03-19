@@ -18,6 +18,7 @@ UCLASS()
 class SMITH_API ASmithEnemy : public ATurnBaseActor, public IAttackable
 {
 	GENERATED_BODY()
+	
 public:
 	ASmithEnemy();
 
@@ -28,7 +29,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void OnAttack(AttackHandle &&) override;
+	virtual void OnAttack(const AttackHandle& Handle) override;
+	virtual bool IsDefeated() const override
+	{
+		return m_hp <= 0;
+	}
+	virtual void OnDefeated() override
+	{ }
+	
 	void OnHeal(int32);
 
 public:

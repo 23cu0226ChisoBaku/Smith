@@ -10,7 +10,7 @@
 /**
  * 
  */
-USTRUCT(Blueprintable)
+USTRUCT(BlueprintType)
 struct SMITHMODEL_API FSmithMapObjDisplayRow : public FTableRowBase
 {
   GENERATED_BODY()

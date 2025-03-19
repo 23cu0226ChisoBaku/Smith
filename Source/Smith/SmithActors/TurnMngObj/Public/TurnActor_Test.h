@@ -31,8 +31,6 @@ class USmithAnimationComponent;
 
 enum class EDirection : uint8;
 
-// TODO
-class USmithBattleLogWorldSubsystem;
 /**
  * 
  */
@@ -59,7 +57,10 @@ public:
 	void Tick(float DeltaTime) override final;
 
 public:
-	void OnAttack(AttackHandle&&) override final;
+	//---Begin of IAttackable Interface
+	void OnAttack(const AttackHandle& Handle) override final;
+	bool IsDefeated() const override final;
+	void OnDefeated() override final;
 
 	uint8 GetOnMapSizeX() const override final;
 	uint8 GetOnMapSizeY() const override final;
@@ -114,12 +115,10 @@ private:
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
 	FParams EnemyParam;
-	// TODO
-	UPROPERTY()
-	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
 	
 private:
 	TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
 	int32 m_level;
 	uint8 m_bIsPlayingDeadAnimation : 1;
+	uint8 m_bIsPlayingDamagedAnimation : 1;
 };

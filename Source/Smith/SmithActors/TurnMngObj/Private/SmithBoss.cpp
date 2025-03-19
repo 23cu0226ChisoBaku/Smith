@@ -82,23 +82,23 @@ void ASmithBoss::Tick(float DeltaTime)
   }
 }
 
-void ASmithBoss::OnAttack(AttackHandle&& handle)
+void ASmithBoss::OnAttack(const AttackHandle& handle)
 {
   EnemyParam.HP -= handle.AttackPower;
-  if (m_logSystem != nullptr)
+}
+
+bool ASmithBoss::IsDefeated() const
+{
+  return EnemyParam.HP <= 0;
+}
+
+void ASmithBoss::OnDefeated()
+{
+  if (OnDefeatEvent.IsBound())
   {
-    // TODO
-    m_logSystem->SendAttackLog(handle.Attacker, this);
-    m_logSystem->SendDamageLog(this, handle.AttackPower);
+    OnDefeatEvent.Broadcast();
   }
-  if(EnemyParam.HP <= 0)
-  {
-    if (OnDefeatEvent.IsBound())
-    {
-      OnDefeatEvent.Broadcast();
-    }
-    Destroy();
-  }
+  Destroy();
 }
 
 uint8 ASmithBoss::GetOnMapSizeX() const

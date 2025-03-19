@@ -95,7 +95,6 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 	}
 
 	const float duration = UAnimMontageHelperLibrary::GetSectionDuration(AnimInstance, CurrentMontage, nextStateName);
-
 	m_curtAnimationTimeInterval = duration;
 	m_animationPlayTimeCnt = 0.0f;
 
@@ -110,6 +109,8 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 	}
 
 	AnimInstance->Montage_JumpToSection(nextStateName);
+
+	MDebug::LogWarning(FString::Printf(TEXT("[%s] Switch To AnimState [%s]. Duration : [%f]"), *GetNameSafe(GetOwner()), *nextStateName.ToString(), duration));
 }
 
 void USmithAnimationComponent::SwitchAnimStateDelay(FName nextStateName, float delay)

@@ -34,7 +34,6 @@ class IBattleCommand;
 class UBattleCommandManager;
 class IEventExecutor;
 
-
 ///
 /// @brief バトルサブシステム
 /// UTickableWorldSubsystemから派生
@@ -45,11 +44,12 @@ class TURNBATTLESYSTEM_API USmithBattleSubsystem final : public UTickableWorldSu
   GENERATED_BODY()
 
 public:
+  //---Begin of USubsystem Interface
   bool ShouldCreateSubsystem(UObject* Outer) const override final;
-  /** Implement this for initialization of instances of the system */
   void Initialize(FSubsystemCollectionBase& Collection) override final;
-  /** Implement this for deinitialization of instances of the system */
   void Deinitialize() override final;
+  //---End of USubsystem Interface
+
   ///
   /// @brief バトルシステムを初期化
   /// 
@@ -110,6 +110,7 @@ private:
   TMap<ETurnPriority, FITurnManageableWrapper> m_priorityManageableLists;
 
 private:
+
   FDelegateHandle m_startDelegateHandle;
   FDelegateHandle m_endDelegateHandle;
   ETurnPriority m_curtTurn;

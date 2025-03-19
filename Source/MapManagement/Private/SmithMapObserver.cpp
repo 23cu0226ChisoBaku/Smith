@@ -366,7 +366,7 @@ namespace UE::Smith
         bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius)
         {
           TSharedPtr<Model> model_shared = m_model.Pin();
-          if (!model_shared.IsValid()) [[unlikely]]
+          if (!model_shared.IsValid())
           {
             return false;
           }

@@ -25,9 +25,9 @@ void ASmithEnemy::Tick(float DeltaTime)
   Super::Tick(DeltaTime);
 }
 
-void ASmithEnemy::OnAttack(AttackHandle &&handle)
+void ASmithEnemy::OnAttack(const AttackHandle& Handle)
 {
-  m_hp -= handle.AttackPower;
+  m_hp -= Handle.AttackPower;
   Current_HP = m_hp;
   MDebug::LogError(GetName() + TEXT(" left HP:") + FString::FromInt(m_hp));
 
