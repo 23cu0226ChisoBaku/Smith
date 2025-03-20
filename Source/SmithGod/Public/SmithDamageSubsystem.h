@@ -71,5 +71,6 @@ private:
 
 	TUniquePtr<IDamageCalculationConcept> m_pimpl;
 
-	TWeakObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
+	UPROPERTY()
+	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
 };

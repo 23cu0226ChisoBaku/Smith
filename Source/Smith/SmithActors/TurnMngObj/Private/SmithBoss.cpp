@@ -161,8 +161,6 @@ void ASmithBoss::SetEventPublishMediator(IEventPublishMediator* eventMediator)
 
 void ASmithBoss::SwitchAnimation(uint8 animationState)
 {
-	//MDebug::Log(TEXT("called animation"));
-
 	if (AnimComponent == nullptr)
 	{
 		return;
@@ -201,11 +199,6 @@ void ASmithBoss::SwitchAnimation(uint8 animationState)
 void ASmithBoss::UpdateAnimation(float deltaTime)
 {
 	AnimComponent->UpdateAnim(deltaTime);
-}
-
-void ASmithBoss::SwitchAnimationDelay(uint8 animationState, float delay)
-{
-
 }
 
 bool ASmithBoss::IsAnimationFinish() const

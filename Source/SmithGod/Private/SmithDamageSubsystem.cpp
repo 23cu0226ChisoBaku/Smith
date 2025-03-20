@@ -78,7 +78,7 @@ void USmithDamageSubsystem::ApplyDamage(AActor* DamageInstigator, AActor* Damage
 
     // TODO
     ISmithBattleLogger* targetLogger = Cast<ISmithBattleLogger>(attackTarget);
-    if (m_logSystem.IsValid())
+    if (m_logSystem != nullptr)
     {
       m_logSystem->SendAttackLog(Handle.Attacker, targetLogger);
       m_logSystem->SendDamageLog(targetLogger, result.Damage);

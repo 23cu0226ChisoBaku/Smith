@@ -9,7 +9,7 @@ public class TurnBattleSystem: ModuleRules
 
     PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", "MLibrary" ,"SmithModel", "SmithGod", "Smith", "MapManagement"});
 
-    PrivateIncludePaths.AddRange(new string[] {"Smith/BattleCommand/Public"});
+    PrivateIncludePaths.AddRange(new string[] {"Smith/BattleCommand"});
   }
 
 }

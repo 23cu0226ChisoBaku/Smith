@@ -3,7 +3,6 @@
 
 #include "SmithPickUpItemEvent.h"
 #include "IPickable.h"
-#include "ICanPick.h"
 #include "ICanSetOnMap.h"
 #include "ISmithBattleLogger.h"
 #include "IEventTriggerable.h"

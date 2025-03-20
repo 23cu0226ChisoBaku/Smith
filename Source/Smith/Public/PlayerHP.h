@@ -7,7 +7,6 @@
 #include "PlayerHP.generated.h"
 
 class UUserWidget;
-class UHPUIComponent;
 /**
  *
  */
@@ -37,10 +36,6 @@ public:
 	TObjectPtr<UUserWidget> m_widget;
 	UPROPERTY(BlueprintReadOnly)
 	float m_percent;
-
-private:
-	UPROPERTY()
-	TObjectPtr<UHPUIComponent> m_hpComp;
 
 private:
 	int32 m_maxHp;

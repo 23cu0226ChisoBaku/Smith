@@ -12,9 +12,9 @@ public class SmithGod: ModuleRules
                                                        "SmithModel", "Smith", "UMG" , "Niagara", "SmithModelInitializer"});
 
     PrivateIncludePaths.AddRange(new string[] {"Smith/SmithActors/Interfaces",
-                                               "Smith/BattleCommand/Public",
+                                               "Smith/BattleCommand",
                                                "Smith/SmithActors/TurnMngObj/Public",
-                                               "Smith/SmithActors/Player/Public"});
+                                               "Smith/Player"});
   }
 
 }

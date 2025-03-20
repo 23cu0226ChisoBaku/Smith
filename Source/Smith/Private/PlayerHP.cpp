@@ -3,7 +3,6 @@
 
 #include "PlayerHP.h"
 #include "Blueprint/UserWidget.h"
-#include "HPUIComponent.h"
 #include "Debug.h"
 
 APlayerHP::APlayerHP()
@@ -11,7 +10,6 @@ APlayerHP::APlayerHP()
 ,m_maxHp(10)
 {
   PrimaryActorTick.bCanEverTick = false;
-	m_hpComp = CreateDefaultSubobject<UHPUIComponent>(TEXT("konno Player HP Component"));
 	m_currentHp = m_maxHp;
 }
 
@@ -60,7 +58,6 @@ void APlayerHP::OnHP()
 	{
 		MDebug::LogError(TEXT("HP減らせないよ"));
 		m_percent = 0.0f;
-		//m_hpComp->SetHP(0.0f);
 		return;
 	}
 
@@ -71,5 +68,4 @@ void APlayerHP::OnHP()
 	}
 
 	m_percent = (float)m_currentHp / (float)m_maxHp;
-	//m_hpComp->SetHP(percent);
 }

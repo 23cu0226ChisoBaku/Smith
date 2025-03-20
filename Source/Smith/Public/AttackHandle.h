@@ -20,7 +20,6 @@ Encoding : UTF-8
 #ifndef SMITH_ATK_HDL
 #define SMITH_ATK_HDL
 
-#include "CoreMinimal.h"
 #include "Direction.h"
 //---------------------------------------
 /*

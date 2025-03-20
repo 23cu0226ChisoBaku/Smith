@@ -38,7 +38,7 @@
 #include "SmithTowerEnemyParamInitializer.h"
 #include "SmithEnemyParamInitializer.h"
 
-#include "SmithBattlePlayerController.h"
+#include "SmithPlayerController.h"
 
 #include "SmithMinimap.h"
 #include "MinimapDisplayTypeFactory.h"
@@ -392,18 +392,18 @@ void AMapGenerateGameMode_Test::initializeGame()
       if (m_fadeWidget != nullptr)
       {
         APlayerController* playerCtrl = world->GetFirstPlayerController();
-        ASmithBattlePlayerController* smithPlayerCtrl = Cast<ASmithBattlePlayerController>(playerCtrl);
+        ASmithPlayerController* smithPlayerCtrl = Cast<ASmithPlayerController>(playerCtrl);
         if (smithPlayerCtrl != nullptr)
         {
           m_fadeWidget->OnFadeInStartEvent.AddUObject(this, &AMapGenerateGameMode_Test::startNewLevel);
-          m_fadeWidget->OnFadeInEndEvent.AddUObject(smithPlayerCtrl, &ASmithBattlePlayerController::EnablePlayerInput);
-          m_fadeWidget->OnFadeOutStartEvent.AddUObject(smithPlayerCtrl, &ASmithBattlePlayerController::DisablePlayerInput);
+          m_fadeWidget->OnFadeInEndEvent.AddUObject(smithPlayerCtrl, &ASmithPlayerController::EnablePlayerInput);
+          m_fadeWidget->OnFadeOutStartEvent.AddUObject(smithPlayerCtrl, &ASmithPlayerController::DisablePlayerInput);
           // TODO
           m_fadeWidget->OnFadeOutStartEvent.AddUObject(m_battleSystem, &USmithBattleSubsystem::ResetBattle);
           m_fadeWidget->OnFadeOutEndEvent.AddUObject(this, &AMapGenerateGameMode_Test::clearCurrentLevel);
 
-          smithPlayerCtrl->OnOpenMenu.AddUObject(this, &AMapGenerateGameMode_Test::hideMinimap);
-          smithPlayerCtrl->OnCloseMenu.AddUObject(this, &AMapGenerateGameMode_Test::showMinimap);
+          smithPlayerCtrl->OnEnhanceMenuOpened.AddUObject(this, &AMapGenerateGameMode_Test::hideMinimap);
+          smithPlayerCtrl->OnEnhanceMenuClosed.AddUObject(this, &AMapGenerateGameMode_Test::showMinimap);
         }
 
         m_fadeWidget->AddToViewport(1);

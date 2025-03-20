@@ -2,10 +2,14 @@
 
 
 #include "SmithEnhanceSubsystem.h"
+
 #include "SmithTurnBattleWorldSettings.h"
 #include "IEnhanceable.h"
 #include "ParamAbsorbable.h"
-#include "MLibrary.h"
+
+#include "SmithBattleLogWorldSubsystem.h"
+#include "ISmithBattleLogger.h"
+
 
 bool USmithEnhanceSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -30,6 +34,9 @@ bool USmithEnhanceSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 void USmithEnhanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
   Super::Initialize(Collection);
+  Collection.InitializeDependency(USmithBattleLogWorldSubsystem::StaticClass());
+  m_logSystem = GetWorld()->GetSubsystem<USmithBattleLogWorldSubsystem>();
+  
   m_upgradeCount = 0;
 }
 
@@ -38,18 +45,22 @@ void USmithEnhanceSubsystem::Deinitialize()
   Super::Deinitialize();
 }
 
-void USmithEnhanceSubsystem::Enhance(IEnhanceable* enhanceable,IParamAbsorbable* absorbItem)
+void USmithEnhanceSubsystem::Enhance(IEnhanceable* enhanceable, IParamAbsorbable* absorbItem)
 {
-  if (!IS_UINTERFACE_VALID(enhanceable) || !IS_UINTERFACE_VALID(absorbItem))
+  if ((enhanceable == nullptr) || (absorbItem == nullptr))
   {
     return;
   }
 
   enhanceable->Upgrade(absorbItem);
+
+  if (m_logSystem != nullptr)
+  {
+    m_logSystem->SendEnhanceLog(Cast<ISmithBattleLogger>(enhanceable));
+  }
+  enhanceable->OnUpgraded();
   ++m_upgradeCount;
 
-  using namespace MLibrary::UE::Audio;
-  AudioKit::PlaySE(TEXT("Hit_Iron_1"));
 }
 
 int32 USmithEnhanceSubsystem::GetUpgradeCount() const

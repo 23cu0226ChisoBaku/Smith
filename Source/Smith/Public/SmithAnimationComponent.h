@@ -2,14 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Animation/AnimInstance.h"
-#include "Animation/AnimMontage.h"
+
 #include "SmithAnimationComponent.generated.h"
 
-
-class USkeltalMeshComponent;
+class UAnimMontage;
+class UAnimInstance;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SMITH_API USmithAnimationComponent : public UActorComponent
@@ -33,14 +31,12 @@ public:
 	void UpdateAnim(float);
 	bool IsCurrentAnimationFinish() const;
 
-	UFUNCTION()
-	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
 private:
+
 	UPROPERTY(VisibleAnywhere)
-	UAnimMontage* MontageToPlay;
+	TObjectPtr<UAnimMontage> MontageToPlay;
 	UPROPERTY(VisibleAnywhere)
-	UAnimInstance* AnimInstance;
+	TObjectPtr<UAnimInstance> AnimInstance;
 
 	UPROPERTY(EditAnywhere)
 	FString objectPass;

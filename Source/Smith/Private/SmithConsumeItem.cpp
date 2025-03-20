@@ -2,7 +2,6 @@
 
 
 #include "SmithConsumeItem.h"
-#include "ICanPick.h"
 
 USmithConsumeItem::USmithConsumeItem(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)

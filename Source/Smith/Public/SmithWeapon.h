@@ -38,11 +38,18 @@ UCLASS(EditInlineNew)
 class SMITH_API USmithWeapon : public UObject, public IEnhanceable, public ISmithBattleLogger
 {
 	GENERATED_BODY()
+
 public:
+
 	USmithWeapon(const FObjectInitializer&);
 	virtual void BeginDestroy() override;
+
 public:
+	//---Begin of IEnhanceable Interface
 	virtual void Upgrade(IParamAbsorbable*) override;
+	virtual void OnUpgraded() override;
+	//---End of IEnhanceable Interface
+	
 	void SetParam(FParams);
 	FParams GetParam() const;
 	int32 GetLevel() const;
@@ -57,15 +64,16 @@ public:
 
 // TODO
 public:
-	TMulticastDelegate<void(FParams)> OnUpgrade;
+	TMulticastDelegate<void(FParams)> OnParamUpdated;
 	
 private:
-	UPROPERTY(EditAnywhere, Category = WeaponParameter)
+	UPROPERTY(EditAnywhere, Category = "Smith|Weapon")
 	FParams WeaponParam;
-	UPROPERTY(EditAnywhere, Category = Weapon)
+	UPROPERTY(EditAnywhere, Category = "Smith|Weapon")
 	FString Name;
-	UPROPERTY(EditAnywhere, Category = Weapon)
+	UPROPERTY(EditAnywhere, Category = "Smith|Weapon")
 	TObjectPtr<UTexture2D> WeaponImage2D;
+
 	int32 m_weaponLevel;
 	
 };

@@ -82,7 +82,6 @@ public:
 	void SetEventPublishMediator(IEventPublishMediator*) override;
 
 	void SwitchAnimation(uint8 animationState) override;
-	void SwitchAnimationDelay(uint8 animationState, float delay) override;
 	void UpdateAnimation(float deltaTime) override;
 	bool IsAnimationFinish() const override;
 
