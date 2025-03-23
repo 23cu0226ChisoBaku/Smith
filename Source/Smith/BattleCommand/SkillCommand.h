@@ -2,12 +2,13 @@
 
 #pragma once
 
+#ifndef SMITH_BATTLE_SKILL_COMMAND
+#define SMITH_BATTLE_SKILL_COMMAND
+
 #include "IBattleCommand.h"
 
 #include "UObject/WeakInterfacePtr.h"
 #include "ISmithAnimator.h"
-
-class ISmithAnimator;
 
 namespace UE::Smith::Command
 {
@@ -16,7 +17,7 @@ namespace UE::Smith::Command
   {
     public:
       SkillCommand(SkillStrategy Strategy, ISmithAnimator* Animator = nullptr, uint8 SkillSlot = 0u)
-        : m_strategy(Strategy)
+        : m_strategy(::MoveTemp(Strategy))
         , m_animator(Animator)
         , m_skillSlot(SkillSlot)
       { }
@@ -89,3 +90,5 @@ namespace UE::Smith::Command
 
   };
 }
+
+#endif

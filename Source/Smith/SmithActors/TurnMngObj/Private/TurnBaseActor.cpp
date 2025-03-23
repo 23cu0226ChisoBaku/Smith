@@ -2,7 +2,6 @@
 
 
 #include "TurnBaseActor.h"
-#include "IMoveable.h"
 #include "ICommandMediator.h"
 #include "Direction.h"
 #include "SmithAIBehaviorProcessor.h"

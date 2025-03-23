@@ -7,7 +7,6 @@
 #include "IAttackable.h"
 #include "SmithEnemy.generated.h"
 
-class USmithMoveComponent;
 class USmithAttackComponent;
 class UHPWidgetComponent;
 
@@ -48,10 +47,6 @@ public:
 	int32 Max_HP;
 	UPROPERTY(BluePrintReadOnly)
 	int32 Current_HP;
-
-protected:
-	UPROPERTY()
-	TObjectPtr<USmithMoveComponent> m_moveComp;
 
 protected:
 	// 数を整数値にする//

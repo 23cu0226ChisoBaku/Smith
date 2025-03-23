@@ -20,35 +20,66 @@ Encoding : UTF-8
 #ifndef SMITH_BATTLE_MOVE_COMMAND
 #define SMITH_BATTLE_MOVE_COMMAND
 
-#include "CoreMinimal.h"
 #include "IBattleCommand.h"
 
-//---------------------------------------
-/*
-                  前方宣言
-*/
-//---------------------------------------
-class IMoveable;
-class ISmithAnimator;
+#include "UObject/WeakInterfacePtr.h"
+#include "ISmithAnimator.h"
 
 namespace UE::Smith::Command
 {
-  class SMITH_API MoveCommand final : public IBattleCommand
+  template<typename MoveStrategy>
+  class MoveCommand final : public IBattleCommand
   {
-  public:
-    MoveCommand(IMoveable*, ISmithAnimator* = nullptr);
-    ~MoveCommand();
+    public:
+    
+      MoveCommand(MoveStrategy Strategy, ISmithAnimator* Animator = nullptr)
+        : m_moveStrategy(::MoveTemp(Strategy))
+        , m_animator(Animator)
+      { }
 
-  public:
-    void Start() override final;
-    void Execute(float deltaTime) override final;
-    void End() override final;
-    bool IsFinish() const override final;
+      ~MoveCommand()
+      {
+        m_animator.Reset();
+      }
 
-  private:
-    /// @brief	移動コマンド実装クラス(pImplイディオム)
-    class MoveImpl;
-    TUniquePtr<MoveImpl> m_moveImpl;
+    public:
+
+      void Start() override final
+      {
+        if (m_animator.IsValid())
+        {
+          m_animator->SwitchAnimation(SMITH_ANIM_WALK);
+        } 
+      } 
+
+      void Execute(float deltaTime) override final
+      {
+        m_moveStrategy(deltaTime);
+
+        if (m_animator.IsValid())
+        {
+          m_animator->UpdateAnimation(deltaTime);
+        }
+      }
+
+      void End() override final
+      {
+        if (m_animator.IsValid())
+        {
+          m_animator->SwitchAnimationDelay(SMITH_ANIM_IDLE, 0.2f);
+        }
+      }
+
+      bool IsFinish() const override final
+      {
+        return (bool)m_moveStrategy;
+      }
+
+    private:
+      
+      MoveStrategy m_moveStrategy;
+
+      TWeakInterfacePtr<ISmithAnimator> m_animator;
   };
 }
 

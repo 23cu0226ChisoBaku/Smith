@@ -11,9 +11,7 @@ public class MapManagement: ModuleRules
 
     PrivateIncludePaths.AddRange(new string[] 
                                             {
-                                              "Smith/BattleCommand/Public",
                                               "Smith/BattleCommand",
-                                              "Smith/SmithActors/Player/Public",
                                               "Smith/SmithActors/TurnMngObj/Public",
                                               "Smith/SmithActors/Interfaces",
                                               "Smith/SmithActors",

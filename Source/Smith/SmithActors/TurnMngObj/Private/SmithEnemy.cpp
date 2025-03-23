@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SmithActors/TurnMngObj/Public/SmithEnemy.h"
-#include "SmithMoveComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "SmithPlayerActor.h"
 #include "AttackHandle.h"

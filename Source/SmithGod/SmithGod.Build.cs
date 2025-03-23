@@ -11,10 +11,15 @@ public class SmithGod: ModuleRules
                                                        "MLibrary", "TurnBattleSystem", "MapManagement", 
                                                        "SmithModel", "Smith", "UMG" , "Niagara", "SmithModelInitializer"});
 
-    PrivateIncludePaths.AddRange(new string[] {"Smith/SmithActors/Interfaces",
-                                               "Smith/BattleCommand",
-                                               "Smith/SmithActors/TurnMngObj/Public",
-                                               "Smith/Player"});
+    PrivateIncludePaths.AddRange(
+                                  new string[]{ 
+                                                "Smith/SmithActors/Interfaces",
+                                                "Smith/BattleCommand",
+                                                "Smith/UI",
+                                                "Smith/SmithActors/TurnMngObj/Public",
+                                                "Smith/Player"
+                                              }
+                                );
   }
 
 }

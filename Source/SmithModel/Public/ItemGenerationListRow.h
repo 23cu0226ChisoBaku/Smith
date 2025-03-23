@@ -17,8 +17,10 @@ struct SMITHMODEL_API FItemGenerationListRow : public FTableRowBase
 
 	UPROPERTY(EditAnywhere)
 	EMapDeployRule DeployRule;
+
 	UPROPERTY(EditAnywhere, meta=(MustImplement="Pickable"))
 	TSubclassOf<UObject> Item;
+	
 	UPROPERTY(EditAnywhere)
 	uint32 SpawnCount;
 };

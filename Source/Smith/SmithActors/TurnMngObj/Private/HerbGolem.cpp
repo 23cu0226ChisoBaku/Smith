@@ -8,8 +8,6 @@
 #include "SmithTurnBaseAIAttackStrategy.h"
 #include "SmithTurnBaseAIMoveStrategy.h"
 #include "SmithTurnBaseAIIdleStrategy.h"
-#include "SmithTurnBaseAIHealStrategy.h"
-#include "SmithMoveComponent.h"
 
 #include "SmithAnimationComponent.h"
 
@@ -25,15 +23,11 @@
 AHerbGolem::AHerbGolem()
 	: m_moveStrategy(nullptr)
 	, m_idleStrategy(nullptr)
-	, MoveComponent(nullptr)
 	, AnimComponent(nullptr)
 	, m_healCnt(1)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
-
-	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
-	check(MoveComponent != nullptr);
 
 	AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("anim comp"));
 	check(AnimComponent != nullptr)
@@ -187,7 +181,7 @@ void AHerbGolem::TurnOnAI()
 	if (m_moveStrategy != nullptr)
 	{
 		m_moveStrategy->SetOwner(this);
-		m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, MoveComponent, 1);
+		m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, 1);
 	}
 
 	if (m_idleStrategy != nullptr)

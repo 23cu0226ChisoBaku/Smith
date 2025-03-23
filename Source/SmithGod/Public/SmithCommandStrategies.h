@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef SMITH_DAMAGE_STRATEGY
-#define SMITH_DAMAGE_STRATEGY
+#ifndef SMITH_COMMAND_STRATEGY
+#define SMITH_COMMAND_STRATEGY
 
 #include "AttackHandle.h"
 #include "Direction.h"
@@ -25,9 +25,20 @@ struct SMITHGOD_API SmithDefaultDamageStrategy
 	AActor* Instigator = nullptr;
 	AActor* Causer = nullptr;
 	USmithDamageSubsystem* DamageSubsystem = nullptr;
-	FAttackHandle Handle;
+	FAttackHandle Handle = {};
 	EDirection FromDirection;
 
+};
+
+struct SMITHGOD_API SmithDefaultMoveStrategy
+{
+	void operator()(float DeltaTime);
+	// TODO ストラテジー実行が完成できたかを確認する演算子オーバーロード
+	explicit operator bool() const noexcept;
+
+	AActor* MoveEntity = nullptr;
+	float MoveSpeed = 0.f;
+	FVector Destination;
 };
 
 #endif

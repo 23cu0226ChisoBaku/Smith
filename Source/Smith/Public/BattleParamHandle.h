@@ -24,18 +24,11 @@ Encoding : UTF-8
 ///
 struct FBattleAttackParamHandle
 {
-  int32 AttackPoint;
-  int32 CriticalPoint;
-  int32 DefensePoint;
-  int32 Level;
-  double MotionValue;
-
-  constexpr FBattleAttackParamHandle()
-    : AttackPoint(0)
-    , CriticalPoint(0)
-    , Level(0)
-    , MotionValue(1.0)
-  {}
+  int32 AttackPoint = 0;
+  int32 CriticalPoint = 0;
+  int32 DefensePoint = 0;
+  int32 Level = 0;
+  double MotionValue = 0.0;
 };
 
 ///
@@ -43,13 +36,8 @@ struct FBattleAttackParamHandle
 ///
 struct FBattleDefenseParamHandle
 {
-  int32 DefensePoint;
-  int32 Level;
-
-  constexpr FBattleDefenseParamHandle()
-    : DefensePoint(0)
-    , Level(0)
-  {}
+  int32 DefensePoint = 0;
+  int32 Level = 0;
 };
 
 #endif

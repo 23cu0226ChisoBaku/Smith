@@ -45,7 +45,6 @@ Encoding : UTF-8
 // Unreal Component
 class USpringArmComponent;
 class UCameraComponent;
-class USmithMoveComponent;
 class USmithInventoryComponent;
 class USmithAnimationComponent;
 
@@ -189,7 +188,7 @@ public:
 
   #if WITH_EDITOR
   void SelfDamage_Debug(int32);
-  #end if
+  #endif
 
 // Private Functions
 #pragma region Private Functions
@@ -228,9 +227,6 @@ private:
   
   UPROPERTY(VisibleAnywhere, Category = Player)
   TObjectPtr<UCameraComponent> Camera;
-
-  UPROPERTY(VisibleAnywhere)
-  TObjectPtr<USmithMoveComponent> MoveComponent;
 
   UPROPERTY(VisibleAnywhere)
   TObjectPtr<USmithInventoryComponent> InventoryComponent;

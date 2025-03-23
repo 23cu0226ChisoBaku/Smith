@@ -19,6 +19,8 @@ public class Smith : ModuleRules
 																						{
 																							"Smith/BattleCommand",
 																							"Smith/Player",
+																							"Smith/AI",
+																							"Smith/UI",
 																							"Smith/SmithActors/Weapon",
 																							"Smith/SmithActors/TurnMngObj/Public",
 																							"Smith/SmithActors/Interfaces",

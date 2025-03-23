@@ -7,7 +7,6 @@
 #include "UObject/WeakInterfacePtr.h"
 #include "SmithTurnBaseAIMoveStrategy.generated.h"
 
-class IMoveable;
 class ICommandMediator;
 class USmithMoveDirector;
 enum class EDirection : uint8;
@@ -23,7 +22,7 @@ public:
 	USmithTurnBaseAIMoveStrategy(const FObjectInitializer&);
 
 public:
-	void Initialize(ICommandMediator*, USmithMoveDirector* ,IMoveable*, uint8 moveSpeed);
+	void Initialize(ICommandMediator*, USmithMoveDirector*, uint8 moveSpeed);
 	virtual void BeginDestroy() override;
 
 private:
@@ -34,7 +33,6 @@ public:
 private:
 	TWeakInterfacePtr<ICommandMediator> m_mediator;
 	TWeakObjectPtr<USmithMoveDirector> m_moveDirector;
-	TWeakInterfacePtr<IMoveable> m_move;
 	uint8 m_moveSpeed;
 
 };

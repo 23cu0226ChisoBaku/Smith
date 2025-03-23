@@ -6,7 +6,6 @@
 #include "Camera/CameraComponent.h"
 
 // Smithゲーム用コンポネント
-#include "SmithMoveComponent.h"
 #include "SmithInventoryComponent.h"
 #include "SmithAnimationComponent.h"
 
@@ -47,7 +46,6 @@ namespace SmithPlayerActor::Private
 ASmithPlayerActor::ASmithPlayerActor()
   : CameraBoom(nullptr)
   , Camera(nullptr)
-  , MoveComponent(nullptr)
   , InventoryComponent(nullptr)
   , AnimationComponent(nullptr)
   , m_commandMediator(nullptr)
@@ -80,9 +78,6 @@ ASmithPlayerActor::ASmithPlayerActor()
   CameraBoom->bEnableCameraRotationLag = false;
   CameraBoom->SetUsingAbsoluteRotation(true);
   CameraBoom->SetWorldRotation(FRotator::ZeroRotator);
-
-  MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("Smith MoveComponent"));
-  check(::IsValid(MoveComponent));
 
   InventoryComponent = CreateDefaultSubobject<USmithInventoryComponent>(TEXT("Smith InventoryComponent"));
   check(::IsValid(InventoryComponent));
@@ -254,9 +249,9 @@ void ASmithPlayerActor::Move(EDirection newDirection)
   // 移動する前に向きを変える
   ChangeForward(newDirection);
   // 移動コマンドを出す
-  if (::IsValid(MoveComponent) && m_commandMediator.IsValid())
+  if (m_commandMediator.IsValid())
   {
-    bool success = m_commandMediator->SendMoveCommand(this, MoveComponent, newDirection, 1);
+    bool success = m_commandMediator->SendMoveCommand(this, newDirection, 1);
     if (!success)
     {
       if (AnimationComponent != nullptr)

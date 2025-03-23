@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SmithBoss.h"
+
 #include "AttackHandle.h"
 #include "SmithAIBehaviorProcessor.h"
 #include "SmithAIStrategyContainer.h"
@@ -40,18 +41,14 @@ void ASmithBoss::BeginPlay()
 
   m_attackStrategy = NewObject<USmithAIConditionAttackStrategy>(this);
   check(m_attackStrategy != nullptr);
+
   m_moveStrategy = NewObject<USmithTurnBaseAIMoveStrategy>(this);
   check(m_moveStrategy != nullptr);
+
   m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
   check(m_idleStrategy != nullptr);
 
   AnimComponent->SwitchAnimState(TEXT("Idle"));
-
-  UWorld* world = GetWorld();
-  if (::IsValid(world))
-  {
-    m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
-  }
 
   m_maxHp = EnemyParam.HP;
 }

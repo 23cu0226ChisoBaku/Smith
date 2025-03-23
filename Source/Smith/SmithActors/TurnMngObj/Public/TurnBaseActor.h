@@ -2,12 +2,13 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "UObject/WeakInterfacePtr.h"
 #include "ITurnManageable.h"
 #include "ICanCommandMediate.h"
 #include "IMinimapDisplayable.h"
+
+#include "UObject/WeakInterfacePtr.h"
+
 #include "TurnBaseActor.generated.h"
 
 class USmithAIStrategy;

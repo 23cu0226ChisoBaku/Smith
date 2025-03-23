@@ -40,6 +40,7 @@ namespace UE::Smith
 			*/
 			//---------------------------------------
 			public:
+			
 				FSmithCommandFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
 
 				FSmithCommandFormat() = default;
@@ -60,8 +61,11 @@ namespace UE::Smith
 				bool IsValid() const;
 
 			private:
+
 				void setCNCoord();
+
 			private:
+
 				UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> m_formatArr;
 				FMapCoord m_cnCoord;
 		};

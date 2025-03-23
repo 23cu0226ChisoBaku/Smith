@@ -9,7 +9,6 @@
 #include "SmithTurnBaseAIAttackStrategy.h"
 #include "SmithTurnBaseAIMoveStrategy.h"
 #include "SmithTurnBaseAIIdleStrategy.h"
-#include "SmithMoveComponent.h"
 
 #include "SmithAnimationComponent.h"
 
@@ -29,7 +28,6 @@ ATurnActor_Test::ATurnActor_Test()
 	: m_attackStrategy(nullptr)
 	, m_moveStrategy(nullptr)
 	, m_idleStrategy(nullptr)
-	, MoveComponent(nullptr)
 	, AnimComponent(nullptr)
 	, m_level(1)
 	, m_bIsPlayingDeadAnimation(false)
@@ -37,9 +35,6 @@ ATurnActor_Test::ATurnActor_Test()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
-
-	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
-	check(MoveComponent != nullptr);
 
 	AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("anim comp"));
 	check(AnimComponent != nullptr)
@@ -215,7 +210,7 @@ void ATurnActor_Test::TurnOnAI()
 	if (m_moveStrategy != nullptr)
 	{
 		m_moveStrategy->SetOwner(this);
-		m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, MoveComponent, 1);
+		m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, 1);
 		m_moveStrategy->OnMoveToEvent.BindUObject(this, &ATurnActor_Test::faceToDirection);
 	}
 
@@ -241,8 +236,6 @@ void ATurnActor_Test::SetEventPublishMediator(IEventPublishMediator* eventMediat
 
 void ATurnActor_Test::SwitchAnimation(uint8 animationState)
 {
-	//MDebug::Log(TEXT("called animation"));
-
 	if (AnimComponent == nullptr)
 	{
 		return;

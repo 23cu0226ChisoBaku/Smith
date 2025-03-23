@@ -20,7 +20,6 @@
 class USmithAIConditionAttackStrategy;
 class USmithTurnBaseAIMoveStrategy;
 class USmithTurnBaseAIIdleStrategy;
-class USmithPickable;
 class USmithBattleLogWorldSubsystem;
 
 class USmithAnimationComponent;
@@ -50,7 +49,9 @@ class SMITH_API ASmithBoss final: public ASmithEnemy,
 
 public:
   using Type = typename Dragon;
+
 public:
+
   ASmithBoss();
 
 protected:
@@ -83,7 +84,6 @@ public:
 
   void OnAttackExecuted() override
   {
-    
   }
 
 // その技を使う条件の関数
@@ -101,14 +101,16 @@ public:
   void SetEventPublishMediator(IEventPublishMediator *) override;
 
 private:
+
   UPROPERTY()
   TObjectPtr<USmithAIConditionAttackStrategy> m_attackStrategy;
+
   UPROPERTY()
   TObjectPtr<USmithTurnBaseAIMoveStrategy> m_moveStrategy;
+
   UPROPERTY()
   TObjectPtr<USmithTurnBaseAIIdleStrategy> m_idleStrategy;
-  UPROPERTY(EditAnywhere)
-  TObjectPtr<USmithMoveComponent> MoveComponent;
+
   UPROPERTY(EditAnywhere)
   TObjectPtr<USmithAnimationComponent> AnimComponent;
 
@@ -118,18 +120,11 @@ private:
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapObjectType, meta = (AllowPrivateAccess = "true"))
   EMapObjType MapObjectType;
 
-  UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, Category = DropItemTable, meta = (AllowPrivateAccess = "true"))
-  TArray<TObjectPtr<USmithPickable>> DropUpgradeTable;
-
 private:
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
   FParams EnemyParam;
   UPROPERTY(EditAnywhere)
   FString Name;
-
-  // TODO
-	UPROPERTY()
-	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
 
   TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
 
