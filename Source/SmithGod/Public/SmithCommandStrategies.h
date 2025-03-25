@@ -12,13 +12,13 @@ class AActor;
 class USmithDamageSubsystem;
 
 // Dummy
-struct SMITHGOD_API SmithDummyStrategy
+struct SmithDummyStrategy
 {
 	void operator()()
 	{ }
 };
 
-struct SMITHGOD_API SmithDefaultDamageStrategy
+struct SmithDefaultDamageStrategy
 {
 	void operator()();
 
@@ -30,7 +30,7 @@ struct SMITHGOD_API SmithDefaultDamageStrategy
 
 };
 
-struct SMITHGOD_API SmithDefaultMoveStrategy
+struct SmithDefaultMoveStrategy
 {
 	void operator()(float DeltaTime);
 	// TODO ストラテジー実行が完成できたかを確認する演算子オーバーロード

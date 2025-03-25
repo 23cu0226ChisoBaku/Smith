@@ -20,20 +20,38 @@ Encoding : UTF-8
 #ifndef SMITH_BATTLE_MOVE_COMMAND
 #define SMITH_BATTLE_MOVE_COMMAND
 
-#include "IBattleCommand.h"
-
 #include "UObject/WeakInterfacePtr.h"
 #include "ISmithAnimator.h"
 
+#include <type_traits>
+#include <concepts>
+
+// コマンドストラテジーコンセプト
+// 実装すべきもの：
+// void operator()(float) const;              
+// explicit operator bool() const noexcept;     // boolキャスト
+//  
+
+template<typename Strategy>
+concept ConceptMoveStrategy = requires(Strategy Strategy_, float DeltaTime)
+{
+  {Strategy_(DeltaTime)} -> std::same_as<void>;
+  (bool)Strategy_; 
+};
+
 namespace UE::Smith::Command
 {
-  template<typename MoveStrategy>
-  class MoveCommand final : public IBattleCommand
+  ///
+  ///	@brief 移動コマンド
+  /// namespace UE::Smith::Command
+  ///
+  template<ConceptMoveStrategy Strategy>
+  class MoveCommand final
   {
     public:
     
-      MoveCommand(MoveStrategy Strategy, ISmithAnimator* Animator = nullptr)
-        : m_moveStrategy(::MoveTemp(Strategy))
+      MoveCommand(Strategy Strategy_, ISmithAnimator* Animator = nullptr)
+        : m_moveStrategy(::MoveTemp(Strategy_))
         , m_animator(Animator)
       { }
 
@@ -44,7 +62,7 @@ namespace UE::Smith::Command
 
     public:
 
-      void Start() override final
+      void Start()
       {
         if (m_animator.IsValid())
         {
@@ -52,17 +70,17 @@ namespace UE::Smith::Command
         } 
       } 
 
-      void Execute(float deltaTime) override final
+      void Update(float DeltaTime)
       {
-        m_moveStrategy(deltaTime);
+        m_moveStrategy(DeltaTime);
 
         if (m_animator.IsValid())
         {
-          m_animator->UpdateAnimation(deltaTime);
+          m_animator->UpdateAnimation(DeltaTime);
         }
       }
 
-      void End() override final
+      void End()
       {
         if (m_animator.IsValid())
         {
@@ -70,14 +88,14 @@ namespace UE::Smith::Command
         }
       }
 
-      bool IsFinish() const override final
+      bool IsFinished() const
       {
         return (bool)m_moveStrategy;
       }
 
     private:
       
-      MoveStrategy m_moveStrategy;
+      Strategy m_moveStrategy;
 
       TWeakInterfacePtr<ISmithAnimator> m_animator;
   };

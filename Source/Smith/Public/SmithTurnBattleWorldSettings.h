@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class SMITHGOD_API ASmithTurnBattleWorldSettings : public AWorldSettings
+class SMITH_API ASmithTurnBattleWorldSettings : public AWorldSettings
 {
 	GENERATED_BODY()
 	

@@ -13,7 +13,7 @@ class ISmithEventLogger;
 enum class EBattleLogType : uint8;
 
 UCLASS()
-class SMITHGOD_API USmithBattleLogWorldSubsystem final : public UWorldSubsystem
+class SMITH_API USmithBattleLogWorldSubsystem final : public UWorldSubsystem
 {
 	GENERATED_BODY()
 

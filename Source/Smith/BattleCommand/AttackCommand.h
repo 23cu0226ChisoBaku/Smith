@@ -21,26 +21,37 @@ Encoding : UTF-8
 #ifndef SMITH_BATTLE_ATTACK_COMMAND
 #define SMITH_BATTLE_ATTACK_COMMAND
 
-#include "IBattleCommand.h"
-
 #include "UObject/WeakInterfacePtr.h"
 #include "ISmithAnimator.h"
+
+#include <concepts>
+#include <type_traits>
+
+// コマンドストラテジーコンセプト
+// 実装すべきもの：
+// void operator()() const;   
+template<typename Strategy>
+concept ConceptAttackStrategy = requires(Strategy Strategy_)
+{
+  {Strategy_()} -> std::same_as<void>;
+};
 
 namespace UE::Smith::Command
 {
   ///
   ///	@brief 攻撃コマンド
   /// namespace UE::Smith::Command
-  /// implemented IBattleCommand
   ///
-  template<typename AttackStrategy>
-  class AttackCommand final : public IBattleCommand
+  template<ConceptAttackStrategy AttackStrategy>
+  class AttackCommand final
   {
     public:
+
       AttackCommand(AttackStrategy Strategy, ISmithAnimator* Animator = nullptr)
         : m_strategy(Strategy)
         , m_animator(Animator)
       { }
+
       ~AttackCommand()
       {
         m_animator.Reset();
@@ -48,7 +59,7 @@ namespace UE::Smith::Command
 
     public:
 
-      void Start() override final
+      void Start()
       {
         if (m_animator.IsValid())
         {
@@ -56,7 +67,7 @@ namespace UE::Smith::Command
         }
       }
 
-      void Execute(float DeltaTime) override final
+      void Update(float DeltaTime)
       {
         if (m_animator.IsValid())
         {
@@ -64,7 +75,7 @@ namespace UE::Smith::Command
         } 
       }
 
-      void End() override final
+      void End()
       {
         if (m_animator.IsValid())
         {
@@ -74,7 +85,7 @@ namespace UE::Smith::Command
         m_strategy();
       }
 
-      bool IsFinish() const override final
+      bool IsFinished() const
       {
         return m_animator.IsValid() ? m_animator->IsAnimationFinish() : true;
       }

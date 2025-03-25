@@ -5,30 +5,43 @@
 #ifndef SMITH_BATTLE_SKILL_COMMAND
 #define SMITH_BATTLE_SKILL_COMMAND
 
-#include "IBattleCommand.h"
-
 #include "UObject/WeakInterfacePtr.h"
 #include "ISmithAnimator.h"
 
+// コマンドストラテジーコンセプト
+// 実装すべきもの：
+// void operator()() const;   
+template<typename Strategy>
+concept ConceptSkillStrategy = requires(Strategy Strategy_)
+{
+  {Strategy_()} -> std::same_as<void>;
+};
+
 namespace UE::Smith::Command
 {
-  template<typename SkillStrategy>
-  class SkillCommand final : public IBattleCommand
+  ///
+  ///	@brief スキルコマンド
+  /// namespace UE::Smith::Command
+  ///
+  template<ConceptSkillStrategy SkillStrategy>
+  class SkillCommand final
   {
     public:
+
       SkillCommand(SkillStrategy Strategy, ISmithAnimator* Animator = nullptr, uint8 SkillSlot = 0u)
         : m_strategy(::MoveTemp(Strategy))
         , m_animator(Animator)
         , m_skillSlot(SkillSlot)
       { }
-      virtual ~SkillCommand()
+
+      ~SkillCommand()
       {
         m_animator.Reset();
       }
 
     public:
 
-      void Start() override final
+      void Start()
       {
         if (m_animator.IsValid())
         {
@@ -57,7 +70,7 @@ namespace UE::Smith::Command
         }
       }
 
-      void Execute(float DeltaTime) override final
+      void Update(float DeltaTime)
       {
         if (m_animator.IsValid())
         {
@@ -65,7 +78,7 @@ namespace UE::Smith::Command
         }
       }
 
-      void End() override final
+      void End()
       {
         if (m_animator.IsValid())
         {
@@ -75,7 +88,7 @@ namespace UE::Smith::Command
         m_strategy();
       }
 
-      bool IsFinish() const override final
+      bool IsFinished() const
       {
         return m_animator.IsValid() ? m_animator->IsAnimationFinish() : true;
       }
@@ -87,7 +100,6 @@ namespace UE::Smith::Command
       TWeakInterfacePtr<ISmithAnimator> m_animator;
 
       uint8 m_skillSlot = 0u;
-
   };
 }
 

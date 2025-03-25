@@ -9,25 +9,20 @@
 #include "SmithMapManager.h"
 
 #include "ICanSetOnMap.h"
-
-#include "MoveCommand.h"
-#include "AttackCommand.h"
-#include "IdleCommand.h"
-#include "SkillCommand.h"
+#include "BattleCommandFactory.h"
 
 #include "SmithCommandFormat.h"
 #include "FormatTransformer.h"
 #include "ISmithAnimator.h"
-
 #include "InvalidValues.h"
-
 #include "MLibrary.h"
-
 #include "AttackHandle.h"
 #include "SmithSkillParameter.h"
 #include "FormatType.h"
 #include "AttackableInfoHandle.h"
 #include "SmithModelHelperFunctionLibrary.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SmithBattleMediator)
 
 USmithBattleMediator::USmithBattleMediator()
   : m_battleSys(nullptr)
@@ -62,13 +57,14 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, EDirection moveDir
 
   if (m_battleSys == nullptr)
   {
-    MDebug::LogError("System INVALID!!!");
+    MDebug::LogError("Battle System INVALID!!!");
     return false;
   }
 
   TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
   if (!mapMgr_shared.IsValid())
   {
+    MDebug::LogError("Map Manager INVALID!!!");
     return false;
   }
   
@@ -79,7 +75,7 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, EDirection moveDir
   {
     return false;
   }
-  else
+
   {
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
     SmithDefaultMoveStrategy moveStrategy = 
@@ -88,10 +84,10 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, EDirection moveDir
       .MoveSpeed = 800.0f,        // TODO
       .Destination = destination
     };
-
-    m_battleSys->RegisterCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::MoveCommand<SmithDefaultMoveStrategy>>(moveStrategy, animator));
-    return true;
+    m_battleSys->RegisterCommand(Cast<ITurnManageable>(requester), FBattleCommandFactory::CreateMoveCommand(moveStrategy, animator));
   }
+
+  return true;
 }
 
 bool USmithBattleMediator::SendAttackCommand(AActor* requester, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle, bool bAttackEvenNoTarget)
@@ -129,7 +125,7 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, EDirection direc
       damageStrategy.Handle = atkHandle;
       damageStrategy.FromDirection = attackableInfo.AttackFrom;
 
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand<SmithDefaultDamageStrategy>>(damageStrategy, animator));
+      m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateAttackCommand(damageStrategy, animator));
     }
     return true;
   }
@@ -138,7 +134,9 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, EDirection direc
   {
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
     AttackHandle attackHandle = AttackHandle::NullHandle;
-    m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand<SmithDummyStrategy>>(SmithDummyStrategy{}, animator));
+    SmithDummyStrategy dummy{};
+
+    m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateAttackCommand(dummy, animator));
     return true;
   }
   else
@@ -183,13 +181,14 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, FSmithSkillParame
         damageStrategy.Handle = atkHandle;
         damageStrategy.FromDirection = attackableInfo.AttackFrom;
   
-        m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::SkillCommand<SmithDefaultDamageStrategy>>(damageStrategy, animator, skillParameter.SkillSlot));
+        m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateSkillCommand(damageStrategy, animator, skillParameter.SkillSlot));
       }
       return true;
     }
     else
     {
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::SkillCommand<SmithDummyStrategy>>(/**dummy */SmithDummyStrategy{}, animator, skillParameter.SkillSlot));
+      SmithDummyStrategy dummy{};
+      m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateSkillCommand(dummy, animator, skillParameter.SkillSlot));
     }
   }
 
@@ -211,9 +210,9 @@ bool USmithBattleMediator::SendIdleCommand(AActor* requester, float idleTime)
     return false;
   }
 
-  m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::IdleCommand>(idleTime));
-  return true;
+  m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateIdleCommand(idleTime));
 
+  return true;
 }
 
 int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format)

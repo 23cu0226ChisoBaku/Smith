@@ -11,7 +11,7 @@ public class Smith : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", 
 																												"InputCore", "EnhancedInput", "MLibrary", 
 																												"TurnBattleSystem" , "MapManagement", "SmithModel",
-																												"SmithGod", "Niagara", "SmithModelInitializer"});
+																												"Niagara", "SmithModelInitializer"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
