@@ -6,6 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "IEnhanceable.h"
 #include "Params.h"
+#include "ISmithBattleLogger.h"
 #include "SmithWeapon.generated.h"
 
 class UTexture2D;
@@ -34,14 +35,21 @@ struct FSmithWeaponInfoHandle
  * 
  */
 UCLASS(EditInlineNew)
-class SMITH_API USmithWeapon : public UObject, public IEnhanceable
+class SMITH_API USmithWeapon : public UObject, public IEnhanceable, public ISmithBattleLogger
 {
 	GENERATED_BODY()
+
 public:
+
 	USmithWeapon(const FObjectInitializer&);
 	virtual void BeginDestroy() override;
+
 public:
+	//---Begin of IEnhanceable Interface
 	virtual void Upgrade(IParamAbsorbable*) override;
+	virtual void OnUpgraded() override;
+	//---End of IEnhanceable Interface
+	
 	void SetParam(FParams);
 	FParams GetParam() const;
 	int32 GetLevel() const;
@@ -51,17 +59,21 @@ public:
 		return handle;
 	}
 
+	FString GetName_Log() const override;
+	EBattleLogType GetType_Log() const override;
+
 // TODO
 public:
-	TMulticastDelegate<void(FParams)> OnUpgrade;
+	TMulticastDelegate<void(FParams)> OnParamUpdated;
 	
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = WeaponParameter, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = "Smith|Weapon")
 	FParams WeaponParam;
-	UPROPERTY(EditAnywhere, Category = Weapon)
+	UPROPERTY(EditAnywhere, Category = "Smith|Weapon")
 	FString Name;
-	UPROPERTY(EditAnywhere, Category = Weapon)
+	UPROPERTY(EditAnywhere, Category = "Smith|Weapon")
 	TObjectPtr<UTexture2D> WeaponImage2D;
+
 	int32 m_weaponLevel;
 	
 };

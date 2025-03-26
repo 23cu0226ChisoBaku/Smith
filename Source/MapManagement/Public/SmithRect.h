@@ -23,6 +23,14 @@ Encoding : UTF-8
 
 #include "CoreMinimal.h"
 
+namespace UE::MLibrary
+{
+  namespace MDataStructure
+  {
+    template<typename ElementType> struct TDimension2ArrayHandle;
+  }
+}
+
 namespace UE::Smith
 {
   namespace Map
@@ -115,6 +123,7 @@ namespace UE::Smith
           /// @return           	範囲外 -> true; 範囲内 -> false
           ///    				
           bool IsOutOfBounds(uint8 x, uint8 y) const;
+          UE::MLibrary::MDataStructure::TDimension2ArrayHandle<uint8> GetDataHandle() const;
       #pragma endregion FSmithRect Interface
       // end of FSmithRect Interface
 

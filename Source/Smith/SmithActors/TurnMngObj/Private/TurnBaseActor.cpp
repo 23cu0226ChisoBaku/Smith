@@ -2,7 +2,6 @@
 
 
 #include "TurnBaseActor.h"
-#include "IMoveable.h"
 #include "ICommandMediator.h"
 #include "Direction.h"
 #include "SmithAIBehaviorProcessor.h"
@@ -49,4 +48,9 @@ void ATurnBaseActor::SetCommandMediator(ICommandMediator* mediator)
 void ATurnBaseActor::InitializeParameter(int32 currentLevel)
 {
 	
+}
+
+UTexture2D* ATurnBaseActor::GetMinimapDisplayTexture_Implementation()
+{
+	return MinimapTexture;
 }

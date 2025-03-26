@@ -13,22 +13,22 @@
  */
 UCLASS(Abstract, EditInlineNew, Blueprintable)
 class SMITH_API USmithPickable : public UObject, public IPickable
-															 , public ISmithBattleLogger
+                              , public ISmithBattleLogger
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 public:
-	USmithPickable(const FObjectInitializer&);
-	virtual void BeginDestroy() override;
+  USmithPickable(const FObjectInitializer&);
+  virtual void BeginDestroy() override;
 
 public:
-	FString GetPickType() const override final;
-	virtual FString GetName_Log() const override final;
-	virtual EBattleLogType GetType_Log() const PURE_VIRTUAL(USmithPickable::GetType_Log, return EBattleLogType::None;);
+  FString GetPickType() const override final;
+  virtual FString GetName_Log() const override final;
+  virtual EBattleLogType GetType_Log() const PURE_VIRTUAL(USmithPickable::GetType_Log, return EBattleLogType::None;);
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PickableInfomation, meta = (AllowPrivateAccess = "true"))
-	FString Name;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PickableInfomation, meta = (AllowPrivateAccess = "true"))
-	FString PickableTypeName;
-	
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PickableInfomation, meta = (AllowPrivateAccess = "true"))
+  FString Name;
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = PickableInfomation, meta = (AllowPrivateAccess = "true"))
+  FString PickableTypeName;
+  
 };

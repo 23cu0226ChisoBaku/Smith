@@ -44,7 +44,8 @@ namespace UE::Smith
       */
       //---------------------------------------
       private:
-        using FDimension2D_uint8 = typename UE::MLibrary::MDataStructure::TDimension2Array<uint8>;
+        using Dimension2D_uint8 = typename UE::MLibrary::MDataStructure::TDimension2Array<uint8>;
+        using Dimension2D_uint8_handle = typename UE::MLibrary::MDataStructure::TDimension2ArrayHandle<uint8>;
 
       //---------------------------------------
       /*
@@ -80,7 +81,7 @@ namespace UE::Smith
         {
           // ムーブ代入（Move assignment）
           // heightは行（Row）、widthは列（Column）
-          m_rect = std::move(FDimension2D_uint8(StaticCast<uint64>(height), StaticCast<uint64>(width)));
+          m_rect = std::move(Dimension2D_uint8(StaticCast<uint64>(height), StaticCast<uint64>(width)));
           for (uint64 y = 0; y < m_rect.Row(); ++y)
           {
             for (uint64 x = 0; x < m_rect.Column(); ++x)
@@ -148,11 +149,15 @@ namespace UE::Smith
         {
           return (x >= GetWidth()) || (y >= GetHeight());
         }
+        Dimension2D_uint8_handle GetDataHandle() const
+        {
+          return m_rect.GetData();
+        }
       #pragma endregion SmithRect Implementation
       // end of SmithRect Implementation
       private:
       // 矩形の元データ（二次元配列）
-      FDimension2D_uint8 m_rect;
+      Dimension2D_uint8 m_rect;
     };
 
     FSmithRect::FSmithRect()
@@ -219,6 +224,10 @@ namespace UE::Smith
     bool FSmithRect::IsOutOfBounds(uint8 x, uint8 y) const
     {
       return m_pImpl->IsOutOfBounds(x, y);
+    }
+    UE::MLibrary::MDataStructure::TDimension2ArrayHandle<uint8> FSmithRect::GetDataHandle() const
+    {
+      return m_pImpl->GetDataHandle();
     }
   }
 }

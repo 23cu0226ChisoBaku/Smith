@@ -2,14 +2,13 @@
 
 
 #include "TurnActor_Test.h"
+
 #include "AttackHandle.h"
 #include "SmithAIBehaviorProcessor.h"
 #include "SmithAIStrategyContainer.h"
 #include "SmithTurnBaseAIAttackStrategy.h"
 #include "SmithTurnBaseAIMoveStrategy.h"
 #include "SmithTurnBaseAIIdleStrategy.h"
-#include "SmithAttackComponent.h"
-#include "SmithMoveComponent.h"
 
 #include "SmithAnimationComponent.h"
 
@@ -18,7 +17,6 @@
 #include "Direction.h"
 #include "SmithPickable.h"
 #include "IEventPublishMediator.h"
-#include "SmithBattleLogWorldSubsystem.h"
 #include "MLibrary.h"
 
 #include "SmithEnemyParamInitializer.h"
@@ -30,20 +28,13 @@ ATurnActor_Test::ATurnActor_Test()
 	: m_attackStrategy(nullptr)
 	, m_moveStrategy(nullptr)
 	, m_idleStrategy(nullptr)
-	, AtkComponent(nullptr)
-	, MoveComponent(nullptr)
 	, AnimComponent(nullptr)
 	, m_level(1)
 	, m_bIsPlayingDeadAnimation(false)
+	, m_bIsPlayingDamagedAnimation(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetTurnPriority(ETurnPriority::Rival);
-
-	AtkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
-	check(AtkComponent != nullptr);
-
-	MoveComponent = CreateDefaultSubobject<USmithMoveComponent>(TEXT("move comp test"));
-	check(MoveComponent != nullptr);
 
 	AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("anim comp"));
 	check(AnimComponent != nullptr)
@@ -62,12 +53,6 @@ void ATurnActor_Test::BeginPlay()
 	check(m_idleStrategy != nullptr);
 
   AnimComponent->SwitchAnimState(TEXT("Idle"));
-
-	UWorld* world = GetWorld();
-	if (world != nullptr)
-	{
-		m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
-	}
 }
 
 void ATurnActor_Test::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -101,13 +86,24 @@ void ATurnActor_Test::Tick(float DeltaTime)
 		return;
 	}
 
+	if (m_bIsPlayingDamagedAnimation)
+	{
+		if (AnimComponent != nullptr && AnimComponent->IsCurrentAnimationFinish())
+		{
+			m_bIsPlayingDamagedAnimation = false;
+		}
+		AnimComponent->UpdateAnim(DeltaTime);
+
+		return;
+	}
+
 	if (m_aiBehaviorProcessor != nullptr)
 	{
 		m_aiBehaviorProcessor->TickBehaviorProcessor(DeltaTime);
 	}
 }
 
-void ATurnActor_Test::OnAttack(AttackHandle&& handle)
+void ATurnActor_Test::OnAttack(const AttackHandle& handle)
 {
 	if (handle.AttackPower > 0)
 	{
@@ -118,49 +114,43 @@ void ATurnActor_Test::OnAttack(AttackHandle&& handle)
 		}
 		EnemyParam.HP -= handle.AttackPower;
 
-		if (m_logSystem != nullptr)
-		{
-			m_logSystem->SendAttackLog(handle.Attacker, this);
-			m_logSystem->SendDamageLog(this,handle.AttackPower);
-		}
-
 		if (AnimComponent != nullptr)
 		{
 			AnimComponent->SwitchAnimState(TEXT("Damaged"));
+			m_bIsPlayingDamagedAnimation = true;
 		}
 	}
-	else
+
+}
+
+bool ATurnActor_Test::IsDefeated() const
+{
+	return EnemyParam.HP <= 0;
+}	
+
+void ATurnActor_Test::OnDefeated()
+{
+	if (m_eventMediator.IsValid())
 	{
-		return;
+		// TODO will return null when RECOMPILE!!!!!!!
+		// Reason: dll make copy of static member variable
+		IPickable* pickable = USmithEnemyLootGenerator::GetLoot(this);
+		if (pickable != nullptr)
+		{
+			USmithPickable* smithPickable = Cast<USmithPickable>(pickable);
+			m_eventMediator->PublishPickUpEvent(this, smithPickable);
+		}
 	}
 
-	if (EnemyParam.HP <= 0)
+	if (OnDefeatEvent.IsBound())
 	{
-		if (m_logSystem != nullptr)
-		{
-			m_logSystem->SendDefeatedLog(this);
-		}
+		OnDefeatEvent.Broadcast();
+	}
 
-		if (m_eventMediator.IsValid())
-		{
-			IPickable* pickable = FSmithEnemyLootGenerator::GetLoot(this);
-			if (pickable != nullptr)
-			{
-				USmithPickable* smithPickable = Cast<USmithPickable>(pickable);
-				m_eventMediator->PublishPickUpEvent(this, smithPickable);
-			}
-		}
-
-		if (OnDefeatEvent.IsBound())
-		{
-			OnDefeatEvent.Broadcast();
-		}
-
-		if (AnimComponent != nullptr)
-		{
-			AnimComponent->SwitchAnimState(TEXT("Dead"));
-			m_bIsPlayingDeadAnimation = true;
-		}
+	if (AnimComponent != nullptr)
+	{
+		AnimComponent->SwitchAnimState(TEXT("Dead"));
+		m_bIsPlayingDeadAnimation = true;
 	}
 }
 
@@ -199,7 +189,7 @@ void ATurnActor_Test::TurnOnAI()
 	if (m_attackStrategy != nullptr)
 	{
 		m_attackStrategy->SetOwner(this);
-		m_attackStrategy->Initialize(AtkComponent, m_commandMediator.Get(), EnemyParam.ATK);
+		m_attackStrategy->Initialize(m_commandMediator.Get(), EnemyParam.ATK);
 		m_attackStrategy->SetAttackParam(EnemyParam.ATK, EnemyParam.CRT, m_level);
 		m_attackStrategy->OnChangeDirectionDelegate.BindUObject(this, &ATurnActor_Test::faceToDirection);
 	}
@@ -220,7 +210,7 @@ void ATurnActor_Test::TurnOnAI()
 	if (m_moveStrategy != nullptr)
 	{
 		m_moveStrategy->SetOwner(this);
-		m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, MoveComponent, 1);
+		m_moveStrategy->Initialize(m_commandMediator.Get(), m_moveDirector, 1);
 		m_moveStrategy->OnMoveToEvent.BindUObject(this, &ATurnActor_Test::faceToDirection);
 	}
 
@@ -246,8 +236,6 @@ void ATurnActor_Test::SetEventPublishMediator(IEventPublishMediator* eventMediat
 
 void ATurnActor_Test::SwitchAnimation(uint8 animationState)
 {
-	//MDebug::Log(TEXT("called animation"));
-
 	if (AnimComponent == nullptr)
 	{
 		return;
@@ -283,33 +271,6 @@ void ATurnActor_Test::UpdateAnimation(float deltaTime)
 	AnimComponent->UpdateAnim(deltaTime);
 }
 
-void ATurnActor_Test::SwitchAnimationDelay(uint8 animationState, float delay)
-{
-  using namespace UE::Smith;
-	FName StateName;
-	switch (animationState)
-	{
-	case SMITH_ANIM_IDLE:
-		StateName = TEXT("Idle");
-		break;
-	case	SMITH_ANIM_WALK:
-		StateName = TEXT("Walk");
-		break;
-	case SMITH_ANIM_ATTACK:
-		StateName = TEXT("Attack");
-		break;
-	case SMITH_ANIM_DAMAGED:
-		StateName = TEXT("Damaged");
-		break;
-	case SMITH_ANIM_DEAD:
-		StateName = TEXT("Dead");
-		break;
-	default:
-		break;
-	}
-  AnimComponent->SwitchAnimStateDelay(StateName, delay);
-}
-
 bool ATurnActor_Test::IsAnimationFinish() const
 {
 	return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
@@ -327,7 +288,8 @@ EBattleLogType ATurnActor_Test::GetType_Log() const
 
 void ATurnActor_Test::InitializeParameter(int32 currentLevel)
 {
-	EnemyParam = FSmithEnemyParamInitializer::GetParams(*this, currentLevel);
+	// TODO will return null when RECOMPILE!!!!!!!
+	EnemyParam = USmithEnemyParamInitializer::GetParams(*this, currentLevel);
 	// TODO
 	m_level = 1 + (currentLevel - 1) * 3;
 }

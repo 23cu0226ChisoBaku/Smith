@@ -2,6 +2,7 @@
 
 
 #include "MapGenerateGameMode_Test.h"
+
 #include "SmithRect.h"
 #include "SmithMap.h"
 #include "SmithMapBuilder.h"
@@ -18,6 +19,7 @@
 #include "SmithBattleMediator.h"
 #include "SmithChasePlayerTracker.h"
 #include "SmithBattleSubsystem.h"
+#include "SmithDamageSubsystem.h"
 #include "SmithEnhanceSubsystem.h"
 #include "SmithEventPublisher.h"
 #include "SmithEventSystem.h"
@@ -32,12 +34,14 @@
 #include "SmithMapBaseMoveDirector.h"
 #include "GameLogWidget.h"
 #include "ScreenFade.h"
-#include "SmithDungeonDamageCalculator.h"
 #include "UI_CurrentLevel.h"
 #include "SmithTowerEnemyParamInitializer.h"
 #include "SmithEnemyParamInitializer.h"
 
-#include "SmithBattlePlayerController.h"
+#include "SmithPlayerController.h"
+
+#include "SmithMinimap.h"
+#include "MinimapDisplayTypeFactory.h"
 
 // TODO
 #include "SmithNextLevelEvent.h"
@@ -53,7 +57,10 @@
 #include "Misc/DateTime.h"
 #include "AudioKit.h"
 #include "ItemGenerationListRow.h"
+
 #include "MLibrary.h"
+
+#include "DamageCalculationStrategies.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   : m_battleSystem(nullptr)
@@ -64,7 +71,6 @@ AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   , m_enhanceSystem(nullptr)
   , m_eventMediator(nullptr)
   , m_logSubsystem(nullptr)
-  , m_damageCalculator(nullptr)
   , m_mapMgr(nullptr)
   , m_defeatedEnemyCount(0)
   , m_curtLevel(0)
@@ -83,8 +89,8 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
 {
   Super::EndPlay(EndPlayReason);
 
-  FSmithEnemyParamInitializer::DetachInitializer();
-  FSmithEnemyLootGenerator::DetachLootGenerator();
+  USmithEnemyParamInitializer::DetachInitializer();
+  USmithEnemyLootGenerator::DetachLootGenerator();
 
   if (m_battleMediator != nullptr)
   {
@@ -116,44 +122,28 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
     m_eventMediator->MarkAsGarbage();
   }
 
-  if (m_damageCalculator != nullptr)
-  {
-    m_damageCalculator->MarkAsGarbage();
-  }
-
   if (m_nextLevelEvent != nullptr)
   {
     m_nextLevelEvent->ConditionalBeginDestroy();
   }
 
-  if (m_towerInitializer != nullptr)
-  {
-    m_towerInitializer->MarkAsGarbage();
-  }
 
   m_mapMgr.Reset();
 }
 
 void AMapGenerateGameMode_Test::startNewLevel()
 {
-  check(m_mapMgr.IsValid());
-  check(m_battleSystem != nullptr);
-  check(m_battleMediator != nullptr); 
-  check(m_chasePlayerTracker != nullptr);
-  check(m_enhanceSystem != nullptr);
-  check(m_eventMediator != nullptr);
-
   APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
   ICanSetOnMap* mapPlayer = Cast<ICanSetOnMap>(playerPawn);
   check(mapPlayer != nullptr);
 
-  m_chasePlayerTracker->SetupTracker(m_mapMgr);
-
+  // ボス階層初期化
   if (m_curtLevel % 5 == 0)
   {
     m_mapMgr->InitMap(GetWorld(), BossMapBluePrint, MapConstructionBluePrint);
     m_mapMgr->InitMapObjs(GetWorld(), playerPawn, BossGenerateBluePrint);
   }
+  // 普通階層初期化
   else
   {
     m_mapMgr->InitMap(GetWorld(), MapBluePrint, MapConstructionBluePrint);
@@ -193,6 +183,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
       {
         ATurnBaseActor* turnBaseEnemy = Cast<ATurnBaseActor>(enemy);
         turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::addDefeatedEnemyCount);
+        // TODO 
         if (m_curtLevel % 5 == 0)
         {
           turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::processGameClear);
@@ -203,6 +194,7 @@ void AMapGenerateGameMode_Test::startNewLevel()
             turnBaseEnemy->OnDefeatEvent.AddUObject(player, &ASmithPlayerActor::OnGameClear);
           }
         }
+
         turnBaseEnemy->InitializeParameter(m_curtLevel);
       }
     }
@@ -273,7 +265,6 @@ void AMapGenerateGameMode_Test::startNewLevel()
     }
   }
 
-
   m_eventSystem->Reset();
 
   if (CurtLevelUI != nullptr)
@@ -284,15 +275,10 @@ void AMapGenerateGameMode_Test::startNewLevel()
 
 void AMapGenerateGameMode_Test::clearCurrentLevel()
 {
-  check(m_mapMgr.IsValid());
-  check(m_battleSystem != nullptr);
-  check(m_battleMediator != nullptr); 
-  check(m_chasePlayerTracker != nullptr);
-
   m_mapMgr->Reset();
   m_battleSystem->ResetBattle();
+  m_minimap->ResetMap();
 
-  // TODO
   if (m_fadeWidget != nullptr)
   {
     m_fadeWidget->StartFade(FadeStatus::In);
@@ -300,9 +286,10 @@ void AMapGenerateGameMode_Test::clearCurrentLevel()
 }
 
 void AMapGenerateGameMode_Test::initializeGame()
-{
+{ 
   UWorld* world = GetWorld();
   check(world != nullptr);
+
   ASmithTurnBattleWorldSettings* worldSettings = Cast<ASmithTurnBattleWorldSettings>(world->GetWorldSettings());
 
   if (worldSettings != nullptr && worldSettings->IsBattleLevel())
@@ -325,12 +312,17 @@ void AMapGenerateGameMode_Test::initializeGame()
     m_mapMgr = ::MakeShared<UE::Smith::Map::FSmithMapManager>();
     check(m_mapMgr.IsValid());
 
-    m_damageCalculator = NewObject<USmithDungeonDamageCalculator>(this);
-    check(m_damageCalculator != nullptr);
-    m_damageCalculator->SetConstantNumber(TEST_DAMAGE_CALCULATOR_CONSTANT);
+    m_chasePlayerTracker->SetupTracker(m_mapMgr);
 
-    m_battleMediator->SetupMediator(m_battleSystem, m_damageCalculator, m_mapMgr);
+    USmithDamageSubsystem* damageSys = world->GetSubsystem<USmithDamageSubsystem>();
+    if (damageSys != nullptr)
+    {
+      damageSys->SetDamageStrategy(FSmithReductionRateDCS{TEST_DAMAGE_CALCULATOR_CONSTANT});
+    }
+    // コマンド仲介初期化
+    m_battleMediator->SetupMediator(m_battleSystem, damageSys, m_mapMgr);
 
+    // イベント登録システムを注入
     m_mapMgr->AssignEventRegister(m_eventSystem);
     m_battleSystem->AssignEventExecutor(m_eventSystem);
 
@@ -338,9 +330,16 @@ void AMapGenerateGameMode_Test::initializeGame()
     check(m_enhanceSystem != nullptr);
 
     APawn* playerPawn = UGameplayStatics::GetPlayerPawn(world, 0);
+    // 強化システムを注入
     ICanUseEnhanceSystem* enhanceUser = Cast<ICanUseEnhanceSystem>(playerPawn);
     check(enhanceUser != nullptr);
     enhanceUser->SetEnhanceSystem(m_enhanceSystem);
+
+    ASmithPlayerActor* player = Cast<ASmithPlayerActor>(playerPawn);
+    if (player != nullptr)
+    {
+      player->OnDead.AddUObject(this, &AMapGenerateGameMode_Test::processGameOver);
+    }
 
     m_eventMediator = NewObject<USmithEventPublishMediator>(this);
     check(m_eventMediator != nullptr)
@@ -356,17 +355,34 @@ void AMapGenerateGameMode_Test::initializeGame()
       m_logSubsystem->SetLogWidget(logWidget);
     }
 
+    // リザルト変数初期化
     m_curtLevel = 1;
     m_defeatedEnemyCount = 0;
     m_startPlayTime = FMath::FloorToInt32(world->GetTimeSeconds());
     m_startDateTime = FDateTime::Now();
 
-    // TODO
+    // 階層表示ウイジェット
     CurtLevelUI = CreateWidget<UUI_CurrentLevel>(world, LevelUISub);
     if (CurtLevelUI != nullptr)
     {
       CurtLevelUI->AddToViewport();
       CurtLevelUI->SetLevel(StaticCast<int32>(m_curtLevel));
+    }
+
+    // Minimap
+    {
+      m_minimap = CreateWidget<USmithMinimap>(world, MinimapWidgetSub);
+      check(m_minimap != nullptr)
+      if (m_minimap != nullptr)
+      {
+        m_minimap->AddToViewport();
+      }
+  
+      m_factory = NewObject<UMinimapDisplayTypeFactory>(world, MinimapTypeFactorySub);
+      check(m_factory != nullptr);
+      
+      m_mapMgr->AssignMinimapDisplayer(m_minimap);
+      m_mapMgr->AssignMinimapDisplayTypeFactory(m_factory);
     }
 
     if (FadeSub != nullptr)
@@ -376,13 +392,18 @@ void AMapGenerateGameMode_Test::initializeGame()
       if (m_fadeWidget != nullptr)
       {
         APlayerController* playerCtrl = world->GetFirstPlayerController();
-        ASmithBattlePlayerController* smithPlayerCtrl = Cast<ASmithBattlePlayerController>(playerCtrl);
+        ASmithPlayerController* smithPlayerCtrl = Cast<ASmithPlayerController>(playerCtrl);
         if (smithPlayerCtrl != nullptr)
         {
           m_fadeWidget->OnFadeInStartEvent.AddUObject(this, &AMapGenerateGameMode_Test::startNewLevel);
-          m_fadeWidget->OnFadeInEndEvent.AddUObject(smithPlayerCtrl, &ASmithBattlePlayerController::EnablePlayerInput);
-          m_fadeWidget->OnFadeOutStartEvent.AddUObject(smithPlayerCtrl, &ASmithBattlePlayerController::DisablePlayerInput);
+          m_fadeWidget->OnFadeInEndEvent.AddUObject(smithPlayerCtrl, &ASmithPlayerController::EnablePlayerInput);
+          m_fadeWidget->OnFadeOutStartEvent.AddUObject(smithPlayerCtrl, &ASmithPlayerController::DisablePlayerInput);
+          // TODO
+          m_fadeWidget->OnFadeOutStartEvent.AddUObject(m_battleSystem, &USmithBattleSubsystem::ResetBattle);
           m_fadeWidget->OnFadeOutEndEvent.AddUObject(this, &AMapGenerateGameMode_Test::clearCurrentLevel);
+
+          smithPlayerCtrl->OnEnhanceMenuOpened.AddUObject(this, &AMapGenerateGameMode_Test::hideMinimap);
+          smithPlayerCtrl->OnEnhanceMenuClosed.AddUObject(this, &AMapGenerateGameMode_Test::showMinimap);
         }
 
         m_fadeWidget->AddToViewport(1);
@@ -390,6 +411,7 @@ void AMapGenerateGameMode_Test::initializeGame()
       }
     }
 
+    // 階層上りイベント
     m_nextLevelEvent = m_eventPublisher->PublishMapEvent<USmithNextLevelEvent>(USmithNextLevelEvent::StaticClass());
     if (m_nextLevelEvent == nullptr)
     {
@@ -400,22 +422,25 @@ void AMapGenerateGameMode_Test::initializeGame()
       m_nextLevelEvent->OnNextLevel.BindUObject(this, &AMapGenerateGameMode_Test::goToNextLevel);
     }
 
-    m_towerInitializer = NewObject<USmithTowerEnemyParamInitializer>(this);
-    check(m_towerInitializer != nullptr);
-
-    m_towerInitializer->AssignEnemyParamList(EnemyDefaultParamList);
-    FSmithEnemyParamInitializer::AssignInitializer(m_towerInitializer);
-
+    // TODO DLLをロードすると、スタティック変数のコピーが生成される
+    // 故に、違う値に代入してしまう
+    // 解決策：ヘルパーDLLを用意して、他のDLLがそのDLLをアクセスすると値の一致性が保障される？
     UGameInstance* gameInstance = world->GetGameInstance();
     if (gameInstance != nullptr)
     {
-      USmithLootGameInstanceSubsystem* lootSub = gameInstance->GetSubsystem<USmithLootGameInstanceSubsystem>();
-      if (lootSub != nullptr)
+      USmithLootGameInstanceSubsystem* lootGenerator = gameInstance->GetSubsystem<USmithLootGameInstanceSubsystem>();
+      if (lootGenerator != nullptr)
       {
-        lootSub->AssignLootList(EnemyDropLootList);
+        lootGenerator->AssignLootList(EnemyDropLootList);
+        USmithEnemyLootGenerator::AssignLootGenerator(lootGenerator);
       }
 
-      FSmithEnemyLootGenerator::AssignLootGenerator(lootSub);
+      USmithTowerEnemyParamInitializer* paramInitializer = gameInstance->GetSubsystem<USmithTowerEnemyParamInitializer>();
+      if (paramInitializer != nullptr)
+      {
+        paramInitializer->AssignEnemyParamList(EnemyDefaultParamList);
+        USmithEnemyParamInitializer::AssignInitializer(paramInitializer);
+      }
     }
   }
 }
@@ -483,7 +508,7 @@ void AMapGenerateGameMode_Test::processGameClear()
 
 void AMapGenerateGameMode_Test::deployPickableEvent()
 {
-  if (ItemGenerationRecipe == nullptr) [[unlikely]]
+  if (ItemGenerationRecipe == nullptr)
   {
     return;
   }
@@ -516,5 +541,35 @@ void AMapGenerateGameMode_Test::deployPickableEvent()
     }
 
     m_mapMgr->InitPickableEvent(recipe->DeployRule, itemEvents);
+  }
+}
+
+void AMapGenerateGameMode_Test::processGameOver()
+{
+  UWorld* world = GetWorld();
+  if (world != nullptr)
+  {
+    UGameInstance* gameInstance = world->GetGameInstance();
+    USmithBattleGameInstanceSubsystem* battleInstanceSubsystem = gameInstance->GetSubsystem<USmithBattleGameInstanceSubsystem>();
+    if (battleInstanceSubsystem != nullptr)
+    {
+      battleInstanceSubsystem->DisplayGameOverWidget(this);
+    }
+  }
+}
+
+void AMapGenerateGameMode_Test::hideMinimap()
+{
+  if (m_minimap != nullptr)
+  {
+    m_minimap->SetVisibility(false);
+  }
+}
+
+void AMapGenerateGameMode_Test::showMinimap()
+{
+  if (m_minimap != nullptr)
+  {
+    m_minimap->SetVisibility(true);
   }
 }

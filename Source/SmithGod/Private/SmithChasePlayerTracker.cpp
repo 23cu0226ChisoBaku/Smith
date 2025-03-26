@@ -2,27 +2,26 @@
 
 
 #include "SmithChasePlayerTracker.h"
+
 #include "SmithMapManager.h"
 #include "Direction.h"
 #include "ICanSetOnMap.h"
-#include "MLibrary.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SmithChasePlayerTracker)
 
 USmithChasePlayerTracker::USmithChasePlayerTracker(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
   , m_mapMgr(nullptr)
 { }
 
-void USmithChasePlayerTracker::SetupTracker(TSharedPtr<UE::Smith::Map::FSmithMapManager> mapMgr)
+void USmithChasePlayerTracker::SetupTracker(const TSharedPtr<UE::Smith::Map::FSmithMapManager>& mapMgr)
 {
   m_mapMgr = mapMgr;
 }
 
 bool USmithChasePlayerTracker::TrackTarget(EDirection& outDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
 {
-  if (!IS_UINTERFACE_VALID(chaser))
-  {
-    return false;
-  }
+  check(chaser);
 
   TSharedPtr<UE::Smith::Map::FSmithMapManager> mapMgr_shared = m_mapMgr.Pin();
   if (!mapMgr_shared.IsValid())

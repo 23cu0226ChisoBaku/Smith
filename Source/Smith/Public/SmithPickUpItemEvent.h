@@ -7,6 +7,7 @@
 #include "UObject/WeakInterfacePtr.h"
 #include "ISmithMapEvent.h"
 #include "ISmithEventLogger.h"
+#include "IMinimapDisplayable.h"
 #include "SmithPickUpItemEvent.generated.h"
 
 class IPickable;
@@ -17,7 +18,7 @@ class UNiagaraComponent;
  * 
  */
 UCLASS()
-class SMITH_API USmithPickUpItemEvent : public UObject, public ISmithMapEvent, public ISmithEventLogger
+class SMITH_API USmithPickUpItemEvent : public UObject, public ISmithMapEvent, public ISmithEventLogger, public IMinimapDisplayable
 {
 	GENERATED_BODY()
 
@@ -41,6 +42,9 @@ public:
 	void AssignPickable(IPickable*, UNiagaraSystem*);
 	IPickable* GetPickable() const;
 	FString GetPickUpItemType() const;
+
+public:
+UTexture2D* GetMinimapDisplayTexture_Implementation() override final;
 	
 private:
 	UPROPERTY()
@@ -49,6 +53,9 @@ private:
 	TObjectPtr<UNiagaraComponent> m_itemEventNiagaraComp;
 	UPROPERTY()
 	TObjectPtr<UObject> m_pickableObject;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> MinimapTexture;
 
 private:
 	TWeakInterfacePtr<IPickable> m_pickable;

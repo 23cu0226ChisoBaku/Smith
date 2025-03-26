@@ -31,13 +31,12 @@ struct MAPMANAGEMENT_API FSmithMapConstructionBluePrint
 
 public:
   /** タイルサイズ(単位：cm) */
-  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
   int32 TileSize;
   /** マップの原点座標(マップ矩形(二次元配列)の[0,0]の座標) */
-  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  UPROPERTY(EditAnywhere)
   FVector OriginCoordinate;
-  /** タイルのBPオブジェクトパス */
-  UPROPERTY(EditAnywhere, BlueprintReadWrite)
-  TMap<ETileType, FString> TileBuildingMaterialPaths;
-
+  /** タイルのBPオブジェクトサブクラス */
+  UPROPERTY(EditAnywhere)
+  TMap<ETileType, TSubclassOf<AActor>> TileBuildingMaterialSubClass;
 };

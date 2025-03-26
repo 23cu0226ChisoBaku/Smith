@@ -19,25 +19,16 @@ Encoding : UTF-8
 #ifndef SMITH_BATTLE_PARAM_HANDLE
 #define SMITH_BATTLE_PARAM_HANDLE
 
-#include "CoreMinimal.h"
-
 ///
 /// @brief 攻撃パラメーターハンドル
 ///
 struct FBattleAttackParamHandle
 {
-  int32 AttackPoint;
-  int32 CriticalPoint;
-  int32 DefensePoint;
-  int32 Level;
-  double MotionValue;
-
-  constexpr FBattleAttackParamHandle()
-    : AttackPoint(0)
-    , CriticalPoint(0)
-    , Level(0)
-    , MotionValue(0)
-  {}
+  int32 AttackPoint = 0;
+  int32 CriticalPoint = 0;
+  int32 DefensePoint = 0;
+  int32 Level = 0;
+  double MotionValue = 0.0;
 };
 
 ///
@@ -45,13 +36,8 @@ struct FBattleAttackParamHandle
 ///
 struct FBattleDefenseParamHandle
 {
-  int32 DefensePoint;
-  int32 Level;
-
-  constexpr FBattleDefenseParamHandle()
-    : DefensePoint(0)
-    , Level(0)
-  {}
+  int32 DefensePoint = 0;
+  int32 Level = 0;
 };
 
 #endif

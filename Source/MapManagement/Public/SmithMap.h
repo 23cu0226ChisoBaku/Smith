@@ -71,9 +71,9 @@ namespace UE::Smith
           /// @param widthPerSection  セクションの横幅
           /// @param heightPerSection セクションの縦幅
           /// @param sectionGap       セクションの間のギャップ
-          /// @param defaultValue     マップのマスの初期データ
+          /// @param defaultValue     マップのマスのデータ
           ///
-          void GenerateMap(uint8 row, uint8 column, uint8 widthPerSection,uint8 heightPerSection, uint8 sectionGap, uint8 defaultValue);
+          void GenerateMap(uint8 row, uint8 column, uint8 widthPerSection,uint8 heightPerSection, uint8 sectionGap, uint8 mapDefaultValue);
           ///
           /// @brief                  部屋を生成する
           /// @param sectionIdx       生成するセクションのインデックス
@@ -81,13 +81,14 @@ namespace UE::Smith
           /// @param roomMaxWidth     部屋の最大横幅
           /// @param roomMinHeight    部屋の最小縦幅
           /// @param roomMaxHeight    部屋の最大縦幅
-          /// @param defaultValue     部屋の初期データ
+          /// @param defaultValue     部屋のデータ
           ///
-          void GenerateRoom(uint8 sectionIdx, uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue);
+          void GenerateRoom(uint8 sectionIdx, uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 roomDefaultValue);
           ///
-          /// @brief 部屋を接続する
+          /// @brief                  部屋を接続する
+          /// @param pathwayData      通路のデータ
           ///
-          void ConnectRooms(uint8 corridorData);
+          void ConnectRooms(uint8 pathwayData);
           ///
           /// @brief                  セクションの数を取得
           /// @return                 セクションの数

@@ -7,7 +7,6 @@
 #include "IAttackable.h"
 #include "SmithEnemy.generated.h"
 
-class USmithMoveComponent;
 class USmithAttackComponent;
 class UHPWidgetComponent;
 
@@ -18,6 +17,7 @@ UCLASS()
 class SMITH_API ASmithEnemy : public ATurnBaseActor, public IAttackable
 {
 	GENERATED_BODY()
+	
 public:
 	ASmithEnemy();
 
@@ -28,7 +28,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void OnAttack(AttackHandle &&) override;
+	virtual void OnAttack(const AttackHandle& Handle) override;
+	virtual bool IsDefeated() const override
+	{
+		return m_hp <= 0;
+	}
+	virtual void OnDefeated() override
+	{ }
+	
 	void OnHeal(int32);
 
 public:
@@ -40,12 +47,6 @@ public:
 	int32 Max_HP;
 	UPROPERTY(BluePrintReadOnly)
 	int32 Current_HP;
-
-protected:
-	UPROPERTY()
-	TObjectPtr<USmithMoveComponent> m_moveComp;
-	UPROPERTY()
-	TObjectPtr<USmithAttackComponent> m_attackComp;
 
 protected:
 	// 数を整数値にする//

@@ -24,6 +24,7 @@ Encoding : UTF-8
 #include "ISmithMapEvent.h"
 #include "SmithMapHelperLibrary.h"
 #include "MLibrary.h"
+#include "IMinimapDisplayable.h"
 
 
 namespace UE::Smith
@@ -114,7 +115,13 @@ namespace UE::Smith
             model_shared->StaySpaceTable[placeCoord]->SetMapObj(mapObj);
           }
           // マップオブジェクトの原点座標だけテーブルに記録する
-          model_shared->OnMapObjsCoordTable.Emplace(mapObj, FMapCoord{x, y});
+          const FMapCoord placeOriginCoord = FMapCoord{x, y};
+          model_shared->OnMapObjsCoordTable.Emplace(mapObj, placeOriginCoord);
+
+          if (m_updateMinimapDelegate.IsBound())
+          {
+            m_updateMinimapDelegate.Broadcast(mapObj->_getUObject(), placeOriginCoord, mapObjSizeX, mapObjSizeY);
+          }
         }
         void DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y)
         {
@@ -160,10 +167,25 @@ namespace UE::Smith
             // イベント初期化
             event->InitializeEvent(eventLocation, eventRotation);
             staySpaceTileContainer->SetEvent(event);
+
+            if (m_updateMinimapDelegate.IsBound())
+            {
+              m_updateMinimapDelegate.Broadcast(event->_getUObject(), FMapCoord(x, y), 1u, 1u);
+            }
           }
+        }
+        void AddUpdateMinimapDelegate(const TDelegate<void(UObject*, const FMapCoord&, uint8, uint8)>& delegate)
+        {
+          if (!delegate.IsBound())
+          {
+            return;
+          }
+
+          m_updateMinimapDelegate.Add(delegate);
         }
       private:
         TWeakPtr<Model> m_model;
+        TMulticastDelegate<void(UObject*, const FMapCoord&, uint8, uint8)> m_updateMinimapDelegate;
     };
     FSmithMapDeployDirector::FSmithMapDeployDirector()
       : m_pImpl(::MakeUnique<DeployDirectorImpl>())
@@ -196,6 +218,10 @@ namespace UE::Smith
     void FSmithMapDeployDirector::DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y)
     {
       m_pImpl->DeployEvent(event, x, y);
+    }
+    void FSmithMapDeployDirector::AddUpdateMinimapDelegate(const TDelegate<void(UObject*, const FMapCoord&, uint8, uint8)>& delegate)
+    {
+      m_pImpl->AddUpdateMinimapDelegate(delegate);
     }
   } 
 }

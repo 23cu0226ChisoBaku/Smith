@@ -28,6 +28,7 @@ UBattleCommandManager::UBattleCommandManager(const FObjectInitializer& ObjectIni
   , m_eventExecutor(nullptr)
   , m_bIsExecutingCommand(false)
   , m_bCanRegister(false)
+  , m_bIsReset(false)
 {}
 
 void UBattleCommandManager::BeginDestroy()
@@ -131,24 +132,27 @@ void UBattleCommandManager::ExecuteCommands(float deltaTime)
   if (m_commandLists.Num() == 0)
   {
     m_bIsExecutingCommand = false;
-    if (OnEndExecuteEvent.IsBound())
-    {
-      OnEndExecuteEvent.Broadcast();
-    }
 
     // このターンに発生するマップイベントを実行
     if (m_eventExecutor.IsValid() && m_eventExecutor->IsEventInStock())
     { 
       m_eventExecutor->ExecuteEvent();
     }
+
+    if (!m_bIsReset && OnEndExecuteEvent.IsBound())
+    {
+      OnEndExecuteEvent.Broadcast();
+    }
   }
 }
 void UBattleCommandManager::Initialize()
 {
   m_bCanRegister = true;
+  m_bIsReset = false;
 }
 void UBattleCommandManager::Reset()
 {
+  m_bIsReset = true;
   m_bIsExecutingCommand = false;
   m_bCanRegister = false;
   m_requestCmdWaitList.Reset();

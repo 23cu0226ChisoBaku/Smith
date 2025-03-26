@@ -5,9 +5,9 @@ BattleResult.h
 
 Author : MAI ZHICONG(バクチソウ)
 
-Description : [ファイル説明]
+Description : バトルリザルト
 
-Update History: [20xx/xx/xx] [コメント]
+Update History: 2025/01/29 作成
 
 Version : alpha_1.0.0
 
@@ -19,7 +19,7 @@ Encoding : UTF-8
 #ifndef SMITH_BATTLE_RESULT
 #define SMITH_BATTLE_RESULT
 
-#include "CoreMinimal.h"
+
 //---------------------------------------
 /*
                   前方宣言
@@ -32,12 +32,23 @@ class ISmithBattleLogger;
 ///
 struct FBattleResult
 {
+  ///
+  /// @brief 戦う相手のLog出力用ポインタ
+  ///
   ISmithBattleLogger* ResultLogger;
+  ///
+  /// @brief ダメージ
+  ///
   int32 Damage;
 
   constexpr FBattleResult()
     : ResultLogger(nullptr)
     , Damage(0)
+  {}
+
+  FBattleResult(ISmithBattleLogger* ResultLogger_, int32 Damage_)
+    : ResultLogger(ResultLogger_)
+    , Damage(Damage_)
   {}
 };
 

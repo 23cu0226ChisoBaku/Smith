@@ -60,6 +60,10 @@ namespace UE::Smith
         /// @return 		ETileType
         ///
         ETileType GetTileType() const;
+
+        void SetTileActor(AActor*);
+        AActor* GetTileActor() const;
+
         ///
         /// @brief 			タイルにものを置けるか
         /// @return 		置ける -> true 置けない -> false
@@ -84,7 +88,21 @@ namespace UE::Smith
         /// @brief      タイルタイプ
         ///
         ETileType m_tileType;
+        TWeakObjectPtr<AActor> m_tileActor;
     };
+
+    inline ETileType FTileInfoContainer::GetTileType() const
+    {
+      return m_tileType;
+    }
+    inline void FTileInfoContainer::SetTileActor(AActor* actor)
+    {
+      m_tileActor = actor;
+    }
+    inline AActor* FTileInfoContainer::GetTileActor() const
+    {
+      return m_tileActor.Get();
+    }
   }
 }
 

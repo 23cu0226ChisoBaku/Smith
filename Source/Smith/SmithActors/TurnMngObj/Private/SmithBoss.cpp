@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SmithBoss.h"
+
 #include "AttackHandle.h"
 #include "SmithAIBehaviorProcessor.h"
 #include "SmithAIStrategyContainer.h"
 #include "SmithAIConditionAttackStrategy.h"
 #include "SmithTurnBaseAIMoveStrategy.h"
 #include "SmithTurnBaseAIIdleStrategy.h"
-#include "SmithAttackComponent.h"
 #include "SmithAnimationComponent.h"
 #include "FormatInfo_Import.h"
 #include "SmithPickable.h"
@@ -22,7 +22,6 @@
 ASmithBoss::ASmithBoss()
   : m_attackStrategy(nullptr)
   , m_idleStrategy(nullptr)
-  , m_atkComponent(nullptr)
   , AnimComponent(nullptr)
   , m_wingsCnt(0)
   , m_breathCnt(0)
@@ -32,8 +31,6 @@ ASmithBoss::ASmithBoss()
   PrimaryActorTick.bCanEverTick = true;
   SetTurnPriority(ETurnPriority::Rival);
 
-  m_atkComponent = CreateDefaultSubobject<USmithAttackComponent>(TEXT("attack comp test"));
-  check(m_atkComponent != nullptr);
   AnimComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("anim comp"));
   check(AnimComponent != nullptr)
 }
@@ -44,18 +41,14 @@ void ASmithBoss::BeginPlay()
 
   m_attackStrategy = NewObject<USmithAIConditionAttackStrategy>(this);
   check(m_attackStrategy != nullptr);
+
   m_moveStrategy = NewObject<USmithTurnBaseAIMoveStrategy>(this);
   check(m_moveStrategy != nullptr);
+
   m_idleStrategy = NewObject<USmithTurnBaseAIIdleStrategy>(this);
   check(m_idleStrategy != nullptr);
 
   AnimComponent->SwitchAnimState(TEXT("Idle"));
-
-  UWorld* world = GetWorld();
-  if (::IsValid(world))
-  {
-    m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
-  }
 
   m_maxHp = EnemyParam.HP;
 }
@@ -86,23 +79,23 @@ void ASmithBoss::Tick(float DeltaTime)
   }
 }
 
-void ASmithBoss::OnAttack(AttackHandle&& handle)
+void ASmithBoss::OnAttack(const AttackHandle& handle)
 {
   EnemyParam.HP -= handle.AttackPower;
-  if (m_logSystem != nullptr)
+}
+
+bool ASmithBoss::IsDefeated() const
+{
+  return EnemyParam.HP <= 0;
+}
+
+void ASmithBoss::OnDefeated()
+{
+  if (OnDefeatEvent.IsBound())
   {
-    // TODO
-    m_logSystem->SendAttackLog(handle.Attacker, this);
-    m_logSystem->SendDamageLog(this, handle.AttackPower);
+    OnDefeatEvent.Broadcast();
   }
-  if(EnemyParam.HP <= 0)
-  {
-    if (OnDefeatEvent.IsBound())
-    {
-      OnDefeatEvent.Broadcast();
-    }
-    Destroy();
-  }
+  Destroy();
 }
 
 uint8 ASmithBoss::GetOnMapSizeX() const
@@ -125,7 +118,7 @@ void ASmithBoss::TurnOnAI()
   if (m_attackStrategy != nullptr)
   {
     m_attackStrategy->SetOwner(this);
-    m_attackStrategy->Initialize(m_atkComponent, m_commandMediator.Get(), EnemyParam.ATK);
+    m_attackStrategy->Initialize(m_commandMediator.Get(), EnemyParam.ATK);
     m_attackStrategy->SetAttackParam(EnemyParam.ATK, EnemyParam.CRT, m_level);
   }
 
@@ -147,7 +140,7 @@ void ASmithBoss::TurnOnAI()
   if (m_idleStrategy != nullptr)
   {
     m_idleStrategy->SetOwner(this);
-    m_idleStrategy->Initialize(m_commandMediator.Get());
+    m_idleStrategy->Initialize(m_commandMediator.Get(), 0.2f);
   }
 
   if (m_aiBehaviorProcessor != nullptr)
@@ -165,8 +158,6 @@ void ASmithBoss::SetEventPublishMediator(IEventPublishMediator* eventMediator)
 
 void ASmithBoss::SwitchAnimation(uint8 animationState)
 {
-	//MDebug::Log(TEXT("called animation"));
-
 	if (AnimComponent == nullptr)
 	{
 		return;
@@ -205,11 +196,6 @@ void ASmithBoss::SwitchAnimation(uint8 animationState)
 void ASmithBoss::UpdateAnimation(float deltaTime)
 {
 	AnimComponent->UpdateAnim(deltaTime);
-}
-
-void ASmithBoss::SwitchAnimationDelay(uint8 animationState, float delay)
-{
-
 }
 
 bool ASmithBoss::IsAnimationFinish() const
@@ -300,6 +286,6 @@ EBattleLogType ASmithBoss::GetType_Log() const
 
 void ASmithBoss::InitializeParameter(int32 currentLevel)
 {
-	EnemyParam = FSmithEnemyParamInitializer::GetParams(this, currentLevel);
+	EnemyParam = USmithEnemyParamInitializer::GetParams(this, currentLevel);
   m_level = 1 + (currentLevel - 1) * 4;
 }

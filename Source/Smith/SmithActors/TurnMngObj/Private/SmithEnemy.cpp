@@ -1,45 +1,22 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SmithActors/TurnMngObj/Public/SmithEnemy.h"
-#include "SmithMoveComponent.h"
-#include "SmithAttackComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "SmithPlayerActor.h"
+#include "AttackHandle.h"
 
 #include "Debug.h"
 
 ASmithEnemy::ASmithEnemy()
     : m_hp(5)
 {
-//   SetTurnPriority(ETurnPriority::Rival);
   PrimaryActorTick.bCanEverTick = true;
-
-//  m_moveComp = CreateDefaultSubobject<USmithMoveComponent>(TEXT("konno Enemy Move Component"));
-//  check((m_moveComp != nullptr));
-
-//   MOVE_DISTANCE = 100.0f;
-
-//   m_attackComp = CreateDefaultSubobject<USmithAttackComponent>(TEXT("Konno Enemy Attack Component"));
-
-//   Max_HP = m_hp;
 }
 
 void ASmithEnemy::BeginPlay()
 {
   Super::BeginPlay();
 
-  // // 指定したクラスのアクターを取得
-  // TArray<TObjectPtr<AActor>> aActorList;
-  // UGameplayStatics::GetAllActorsOfClass(this, ASmithPlayerActor::StaticClass(), aActorList);
-
-  // for (TObjectPtr<AActor> aActor : aActorList)
-  // {
-  //   // 取得したクラスにキャスト
-  //   m_target = Cast<ASmithPlayerActor>(aActor);
-  //   break;
-  // }
-
-  // MDebug::LogWarning("Super Class BeginPlay");
 }
 
 void ASmithEnemy::Tick(float DeltaTime)
@@ -47,9 +24,9 @@ void ASmithEnemy::Tick(float DeltaTime)
   Super::Tick(DeltaTime);
 }
 
-void ASmithEnemy::OnAttack(AttackHandle &&handle)
+void ASmithEnemy::OnAttack(const AttackHandle& Handle)
 {
-  m_hp -= handle.AttackPower;
+  m_hp -= Handle.AttackPower;
   Current_HP = m_hp;
   MDebug::LogError(GetName() + TEXT(" left HP:") + FString::FromInt(m_hp));
 

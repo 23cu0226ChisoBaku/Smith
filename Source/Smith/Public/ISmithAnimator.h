@@ -40,7 +40,7 @@ class SMITH_API ISmithAnimator
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual void SwitchAnimation(uint8 animationState) = 0;
-	virtual void SwitchAnimationDelay(uint8 animationState, float delay) = 0;
+	virtual void SwitchAnimationDelay(uint8 animationState, float delay) { SwitchAnimation(animationState);}
 	virtual void UpdateAnimation(float deltaTime) = 0;
 	virtual bool IsAnimationFinish() const = 0;
 };

@@ -30,7 +30,9 @@ Encoding : UTF-8
 class ICanSetOnMap;
 class IEventRegister;
 class ISmithMapEvent;
+class IMinimapDisplayer;
 class USmithEventPublisher;
+class UMinimapDisplayTypeFactory;
 struct FAttackableInfoHandle;
 namespace UE::Smith
 {
@@ -41,6 +43,7 @@ namespace UE::Smith
 }
 
 enum class EDirection : uint8;
+enum class EDirectionStrategy : uint8;
 enum class EMapDeployRule : uint8;
 
 struct FMapCoord;
@@ -125,6 +128,9 @@ namespace UE::Smith
         /// @param y                              Y座標
         ///
         void InitDecoration(UWorld*, const FSmithMapDecoration&);
+        void AssignMinimapDisplayer(IMinimapDisplayer*);
+        // TODO
+        void AssignMinimapDisplayTypeFactory(UMinimapDisplayTypeFactory*);
         void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
         void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y);
         ///
@@ -135,7 +141,7 @@ namespace UE::Smith
         ///
         void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
         void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
-        bool GetPlayerDirection(EDirection& outDirection, ICanSetOnMap* origin, uint8 offsetLeft = 0, uint8 offsetTop = 0);
+        bool GetPlayerDirection(EDirection& outDirection, EDirectionStrategy, ICanSetOnMap* origin, uint8 offsetLeft = 0, uint8 offsetTop = 0);
         ///
         /// @brief                                マップオブジェクトを移動
         /// @param ICanSetOnMap                   マップオブジェクト

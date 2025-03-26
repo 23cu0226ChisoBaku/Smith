@@ -16,7 +16,6 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "MapCoord.generated.h"
 
 USTRUCT(BlueprintType)
@@ -25,18 +24,26 @@ struct SMITHMODEL_API FMapCoord
 	GENERATED_BODY()
 
 	public:
+
 		constexpr FMapCoord()
 		  : x(0)
   		, y(0)
 		{ }
+
 		FMapCoord(uint8 _x, uint8 _y);
+
 		FMapCoord(const FMapCoord&);
 		FMapCoord& operator=(const FMapCoord&);
+
 		~FMapCoord() = default;
+
 		FString ToString() const;
+		
 	public:
+
 		UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		uint8 x;
+
 		UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		uint8 y;
 };

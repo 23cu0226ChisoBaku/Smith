@@ -58,11 +58,6 @@ void USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
     return;
   }
 
-  if (mapObj->GetType() != EMapObjType::Player)
-  {
-    return;
-  }
-
   IEventTriggerable* eventTriggerable = Cast<IEventTriggerable>(mapObj);
   if (eventTriggerable == nullptr)
   {
@@ -90,4 +85,14 @@ void USmithNextLevelEvent::RaiseEvent()
 bool USmithNextLevelEvent::IsDisposed() const
 { 
   return m_bIsDisposed;
+}
+
+UTexture2D* USmithNextLevelEvent::GetMinimapDisplayTexture_Implementation()
+{
+  if (m_minimapTexture == nullptr)
+  {
+    m_minimapTexture = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), nullptr, *FString(TEXT("/Game/Resources/UI/Minimap/Image_Minimap_NextLevel.Image_Minimap_NextLevel"))));
+  }
+
+  return m_minimapTexture;
 }

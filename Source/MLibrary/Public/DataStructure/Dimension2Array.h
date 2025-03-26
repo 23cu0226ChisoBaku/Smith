@@ -20,7 +20,7 @@ Encoding : UTF-8
 #define M_DIMENSION_TWO_ARRAY
 
 #include "ArrayIterator.h"
-#include <vector> 
+#include "Dimension2ArrayHandle.h"
 
 namespace UE::MLibrary
 {
@@ -235,6 +235,10 @@ namespace UE::MLibrary
         {
           return ConstIterator(m_elemArr + m_row * m_column);
         }
+        TDimension2ArrayHandle<ElementType> GetData() const
+        {
+          return TDimension2ArrayHandle<ElementType>(m_elemArr, m_row, m_column);
+        }
       //---------------------------------------
       /*
               パブリック関数(インターフェース)
@@ -259,7 +263,7 @@ namespace UE::MLibrary
             delete[] m_elemArr;
           }
 
-          memset(this, 0, sizeof(this));
+          memset(this, 0, sizeof(*this));
         }
 
         ElementType& at_impl(uint64 row, uint64 column)

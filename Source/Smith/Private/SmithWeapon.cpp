@@ -2,9 +2,11 @@
 
 
 #include "SmithWeapon.h"
-#include "ParamAbsorbable.h"
 
+#include "ParamAbsorbable.h"
 #include "MLibrary.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SmithWeapon)
 
 USmithWeapon::USmithWeapon(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -14,22 +16,32 @@ USmithWeapon::USmithWeapon(const FObjectInitializer& ObjectInitializer)
 void USmithWeapon::BeginDestroy()
 {
   Super::BeginDestroy();
+
+  WeaponParam = FParams{};
 }
 
 void USmithWeapon::Upgrade(IParamAbsorbable* absorbItem)
 {
-  if (!IS_UINTERFACE_VALID(absorbItem))
+  if (absorbItem == nullptr)
   {
     MDebug::LogError("Upgrade failed --- absorbItem invalid");
     return;
   }
 
-  WeaponParam += absorbItem->GetParam();
-  if (OnUpgrade.IsBound())
+  FParams absorbParam = absorbItem->GetParam();
+  WeaponParam += absorbParam;
+  if (OnParamUpdated.IsBound())
   {
-    OnUpgrade.Broadcast(absorbItem->GetParam());
+    OnParamUpdated.Broadcast(absorbParam);
   }
+  
   ++m_weaponLevel;
+}
+
+void USmithWeapon::OnUpgraded()
+{
+  using namespace MLibrary::UE::Audio;
+  AudioKit::PlaySE(TEXT("Hit_Iron_1"));
 }
 
 void USmithWeapon::SetParam(FParams param)
@@ -46,3 +58,14 @@ int32 USmithWeapon::GetLevel() const
 {
   return m_weaponLevel;
 }
+
+FString USmithWeapon::GetName_Log() const
+{
+  return Name;
+}
+
+EBattleLogType USmithWeapon::GetType_Log() const
+{
+  return EBattleLogType::Enhance;
+}
+

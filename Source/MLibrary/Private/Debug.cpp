@@ -19,6 +19,8 @@ Encoding : UTF-8
 
 #include "Debug.h"
 
+DEFINE_LOG_CATEGORY(MDebugLog);
+
 namespace UE::MLibrary
 {
   float Debug::gLogTime = 15.0f;
@@ -61,16 +63,19 @@ namespace UE::MLibrary
           case MLIB_DEBUG_LEVEL::Log:
           {
             GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_FORMAT.LogColor, log);
+            UE_LOG(MDebugLog, Log, TEXT("%s"), *log);
           }
           break;
           case MLIB_DEBUG_LEVEL::Warning:
           {
-            GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_WARNING_FORMAT.LogColor, log); 
+            GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_WARNING_FORMAT.LogColor, log);
+            UE_LOG(MDebugLog, Warning, TEXT("%s"), *log); 
           }
           break;
           case MLIB_DEBUG_LEVEL::Error:
           {
             GEngine->AddOnScreenDebugMessage(-1, gLogTime, LOG_ERROR_FORMAT.LogColor, log); 
+            UE_LOG(MDebugLog, Error, TEXT("%s"), *log);
           }
           break;
         }

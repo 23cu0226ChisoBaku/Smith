@@ -2,219 +2,130 @@
 
 
 #include "SmithBattleMediator.h"
+
 #include "SmithBattleSubsystem.h"
+#include "SmithDamageSubsystem.h"
+#include "SmithCommandStrategies.h"
 #include "SmithMapManager.h"
 
-#include "IMoveable.h"
-#include "ICanMakeAttack.h"
 #include "ICanSetOnMap.h"
-#include "IHealable.h"
-
-#include "MoveCommand.h"
-#include "AttackCommand.h"
-#include "NullCommand.h"
-#include "HealCommand.h"
-#include "SkillCommand.h"
+#include "BattleCommandFactory.h"
 
 #include "SmithCommandFormat.h"
 #include "FormatTransformer.h"
 #include "ISmithAnimator.h"
-
-#include "ISmithDamageCalculator.h"
-#include "BattleParamHandle.h"
-#include "BattleResult.h"
-
 #include "InvalidValues.h"
-
 #include "MLibrary.h"
-
-// TODO
 #include "AttackHandle.h"
-#include "SmithSkillCenterSpotParameter.h"
+#include "SmithSkillParameter.h"
 #include "FormatType.h"
 #include "AttackableInfoHandle.h"
+#include "SmithModelHelperFunctionLibrary.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SmithBattleMediator)
 
 USmithBattleMediator::USmithBattleMediator()
   : m_battleSys(nullptr)
-  , m_damageCalculator(nullptr)
+  , m_damageSys(nullptr)
   , m_mapMgr(nullptr)
 { }
 
 void USmithBattleMediator::BeginDestroy()
 {
   Super::BeginDestroy();
-  m_battleSys.Reset();
-  m_damageCalculator.Reset();
+
   m_mapMgr.Reset();
 }
 
-void USmithBattleMediator::SetupMediator(USmithBattleSubsystem* battleSys, ISmithDamageCalculator* damageCalculator, TSharedPtr<MapManager> mapMgr)
+void USmithBattleMediator::SetupMediator(USmithBattleSubsystem* BattleSystem, USmithDamageSubsystem* DamageSystem, TSharedPtr<MapManager> MapMgr)
 {
-  check(((battleSys != nullptr) && (mapMgr != nullptr)));
+  check(BattleSystem != nullptr);
+  check(DamageSystem != nullptr);
+  check(MapMgr != nullptr);
   
-  m_battleSys.Reset();
-  m_battleSys = battleSys;
+  m_battleSys = BattleSystem;
+  m_damageSys = DamageSystem;
 
   m_mapMgr.Reset();
-  m_mapMgr = mapMgr;
-
-  m_damageCalculator.Reset();
-  m_damageCalculator = damageCalculator;
+  m_mapMgr = MapMgr;
   
 }
 
-bool USmithBattleMediator::SendMoveCommand(AActor* requester, IMoveable* move, EDirection moveDirection, uint8 moveDistance)
+bool USmithBattleMediator::SendMoveCommand(AActor* requester, EDirection moveDirection, uint8 moveDistance)
 {
-  if (!m_mapMgr.IsValid() || !m_battleSys.IsValid())
-  {
-    MDebug::LogError("System INVALID!!!");
-    return false;
-  }
+  check(requester != nullptr);
 
-  if (!::IsValid(requester) || !IS_UINTERFACE_VALID(move))
+  if (m_battleSys == nullptr)
   {
-    MDebug::LogError("Request INVALID!!!");
-    // TODO
-    return false;
-  }
-
-  FVector destinationVector;
-  auto mapMgrSharedPtr = m_mapMgr.Pin();
-  if (!mapMgrSharedPtr.IsValid())
-  {
-    return false;
-  }
-
-  mapMgrSharedPtr->MoveMapObj(Cast<ICanSetOnMap>(requester), moveDirection, moveDistance, destinationVector);
-
-  if (destinationVector.Equals(InvalidValues::MapInvalidCoord_World))
-  {
-    return false;
-  }
-  else
-  {
-    ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
-    move->SetDestination(destinationVector);
-    m_battleSys->RegisterCommand(Cast<ITurnManageable>(requester), ::MakeShared<UE::Smith::Command::MoveCommand>(move, animator));
-    return true;
-  }
-}
-
-bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, AttackHandle&& atkHandle, bool bAttackEvenNoTarget)
-{
-  if (!m_battleSys.IsValid())
-  {
-    MDebug::LogError("System INVALID!!!");
-    return false;
-  }
-
-  if (!::IsValid(requester))
-  {
-    MDebug::LogError("Requester INVALID!!!");
-    return false;
-  }
-
-  if (format.GetRow() == 0 || format.GetColumn() == 0)
-  {
-    MDebug::LogError("Format INVALID");
+    MDebug::LogError("Battle System INVALID!!!");
     return false;
   }
 
   TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
   if (!mapMgr_shared.IsValid())
   {
+    MDebug::LogError("Map Manager INVALID!!!");
+    return false;
+  }
+  
+  FVector destination = FVector::ZeroVector;
+  mapMgr_shared->MoveMapObj(Cast<ICanSetOnMap>(requester), moveDirection, moveDistance, destination);
+
+  if (destination.Equals(InvalidValues::MAP_COORD_WORLD_INVALID))
+  {
     return false;
   }
 
-  // TODO
-  UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, direction);
-  TArray<FAttackableInfoHandle> attackables{};
-  mapMgr_shared->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
-
-  // TODO Safe Cast may cause performance issue
-  ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
-  if (attackables.Num() > 0)
   {
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
-    for(const auto& attackableInfoHandle : attackables)
+    SmithDefaultMoveStrategy moveStrategy = 
     {
-      atkHandle.AttackFrom = attackableInfoHandle.AttackFrom;
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, attackableInfoHandle.Attackable, ::MoveTemp(atkHandle), animator));
-    }
-    return true;
+      .MoveEntity = requester,
+      .MoveSpeed = 800.0f,        // TODO
+      .Destination = destination
+    };
+    m_battleSys->RegisterCommand(Cast<ITurnManageable>(requester), FBattleCommandFactory::CreateMoveCommand(moveStrategy, animator));
   }
 
-  if (bAttackEvenNoTarget)
-  {
-    ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
-    m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, nullptr, ::MoveTemp(atkHandle), animator));
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+  return true;
 }
 
-bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* attacker, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle, bool bAttackEvenNoTarget)
+bool USmithBattleMediator::SendAttackCommand(AActor* requester, EDirection direction, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle, bool bAttackEvenNoTarget)
 {
-   if (!m_battleSys.IsValid())
+  check(requester != nullptr);
+  check(format.IsValid());
+
+  if ((m_battleSys == nullptr) || (m_damageSys == nullptr))
   {
     MDebug::LogError("System INVALID!!!");
-    return false;
-  }
-
-  if (!::IsValid(requester))
-  {
-    MDebug::LogError("Requester INVALID!!!");
-    return false;
-  }
-
-  if (format.GetRow() == 0 || format.GetColumn() == 0)
-  {
-    MDebug::LogError("Format INVALID");
     return false;
   }
 
   TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
   if (!mapMgr_shared.IsValid())
   {
+    MDebug::LogError("Map Manager INVALID");
     return false;
   }
 
-  // TODO
   UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, direction);
   TArray<FAttackableInfoHandle> attackables{};
   mapMgr_shared->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
 
-  // TODO Safe Cast may cause performance issue
   ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
   if (attackables.Num() > 0)
   {
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
     for(const auto& attackableInfo : attackables)
     {
-      // TODO 修正案ー＞BattleModelを作成し、Data Assetsで設定できるようにする
-      AttackHandle attackHandle;
-      attackHandle.Attacker = atkHandle.Attacker;
-      if (attackableInfo.Attackable != nullptr && m_damageCalculator.IsValid())
-      { 
-        FBattleAttackParamHandle attackParam;
-        attackParam.AttackPoint = atkHandle.AttackPower;
-        attackParam.CriticalPoint = atkHandle.CriticalPower;
-        attackParam.Level = atkHandle.Level;
-        attackParam.MotionValue = atkHandle.MotionValue;
+      SmithDefaultDamageStrategy damageStrategy{};
+      damageStrategy.Instigator = requester;
+      damageStrategy.Causer = Cast<AActor>(attackableInfo.Attackable);
+      damageStrategy.DamageSubsystem = m_damageSys;
+      damageStrategy.Handle = atkHandle;
+      damageStrategy.FromDirection = attackableInfo.AttackFrom;
 
-        const FBattleResult result = m_damageCalculator->CalculateDamage(attackParam, attackableInfo.Attackable->GetDefenseParam());
-        attackHandle.AttackPower = result.Damage;
-      }
-      else
-      {
-        attackHandle.AttackPower = atkHandle.AttackPower;
-      }
-
-      attackHandle.AttackFrom = attackableInfo.AttackFrom;
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, attackableInfo.Attackable, ::MoveTemp(attackHandle), animator));
+      m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateAttackCommand(damageStrategy, animator));
     }
     return true;
   }
@@ -223,7 +134,9 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
   {
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
     AttackHandle attackHandle = AttackHandle::NullHandle;
-    m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::AttackCommand>(attacker, nullptr, ::MoveTemp(attackHandle), animator));
+    SmithDummyStrategy dummy{};
+
+    m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateAttackCommand(dummy, animator));
     return true;
   }
   else
@@ -232,21 +145,14 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, ICanMakeAttack* 
   }
 }
 
-bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* attacker, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle)
+bool USmithBattleMediator::SendSkillCommand(AActor* requester, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle)
 {
-  if (!m_battleSys.IsValid())
+  check(requester != nullptr);
+  check(format.IsValid());
+  
+  if ((m_battleSys == nullptr) || (m_damageSys == nullptr))
   {
-    return false;
-  }
-
-  if (!::IsValid(requester) || !IS_UINTERFACE_VALID(attacker))
-  {
-    return false;
-  }
-
-  if (format.GetRow() == 0 || format.GetColumn() == 0)
-  {
-    MDebug::LogError("Format INVALID");
+    MDebug::LogError("System INVALID!!!");
     return false;
   }
 
@@ -256,154 +162,98 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, ICanMakeAttack* a
     return false;
   }
 
-  // TODO
   UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, skillParameter.ActiveDirection);
   TArray<FAttackableInfoHandle> attackables{};
   mapMgr_shared->FindAttackableMapObjsFromCoord(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat, skillParameter.OffsetToLeft, skillParameter.OffsetToTop);
   
-   // TODO Safe Cast may cause performance issue
-  ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
-  ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
-  if (attackables.Num() > 0)
+  // TODO Safe Cast may cause performance issue
   {
-    for(const auto& attackableInfo : attackables)
+    ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
+    ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
+    if (attackables.Num() > 0)
     {
-      // TODO 修正案ー＞BattleModelを作成し、Data Assetsで設定できるようにする
-      AttackHandle attackHandle;
-      attackHandle.Attacker = atkHandle.Attacker;
-      if (attackableInfo.Attackable != nullptr && m_damageCalculator.IsValid())
-      { 
-        FBattleAttackParamHandle attackParam;
-        attackParam.AttackPoint = atkHandle.AttackPower;
-        attackParam.CriticalPoint = atkHandle.CriticalPower;
-        attackParam.Level = atkHandle.Level;
-        attackParam.MotionValue = atkHandle.MotionValue;
-
-        const FBattleResult result = m_damageCalculator->CalculateDamage(attackParam, attackableInfo.Attackable->GetDefenseParam());
-        attackHandle.AttackPower = result.Damage;
-      }
-      else
+      for(const auto& attackableInfo : attackables)
       {
-        attackHandle.AttackPower = atkHandle.AttackPower;
+        SmithDefaultDamageStrategy damageStrategy{};
+        damageStrategy.Instigator = requester;
+        damageStrategy.Causer = Cast<AActor>(attackableInfo.Attackable);
+        damageStrategy.DamageSubsystem = m_damageSys;
+        damageStrategy.Handle = atkHandle;
+        damageStrategy.FromDirection = attackableInfo.AttackFrom;
+  
+        m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateSkillCommand(damageStrategy, animator, skillParameter.SkillSlot));
       }
-
-      attackHandle.AttackFrom = attackableInfo.AttackFrom;
-      m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::SkillCommand>(attacker, attackableInfo.Attackable, ::MoveTemp(attackHandle), animator, skillParameter.SkillSlot));
+      return true;
     }
-    return true;
-  }
-  else
-  {
-    m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::SkillCommand>(nullptr, nullptr, AttackHandle::NullHandle, animator, skillParameter.SkillSlot));
+    else
+    {
+      SmithDummyStrategy dummy{};
+      m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateSkillCommand(dummy, animator, skillParameter.SkillSlot));
+    }
   }
 
   return false;
 }
 
-bool USmithBattleMediator::SendIdleCommand(AActor* requester)
+bool USmithBattleMediator::SendIdleCommand(AActor* requester, float idleTime)
 {
-  if (!m_battleSys.IsValid())
-  {
-    return false;
-  }
-  
-  if (!::IsValid(requester))
+  check(requester != nullptr);
+
+  if (m_battleSys == nullptr)
   {
     return false;
   }
 
   ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
-  if (!IS_UINTERFACE_VALID(requesterTurnManageable))
+  if (requesterTurnManageable == nullptr)
   {
     return false;
   }
 
-  m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::NullCommand>());
-  return true;
+  m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateIdleCommand(idleTime));
 
+  return true;
 }
 
-bool USmithBattleMediator::SendHealCommand(AActor* requester,IHealable* heal)
-{
-  if (!m_battleSys.IsValid())
-  {
-    return false;
-  }
-  
-  if (!::IsValid(requester))
-  {
-    return false;
-  }
-
-  ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
-  if (!IS_UINTERFACE_VALID(requesterTurnManageable))
-  {
-    return false;
-  }
-
-  m_battleSys->RegisterCommand(requesterTurnManageable, ::MakeShared<UE::Smith::Command::HealCommand>(heal));
-  return true;
-
-}
-
-// TODO 悪い参照渡し 
-int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format) const
+int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format)
 { 
   using namespace UE::Smith::Battle;
-  outLocations.Reset();
-
-  if (!::IsValid(requester))
-  {
-    return outLocations.Num();
-  }
+  check(requester != nullptr);
+  check(format.IsValid());
 
   TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
   if (!mapMgr_shared.IsValid())
   {
-    return outLocations.Num();
+    return 0;
   }
-
-  if (format.GetRow() == 0 || format.GetColumn() == 0)
-  {
-    MDebug::LogError("Format INVALID");
-    return outLocations.Num();
-  }
+  
+  outLocations.Reset();
 
   ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(requester);
-  if (!IS_UINTERFACE_VALID(mapObj))
-  {
-    return outLocations.Num();
-  }
-
   uint8 mapObjOriginCoordX = 0u;
   uint8 mapObjOriginCoordY = 0u;
   if (!mapMgr_shared->GetMapObjectCoord(mapObj, mapObjOriginCoordX, mapObjOriginCoordY))
   {
-    return outLocations.Num();
+    return 0;
   }
 
   FSmithCommandFormat rotatedFormat = FFormatTransformer::GetRotatedFormat(format, skillParameter.ActiveDirection);
   auto formattedMapCoords = FFormatTransformer::FormatToMapCoord(rotatedFormat, FMapCoord(mapObjOriginCoordX + skillParameter.OffsetToLeft, mapObjOriginCoordY + skillParameter.OffsetToTop));
 
+  // フォーマットから効果範囲を座標に変換する
   for (int32 row = 0; row < rotatedFormat.GetRow(); ++row)
   {
     for (int32 column = 0; column < rotatedFormat.GetColumn(); ++column)
     {
-      // TODO
+      using enum ESmithFormatType;
       switch(rotatedFormat.GetFormatData(column, row))
       {
-        case ESmithFormatType::NO_EFFECT:
-        case ESmithFormatType::CENTER_NO_EFFECT:
-        {
-          continue;
-        }
-
-        case ESmithFormatType::EFFECT:
-        case ESmithFormatType::CENTER_EFFECT:
+        case EFFECT:
+        case CENTER_EFFECT:
         {
           const FMapCoord coord = formattedMapCoords.At_ReadOnly(row, column);
 
-          FVector location;
+          FVector location = FVector::ZeroVector;
           if (!mapMgr_shared->ConvertMapCoordToWorldLocation(location, coord.x, coord.y))
           {
             continue;
@@ -412,6 +262,13 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
           outLocations.Emplace(location);
         }
         break;
+
+        case NO_EFFECT:
+        case CENTER_NO_EFFECT:
+        default:
+        {
+          continue;
+        }
       }
     }
   }
@@ -419,14 +276,18 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
   return outLocations.Num();
 }
 
-void USmithBattleMediator::GetPlayerDirection(EDirection& outDirection, AActor* requester, uint8 offsetToLeft, uint8 offsetToTop)
+void USmithBattleMediator::GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, AActor* requester, uint8 offsetToLeft, uint8 offsetToTop)
 {
+  check(requester != nullptr);
+
   TSharedPtr<MapManager> mapMgr_shared = m_mapMgr.Pin();
   if (!mapMgr_shared.IsValid())
   {
     return;
   }
 
-  mapMgr_shared->GetPlayerDirection(outDirection, Cast<ICanSetOnMap>(requester), offsetToLeft, offsetToTop);
+  ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(requester);
+
+  mapMgr_shared->GetPlayerDirection(outDirection, directionStrategy, mapObj, offsetToLeft, offsetToTop);
 }
 

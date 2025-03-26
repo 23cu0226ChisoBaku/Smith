@@ -25,6 +25,7 @@ Encoding : UTF-8
 #include "FormatType.h"
 #include "FormatTransformer.h"
 #include "MapObjType.h"
+#include "IMinimapDisplayable.h"
 
 // TODO
 // IAttackable.h
@@ -88,7 +89,7 @@ namespace UE::Smith
             return;
           }
 
-          if (format.GetRow() == 0 || format.GetColumn() == 0)
+          if (!format.IsValid())
           {
             return;
           }
@@ -188,7 +189,7 @@ namespace UE::Smith
             return;
           }
 
-          if (format.GetRow() == 0 || format.GetColumn() == 0)
+          if (!format.IsValid())
           {
             return;
           }
@@ -269,7 +270,7 @@ namespace UE::Smith
         }
         void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
-          destination = InvalidValues::MapInvalidCoord_World;
+          destination = InvalidValues::MAP_COORD_WORLD_INVALID;
           // 安全性チェック
           #pragma region Safe Check
           {
@@ -319,6 +320,15 @@ namespace UE::Smith
             }
           }
           updateObjCoord(mapObj, directionCheck_bits, actualMoveDistance, destination);
+        }
+        void AddUpdateMinimapDelegate(const TDelegate<void(UObject*, const FMapCoord&, uint8, uint8)>& delegate)
+        {
+          if (!delegate.IsBound())
+          {
+            return;
+          }
+
+          m_updateMinimapDelegate.Add(delegate);
         }
       private:
         bool isObjectMoveable(ICanSetOnMap* mapObj, uint8 distance, uint8 checkBits_Internal) const
@@ -520,11 +530,20 @@ namespace UE::Smith
                                 0.0
                                 )
                       + mapObjoffset;
-
+          
+          if (m_updateMinimapDelegate.IsBound())
+          {
+            if (model_shared->StaySpaceTable.Contains(mapObjOriginCoord))
+            {
+              m_updateMinimapDelegate.Broadcast(model_shared->StaySpaceTable[mapObjOriginCoord]->GetTileActor(), mapObjOriginCoord, mapSizeX, mapSizeY);
+            }
+            m_updateMinimapDelegate.Broadcast(mapObj->_getUObject(), newMapObjOriginCoord, mapSizeX, mapSizeY);
+          }
         }
       private:
         TWeakPtr<Model> m_model;
         TWeakInterfacePtr<IEventRegister> m_eventRegister;
+        TMulticastDelegate<void(UObject*, const FMapCoord&, uint8, uint8)> m_updateMinimapDelegate;
     };
 
     FSmithMapObjOperator::FSmithMapObjOperator()
@@ -569,6 +588,10 @@ namespace UE::Smith
     void FSmithMapObjOperator::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     { 
       m_pImpl->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
+    }
+    void FSmithMapObjOperator::AddUpdateMinimapDelegate(const TDelegate<void(UObject*, const FMapCoord&, uint8, uint8)>& delegate)
+    {
+      m_pImpl->AddUpdateMinimapDelegate(delegate);
     }
   }
 }

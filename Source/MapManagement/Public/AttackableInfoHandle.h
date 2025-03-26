@@ -5,13 +5,11 @@
 #ifndef ATTACKABLE_INFO_HANDLE
 #define ATTACKABLE_INFO_HANDLE
 
-#include "CoreMinimal.h"
 #include "IAttackable.h"
 #include "Direction.h"
 
 struct MAPMANAGEMENT_API FAttackableInfoHandle
 {
-
 	IAttackable* Attackable;
 	EDirection AttackFrom;
 

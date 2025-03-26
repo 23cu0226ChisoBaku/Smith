@@ -7,15 +7,11 @@
 
 USmithLootGameInstanceSubsystem::USmithLootGameInstanceSubsystem()
   : m_lootList{}
-{
-  FSmithEnemyLootGenerator::AssignLootGenerator(this);
-}
+{ }
 
 void USmithLootGameInstanceSubsystem::BeginDestroy()
 {
   m_lootList.Empty();
-  FSmithEnemyLootGenerator::DetachLootGenerator();
-
   Super::BeginDestroy();
 }
 

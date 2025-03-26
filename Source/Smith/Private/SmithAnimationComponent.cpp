@@ -2,12 +2,16 @@
 
 
 #include "SmithAnimationComponent.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "GameFramework/Character.h"
-#include "Debug.h"
+
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
+
 #include "AnimMontageHelperLibrary.h"
 
-// Sets default values for this component's properties
+#include "Debug.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SmithAnimationComponent)
+
 USmithAnimationComponent::USmithAnimationComponent()
 	: m_curtAnimationTimeInterval(0.0f)
 	, m_animationPlayTimeCnt(0.0f)
@@ -15,16 +19,10 @@ USmithAnimationComponent::USmithAnimationComponent()
 	, m_animationSwitchDelayTimeCnt(0.0f)
 	, m_delayNextSectionName()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
-
-	// ...
 }
 
-
-// Called when the game starts
 void USmithAnimationComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -47,13 +45,11 @@ void USmithAnimationComponent::BeginPlay()
 
 }
 
-
 // Called every frame
 void USmithAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
-	// ...
+
 	if (m_delayNextSectionName.IsNone())
 	{
 		return;
@@ -69,12 +65,12 @@ void USmithAnimationComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 {
-	if (AnimInstance == nullptr)
+	if (nextStateName.IsNone())
 	{
 		return;
 	}
 
-	if (nextStateName.IsNone())
+	if (AnimInstance == nullptr)
 	{
 		return;
 	}
@@ -95,7 +91,6 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 	}
 
 	const float duration = UAnimMontageHelperLibrary::GetSectionDuration(AnimInstance, CurrentMontage, nextStateName);
-
 	m_curtAnimationTimeInterval = duration;
 	m_animationPlayTimeCnt = 0.0f;
 
@@ -110,6 +105,8 @@ void USmithAnimationComponent::SwitchAnimState(FName nextStateName)
 	}
 
 	AnimInstance->Montage_JumpToSection(nextStateName);
+
+	//MDebug::LogWarning(FString::Printf(TEXT("[%s] Switch To AnimState [%s]. Duration : [%f]"), *GetNameSafe(GetOwner()), *nextStateName.ToString(), duration));
 }
 
 void USmithAnimationComponent::SwitchAnimStateDelay(FName nextStateName, float delay)
@@ -147,8 +144,4 @@ bool USmithAnimationComponent::IsCurrentAnimationFinish() const
 	return m_animationPlayTimeCnt >= m_curtAnimationTimeInterval;
 }
 
-void USmithAnimationComponent::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-
-}
 

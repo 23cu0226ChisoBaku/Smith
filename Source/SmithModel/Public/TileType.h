@@ -11,5 +11,5 @@ enum class ETileType : uint8
 	Ground = 1,
   Wall = 2,
   Corridor = 3,
-  
+  TileTypeCount
 };

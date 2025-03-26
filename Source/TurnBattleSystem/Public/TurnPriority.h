@@ -18,7 +18,7 @@ Encoding : UTF-8
 
 #include "CoreMinimal.h"
 
-UENUM(Blueprintable)
+UENUM(BlueprintType)
 enum class ETurnPriority : uint8
 {
 	PlayerSelf = 0,			// プレイヤー

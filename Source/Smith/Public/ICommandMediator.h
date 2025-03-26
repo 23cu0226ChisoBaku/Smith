@@ -1,50 +1,79 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/*
 
+ICommandMediator.h
+
+Author : MAI ZHICONG(バクチソウ)
+
+Description : コマンド仲介インタフェース
+
+Update History: 2024/12/23 作成
+                2024/12/26 全てのインタフェースにActorポインタを渡すように変更
+                2025/01/07 SendMoveCommand引数追加：  UE::Smith::Battle::EMoveDirection, uint8 moveDistance
+                           SendAttackCommand引数追加: UE::Smith::Battle::FSmithCommandFormat
+
+                2025/01/14 SendAttackCommand引数追加: UE::Smith::Battle::EMoveDirection
+                2025/01/16 UE::Smith::Battle::EMoveDirectionをEDirectionに変更
+                2025/01/20 SendIdleCommand追加
+                           SendAttackCommand引数追加: bool bAttackEventNoTarget = true
+
+                2025/01/30 FAttackHandle引数専用SendAttackCommand関数追加
+                2025/02/09 SendSkillCommand追加
+                           TODO GetRangeLocations関数追加
+
+                2025/02/13 ※リファクタリングする予定
+                           TODO GetPlayerDirection関数追加
+
+                2025/02/16 SendIdleCommand引数追加: float idleTime = 0.0f
+
+Version : alpha_1.0.0
+
+Encoding : UTF-8 
+*/
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "ICommandMediator.generated.h"
 
-class IMoveable;
-class ICanMakeAttack;
-class IAttackable;
-class IHealable;
+//---------------------------------------
+/*
+                  前方宣言
+*/
+//---------------------------------------
 struct AttackHandle;
 struct FAttackHandle;
 struct FSmithSkillParameter;
 enum class EDirection : uint8;
+enum class EDirectionStrategy : uint8;
 
 namespace UE::Smith
 {
-	namespace Battle
-	{
-		class FSmithCommandFormat;
-	}
+  namespace Battle
+  {
+    class FSmithCommandFormat;
+  }
 }
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UCommandMediator : public UInterface
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 };
 
 class SMITH_API ICommandMediator
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+  // Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual bool SendMoveCommand(AActor*, IMoveable*, EDirection, uint8 moveDistance) = 0;
-	virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, AttackHandle&&, bool bAttackEvenNoTarget = true) = 0;
-	virtual bool SendIdleCommand(AActor*) = 0;
+  virtual bool SendMoveCommand(AActor*, EDirection, uint8 moveDistance) = 0;
+  virtual bool SendIdleCommand(AActor*, float idleTime = 0.0f) = 0;
+  virtual bool SendAttackCommand(AActor*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) = 0;
+  virtual bool SendSkillCommand(AActor*, FSmithSkillParameter, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&) = 0;
 
-	virtual bool SendAttackCommand(AActor*, ICanMakeAttack*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) = 0;
-	virtual bool SendSkillCommand(AActor*, ICanMakeAttack*, FSmithSkillParameter, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&) = 0;
-	virtual bool SendHealCommand(AActor*,IHealable*) = 0;
-
-	// TODO
-	virtual int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillParameter, const UE::Smith::Battle::FSmithCommandFormat&) const = 0;
-	virtual void GetPlayerDirection(EDirection& outDirection, AActor*, uint8 offsetToLeft = 0, uint8 offsetToTop = 0) = 0;
+  // TODO 設計を見直す
+  virtual int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillParameter, const UE::Smith::Battle::FSmithCommandFormat&) = 0;
+  virtual void GetPlayerDirection(EDirection& outDirection, EDirectionStrategy, AActor*, uint8 offsetToLeft = 0u, uint8 offsetToTop = 0u) = 0;
 };

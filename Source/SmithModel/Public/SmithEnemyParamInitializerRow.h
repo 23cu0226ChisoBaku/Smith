@@ -13,8 +13,10 @@ struct SMITHMODEL_API FSmithEnemyParamInitializerRow : public FTableRowBase
 	GENERATED_BODY()
 
 public:
+
 	UPROPERTY(EditAnywhere)
 	FString EnemyName;
+	
 	UPROPERTY(EditAnywhere)
 	FParams DefaultParam;
 };

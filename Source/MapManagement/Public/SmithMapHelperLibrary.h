@@ -76,7 +76,6 @@ namespace UE::Smith
         ///
         static void DirectMapElementRotation(FSmithMap*, FRotator& outRotation, uint8 x, uint8 y);
         static int32 GetMapCoordsByRule(FSmithMap*, EMapDeployRule, TArray<FMapCoord>& outCoords);
-        static int32 GetMapCoordByRule_PerRoom(FSmithMap*, EMapDeployRule, TArray<FMapCoord>& outCoords);
         static uint8 GetRoomCount(FSmithMap*);
         static bool IsSameTileNearby(FSmithMap*, const FMapCoord&, FMapCoord& outDiffTileCoord);
     };

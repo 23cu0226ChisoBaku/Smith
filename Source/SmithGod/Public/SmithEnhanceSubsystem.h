@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "IEnhanceSystem.h"
 #include "SmithEnhanceSubsystem.generated.h"
 
+class USmithBattleLogWorldSubsystem;
 /**
  * 
  */
@@ -16,16 +16,21 @@ class SMITHGOD_API USmithEnhanceSubsystem : public UWorldSubsystem, public IEnha
 	GENERATED_BODY()
 
 public:
+	//---Begin of USubsystem Interface
 	bool ShouldCreateSubsystem(UObject* Outer) const override final;
-	/** Implement this for initialization of instances of the system */
 	void Initialize(FSubsystemCollectionBase& Collection) override final;
-	/** Implement this for deinitialization of instances of the system */
 	void Deinitialize() override final;
+	//---End of USubsystem Interface
 
 public:
+
 	void Enhance(IEnhanceable*, IParamAbsorbable*) override final;
 	int32 GetUpgradeCount() const;
 
 private:
+
+	UPROPERTY()
+	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
+
 	int32 m_upgradeCount;
 };

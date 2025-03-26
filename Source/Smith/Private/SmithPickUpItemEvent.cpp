@@ -3,7 +3,6 @@
 
 #include "SmithPickUpItemEvent.h"
 #include "IPickable.h"
-#include "ICanPick.h"
 #include "ICanSetOnMap.h"
 #include "ISmithBattleLogger.h"
 #include "IEventTriggerable.h"
@@ -158,3 +157,13 @@ FString USmithPickUpItemEvent::GetFailedMessage() const
 {
   return TEXT("の上に乗った");
 }
+
+UTexture2D* USmithPickUpItemEvent::GetMinimapDisplayTexture_Implementation()
+{
+  if (MinimapTexture == nullptr)
+  {
+    MinimapTexture = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), nullptr, *FString(TEXT("/Game/Resources/UI/Minimap/Image_Minimap_Pickable.Image_Minimap_Pickable"))));
+  }
+  return MinimapTexture;
+}
+

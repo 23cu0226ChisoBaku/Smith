@@ -21,10 +21,9 @@ class USmithEventPublishMediator;
 class USmithBattleLogWorldSubsystem;
 class UUI_CurrentLevel;
 class USmithNextLevelEvent;
-class USmithTowerEnemyParamInitializer;
+class USmithMinimap;
+class UMinimapDisplayTypeFactory;
 
-// Damage
-class USmithDungeonDamageCalculator;
 class UGameLogWidget;
 class UScreenFade;
 
@@ -76,6 +75,9 @@ private:
 	void goToNextLevel();
 	void addDefeatedEnemyCount();
 	void processGameClear();
+	void processGameOver();
+	void showMinimap();
+	void hideMinimap();
 
 private:
 	/** ダンジョンマップ設計図 */
@@ -109,8 +111,6 @@ private:
 	TObjectPtr<USmithEventPublishMediator> m_eventMediator;
 	UPROPERTY()
 	TObjectPtr<USmithBattleLogWorldSubsystem> m_logSubsystem;
-	UPROPERTY()
-	TObjectPtr<USmithDungeonDamageCalculator> m_damageCalculator;
 	UPROPERTY(EditAnywhere)
 	double TEST_DAMAGE_CALCULATOR_CONSTANT;
 	UPROPERTY()
@@ -127,11 +127,19 @@ private:
 	TObjectPtr<UDataTable> EnemyDefaultParamList;
 	UPROPERTY(EditAnywhere, meta=(RequiredAssetDataTags = "RowStructure=/Script/Smith.SmithPickableDropRateListRow"))
 	TObjectPtr<UDataTable> EnemyDropLootList;
-	UPROPERTY()
-	TObjectPtr<USmithTowerEnemyParamInitializer> m_towerInitializer;
-
 	UPROPERTY(EditAnywhere)
 	FSmithMapDecoration TEMP_Decoration;
+
+
+	UPROPERTY(EditAnywhere, Category = "Minimap")
+	TSubclassOf<USmithMinimap> MinimapWidgetSub;
+	UPROPERTY()
+	TObjectPtr<USmithMinimap> m_minimap;
+
+	UPROPERTY(EditAnywhere, Category = "Minimap")
+	TSubclassOf<UMinimapDisplayTypeFactory> MinimapTypeFactorySub;
+	UPROPERTY()
+	TObjectPtr<UMinimapDisplayTypeFactory> m_factory;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;
