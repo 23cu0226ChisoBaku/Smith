@@ -47,10 +47,11 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"CoreUObject"
+				"CoreUObject",
+				"Engine"
 			]
 		},
-{
+		{
 			"Name": "SmithModelInitializer",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
@@ -58,7 +59,6 @@
 				"CoreUObject"
 			]
 		},
-
 		{
 			"Name": "SmithGod",
 			"Type": "Runtime",

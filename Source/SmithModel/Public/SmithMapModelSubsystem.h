@@ -1,0 +1,31 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "Subsystems/WorldSubsystem.h"
+
+#include "ISmithMapModelRequester.h"
+
+#include "SmithMapModelSubsystem.generated.h"
+
+
+UCLASS()
+class SMITHMODEL_API USmithMapModelSubsystem : public UWorldSubsystem , public ISmithMapModelRequester
+{
+	GENERATED_BODY()
+	
+public:
+
+	//---Begin of USubsystem Interface
+	bool ShouldCreateSubsystem(UObject* Outer) const override final;
+	void Initialize(FSubsystemCollectionBase& Collection) override final;
+	void Deinitialize() override final;
+	//---End of USubsystem Interface
+
+	void InitializeMapModel(USmithMapModelDefinition* DefinitionAsset);
+	FSmithMapModel GetModel(AActor* Requester) const override; 
+
+private:
+
+	TMap<TSubclassOf<AActor>, const FSmithMapModel> m_mapModels;
+};

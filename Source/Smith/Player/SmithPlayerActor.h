@@ -92,21 +92,19 @@ class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
 public:
   ASmithPlayerActor();
 
-//---------------------------------------
-/*
-          アクター ライフサイクル
-*/
-//---------------------------------------
-// Lifecycle
+
 #pragma region Lifecycle
+//---Begin of AActor Interfaces
 protected:
+
   void BeginPlay() override final;
   void EndPlay(const EEndPlayReason::Type EndPlayReason) override final;
 
 public:	
+
   void Tick(float DeltaTime) override final;
+//---End of AActor Interfaces
 #pragma endregion Lifecycle
-// end of Lifecycle
 
 //---------------------------------------
 /*
