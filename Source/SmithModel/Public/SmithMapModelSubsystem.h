@@ -23,7 +23,10 @@ public:
 	//---End of USubsystem Interface
 
 	void InitializeMapModel(USmithMapModelDefinition* DefinitionAsset);
+
+	//---Begin of ISmithMapModelRequester Interface
 	FSmithMapModel GetModel(AActor* Requester) const override; 
+	//---End of ISmithMapModelRequester Interface
 
 private:
 

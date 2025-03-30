@@ -16,8 +16,6 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
-
 #ifndef SMITH_MAP_EVENT_DIRECTOR
 #define SMITH_MAP_EVENT_DIRECTOR
 
@@ -38,7 +36,7 @@ namespace UE::Smith
     ///	@brief イベントをマップに配置する時見た目（座標や回転など）を決めるクラス
     /// namespace UE::Smith::Map
     ///
-    class MAPMANAGEMENT_API FSmithMapEventDirector
+    class FSmithMapEventDirector
     {
       //---------------------------------------
       /*

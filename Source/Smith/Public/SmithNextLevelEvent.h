@@ -2,15 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+
 #include "ISmithMapEvent.h"
 #include "IMinimapDisplayable.h"
 #include "SmithNextLevelEvent.generated.h"
-
-DECLARE_DELEGATE(FOnTriggerEvent);
-
-class ICanSetOnMap;
 
 /**
  * 
@@ -26,7 +22,7 @@ public:
 	
 public:
 	void InitializeEvent(const FVector&, const FRotator&) override final;
-	void TriggerEvent(ICanSetOnMap*) override final;
+	void TriggerEvent(AActor* Instigator) override final;
 	void DiscardEvent() override final;
 	void RaiseEvent() override final;
 	bool IsDisposed() const override final;
@@ -35,7 +31,7 @@ public:
 	UTexture2D* GetMinimapDisplayTexture_Implementation() override final;
 
 public:
-	FOnTriggerEvent OnNextLevel;
+	TDelegate<void()> OnNextLevel;
 
 private:
 	UPROPERTY()

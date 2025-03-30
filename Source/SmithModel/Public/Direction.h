@@ -2,7 +2,7 @@
 
 #pragma once
 
-UENUM(BlueprintType)
+UENUM()
 enum class EDirection: uint8
 {
   North = 0,

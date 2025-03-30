@@ -5,10 +5,6 @@
 
 #include "SmithMapModelDefinition.h"
 
-FSmithMapModel::FSmithMapModel()
-  : m_definition(nullptr)
-{}
-
 FSmithMapModel FSmithMapModel::CreateModel(USmithMapModelDefinition* Definition)
 {
   FSmithMapModel model;

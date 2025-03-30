@@ -2,17 +2,18 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+
 #include "SmithSoundMetaData_Import.generated.h"
 
-USTRUCT(Blueprintable, DisplayName = "Sound Meta Data")
+USTRUCT(BlueprintType, DisplayName = "Sound Meta Data")
 struct SMITHMODEL_API FSmithSoundMetaData_Import : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	FString SoundName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditAnywhere)
   TSoftObjectPtr<USoundBase> Sound;
 };

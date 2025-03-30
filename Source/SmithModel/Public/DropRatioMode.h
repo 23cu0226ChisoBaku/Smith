@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 
 UENUM()
 enum class EDropRatioMode : uint8

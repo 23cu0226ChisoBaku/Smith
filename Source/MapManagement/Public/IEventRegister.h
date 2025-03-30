@@ -16,8 +16,8 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "IEventRegister.generated.h"
 
 //---------------------------------------
@@ -25,7 +25,7 @@ Encoding : UTF-8
                   前方宣言
 */
 //---------------------------------------
-class ICanSetOnMap;
+class AActor;
 class ISmithMapEvent;
 
 // This class does not need to be modified.
@@ -46,8 +46,8 @@ class MAPMANAGEMENT_API IEventRegister
 public:
   ///
   /// @brief 								イベントを登録する
-  /// @param ICanSetOnMap 	イベントを発生発生させたマップに配置できるオブジェクト
+  /// @param AActor 	      イベントを発生発生させたマップに配置できるオブジェクト
   /// @param ISmithMapEvent	マップイベント
   ///
-  virtual void RegisterMapEvent(ICanSetOnMap*, ISmithMapEvent*) = 0;
+  virtual void RegisterMapEvent(AActor*, ISmithMapEvent*) = 0;
 };

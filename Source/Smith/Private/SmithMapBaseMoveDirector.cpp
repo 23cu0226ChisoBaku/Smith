@@ -2,8 +2,8 @@
 
 
 #include "SmithMapBaseMoveDirector.h"
+
 #include "ITargetTracker.h"
-#include "ICanSetOnMap.h"
 #include "MLibrary.h"
 
 USmithMapBaseMoveDirector::USmithMapBaseMoveDirector(const FObjectInitializer& ObjectInitializer)
@@ -13,7 +13,7 @@ USmithMapBaseMoveDirector::USmithMapBaseMoveDirector(const FObjectInitializer& O
   , m_chaseRadius(0)
 { }
 
-void USmithMapBaseMoveDirector::Initialize(ITargetTracker* targetChaser, ICanSetOnMap* chaser, uint8 chaseRadius)
+void USmithMapBaseMoveDirector::Initialize(ITargetTracker* targetChaser, AActor* chaser, uint8 chaseRadius)
 {
   m_targetTracker = targetChaser;
   m_chaser = chaser;

@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 UENUM()
 enum class EMapDeployRule : uint8
 {

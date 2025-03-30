@@ -20,7 +20,6 @@ Encoding : UTF-8
 #ifndef TILE_INFO_CONTAINER
 #define TILE_INFO_CONTAINER
 
-#include "CoreMinimal.h"
 #include "TileType.h"
 
 namespace UE::Smith
@@ -31,7 +30,7 @@ namespace UE::Smith
     /// ※抽象クラス
     /// @brief タイル情報コンテナ
     ///
-    class MAPMANAGEMENT_API FTileInfoContainer
+    class FTileInfoContainer
     {
       //---------------------------------------
       /*

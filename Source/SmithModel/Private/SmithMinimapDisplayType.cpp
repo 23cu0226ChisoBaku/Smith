@@ -2,7 +2,6 @@
 
 
 #include "SmithMinimapDisplayType.h"
-#include "MLibrary.h"
 
 USmithMinimapDisplayType::USmithMinimapDisplayType()
   : m_displayTexture(nullptr)

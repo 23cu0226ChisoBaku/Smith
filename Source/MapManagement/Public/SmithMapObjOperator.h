@@ -19,14 +19,11 @@ Encoding : UTF-8
 #ifndef SMITH_MAP_OPERATOR
 #define SMITH_MAP_OPERATOR
 
-#include "CoreMinimal.h"
-
 //---------------------------------------
 /*
                   前方宣言
 */
 //---------------------------------------
-class ICanSetOnMap;
 class IEventRegister;
 class UObject;
 struct FAttackableInfoHandle;
@@ -52,7 +49,7 @@ namespace UE::Smith
     class FSmithMap;
     struct FSmithMapDataModel;
 
-    class MAPMANAGEMENT_API FSmithMapObjOperator
+    class FSmithMapObjOperator
     {
       //---------------------------------------
       /*
@@ -100,9 +97,9 @@ namespace UE::Smith
         /// @param ICanSetOnMap							ターゲット
         /// @param FSmithCommandFormat			攻撃フォーマット
         ///
-        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
+        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor*, const UE::Smith::Battle::FSmithCommandFormat&);
         // TODO
-        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
+        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
         ///
         /// @brief 													オブジェクトを移動する
         /// @param ICanSetOnMap							移動するターゲットオブジェクト
@@ -110,7 +107,7 @@ namespace UE::Smith
         /// @param moveDistance 						移動距離
         /// @param FVector									移動先の座標
         ///
-        void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
+        void MoveMapObj(AActor*, EDirection, uint8 moveDistance, FVector&);
         void AddUpdateMinimapDelegate(const TDelegate<void(UObject*, const FMapCoord&, uint8, uint8)>&);
       #pragma endregion FSmithMapObjOperator Interface
       // end of FSmithMapObjOperator Interface

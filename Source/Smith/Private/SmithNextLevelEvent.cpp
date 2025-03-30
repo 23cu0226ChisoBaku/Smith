@@ -2,7 +2,7 @@
 
 
 #include "SmithNextLevelEvent.h"
-#include "ICanSetOnMap.h"
+
 #include "MapObjType.h"
 #include "IEventTriggerable.h"
 #include "MLibrary.h"
@@ -51,9 +51,10 @@ void USmithNextLevelEvent::InitializeEvent(const FVector& location, const FRotat
   m_bIsDisposed = false;
 }
 
-void USmithNextLevelEvent::TriggerEvent(ICanSetOnMap* mapObj)
+void USmithNextLevelEvent::TriggerEvent(AActor* mapObj)
 {
-  if (!IS_UINTERFACE_VALID(mapObj))
+  check(mapObj != nullptr);
+  if (mapObj == nullptr)
   {
     return;
   }

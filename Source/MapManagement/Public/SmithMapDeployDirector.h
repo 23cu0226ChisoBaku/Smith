@@ -21,8 +21,6 @@ Encoding : UTF-8
 #ifndef SMITH_MAP_DEPLOY_DIRECTOR
 #define SMITH_MAP_DEPLOY_DIRECTOR
 
-#include "CoreMinimal.h"
-
 //---------------------------------------
 /*
                   前方宣言
@@ -48,7 +46,7 @@ namespace UE::Smith
     ///	@brief マップにものを新しく配置するクラス
     /// namespace UE::Smith::Map
     ///
-    class MAPMANAGEMENT_API FSmithMapDeployDirector
+    class FSmithMapDeployDirector
     {
       //---------------------------------------
       /*
@@ -90,11 +88,11 @@ namespace UE::Smith
         void AssignMap(TSharedPtr<FSmithMapDataModel>);
         ///
         /// @brief  オブジェクトを配置する
-        /// @param  ICanSetOnMap            マップオブジェクト
+        /// @param  AActor                  マップオブジェクト
         /// @param  x	                      X座標
         /// @param  y	                      Y座標
         ///
-        void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
+        void DeployMapObj(AActor*, uint8 x, uint8 y);
         ///
         /// @brief  イベントを配置する
         /// @param  ISmithMapEvent          イベントオブジェクト

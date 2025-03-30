@@ -17,7 +17,6 @@ namespace UE::Smith
 	}
 }
 enum class EDirection : uint8;
-class ICanSetOnMap;
 /**
  * 
  */
@@ -33,7 +32,7 @@ public:
 	void SetupTracker(const TSharedPtr<UE::Smith::Map::FSmithMapManager>& MapManager);
 
 public:
-	bool TrackTarget(/* OUT */EDirection& outDirection, ICanSetOnMap* chaser, uint8 chaseRadius) override final;
+	bool TrackTarget(/* OUT */EDirection& outDirection, AActor* Chaser, uint8 chaseRadius) override final;
 
 private:
 

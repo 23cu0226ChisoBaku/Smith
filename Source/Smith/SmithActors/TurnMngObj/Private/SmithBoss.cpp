@@ -98,21 +98,6 @@ void ASmithBoss::OnDefeated()
   Destroy();
 }
 
-uint8 ASmithBoss::GetOnMapSizeX() const
-{
-  return 3;
-}
-
-uint8 ASmithBoss::GetOnMapSizeY() const
-{
-  return 3;
-}
-
-EMapObjType ASmithBoss::GetType() const
-{
-  return MapObjectType;
-}
-
 void ASmithBoss::TurnOnAI()
 {
   if (m_attackStrategy != nullptr)

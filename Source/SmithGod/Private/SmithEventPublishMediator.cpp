@@ -4,7 +4,6 @@
 #include "SmithEventPublishMediator.h"
 #include "SmithMapManager.h"
 #include "SmithEventPublisher.h"
-#include "ICanSetOnMap.h"
 #include "SmithPickable.h"
 #include "SmithPickUpItemEvent.h"
 #include "NiagaraSystem.h"
@@ -29,9 +28,10 @@ void USmithEventPublishMediator::Initialize(USmithEventPublisher* eventPublisher
   m_mapMgr = mapMgr;
 }
 
-void USmithEventPublishMediator::PublishPickUpEvent(ICanSetOnMap* mapObj, USmithPickable* pickable)
+void USmithEventPublishMediator::PublishPickUpEvent(AActor* mapObj, USmithPickable* pickable)
 {
-  check(m_eventPublisher.IsValid());
+  check(mapObj != nullptr);
+  
   if (!m_eventPublisher.IsValid())
   {
     return;
@@ -45,7 +45,7 @@ void USmithEventPublishMediator::PublishPickUpEvent(ICanSetOnMap* mapObj, USmith
 
   uint8 publishCoordX = 0;
   uint8 publishCoordY = 0;
-  bool success = mgr_shared->GetMapObjectCoord(mapObj,publishCoordX, publishCoordY);
+  bool success = mgr_shared->GetMapObjectCoord(mapObj, publishCoordX, publishCoordY);
   if (success)
   {
     USmithPickUpItemEvent* pickEvent = m_eventPublisher->PublishMapEvent<USmithPickUpItemEvent>(USmithPickUpItemEvent::StaticClass());

@@ -8,7 +8,6 @@
 #include "SmithCommandStrategies.h"
 #include "SmithMapManager.h"
 
-#include "ICanSetOnMap.h"
 #include "BattleCommandFactory.h"
 
 #include "SmithCommandFormat.h"
@@ -69,7 +68,7 @@ bool USmithBattleMediator::SendMoveCommand(AActor* requester, EDirection moveDir
   }
   
   FVector destination = FVector::ZeroVector;
-  mapMgr_shared->MoveMapObj(Cast<ICanSetOnMap>(requester), moveDirection, moveDistance, destination);
+  mapMgr_shared->MoveMapObj(requester, moveDirection, moveDistance, destination);
 
   if (destination.Equals(InvalidValues::MAP_COORD_WORLD_INVALID))
   {
@@ -110,7 +109,7 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, EDirection direc
 
   UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, direction);
   TArray<FAttackableInfoHandle> attackables{};
-  mapMgr_shared->FindAttackableMapObjs(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat);
+  mapMgr_shared->FindAttackableMapObjs(attackables, requester, rotatedFormat);
 
   ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
   if (attackables.Num() > 0)
@@ -164,7 +163,7 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, FSmithSkillParame
 
   UE::Smith::Battle::FSmithCommandFormat rotatedFormat = UE::Smith::Battle::FFormatTransformer::GetRotatedFormat(format, skillParameter.ActiveDirection);
   TArray<FAttackableInfoHandle> attackables{};
-  mapMgr_shared->FindAttackableMapObjsFromCoord(attackables, Cast<ICanSetOnMap>(requester), rotatedFormat, skillParameter.OffsetToLeft, skillParameter.OffsetToTop);
+  mapMgr_shared->FindAttackableMapObjsFromCoord(/**Out */attackables, requester, rotatedFormat, skillParameter.OffsetToLeft, skillParameter.OffsetToTop);
   
   // TODO Safe Cast may cause performance issue
   {
@@ -229,10 +228,9 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
   
   outLocations.Reset();
 
-  ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(requester);
   uint8 mapObjOriginCoordX = 0u;
   uint8 mapObjOriginCoordY = 0u;
-  if (!mapMgr_shared->GetMapObjectCoord(mapObj, mapObjOriginCoordX, mapObjOriginCoordY))
+  if (!mapMgr_shared->GetMapObjectCoord(requester, mapObjOriginCoordX, mapObjOriginCoordY))
   {
     return 0;
   }
@@ -286,8 +284,6 @@ void USmithBattleMediator::GetPlayerDirection(EDirection& outDirection, EDirecti
     return;
   }
 
-  ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(requester);
-
-  mapMgr_shared->GetPlayerDirection(outDirection, directionStrategy, mapObj, offsetToLeft, offsetToTop);
+  mapMgr_shared->GetPlayerDirection(outDirection, directionStrategy, requester, offsetToLeft, offsetToTop);
 }
 

@@ -2,7 +2,7 @@
 
 
 #include "SmithEventSystem.h"
-#include "ICanSetOnMap.h"
+
 #include "ISmithMapEvent.h"
 #include "IEventTriggerable.h"
 #include "MLibrary.h"
@@ -12,8 +12,8 @@ USmithEventSystem::USmithEventSystem(const FObjectInitializer& ObjectInitializer
   , m_eventHandleContainer{}
 { }
 
-USmithEventSystem::SmithEventHandle::SmithEventHandle(ICanSetOnMap* receiver, ISmithMapEvent* event)
-  : EventReceiver(receiver)
+USmithEventSystem::SmithEventHandle::SmithEventHandle(AActor* Instigator, ISmithMapEvent* event)
+  : EventInstigator(Instigator)
   , Event(event)
 { }
 
@@ -23,14 +23,14 @@ void USmithEventSystem::BeginDestroy()
   Super::BeginDestroy();
 }
 
-void USmithEventSystem::RegisterMapEvent(ICanSetOnMap* receiver, ISmithMapEvent* event)
+void USmithEventSystem::RegisterMapEvent(AActor* Instigator, ISmithMapEvent* event)
 {
-  if (!IS_UINTERFACE_VALID(receiver) || !IS_UINTERFACE_VALID(event))
+  if ((Instigator == nullptr) || !IS_UINTERFACE_VALID(event))
   {
     return;
   }
 
-  m_eventHandleContainer.Emplace(SmithEventHandle(receiver, event));
+  m_eventHandleContainer.Emplace(SmithEventHandle(Instigator, event));
 }
 
 void USmithEventSystem::ExecuteEvent()
@@ -41,7 +41,7 @@ void USmithEventSystem::ExecuteEvent()
   {
     auto& eventHandle = m_eventHandleContainer[idx];
 
-    if (!eventHandle.EventReceiver.IsValid() || !eventHandle.Event.IsValid())
+    if (!eventHandle.EventInstigator.IsValid() || !eventHandle.Event.IsValid())
     {
       m_eventHandleContainer.RemoveAt(idx);
       continue;
@@ -49,7 +49,7 @@ void USmithEventSystem::ExecuteEvent()
 
     if (!eventHandle.Event->IsDisposed())
     {
-      eventHandle.Event->TriggerEvent(eventHandle.EventReceiver.Get());
+      eventHandle.Event->TriggerEvent(eventHandle.EventInstigator.Get());
       if (eventHandle.Event.IsValid() && eventHandle.Event->IsDisposed())
       {
         eventHandle.Event->DiscardEvent();

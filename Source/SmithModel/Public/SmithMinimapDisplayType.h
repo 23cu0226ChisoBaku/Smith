@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "IMinimapDisplayable.h"
+
 #include "SmithMinimapDisplayType.generated.h"
 
 /**
@@ -16,11 +16,16 @@ class SMITHMODEL_API USmithMinimapDisplayType : public UObject , public IMinimap
 	GENERATED_BODY()
 
 public:
+
 	USmithMinimapDisplayType();
 	void SetTexture(UTexture2D*);
+
+	//---Begin of UObject Interface
 	virtual void BeginDestroy() override;
+	//---End of UObject Interface;
 
 public:
+
 	UTexture2D* GetMinimapDisplayTexture_Implementation() override;
 
 private:

@@ -16,36 +16,32 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "MapCoord.generated.h"
-
-USTRUCT(BlueprintType)
 struct SMITHMODEL_API FMapCoord
 {
-	GENERATED_BODY()
 
-	public:
+  public:
 
-		constexpr FMapCoord()
-		  : x(0)
-  		, y(0)
-		{ }
+    constexpr FMapCoord()
+      : x(0)
+      , y(0)
+    { }
 
-		FMapCoord(uint8 _x, uint8 _y);
+    FMapCoord(uint8 x_, uint8 y_);
+    ~FMapCoord() = default;
 
-		FMapCoord(const FMapCoord&);
-		FMapCoord& operator=(const FMapCoord&);
+    FMapCoord(const FMapCoord& Other) = default;
+    FMapCoord& operator=(const FMapCoord& Other) = default;
 
-		~FMapCoord() = default;
+    FMapCoord(FMapCoord&& Other) noexcept = default;
+    FMapCoord& operator=(FMapCoord&& Other) noexcept = default;
 
-		FString ToString() const;
-		
-	public:
+    FString ToString() const;
+    
+  public:
+  
+    uint8 x;
 
-		UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		uint8 x;
-
-		UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		uint8 y;
+    uint8 y;
 };
 
 /// @brief 比較演算子
@@ -58,7 +54,7 @@ uint32 GetTypeHash(const FMapCoord&);
 #else /// @brief optimize by inlining in shipping and development builds
 __forceinline uint32 GetTypeHash(const FMapCoord& Thing)
 {
-	uint32 Hash = FCrc::MemCrc32(&Thing, sizeof(FMapCoord));
-	return Hash;
+  uint32 Hash = FCrc::MemCrc32(&Thing, sizeof(FMapCoord));
+  return Hash;
 }
 #endif

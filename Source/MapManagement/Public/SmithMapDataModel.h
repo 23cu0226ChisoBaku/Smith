@@ -16,28 +16,18 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/WeakInterfacePtr.h"
-#include "ICanSetOnMap.h"
+
 #include "MapCoord.h"
 #include "ObstacleTileInfoContainer.h"
 #include "StaySpaceTileInfoContainer.h"
 
-///
-/// @brief TWeakInterfacePtr<ICanSetOnMap>をキーとしてTMapに使う
-///
-#if UE_BUILD_DEBUG
-uint32 GetTypeHash(const TWeakInterfacePtr<ICanSetOnMap>&);
-#else /// @brief optimize by inlining in shipping and development builds
-FORCEINLINE uint32 GetTypeHash(const TWeakInterfacePtr<ICanSetOnMap>& Thing)
-{
-  uint32 Hash = FCrc::MemCrc32(&Thing, sizeof(TWeakInterfacePtr<ICanSetOnMap>));
-  return Hash;
-}
-#endif
 
 class FObstacleTileInfoContainer;
 class FStaySpaceTileInfoContainer;
+
+// TODO
+class ISmithMapModelRequester;
 
 namespace UE::Smith
 {
@@ -48,7 +38,7 @@ namespace UE::Smith
     /// @brief マップデータモデル
     /// namespace UE::Smith::Map
     ///
-    struct MAPMANAGEMENT_API FSmithMapDataModel
+    struct FSmithMapDataModel
     {
       //---------------------------------------
       /*
@@ -76,12 +66,17 @@ namespace UE::Smith
         FSmithMapDataModel& operator=(const FSmithMapDataModel&) = delete;
       
       public:
+
         TWeakPtr<FSmithMap> Map;
-        TMap<TWeakInterfacePtr<ICanSetOnMap>, FMapCoord> OnMapObjsCoordTable;
+        TMap<TWeakObjectPtr<AActor>, FMapCoord> OnMapObjsCoordTable;
         TMap<FMapCoord, TSharedPtr<FObstacleTileInfoContainer>> ObstacleTable;
         TMap<FMapCoord, TSharedPtr<FStaySpaceTileInfoContainer>> StaySpaceTable;
         FVector OriginWorldCoord;
         int32 MapTileSize;
+
+        // TODO need make these models private
+        // TODO Use Presenter
+        TWeakInterfacePtr<ISmithMapModelRequester> MapModelRequester;
     };
   }
 }

@@ -12,7 +12,6 @@
 #include "SmithMapManager.h"
 
 #include "ICanCommandMediate.h"
-#include "ICanSetOnMap.h"
 #include "IMoveDirector.h"
 #include "ICanUseEnhanceSystem.h"
 #include "TurnActor_Test.h"
@@ -61,6 +60,8 @@
 #include "MLibrary.h"
 
 #include "DamageCalculationStrategies.h"
+
+#include "SmithMapModelSubsystem.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   : m_battleSystem(nullptr)
@@ -134,8 +135,6 @@ void AMapGenerateGameMode_Test::EndPlay(const EEndPlayReason::Type EndPlayReason
 void AMapGenerateGameMode_Test::startNewLevel()
 {
   APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-  ICanSetOnMap* mapPlayer = Cast<ICanSetOnMap>(playerPawn);
-  check(mapPlayer != nullptr);
 
   // ボス階層初期化
   if (m_curtLevel % 5 == 0)
@@ -188,10 +187,10 @@ void AMapGenerateGameMode_Test::startNewLevel()
         {
           turnBaseEnemy->OnDefeatEvent.AddUObject(this, &AMapGenerateGameMode_Test::processGameClear);
           // TODO!!!!
-          ASmithPlayerActor* player = Cast<ASmithPlayerActor>(playerPawn);
-          if (player != nullptr)
+          ASmithPlayerActor* playerModel = Cast<ASmithPlayerActor>(playerPawn);
+          if (playerModel != nullptr)
           {
-            turnBaseEnemy->OnDefeatEvent.AddUObject(player, &ASmithPlayerActor::OnGameClear);
+            turnBaseEnemy->OnDefeatEvent.AddUObject(playerModel, &ASmithPlayerActor::OnGameClear);
           }
         }
 
@@ -213,22 +212,15 @@ void AMapGenerateGameMode_Test::startNewLevel()
         return;
       }
 
-      for (auto& obj : moveDirectorImplementedActors)
+      for (AActor* moveDirectorActor : moveDirectorImplementedActors)
       {
-        ICanSetOnMap* mapObj = Cast<ICanSetOnMap>(obj);
-        if (mapObj == nullptr)
-        {
-          continue;
-        }
-
-        // TODO
-        IMoveDirector* moveDirector = Cast<IMoveDirector>(obj);
+        IMoveDirector* moveDirector = Cast<IMoveDirector>(moveDirectorActor);
         UClass* moveDirectorSub = moveDirector->GetMoveDirectorUClass();
 
         if (moveDirectorSub->IsChildOf<USmithMapBaseMoveDirector>())
         {
-          USmithMapBaseMoveDirector* mb_moveDirector = NewObject<USmithMapBaseMoveDirector>(obj);
-          mb_moveDirector->Initialize(m_chasePlayerTracker, mapObj, moveDirector->GetChaseRadius());
+          USmithMapBaseMoveDirector* mb_moveDirector = NewObject<USmithMapBaseMoveDirector>(moveDirectorActor);
+          mb_moveDirector->Initialize(m_chasePlayerTracker, moveDirectorActor, moveDirector->GetChaseRadius());
           moveDirector->SetMoveDirector(mb_moveDirector);
         }
       }
@@ -325,6 +317,16 @@ void AMapGenerateGameMode_Test::initializeGame()
     // イベント登録システムを注入
     m_mapMgr->AssignEventRegister(m_eventSystem);
     m_battleSystem->AssignEventExecutor(m_eventSystem);
+
+    USmithMapModelSubsystem* modelSys = world->GetSubsystem<USmithMapModelSubsystem>();
+    if (modelSys != nullptr)
+    {
+      for (const auto& definition : MapModelDefinition)
+      {
+        modelSys->InitializeMapModel(definition);
+      }
+      m_mapMgr->AssignMapModelRequester(modelSys);
+    }
 
     m_enhanceSystem = world->GetSubsystem<USmithEnhanceSubsystem>();
     check(m_enhanceSystem != nullptr);

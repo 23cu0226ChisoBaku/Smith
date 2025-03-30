@@ -22,15 +22,15 @@ public:
 	virtual void BeginDestroy() override;
 
 public:
-	void RegisterMapEvent(ICanSetOnMap*, ISmithMapEvent*) override final;
+	void RegisterMapEvent(AActor* Instigator, ISmithMapEvent*) override final;
 	void ExecuteEvent() override final;
 	bool IsEventInStock() const override final;
 	void Reset();
 private:
 	struct SmithEventHandle
 	{
-		SmithEventHandle(ICanSetOnMap*, ISmithMapEvent*);
-		TWeakInterfacePtr<ICanSetOnMap> EventReceiver;
+		SmithEventHandle(AActor*, ISmithMapEvent*);
+		TWeakObjectPtr<AActor> EventInstigator;
 		TWeakInterfacePtr<ISmithMapEvent> Event;
 	};
 	TArray<SmithEventHandle> m_eventHandleContainer;

@@ -2,13 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "SmithMoveDirector.h"
+
 #include "UObject/WeakInterfacePtr.h"
 #include "SmithMapBaseMoveDirector.generated.h"
 
 class ITargetTracker;
-class ICanSetOnMap;
 /**
  * 
  */
@@ -21,13 +20,13 @@ public:
 	USmithMapBaseMoveDirector(const FObjectInitializer&);
 
 public:
-	void Initialize(ITargetTracker*, ICanSetOnMap*, uint8 chaseRadius);
+	void Initialize(ITargetTracker*, AActor*, uint8 chaseRadius);
 
 private:
 	EDirection getNextDirectionImpl() override;
 	
 private:
 	TWeakInterfacePtr<ITargetTracker> m_targetTracker;
-	TWeakInterfacePtr<ICanSetOnMap> m_chaser;
+	TWeakObjectPtr<AActor> m_chaser;
 	uint8 m_chaseRadius;
 };

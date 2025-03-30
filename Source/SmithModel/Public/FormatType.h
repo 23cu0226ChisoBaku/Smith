@@ -2,9 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
-UENUM(Blueprintable)
+UENUM()
 enum class ESmithFormatType : uint8
 {
 	NO_EFFECT = 0,

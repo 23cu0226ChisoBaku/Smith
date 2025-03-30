@@ -19,7 +19,6 @@ Encoding : UTF-8
 #ifndef SMITH_MAP_OBSTACLE_TILEINFO
 #define SMITH_MAP_OBSTACLE_TILEINFO
 
-#include "CoreMinimal.h"
 #include "TileInfoContainer.h"
 
 namespace UE::Smith
@@ -30,7 +29,7 @@ namespace UE::Smith
     /// @brief 障害物タイル情報コンテナ
     ///	namespace UE::Smith::Map
     /// 
-    class MAPMANAGEMENT_API FObstacleTileInfoContainer : public FTileInfoContainer
+    class FObstacleTileInfoContainer : public FTileInfoContainer
     {
       // 親クラスの全てのコンストラクタを使えるように
       using FTileInfoContainer::FTileInfoContainer;

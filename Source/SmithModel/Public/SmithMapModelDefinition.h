@@ -11,8 +11,6 @@ enum class EMapModelType : uint8
 {
   Player UMETA(DisplayName = "Player"),
   Enemy UMETA(DisplayName = "Enemy"),
-  Pickable UMETA(DisplayName = "Pickable Item"),
-  NextLevel UMETA(DisplayName = "Next Level"),
   TypeCount UMETA(Hidden),
 };	
 
@@ -39,7 +37,7 @@ class SMITHMODEL_API USmithMapModelDefinition : public UDataAsset
 
 public:
 
-	UPROPERTY(EditDefaultsOnly, Category = "Smith|MapData", meta = (MustImplement = "CanSetOnMap"))
+	UPROPERTY(EditDefaultsOnly, Category = "Smith|MapData")
 	TSubclassOf<class AActor> MapObjectActorClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Smith|MapData", meta = (DisplayName = "DataInstance"))

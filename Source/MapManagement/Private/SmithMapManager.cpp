@@ -19,7 +19,8 @@ Encoding : UTF-8
 #include "SmithRect.h"
 #include "SmithMap.h"
 
-#include "ICanSetOnMap.h"
+#include "ISmithMapModelRequester.h"
+#include "SmithMapModelDefinition.h"
 
 #include "MapCoord.h"
 #include "TileType.h"
@@ -113,6 +114,13 @@ namespace UE::Smith
 
           m_mapOperator->AssignEventRegister(eventRegister);
         }
+        void AssignMapModelRequester(ISmithMapModelRequester* ModelRequester)
+        {
+          check(ModelRequester != nullptr);
+          check(m_model.IsValid());
+
+          m_model->MapModelRequester = ModelRequester;
+        }
         void InitMap(UWorld* world, const FSmithMapBluePrint& mapBP, const FSmithMapConstructionBluePrint& constructionBP)
         {    
           // 安全性チェック
@@ -147,8 +155,14 @@ namespace UE::Smith
           m_map.Reset();
           m_map = ::MoveTemp(tempMap);
 
-          m_model.Reset();
-          m_model = ::MoveTemp(tempModel);
+          // TODO EMERGENCY
+          {
+            auto requester = m_model->MapModelRequester.Get();
+  
+            m_model.Reset();
+            m_model = ::MoveTemp(tempModel);
+            m_model->MapModelRequester = requester;
+          }
 
           m_mapConstructor->ConstructMap(world, m_map->GetMap(), constructionBP);
 
@@ -242,20 +256,22 @@ namespace UE::Smith
         {
           // 安全性チェック
           #pragma region Safe Check
-          check((m_mapObserver.IsValid() && m_deployDirector.IsValid()));
-          if (!m_mapObserver.IsValid() || !m_deployDirector.IsValid())
-          {
-            return;
-          }
 
-          check(::IsValid(world) && ::IsValid(player));
-          if (world == nullptr || player == nullptr)
-          {
-            return;
-          }
+            check((world != nullptr) && (player != nullptr));
+            check((m_mapObserver.IsValid() && m_deployDirector.IsValid()));
+            if (!m_mapObserver.IsValid() || !m_deployDirector.IsValid())
+            {
+              return;
+            }
+
+            if (!m_model->MapModelRequester.IsValid())
+            {
+              return;
+            }
+
           #pragma endregion Safe Check
 
-          TMap<FMapCoord, ICanSetOnMap*> deployMapObjs{};
+          TMap<FMapCoord, AActor*> deployMapObjs{};
           m_mapObserver->InitMapObj(deployMapObjs, world, player, generateBP);
 
           for(const auto& [mapCoord, mapObj] : deployMapObjs)
@@ -267,21 +283,29 @@ namespace UE::Smith
           {
             for(const auto& [mapCoord, mapObj] : deployMapObjs)
             {
-              const uint8 sizeX = mapObj->GetOnMapSizeX();
-              const uint8 sizeY = mapObj->GetOnMapSizeY();
+              const FSmithMapModel mapObjModel = m_model->MapModelRequester->GetModel(mapObj);
+              if (!mapObjModel.IsValid())
+              {
+                continue;
+              }
+
+              const uint8 sizeX = mapObjModel.GetSizeX();
+              const uint8 sizeY = mapObjModel.GetSizeY();
               const int32 typeObjCnt = StaticCast<int32>(sizeX) * StaticCast<int32>(sizeY);
 
-              const EMapObjType type = mapObj->GetType();
+              const EMapModelType type = mapObjModel.GetModelType();
               TArray<UObject*> tileTypeObjs;
               EMinimapDisplayType displayType = EMinimapDisplayType::Default;
+
+              using enum EMapModelType;
               switch (type)
               {
-                case EMapObjType::Player:
+                case Player:
                 {
                   displayType = EMinimapDisplayType::Player;
                 }
                 break;
-                case EMapObjType::Enemy:
+                case Enemy:
                 {
                   displayType = EMinimapDisplayType::Enemy;
                 }
@@ -446,7 +470,7 @@ namespace UE::Smith
         {
           m_factory = factory;
         }
-        void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
+        void DeployMapObj(AActor* mapObj, uint8 x, uint8 y)
         {
           m_deployDirector->DeployMapObj(mapObj, x, y);
         }
@@ -459,15 +483,15 @@ namespace UE::Smith
             m_mapEvents.Emplace(mapEvent);
           }
         }
-        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
+        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor* mapObj, const FSmithCommandFormat& format)
         {
           m_mapOperator->FindAttackableMapObjs(outAttackableHandles, mapObj, format);
         }
-        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
         {
           m_mapOperator->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
         }
-        bool GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, ICanSetOnMap* origin, uint8 offsetLeft, uint8 offsetTop)
+        bool GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, AActor* origin, uint8 offsetLeft, uint8 offsetTop)
         {
           // TODO
           uint8 x = 0;
@@ -484,15 +508,15 @@ namespace UE::Smith
 
           return outDirection != EDirection::Invalid;
         }
-        void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
+        void MoveMapObj(AActor* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
           m_mapOperator->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
         }
-        bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
+        bool ChasePlayerTarget(EDirection& outChaseDirection, AActor* chaser, uint8 chaseRadius)
         {
           return m_mapObserver->ChasePlayer(outChaseDirection, chaser, chaseRadius);
         }
-        bool GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& x, uint8& y)
+        bool GetMapObjectCoord(AActor* mapObj, uint8& x, uint8& y)
         {
           return m_mapObserver->GetMapObjectCoord(mapObj, x, y);
         }
@@ -559,6 +583,10 @@ namespace UE::Smith
     {
       m_pImpl->AssignEventRegister(eventRegister);
     }
+    void FSmithMapManager::AssignMapModelRequester(ISmithMapModelRequester* MapModelRequester)
+    {
+      m_pImpl->AssignMapModelRequester(MapModelRequester);
+    }
     void FSmithMapManager::InitMap(UWorld* world, const FSmithMapBluePrint& mapBP, const FSmithMapConstructionBluePrint& constructionBP)
     {
       m_pImpl->InitMap(world, mapBP, constructionBP);
@@ -587,7 +615,7 @@ namespace UE::Smith
     {
       m_pImpl->AssignMinimapDisplayTypeFactory(factory);
     }
-    void FSmithMapManager::DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
+    void FSmithMapManager::DeployMapObj(AActor* mapObj, uint8 x, uint8 y)
     {
       m_pImpl->DeployMapObj(mapObj, x, y);
     }
@@ -595,27 +623,27 @@ namespace UE::Smith
     {
       m_pImpl->DeployEvent(mapEvent, x, y);
     }
-    void FSmithMapManager::FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj,const FSmithCommandFormat& format)
+    void FSmithMapManager::FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor* mapObj,const FSmithCommandFormat& format)
     {
       m_pImpl->FindAttackableMapObjs(outAttackableHandles, mapObj, format);
     } 
-    void FSmithMapManager::FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+    void FSmithMapManager::FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor* mapObj, const FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
     {
       m_pImpl->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
     }
-    bool FSmithMapManager::GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, ICanSetOnMap* origin, uint8 offsetLeft, uint8 offsetTop)
+    bool FSmithMapManager::GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, AActor* origin, uint8 offsetLeft, uint8 offsetTop)
     {
       return m_pImpl->GetPlayerDirection(outDirection, directionStrategy, origin, offsetLeft, offsetTop);
     }
-    void FSmithMapManager::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
+    void FSmithMapManager::MoveMapObj(AActor* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     {
       return m_pImpl->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
     }
-    bool FSmithMapManager::ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
+    bool FSmithMapManager::ChasePlayerTarget(EDirection& outChaseDirection, AActor* chaser, uint8 chaseRadius)
     {
       return m_pImpl->ChasePlayerTarget(outChaseDirection, chaser, chaseRadius);
     }
-    bool FSmithMapManager::GetMapObjectCoord(ICanSetOnMap* mapObj, uint8& x, uint8& y)
+    bool FSmithMapManager::GetMapObjectCoord(AActor* mapObj, uint8& x, uint8& y)
     {
       return m_pImpl->GetMapObjectCoord(mapObj, x, y);
     }

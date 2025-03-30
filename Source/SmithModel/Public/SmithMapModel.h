@@ -8,15 +8,15 @@
 class USmithMapModelDefinition;
 enum class EMapModelType : uint8;
 
-struct FSmithMapModel
+struct SMITHMODEL_API FSmithMapModel
 {
 
 	friend class USmithMapModelSubsystem;
 
 	private:
-		FSmithMapModel();
+	
+		FSmithMapModel() = default;
 
-	private:
 		static FSmithMapModel CreateModel(USmithMapModelDefinition* Definition);
 
 	public:

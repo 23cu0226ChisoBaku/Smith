@@ -24,5 +24,5 @@ class SMITH_API ITargetTracker
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual bool TrackTarget(EDirection& outDirection, ICanSetOnMap* chaser, uint8 chaseRadius) = 0;
+	virtual bool TrackTarget(EDirection& outDirection, AActor* chaser, uint8 chaseRadius) = 0;
 };

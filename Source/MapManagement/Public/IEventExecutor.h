@@ -16,8 +16,8 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "IEventExecutor.generated.h"
 
 // This class does not need to be modified.

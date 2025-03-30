@@ -27,6 +27,8 @@ class UMinimapDisplayTypeFactory;
 class UGameLogWidget;
 class UScreenFade;
 
+class USmithMapModelDefinition;
+
 namespace UE::Smith
 {
 	namespace Map
@@ -140,6 +142,9 @@ private:
 	TSubclassOf<UMinimapDisplayTypeFactory> MinimapTypeFactorySub;
 	UPROPERTY()
 	TObjectPtr<UMinimapDisplayTypeFactory> m_factory;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Map|Model|Definition")
+	TArray<TObjectPtr<USmithMapModelDefinition>> MapModelDefinition;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;

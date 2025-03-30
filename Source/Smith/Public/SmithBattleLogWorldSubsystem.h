@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
+
 #include "SmithBattleLogWorldSubsystem.generated.h"
 
 class UGameLogWidget;

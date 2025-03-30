@@ -19,8 +19,6 @@ Encoding : UTF-8
 #ifndef SMITH_ROOM
 #define SMIHT_ROOM
 
-#include "CoreMinimal.h"
-
 namespace UE::Smith
 {
   namespace Map
@@ -36,7 +34,7 @@ namespace UE::Smith
     /// @brief 部屋クラス
     /// namespace UE::Smith::Map
     ///　
-    class MAPMANAGEMENT_API FSmithRoom
+    class FSmithRoom
     {
       //---------------------------------------
       /*

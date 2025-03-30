@@ -127,16 +127,6 @@ void AHerbGolem::OnAttack(const AttackHandle& Handle)
 	}
 }
 
-uint8 AHerbGolem::GetOnMapSizeX() const
-{
-	return 1;
-}
-
-uint8 AHerbGolem::GetOnMapSizeY() const
-{
-	return 1;
-}
-
 UClass* AHerbGolem::GetMoveDirectorUClass() const
 {
 	return MoveDirectorSubclass.Get();
@@ -150,11 +140,6 @@ void AHerbGolem::SetMoveDirector(USmithMoveDirector* director)
 uint8 AHerbGolem::GetChaseRadius() const
 {
 	return ChaseRadius;
-}
-
-EMapObjType AHerbGolem::GetType() const
-{
-	return MapObjectType;
 }
 
 void AHerbGolem::TurnOnAI()

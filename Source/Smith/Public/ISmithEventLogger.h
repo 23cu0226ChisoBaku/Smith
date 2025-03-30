@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "ISmithEventLogger.generated.h"
 
 class ISmithBattleLogger;

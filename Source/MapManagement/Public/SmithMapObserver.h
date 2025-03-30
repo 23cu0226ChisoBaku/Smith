@@ -19,14 +19,11 @@ Encoding : UTF-8
 #ifndef SMITH_MAP_OBSERVER
 #define SMITH_MAP_OBSERVER
 
-#include "CoreMinimal.h"
-
 //---------------------------------------
 /*
                   前方宣言
 */
 //---------------------------------------
-class ICanSetOnMap;
 struct FSmithEnemyGenerateBluePrint;
 struct FMapCoord;
 enum class EDirection : uint8;
@@ -42,7 +39,7 @@ namespace UE::Smith
     //---------------------------------------
     struct FSmithMapDataModel;
 
-    class MAPMANAGEMENT_API FSmithMapObserver
+    class FSmithMapObserver
     {
       //---------------------------------------
       /*
@@ -89,14 +86,14 @@ namespace UE::Smith
         /// @param	player												プレイヤーポインタ
         /// @param	FSmithEnemyGenerateBluePrint	敵を生成する設計図
         ///
-        void InitMapObj(TMap<FMapCoord, ICanSetOnMap*>& outMapObjs, UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
+        void InitMapObj(TMap<FMapCoord, AActor*>& outMapObjs, UWorld*, AActor* player, const FSmithEnemyGenerateBluePrint&);
         void ClearMapObjs_IgnorePlayer();
-        bool ChasePlayer(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
-        bool GetMapObjectCoord(ICanSetOnMap*, uint8& outX, uint8& outY);
+        bool ChasePlayer(EDirection& outChaseDirection, AActor* chaser, uint8 chaseRadius);
+        bool GetMapObjectCoord(AActor*, uint8& outX, uint8& outY);
         /// @brief 未使用
         void GenerateNewEnemy();
         /// @brief 未使用
-        bool ChaseTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, ICanSetOnMap* target, uint8 chaseRadius);
+        bool ChaseTarget(EDirection& outChaseDirection, AActor* chaser, AActor* target, uint8 chaseRadius);
         /// TODO
         bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y);
         // TODO

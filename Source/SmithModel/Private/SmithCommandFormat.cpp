@@ -2,6 +2,7 @@
 
 
 #include "SmithCommandFormat.h"
+
 #include "FormatType.h"
 
 using namespace UE::MLibrary::MDataStructure;
@@ -21,10 +22,40 @@ namespace UE::Smith
     void FSmithCommandFormat::SetupFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column)
     {
       check(srcData != nullptr)
-      check(dataCnt == row * column)
+      check((dataCnt == (row * column)))
 
       m_formatArr = TDimension2Array<ESmithFormatType>(srcData, dataCnt, row, column);
       setCNCoord();
+    }
+
+    TDimension2Array<ESmithFormatType> FSmithCommandFormat::GetFormatArray() const
+    {
+      return m_formatArr;
+    } 
+
+    FMapCoord FSmithCommandFormat::GetCNCoord() const
+    {
+      return m_cnCoord;
+    }
+
+    uint64 FSmithCommandFormat::GetRow() const
+    {
+      return m_formatArr.Row();
+    }
+
+    uint64 FSmithCommandFormat::GetColumn() const
+    {
+      return m_formatArr.Column();
+    }
+
+    ESmithFormatType FSmithCommandFormat::GetFormatData(uint64 x, uint64 y) const
+    {
+      return m_formatArr.At_ReadOnly(y, x);
+    }
+    
+    bool FSmithCommandFormat::IsValid() const
+    {
+      return (GetRow() != 0) && (GetColumn() != 0);
     }
 
     void FSmithCommandFormat::setCNCoord()
@@ -43,16 +74,6 @@ namespace UE::Smith
           }
         }
       }
-    }
-
-    ESmithFormatType FSmithCommandFormat::GetFormatData(uint64 x, uint64 y) const
-    {
-      return m_formatArr.At_ReadOnly(y, x);
-    }
-
-    bool FSmithCommandFormat::IsValid() const
-    {
-      return (GetRow() != 0) && (GetColumn() != 0);
     }
   }
 }

@@ -2,13 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "MapDeployRule.h"
+
 #include "SmithMapDecoration.generated.h"
 
-/**
- * 
- */
 USTRUCT()
 struct SMITHMODEL_API FSmithMapDecoration
 {
@@ -16,8 +13,10 @@ struct SMITHMODEL_API FSmithMapDecoration
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> MapDecoration;
+
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0))
 	int32 DecorationCount;
+	
 	UPROPERTY(EditAnywhere)
 	EMapDeployRule DeployRule;
 

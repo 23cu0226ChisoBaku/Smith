@@ -3,7 +3,6 @@
 
 #include "SmithPickUpItemEvent.h"
 #include "IPickable.h"
-#include "ICanSetOnMap.h"
 #include "ISmithBattleLogger.h"
 #include "IEventTriggerable.h"
 #include "MLibrary.h"
@@ -42,26 +41,17 @@ void USmithPickUpItemEvent::InitializeEvent(const FVector& location, const FRota
   }
 }
 
-void USmithPickUpItemEvent::TriggerEvent(ICanSetOnMap* mapObj)
+void USmithPickUpItemEvent::TriggerEvent(AActor* Instigator)
 { 
-  if (!m_pickable.IsValid())
+  check(Instigator != nullptr);
+
+  if (!m_pickable.IsValid() || (m_pickableObject == nullptr))
   {
     DiscardEvent();
     return;
   }
 
-  if (m_pickableObject == nullptr || !m_pickableObject->IsValidLowLevel())
-  {
-    DiscardEvent();
-    return;
-  }
-
-  if (!IS_UINTERFACE_VALID(mapObj))
-  {
-    return;
-  }
-
-  IEventTriggerable* eventTriggerable = Cast<IEventTriggerable>(mapObj);
+  IEventTriggerable* eventTriggerable = Cast<IEventTriggerable>(Instigator);
   if (eventTriggerable == nullptr)
   {
     return;
@@ -73,7 +63,7 @@ void USmithPickUpItemEvent::TriggerEvent(ICanSetOnMap* mapObj)
 
 void USmithPickUpItemEvent::DiscardEvent()
 {
-  if (::IsValid(m_pickableObject))
+  if (m_pickableObject != nullptr)
   {
     m_pickableObject->ConditionalBeginDestroy();
   }
@@ -92,7 +82,7 @@ void USmithPickUpItemEvent::RaiseEvent()
     const FString picktype = m_pickable->GetPickType();
     if (picktype == TEXT("ConsumeItem"))
     {
-      MLibrary::UE::Audio::AudioKit::PlaySE(TEXT("Get_HErb"));
+      MLibrary::UE::Audio::AudioKit::PlaySE(TEXT("Get_Herb"));
     }
     else if(picktype == TEXT("UpgradeMaterial"))
     {
@@ -108,12 +98,8 @@ bool USmithPickUpItemEvent::IsDisposed() const
 
 void USmithPickUpItemEvent::AssignPickable(IPickable* pickable, UNiagaraSystem* itemEventNiagara)
 {
+  check(pickable != nullptr);
   if (m_pickable.IsValid())
-  {
-    return;
-  }
-
-  if (!IS_UINTERFACE_VALID(pickable))
   {
     return;
   }

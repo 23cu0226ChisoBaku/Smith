@@ -18,7 +18,8 @@ class UNiagaraComponent;
  * 
  */
 UCLASS()
-class SMITH_API USmithPickUpItemEvent : public UObject, public ISmithMapEvent, public ISmithEventLogger, public IMinimapDisplayable
+class SMITH_API USmithPickUpItemEvent : public UObject, public ISmithMapEvent, 
+																				public ISmithEventLogger, public IMinimapDisplayable
 {
 	GENERATED_BODY()
 
@@ -28,7 +29,7 @@ public:
 
 public:
 	virtual void InitializeEvent(const FVector&, const FRotator&) override;
-	virtual void TriggerEvent(ICanSetOnMap*) override;
+	virtual void TriggerEvent(AActor* Instigator) override;
 	virtual void DiscardEvent() override;
 	virtual void RaiseEvent() override;
 	virtual bool IsDisposed() const override;

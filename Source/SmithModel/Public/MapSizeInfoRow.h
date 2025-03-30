@@ -6,10 +6,7 @@
 
 #include "MapSizeInfoRow.generated.h"
 
-/**
- * 
- */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct SMITHMODEL_API FMapSizeInfoRow : public FTableRowBase
 {
 	 GENERATED_BODY()

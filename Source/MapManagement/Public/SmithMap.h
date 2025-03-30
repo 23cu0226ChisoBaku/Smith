@@ -36,7 +36,7 @@ namespace UE::Smith
     /// 
     /// @brief マップクラス 
     ///
-    class MAPMANAGEMENT_API FSmithMap
+    class FSmithMap
     {
       //---------------------------------------
       /*

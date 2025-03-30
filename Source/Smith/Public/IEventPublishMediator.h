@@ -20,7 +20,6 @@ Encoding : UTF-8
 #include "IEventPublishMediator.generated.h"
 
 class USmithPickable;
-class ICanSetOnMap;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
@@ -38,5 +37,5 @@ class SMITH_API IEventPublishMediator
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void PublishPickUpEvent(ICanSetOnMap*, USmithPickable*) = 0;
+	virtual void PublishPickUpEvent(AActor* Requester, USmithPickable*) = 0;
 };

@@ -18,7 +18,6 @@ Encoding : UTF-8
 #include "SmithMap.h"
 #include "SmithMapDataModel.h"
 #include "InvalidValues.h"
-#include "ICanSetOnMap.h"
 #include "IEventRegister.h"
 #include "ISmithMapEvent.h"
 #include "SmithCommandFormat.h"
@@ -26,6 +25,10 @@ Encoding : UTF-8
 #include "FormatTransformer.h"
 #include "MapObjType.h"
 #include "IMinimapDisplayable.h"
+
+#include "ISmithMapModelRequester.h"
+// TODO
+#include "SmithMapModelDefinition.h"
 
 // TODO
 // IAttackable.h
@@ -80,11 +83,12 @@ namespace UE::Smith
         {
           m_eventRegister = eventRegister;
         }
-        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const FSmithCommandFormat& format)
+        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor* mapObj, const FSmithCommandFormat& format)
         {
+          check(mapObj != nullptr)
           // 安全性チェック
           #pragma region Safe Check
-          if (!IS_UINTERFACE_VALID(mapObj))
+          if (mapObj == nullptr)
           {
             return;
           }
@@ -106,10 +110,22 @@ namespace UE::Smith
           {
             return;
           }
+
+          if (!model_shared->MapModelRequester.IsValid())
+          {
+            return;
+          }
+
+          const FSmithMapModel mapObjModel = model_shared->MapModelRequester->GetModel(mapObj);
+          if (!mapObjModel.IsValid())
+          {
+            return;
+          }
+
           outAttackableHandles.Reset();
 
-          const uint8 mapObjSizeX = mapObj->GetOnMapSizeX();
-          const uint8 mapObjSizeY = mapObj->GetOnMapSizeY();
+          const uint8 mapObjSizeX = mapObjModel.GetSizeX();
+          const uint8 mapObjSizeY = mapObjModel.GetSizeY();
           for (uint8 coordX = 0u; coordX < mapObjSizeX; ++coordX)
           {
             for (uint8 coordY = 0u; coordY < mapObjSizeY; ++coordY)
@@ -117,7 +133,7 @@ namespace UE::Smith
               // オブジェクトの中心座標
               const FMapCoord mapObjOriginCoord = model_shared->OnMapObjsCoordTable[mapObj] + FMapCoord(coordX, coordY);
 
-              const EMapObjType trackerType = mapObj->GetType();
+              const EMapModelType trackerType = mapObjModel.GetModelType();
 
               // 攻撃フォーマットをマップオブジェクトの中心座標でマップ座標に変換
               using namespace UE::MLibrary::MDataStructure;
@@ -142,14 +158,15 @@ namespace UE::Smith
                   }
 
                   // 座標にマップオブジェクトがないと飛ばす
-                  ICanSetOnMap* coordMapObj = model_shared->StaySpaceTable[mapCoord]->GetMapObject();
-                  if (coordMapObj == nullptr || coordMapObj == mapObj)
+                  AActor* coordMapObj = model_shared->StaySpaceTable[mapCoord]->GetMapObject();
+                  if ((coordMapObj == nullptr) || (coordMapObj == mapObj))
                   {
                     continue;
                   }
 
+                  const FSmithMapModel targetModel = model_shared->MapModelRequester->GetModel(coordMapObj);
                   // 同じタイプのターゲットに攻撃しない
-                  if (coordMapObj->GetType() == trackerType)
+                  if (!targetModel.IsValid() || targetModel.GetModelType() == trackerType)
                   {
                     continue;
                   }
@@ -180,11 +197,12 @@ namespace UE::Smith
             } 
           }
         }
-        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
         {
+          check(mapObj != nullptr);
           // 安全性チェック
           #pragma region Safe Check
-          if (!IS_UINTERFACE_VALID(mapObj))
+          if (mapObj == nullptr)
           {
             return;
           }
@@ -207,17 +225,28 @@ namespace UE::Smith
             return;
           }
 
+          if (!model_shared->MapModelRequester.IsValid())
+          {
+            return;
+          }
+
+          const FSmithMapModel mapObjModel = model_shared->MapModelRequester->GetModel(mapObj);
+          if (!mapObjModel.IsValid())
+          {
+            return;
+          }
+
           outAttackableHandles.Reset();
 
-          const uint8 mapObjSizeX = mapObj->GetOnMapSizeX();
-          const uint8 mapObjSizeY = mapObj->GetOnMapSizeY();
+          const uint8 mapObjSizeX = mapObjModel.GetSizeX();
+          const uint8 mapObjSizeY = mapObjModel.GetSizeY();
 
           const uint8 coordX = mapObjSizeX > offsetToLeft ? offsetToLeft : 0u;
           const uint8 coordY = mapObjSizeY > offsetToTop ? offsetToTop : 0u;
           // オブジェクトの中心座標
           const FMapCoord mapObjOriginCoord = model_shared->OnMapObjsCoordTable[mapObj] + FMapCoord(coordX, coordY);
 
-          const EMapObjType trackerType = mapObj->GetType();
+          const EMapModelType trackerType = mapObjModel.GetModelType();
 
           // 攻撃フォーマットをマップオブジェクトの中心座標でマップ座標に変換
           using namespace UE::MLibrary::MDataStructure;
@@ -242,13 +271,14 @@ namespace UE::Smith
               }
 
               // 座標にマップオブジェクトがないと飛ばす
-              ICanSetOnMap* coordMapObj = model_shared->StaySpaceTable[mapCoord]->GetMapObject();
+              AActor* coordMapObj = model_shared->StaySpaceTable[mapCoord]->GetMapObject();
               if (coordMapObj == nullptr || coordMapObj == mapObj)
               {
                 continue;
               }
 
-              if (coordMapObj->GetType() == trackerType)
+              const FSmithMapModel targetModel = model_shared->MapModelRequester->GetModel(coordMapObj);
+              if (!targetModel.IsValid() || targetModel.GetModelType() == trackerType)
               {
                 continue;
               }
@@ -268,19 +298,20 @@ namespace UE::Smith
           }
           
         }
-        void MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
+        void MoveMapObj(AActor* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
         {
           destination = InvalidValues::MAP_COORD_WORLD_INVALID;
           // 安全性チェック
           #pragma region Safe Check
           {
-            check(m_model.IsValid())
+            check(m_model.IsValid());
+            check(mapObj != nullptr);
             if (!m_model.IsValid())
             {
               return;
             }
 
-            if (!IS_UINTERFACE_VALID(mapObj) || moveDistance == 0)
+            if ((mapObj == nullptr) || (moveDistance == 0))
             {
               return;
             }
@@ -331,13 +362,15 @@ namespace UE::Smith
           m_updateMinimapDelegate.Add(delegate);
         }
       private:
-        bool isObjectMoveable(ICanSetOnMap* mapObj, uint8 distance, uint8 checkBits_Internal) const
+        bool isObjectMoveable(AActor* mapObj, uint8 distance, uint8 checkBits_Internal) const
         {
           // 安全性チェック(二重チェックのためDebug専用)
           #if WITH_EDITOR
             #pragma region Safe Check
-              check(IS_UINTERFACE_VALID(mapObj));
+
+              check(mapObj != nullptr);
               check(m_model.IsValid());
+
             #pragma endregion Safe Check
           #endif
 
@@ -347,10 +380,11 @@ namespace UE::Smith
             return false;
           }
 
+          const FSmithMapModel mapObjModel = model_shared->MapModelRequester->GetModel(mapObj);
           const FMapCoord mapObjOriginCoord = model_shared->OnMapObjsCoordTable[mapObj];
 
-          const uint8 objSizeX = mapObj->GetOnMapSizeX();
-          const uint8 objSizeY = mapObj->GetOnMapSizeY();
+          const uint8 objSizeX = mapObjModel.GetSizeX();
+          const uint8 objSizeY = mapObjModel.GetSizeY();
           // チェックが必要なマス目の最大数は横幅+縦幅を超えない
           const int32 needCheckMapObjArea = StaticCast<int32>(objSizeX) + StaticCast<int32>(objSizeY);
 
@@ -428,13 +462,13 @@ namespace UE::Smith
 
           return true;
         }
-        void updateObjCoord(ICanSetOnMap* mapObj, uint8 checkBits_Internal, uint8 moveDistance, FVector& destination)
+        void updateObjCoord(AActor* mapObj, uint8 checkBits_Internal, uint8 moveDistance, FVector& destination)
         {
           // 安全性チェック(二重チェックのためDebug専用)
           #if WITH_EDITOR
             #pragma region Safe Check
             {
-              check(IS_UINTERFACE_VALID(mapObj));
+              check(mapObj != nullptr);
               check(m_model.IsValid());
             }
             #pragma endregion Safe Check
@@ -447,6 +481,11 @@ namespace UE::Smith
 
           TSharedPtr<FSmithMapDataModel> model_shared = m_model.Pin();
           if (!model_shared.IsValid())
+          {
+            return;
+          }
+
+          if (!model_shared->MapModelRequester.IsValid())
           {
             return;
           }
@@ -481,11 +520,15 @@ namespace UE::Smith
           }
 
           const FMapCoord mapObjOriginCoord = model_shared->OnMapObjsCoordTable[mapObj];
-          
+          const FSmithMapModel mapObjModel = model_shared->MapModelRequester->GetModel(mapObj);
+                    
+          const uint8 mapSizeX = mapObjModel.GetSizeX();
+          const uint8 mapSizeY = mapObjModel.GetSizeY();
+
           // TODO ignore ground exist check;
-          for (uint8 y = 0; y < mapObj->GetOnMapSizeY(); ++y)
+          for (uint8 y = 0u; y < mapSizeY; ++y)
           {
-            for (uint8 x = 0; x < mapObj->GetOnMapSizeX(); ++x)
+            for (uint8 x = 0u; x < mapSizeX; ++x)
             {
               // マップオブジェクトを移動する前のタイルの座標
               const FMapCoord removeTileCoord(mapObjOriginCoord.x + x, mapObjOriginCoord.y + y);
@@ -514,9 +557,7 @@ namespace UE::Smith
           const int32 newMapObjOriginCoordY = StaticCast<int32>(mapObjOriginCoord.y) + distanceY;
           const FMapCoord newMapObjOriginCoord(StaticCast<uint8>(newMapObjOriginCoordX), StaticCast<uint8>(newMapObjOriginCoordY));
           model_shared->OnMapObjsCoordTable[mapObj] = newMapObjOriginCoord;
-          
-          const uint8 mapSizeX = mapObj->GetOnMapSizeX();
-          const uint8 mapSizeY = mapObj->GetOnMapSizeY();
+
           const FVector mapObjoffset = FVector(
                                       StaticCast<double>((mapSizeX - 1u) * model_shared->MapTileSize) * 0.5,
                                       StaticCast<double>((mapSizeY - 1u) * model_shared->MapTileSize) * 0.5,
@@ -537,7 +578,7 @@ namespace UE::Smith
             {
               m_updateMinimapDelegate.Broadcast(model_shared->StaySpaceTable[mapObjOriginCoord]->GetTileActor(), mapObjOriginCoord, mapSizeX, mapSizeY);
             }
-            m_updateMinimapDelegate.Broadcast(mapObj->_getUObject(), newMapObjOriginCoord, mapSizeX, mapSizeY);
+            m_updateMinimapDelegate.Broadcast(mapObj, newMapObjOriginCoord, mapSizeX, mapSizeY);
           }
         }
       private:
@@ -577,15 +618,15 @@ namespace UE::Smith
     {
       m_pImpl->AssignMap(map);
     }
-    void FSmithMapObjOperator::FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format)
+    void FSmithMapObjOperator::FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format)
     {
       m_pImpl->FindAttackableMapObjs(outAttackableHandles, mapObj, format);
     }
-    void FSmithMapObjOperator::FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
+    void FSmithMapObjOperator::FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor* mapObj, const UE::Smith::Battle::FSmithCommandFormat& format, uint8 offsetToLeft, uint8 offsetToTop)
     {
       m_pImpl->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
     }
-    void FSmithMapObjOperator::MoveMapObj(ICanSetOnMap* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
+    void FSmithMapObjOperator::MoveMapObj(AActor* mapObj, EDirection moveDirection, uint8 moveDistance, FVector& destination)
     { 
       m_pImpl->MoveMapObj(mapObj, moveDirection, moveDistance, destination);
     }

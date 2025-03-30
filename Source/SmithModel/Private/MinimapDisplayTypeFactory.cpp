@@ -2,32 +2,27 @@
 
 
 #include "MinimapDisplayTypeFactory.h"
+
 #include "SmithMinimapDisplayType.h"
 #include "SmithMinimapDisplayProductRow.h"
 
 IMinimapDisplayable* UMinimapDisplayTypeFactory::GetDisplayable(EMinimapDisplayType type)
 {
-  // if (!m_typeCaches.Contains(type))
-  // {
-    UTexture2D* texture = findProductFromDataTable(type);
-    if (texture == nullptr)
-    {
-      return nullptr;
-    }
-  
-    USmithMinimapDisplayType* displayTypeFlyweightObj = NewObject<USmithMinimapDisplayType>(this, USmithMinimapDisplayType::StaticClass());
-    if (displayTypeFlyweightObj == nullptr)
-    {
-      return nullptr;
-    }
+  UTexture2D* texture = findProductFromDataTable(type);
+  if (texture == nullptr)
+  {
+    return nullptr;
+  }
 
-    displayTypeFlyweightObj->SetTexture(texture);
-    m_typeCaches.Emplace(type, displayTypeFlyweightObj); 
-    return displayTypeFlyweightObj;
-  // }
+  USmithMinimapDisplayType* displayTypeFlyweightObj = NewObject<USmithMinimapDisplayType>(this, USmithMinimapDisplayType::StaticClass());
+  if (displayTypeFlyweightObj == nullptr)
+  {
+    return nullptr;
+  }
 
-  // return m_typeCaches[type].GetInterface();
-
+  displayTypeFlyweightObj->SetTexture(texture);
+  m_typeCaches.Emplace(type, displayTypeFlyweightObj); 
+  return displayTypeFlyweightObj;
 }
 
 UTexture2D* UMinimapDisplayTypeFactory::findProductFromDataTable(EMinimapDisplayType type)

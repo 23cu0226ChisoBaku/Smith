@@ -132,8 +132,6 @@ void ATurnActor_Test::OnDefeated()
 {
 	if (m_eventMediator.IsValid())
 	{
-		// TODO will return null when RECOMPILE!!!!!!!
-		// Reason: dll make copy of static member variable
 		IPickable* pickable = USmithEnemyLootGenerator::GetLoot(this);
 		if (pickable != nullptr)
 		{
@@ -154,16 +152,6 @@ void ATurnActor_Test::OnDefeated()
 	}
 }
 
-uint8 ATurnActor_Test::GetOnMapSizeX() const
-{
-	return 1;
-}
-
-uint8 ATurnActor_Test::GetOnMapSizeY() const
-{
-	return 1;
-}
-
 UClass* ATurnActor_Test::GetMoveDirectorUClass() const
 {
 	return MoveDirectorSubclass.Get();
@@ -177,11 +165,6 @@ void ATurnActor_Test::SetMoveDirector(USmithMoveDirector* director)
 uint8 ATurnActor_Test::GetChaseRadius() const
 {
 	return ChaseRadius;
-}
-
-EMapObjType ATurnActor_Test::GetType() const
-{
-	return MapObjectType;
 }
 
 void ATurnActor_Test::TurnOnAI()

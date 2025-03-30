@@ -24,7 +24,6 @@ Encoding : UTF-8
 #include "ITurnManageable.h"
 #include "IAttackable.h"
 #include "ICanCommandMediate.h"
-#include "ICanSetOnMap.h"
 #include "IEventTriggerable.h"
 #include "ICanUseEnhanceSystem.h"
 #include "ISmithAnimator.h"
@@ -48,7 +47,6 @@ class UCameraComponent;
 class USmithInventoryComponent;
 class USmithAnimationComponent;
 
-// TODO インターフェースにする
 class USmithBattleLogWorldSubsystem;
 
 // SmithActor Module
@@ -71,16 +69,18 @@ namespace UE::Smith
 // end of Forward Declaration
 
 DECLARE_DELEGATE_TwoParams(FInitializeMenuEvent, const FSmithWeaponInfoHandle&, const TArray<UObject*>&);
+
 ///
 /// @brief プレイヤークラス
+/// TODO インターフェースを減らす
 ///
 UCLASS()
-class SMITH_API ASmithPlayerActor final: public APawn, public ITurnManageable
-                                      , public IAttackable, public ICanCommandMediate
-                                      , public ICanSetOnMap, public IEventTriggerable
-                                      , public ICanUseEnhanceSystem, public ISmithAnimator
-                                      , public ISmithBattleLogger, public IItemUseable
-                                      , public IMinimapDisplayable, public IAttackCauser
+class SMITH_API ASmithPlayerActor final:  public APawn, public ITurnManageable, 
+                                          public IAttackable, public IAttackCauser,
+                                          public IEventTriggerable, public ICanCommandMediate,
+                                          public ICanUseEnhanceSystem, public ISmithAnimator,
+                                          public ISmithBattleLogger, public IItemUseable,
+                                          public IMinimapDisplayable
 {
   GENERATED_BODY()
 
@@ -129,11 +129,6 @@ public:
     void SetCommandMediator(ICommandMediator*) override final;
   #pragma endregion ICanCommandMediate
   // end of ICanCommandMediate
-
-  public:
-    uint8 GetOnMapSizeX() const override final;
-    uint8 GetOnMapSizeY() const override final;
-    EMapObjType GetType() const override final;
 
   public:
     void OnTriggerEvent(USmithNextLevelEvent*) override final;
@@ -185,7 +180,7 @@ public:
   bool registerAttackFormat(const FString&, const UDataTable*);
 
   #if WITH_EDITOR
-  void SelfDamage_Debug(int32);
+    void SelfDamage_Debug(int32);
   #endif
 
 // Private Functions
@@ -239,10 +234,10 @@ private:
   TMap<FString,TSharedPtr<UE::Smith::Battle::FSmithCommandFormat>> m_normalAttackFormatBuffer;
 
   // TODO　装備を増やすこと
-  UPROPERTY(EditAnywhere, Instanced, Category = Weapon)
+  UPROPERTY(EditAnywhere, Instanced, Category = "Weapon")
   TObjectPtr<USmithWeapon> Weapon;
 
-  UPROPERTY(EditAnywhere, Category = PlayerInfo)
+  UPROPERTY(EditAnywhere, Category = "PlayerInfo")
   FString PlayerName;
 
   TWeakInterfacePtr<ICommandMediator> m_commandMediator;        // コマンドを送る時に使う仲介
@@ -271,7 +266,6 @@ public:
 
   TDelegate<int32()> OnItemSelected;
   FInitializeMenuEvent OnEnhanceMenuInitialized;
-
 
 //---------------------------------------
 /*

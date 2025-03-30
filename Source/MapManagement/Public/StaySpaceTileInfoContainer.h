@@ -21,7 +21,6 @@ Encoding : UTF-8
 #ifndef SMITH_MAP_STAYSPACE_TILEINFO
 #define SMITH_MAP_STAYSPACE_TILEINFO
 
-#include "CoreMinimal.h"
 #include "TileInfoContainer.h"
 
 //---------------------------------------
@@ -29,25 +28,17 @@ Encoding : UTF-8
                   前方宣言
 */
 //---------------------------------------
-class ICanSetOnMap;
 class ISmithMapEvent;
 
 namespace UE::Smith
 {
   namespace Map
   {
-    //---------------------------------------
-    /*
-                      前方宣言
-    */
-    //---------------------------------------
-    class IPickable;
-
     ///
     /// @brief ものやキャラクターを置けるタイル情報コンテナ
     /// namespace UE::Smith::Map
     ///
-    class MAPMANAGEMENT_API FStaySpaceTileInfoContainer : public FTileInfoContainer
+    class FStaySpaceTileInfoContainer : public FTileInfoContainer
     {
       //---------------------------------------
       /*
@@ -85,9 +76,9 @@ namespace UE::Smith
       public:
         ///
         /// @brief マップオブジェクトを設定する
-        /// @param ICanSetOnMap マップに配置できるオブジェクト
+        /// @param AActor マップに配置できるオブジェクト
         ///
-        void SetMapObj(ICanSetOnMap*);
+        void SetMapObj(AActor*);
         ///
         /// @brief マップイベントを設定する
         /// @param ICanSetOnMap マップに配置できるイベント
@@ -98,7 +89,7 @@ namespace UE::Smith
         /// @return 何かがいたら	-> ここにいるマップオブジェクトのポインタ
         ///					何もいなかったら	-> nullptr
         ///
-        ICanSetOnMap* GetMapObject() const;
+        AActor* GetMapObject() const;
         ///
         /// @brief	マップイベントを取得 
         /// @return	あったら　	->	イベントポインタ

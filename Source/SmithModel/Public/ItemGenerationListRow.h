@@ -2,14 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine/DataTable.h"
+
 #include "MapDeployRule.h"
+
 #include "ItemGenerationListRow.generated.h"
 
-
-/**
- * 
- */
 USTRUCT()
 struct SMITHMODEL_API FItemGenerationListRow : public FTableRowBase
 {
@@ -18,7 +16,7 @@ struct SMITHMODEL_API FItemGenerationListRow : public FTableRowBase
 	UPROPERTY(EditAnywhere)
 	EMapDeployRule DeployRule;
 
-	UPROPERTY(EditAnywhere, meta=(MustImplement="Pickable"))
+	UPROPERTY(EditAnywhere, meta = (MustImplement="Pickable"))
 	TSubclassOf<UObject> Item;
 	
 	UPROPERTY(EditAnywhere)

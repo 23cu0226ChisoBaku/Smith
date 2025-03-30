@@ -230,10 +230,6 @@ namespace UE::Smith
             {
               return false;
             }
-            else
-            {
-              return true;
-            }
           }
 
           return true;

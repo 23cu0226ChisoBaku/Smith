@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "ISmithBattleLogger.generated.h"
 
 enum class EBattleLogType : uint8

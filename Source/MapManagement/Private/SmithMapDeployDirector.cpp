@@ -26,6 +26,7 @@ Encoding : UTF-8
 #include "MLibrary.h"
 #include "IMinimapDisplayable.h"
 
+#include "ISmithMapModelRequester.h"
 
 namespace UE::Smith
 {
@@ -52,7 +53,7 @@ namespace UE::Smith
         {
           m_model = pModel;
         }
-        void DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
+        void DeployMapObj(AActor* mapObj, uint8 x, uint8 y)
         {
           TSharedPtr<Model> model_shared = m_model.Pin();
           if (!model_shared.IsValid())
@@ -66,7 +67,7 @@ namespace UE::Smith
             return;
           }
 
-          if (!IS_UINTERFACE_VALID(mapObj))
+          if (mapObj == nullptr)
           {
             return;
           }
@@ -77,8 +78,20 @@ namespace UE::Smith
             return;
           }
 
-          const uint8 mapObjSizeX = mapObj->GetOnMapSizeX();
-          const uint8 mapObjSizeY = mapObj->GetOnMapSizeY();
+          if (!model_shared->MapModelRequester.IsValid())
+          {
+            return;
+          }
+
+          const FSmithMapModel model = model_shared->MapModelRequester->GetModel(Cast<AActor>(mapObj));
+          if (!model.IsValid())
+          {
+            return;
+          }
+
+        
+          const uint8 mapObjSizeX = model.GetSizeX();
+          const uint8 mapObjSizeY = model.GetSizeY();
           const uint8 mapWidth = map_shared->GetMapWidth();
           const uint8 mapHeight = map_shared->GetMapHeight();
           TArray<FMapCoord> mapObjPlaceCoords{};
@@ -120,7 +133,7 @@ namespace UE::Smith
 
           if (m_updateMinimapDelegate.IsBound())
           {
-            m_updateMinimapDelegate.Broadcast(mapObj->_getUObject(), placeOriginCoord, mapObjSizeX, mapObjSizeY);
+            m_updateMinimapDelegate.Broadcast(mapObj, placeOriginCoord, mapObjSizeX, mapObjSizeY);
           }
         }
         void DeployEvent(ISmithMapEvent* event, uint8 x, uint8 y)
@@ -211,7 +224,7 @@ namespace UE::Smith
     {
       m_pImpl->AssignMap(pModel);
     }
-    void FSmithMapDeployDirector::DeployMapObj(ICanSetOnMap* mapObj, uint8 x, uint8 y)
+    void FSmithMapDeployDirector::DeployMapObj(AActor* mapObj, uint8 x, uint8 y)
     {
       m_pImpl->DeployMapObj(mapObj, x, y); 
     }

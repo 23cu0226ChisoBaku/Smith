@@ -5,8 +5,6 @@
 #ifndef SMITH_MODEL_HELPER_FUNCTION_LIB
 #define SMITH_MODEL_HELPER_FUNCTION_LIB
 
-#include "CoreMinimal.h"
-
 enum class EDirection : uint8;
 struct FMapCoord;
 
@@ -27,9 +25,12 @@ class SMITHMODEL_API FSmithModelHelperFunctionLibrary
 		~FSmithModelHelperFunctionLibrary() = delete;
 
 	public:
+
 		static EDirection GetDirectionOfMapCoord(const FMapCoord& from, const FMapCoord& to, EDirectionStrategy = EDirectionStrategy::Ordinal);
 		static EDirection GetDirectionOfDegree(double angleDegree, EDirectionStrategy = EDirectionStrategy::Ordinal);
+
 	private:
+	
 		static void adjustInputAngle(double& angleDegree);
 };
 

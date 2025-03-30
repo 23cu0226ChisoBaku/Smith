@@ -16,8 +16,8 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "TileType.h"
+
 #include "SmithMapBluePrint.generated.h"
 
 /**

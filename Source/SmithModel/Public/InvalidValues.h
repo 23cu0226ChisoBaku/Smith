@@ -2,11 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
-/**
- * 
- */
 class SMITHMODEL_API InvalidValues
 {
 public:

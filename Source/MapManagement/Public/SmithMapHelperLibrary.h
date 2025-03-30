@@ -37,7 +37,7 @@ namespace UE::Smith
     /// @brief FSmithMapヘルパー関数ライブラリ
     ///	namespace UE::Smith::Map
     ///
-    class MAPMANAGEMENT_API FSmithMapHelperLibrary
+    class FSmithMapHelperLibrary
     {
       // インスタンス作成禁止
       private:

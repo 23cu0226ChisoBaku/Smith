@@ -177,7 +177,6 @@ void ASmithPlayerActor::Tick(float DeltaTime)
   }
 
   // ダメージアニメーション再生中操作停止
-  // TODO もっと良い感じで設計
   if (m_bIsDamaged)
   {
     if (AnimationComponent != nullptr)
@@ -204,12 +203,7 @@ void ASmithPlayerActor::SetEnhanceSystem(IEnhanceSystem* enhanceSystem)
 
 void ASmithPlayerActor::SelectNextMenuItem(float SelectDirection)
 {
-  if (!IsCommandSendable() )
-  {
-    return;
-  }
-
-  if (!m_bIsInMenu)
+  if (!IsCommandSendable() || !m_bIsInMenu)
   {
     return;
   }
@@ -266,12 +260,7 @@ void ASmithPlayerActor::Move(EDirection newDirection)
 
 void ASmithPlayerActor::Attack()
 {
-  if (!IsCommandSendable())
-  {
-    return;
-  }
-
-  if (!m_commandMediator.IsValid())
+  if (!IsCommandSendable() || !m_commandMediator.IsValid())
   {
     return;
   }
@@ -358,6 +347,7 @@ void ASmithPlayerActor::CloseMenu()
   }
 
   m_bIsInMenu = false;
+
   if (OnEnhanceMenuClosed.IsBound())
   {
     OnEnhanceMenuClosed.Broadcast();
@@ -366,7 +356,12 @@ void ASmithPlayerActor::CloseMenu()
 
 void ASmithPlayerActor::RecoverHealth()
 {
-  if (!IsCommandSendable() || (InventoryComponent == nullptr))
+  if (!IsCommandSendable())
+  {
+    return;
+  }
+
+  if (!m_commandMediator.IsValid() || (InventoryComponent == nullptr))
   {
     return;
   }
@@ -387,26 +382,19 @@ void ASmithPlayerActor::RecoverHealth()
     OnHerbValueChanged.Broadcast(InventoryComponent->GetQuantity(consumeInventoryName));
   }
 
-  if (m_commandMediator.IsValid())
-  {
-    m_commandMediator->SendIdleCommand(this);
-  }
+  m_commandMediator->SendIdleCommand(this);
   
 }
 
 bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTable* formatTable)
 {
+  check(formatTable != nullptr)
   if (m_normalAttackFormatBuffer.Contains(name))
   {
     return false;
   }
 
-  if (formatTable == nullptr)
-  {
-    return false;
-  }
-
-  TArray<FFormatInfo_Import*> arr;
+  TArray<FFormatInfo_Import*> arr{};
   formatTable->GetAllRows<FFormatInfo_Import>("", arr);
 
   if (arr.Num() <= 1)
@@ -426,10 +414,6 @@ bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTab
 
   // データの要素数チェック
   check((arr.Num() - 1) == StaticCast<int32>(dataCnt));
-  if ((arr.Num() - 1) != StaticCast<int32>(dataCnt))
-  {
-    return false;
-  }
 
   TArray<ESmithFormatType> typeSrcData;
   for (int32 i = 1; i < arr.Num(); ++i)
@@ -446,7 +430,7 @@ bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTab
 
 bool ASmithPlayerActor::enhanceImpl(int32 idx)
 {
-  if (m_enhanceSystem == nullptr || m_commandMediator == nullptr || InventoryComponent == nullptr)
+  if ((m_enhanceSystem == nullptr) || (m_commandMediator == nullptr) || (InventoryComponent == nullptr))
   {
     return false;
   }
@@ -525,27 +509,9 @@ void ASmithPlayerActor::OnDefeated()
   notifyHealthChanged();
 }
 
-uint8 ASmithPlayerActor::GetOnMapSizeX() const
-{
-  return 1;
-}
-
-uint8 ASmithPlayerActor::GetOnMapSizeY() const
-{
-  return 1;
-}
-
-EMapObjType ASmithPlayerActor::GetType() const
-{
-  return EMapObjType::Player;
-}
-
 void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 {
-  if (!::IsValid(event))
-  {
-    return;
-  }
+  check(event != nullptr);
 
   event->RaiseEvent();
   m_actorFaceDir = EDirection::South;
@@ -555,14 +521,16 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 // TODO Refactoring
 void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 {
-  if ((event == nullptr) || (InventoryComponent == nullptr))
+  check(event != nullptr);
+
+  if (InventoryComponent == nullptr)
   {
     return;
   }
 
   const FString itemType = event->GetPickUpItemType();
   const bool success = (InventoryComponent->ContainsCategory(itemType)) && (!InventoryComponent->IsReachCapacity(itemType));
- 
+
   if (success)
   {
     IPickable* pickable = event->GetPickable();
@@ -578,6 +546,7 @@ void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
     }
   }
 
+  // TODO
   if (m_logSystem != nullptr)
   {
     m_logSystem->SendInteractEventLog(this, event, success);
@@ -645,27 +614,20 @@ bool ASmithPlayerActor::IsAnimationFinish() const
 void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName)
 {
   using namespace UE::Smith;
-  outName = TEXT("");
+  outName = NAME_None;
 
-  switch (animationState)
+  static const TMap<uint8, FName> ANIM_STATE_NAME =
   {
-    case SMITH_ANIM_IDLE:
-      outName = TEXT("Idle");
-      break;
-    case	SMITH_ANIM_WALK:
-      outName = TEXT("Walk");
-      break;
-    case SMITH_ANIM_ATTACK:
-      outName = TEXT("Attack");
-      break;
-    case SMITH_ANIM_DAMAGED:
-      outName = TEXT("Damaged");
-      break;
-    case SMITH_ANIM_DEAD:
-      outName = TEXT("Dead");
-      break;
-    default:
-      break;
+    {SMITH_ANIM_IDLE, TEXT("Idle")},
+    {SMITH_ANIM_WALK, TEXT("Walk")},
+    {SMITH_ANIM_ATTACK, TEXT("Attack")},
+    {SMITH_ANIM_DAMAGED, TEXT("Damaged")},
+    {SMITH_ANIM_DEAD, TEXT("Dead")},
+  };
+
+  if (ANIM_STATE_NAME.Contains(animationState))
+  {
+    outName = ANIM_STATE_NAME[animationState];
   }
 }
 

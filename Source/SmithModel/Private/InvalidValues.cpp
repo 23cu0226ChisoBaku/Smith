@@ -2,6 +2,7 @@
 
 
 #include "InvalidValues.h"
+
 #include <limits>
 
 // 無限大

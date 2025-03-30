@@ -20,23 +20,20 @@ Encoding : UTF-8
 #ifndef SMITH_MAP_MGR
 #define SMITH_MAP_MGR
 
-#include "CoreMinimal.h"
-
 //---------------------------------------
 /*
 									前方宣言
 */
 //---------------------------------------
-class ICanSetOnMap;
 class IEventRegister;
 class ISmithMapEvent;
 class IMinimapDisplayer;
 class USmithEventPublisher;
 class UMinimapDisplayTypeFactory;
-struct FAttackableInfoHandle;
+class ISmithMapModelRequester;
 namespace UE::Smith
 {
-	namespace Battle
+  namespace Battle
 	{
     class FSmithCommandFormat;
   }
@@ -46,6 +43,7 @@ enum class EDirection : uint8;
 enum class EDirectionStrategy : uint8;
 enum class EMapDeployRule : uint8;
 
+struct FAttackableInfoHandle;
 struct FMapCoord;
 struct FSmithMapBluePrint;
 struct FSmithMapConstructionBluePrint;
@@ -104,6 +102,7 @@ namespace UE::Smith
 			#pragma region FSmithMapManager Interface
       public:
         void AssignEventRegister(IEventRegister*);
+        void AssignMapModelRequester(ISmithMapModelRequester* ModelRequester);
         ///
         /// @brief                                マップを初期化する
         /// @param UWorld                         ダンジョンオブジェクトを配置するUnreal Engine ワールド
@@ -131,7 +130,7 @@ namespace UE::Smith
         void AssignMinimapDisplayer(IMinimapDisplayer*);
         // TODO
         void AssignMinimapDisplayTypeFactory(UMinimapDisplayTypeFactory*);
-        void DeployMapObj(ICanSetOnMap*, uint8 x, uint8 y);
+        void DeployMapObj(AActor*, uint8 x, uint8 y);
         void DeployEvent(ISmithMapEvent*, uint8 x, uint8 y);
         ///
         /// @brief                                攻撃できるオブジェクトを探す                      
@@ -139,9 +138,9 @@ namespace UE::Smith
         /// @param ICanSetOnMap                   攻撃を行うマップオブジェクト
         /// @param FSmithCommandFormat            攻撃フォーマット
         ///
-        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&);
-        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, ICanSetOnMap*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
-        bool GetPlayerDirection(EDirection& outDirection, EDirectionStrategy, ICanSetOnMap* origin, uint8 offsetLeft = 0, uint8 offsetTop = 0);
+        void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor*, const UE::Smith::Battle::FSmithCommandFormat&);
+        void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
+        bool GetPlayerDirection(EDirection& outDirection, EDirectionStrategy, AActor* origin, uint8 offsetLeft = 0, uint8 offsetTop = 0);
         ///
         /// @brief                                マップオブジェクトを移動
         /// @param ICanSetOnMap                   マップオブジェクト
@@ -149,10 +148,10 @@ namespace UE::Smith
         /// @param moveDistance                   移動距離(何マス分)
         /// @param FVector                        移動先の座標
         ///
-        void MoveMapObj(ICanSetOnMap*, EDirection, uint8 moveDistance, FVector&);
+        void MoveMapObj(AActor*, EDirection, uint8 moveDistance, FVector&);
         // TODO
-        bool ChasePlayerTarget(EDirection& outChaseDirection, ICanSetOnMap* chaser, uint8 chaseRadius);
-        bool GetMapObjectCoord(ICanSetOnMap*, uint8& outX, uint8& outY);
+        bool ChasePlayerTarget(EDirection& outChaseDirection, AActor* chaser, uint8 chaseRadius);
+        bool GetMapObjectCoord(AActor*, uint8& outX, uint8& outY);
         bool ConvertMapCoordToWorldLocation(FVector& outLocation, uint8 x, uint8 y);
         void Reset();
 			#pragma endregion FSmithMapManager Interface

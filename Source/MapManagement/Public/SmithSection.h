@@ -19,8 +19,6 @@ Encoding : UTF-8
 #ifndef SMITH_SECTION
 #define SMITH_SECTION
 
-#include "CoreMinimal.h"
-
 namespace UE::Smith
 {
   namespace Map
@@ -36,7 +34,7 @@ namespace UE::Smith
     /// @brief セクションクラス
     /// namespace UE::Smith::Map
     ///　
-    class MAPMANAGEMENT_API FSmithSection
+    class FSmithSection
     {
       //---------------------------------------
       /*

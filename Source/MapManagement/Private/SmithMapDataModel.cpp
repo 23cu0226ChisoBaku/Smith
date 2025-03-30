@@ -16,8 +16,10 @@ Encoding : UTF-8
 */
 
 #include "SmithMapDataModel.h"
+
 #include "InvalidValues.h"
 #include "SmithMap.h"
+#include "ISmithMapModelRequester.h"
 
 namespace UE::Smith
 {
@@ -30,6 +32,7 @@ namespace UE::Smith
       , StaySpaceTable{}
       , OriginWorldCoord(FVector::ZeroVector)
       , MapTileSize(0)
+      , MapModelRequester(nullptr)
     { }
 
     FSmithMapDataModel::~FSmithMapDataModel()
@@ -38,6 +41,7 @@ namespace UE::Smith
       OnMapObjsCoordTable.Empty();
       ObstacleTable.Empty();
       StaySpaceTable.Empty();
+      MapModelRequester.Reset();
     }
 
     FSmithMapDataModel::FSmithMapDataModel(FSmithMapDataModel&& other) noexcept
@@ -47,6 +51,7 @@ namespace UE::Smith
       , StaySpaceTable(::MoveTemp(other.StaySpaceTable))
       , OriginWorldCoord(::MoveTemp(other.OriginWorldCoord))
       , MapTileSize(other.MapTileSize)
+      , MapModelRequester(other.MapModelRequester)
     { }
 
     FSmithMapDataModel& FSmithMapDataModel::operator=(FSmithMapDataModel&& other) noexcept
@@ -59,6 +64,7 @@ namespace UE::Smith
         StaySpaceTable = ::MoveTemp(other.StaySpaceTable);
         OriginWorldCoord = ::MoveTemp(other.OriginWorldCoord);
         MapTileSize = other.MapTileSize;
+        MapModelRequester = ::MoveTemp(other.MapModelRequester);
       }
 
       return *this;
@@ -66,10 +72,10 @@ namespace UE::Smith
   }
 }
 
-#if UE_BUILD_DEBUG
-uint32 GetTypeHash(const TWeakInterfacePtr<ICanSetOnMap>& Thing)
-{
-  uint32 Hash = FCrc::MemCrc32(&Thing, sizeof(TWeakInterfacePtr<ICanSetOnMap>));
-  return Hash;
-}
-#endif
+// #if UE_BUILD_DEBUG
+// uint32 GetTypeHash(const TWeakInterfacePtr<ICanSetOnMap>& Thing)
+// {
+//   uint32 Hash = FCrc::MemCrc32(&Thing, sizeof(TWeakInterfacePtr<ICanSetOnMap>));
+//   return Hash;
+// }
+// #endif

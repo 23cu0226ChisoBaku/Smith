@@ -19,8 +19,6 @@ Encoding : UTF-8
 #ifndef SMITH_FORMAT_TRANS
 #define SMITH_FORMAT_TRANS
 
-#include "CoreMinimal.h"
-
 struct FMapCoord;
 enum class EDirection : uint8;
 
@@ -36,10 +34,10 @@ namespace UE::Smith
 	{
 		class FSmithCommandFormat;
 
-
 		class SMITHMODEL_API FFormatTransformer
 		{
 			public:
+			
 				static UE::MLibrary::MDataStructure::TDimension2Array<FMapCoord> FormatToMapCoord(const FSmithCommandFormat& format, FMapCoord cnMapCoord);
 				static FSmithCommandFormat GetRotatedFormat(const FSmithCommandFormat& src, EDirection direction);
 

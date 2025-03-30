@@ -21,8 +21,6 @@ Encoding : UTF-8
 #ifndef SMITH_RECT
 #define SMITH_RECT
 
-#include "CoreMinimal.h"
-
 namespace UE::MLibrary
 {
   namespace MDataStructure
@@ -39,7 +37,7 @@ namespace UE::Smith
     /// @brief 矩形クラス（最大256*256）　矩形に入れるデータ型：uint8(unsigned char)
     /// namespace UE::Smith::Map
     ///　
-    class MAPMANAGEMENT_API FSmithRect
+    class FSmithRect
     {
       //---------------------------------------
       /*

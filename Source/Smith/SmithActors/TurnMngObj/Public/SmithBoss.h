@@ -4,10 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "SmithEnemy.h"
-#include "ICanSetOnMap.h"
 #include "ISmithAnimator.h"
 #include "ISmithSimpleAIDriven.h"
-#include "MapObjType.h"
 #include "../Weapon/Params.h"
 #include "ICanRequestEventPublishment.h"
 #include "SmithAIConditionBindHandle.h"
@@ -37,13 +35,9 @@ DECLARE_DELEGATE_RetVal(bool,FConditionDelegate);
  *
  */
 UCLASS()
-class SMITH_API ASmithBoss final: public ASmithEnemy,
-                                  public ICanSetOnMap,
-                                  public ISmithSimpleAIDriven,
-                                  public ICanRequestEventPublishment,
-                                  public ISmithBattleLogger,
-                                  public ISmithAnimator,
-                                  public IAttackCauser
+class SMITH_API ASmithBoss final: public ASmithEnemy, public ISmithSimpleAIDriven,
+                                  public ICanRequestEventPublishment, public ISmithBattleLogger,
+                                  public ISmithAnimator, public IAttackCauser
 {
   GENERATED_BODY()
 
@@ -67,9 +61,6 @@ public:
   bool IsDefeated() const override final;
   void OnDefeated() override final;
 
-  uint8 GetOnMapSizeX() const override final;
-  uint8 GetOnMapSizeY() const override final;
-  EMapObjType GetType() const override final;
   void TurnOnAI() override final;
 
   void SwitchAnimation(uint8 animationState) override;
@@ -117,8 +108,6 @@ private:
   // Attack Format
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AttackFormat, meta = (AllowPrivateAccess = "true"))
   TMap<FString, FSmithAIConditionBindHandle> ConditionAttackFormatTables;
-  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapObjectType, meta = (AllowPrivateAccess = "true"))
-  EMapObjType MapObjectType;
 
 private:
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))

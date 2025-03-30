@@ -17,8 +17,8 @@ Encoding : UTF-8
 */
 
 #include "StaySpaceTileInfoContainer.h"
+
 #include "UObject/WeakInterfacePtr.h"
-#include "ICanSetOnMap.h"
 #include "ISmithMapEvent.h"
 
 namespace UE::Smith
@@ -36,7 +36,7 @@ namespace UE::Smith
           , m_event(nullptr)
         { }
       public:
-        void SetMapObj(ICanSetOnMap* mapObj)
+        void SetMapObj(AActor* mapObj)
         {
           m_mapObj = mapObj;
         }
@@ -48,7 +48,7 @@ namespace UE::Smith
         {
           return !m_mapObj.IsValid();
         }
-        ICanSetOnMap* GetMapObject() const
+        AActor* GetMapObject() const
         {
           return m_mapObj.IsValid() ? m_mapObj.Get() : nullptr;
         }
@@ -63,7 +63,7 @@ namespace UE::Smith
         }
 
       private:
-        TWeakInterfacePtr<ICanSetOnMap> m_mapObj;
+        TWeakObjectPtr<AActor> m_mapObj;
         TWeakInterfacePtr<ISmithMapEvent> m_event;
     };
 
@@ -115,7 +115,7 @@ namespace UE::Smith
       return *this;
     }
 
-    void FStaySpaceTileInfoContainer::SetMapObj(ICanSetOnMap* mapObj)
+    void FStaySpaceTileInfoContainer::SetMapObj(AActor* mapObj)
     {
       m_pImpl->SetMapObj(mapObj);
     }
@@ -125,7 +125,7 @@ namespace UE::Smith
       m_pImpl->SetEvent(event);
     }
 
-    ICanSetOnMap* FStaySpaceTileInfoContainer::GetMapObject() const
+    AActor* FStaySpaceTileInfoContainer::GetMapObject() const
     {
       return m_pImpl->GetMapObject();
     }

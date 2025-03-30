@@ -5,7 +5,6 @@
 
 #include "SmithMapManager.h"
 #include "Direction.h"
-#include "ICanSetOnMap.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SmithChasePlayerTracker)
 
@@ -19,9 +18,9 @@ void USmithChasePlayerTracker::SetupTracker(const TSharedPtr<UE::Smith::Map::FSm
   m_mapMgr = mapMgr;
 }
 
-bool USmithChasePlayerTracker::TrackTarget(EDirection& outDirection, ICanSetOnMap* chaser, uint8 chaseRadius)
+bool USmithChasePlayerTracker::TrackTarget(EDirection& outDirection, AActor* Chaser, uint8 chaseRadius)
 {
-  check(chaser);
+  check(Chaser != nullptr);
 
   TSharedPtr<UE::Smith::Map::FSmithMapManager> mapMgr_shared = m_mapMgr.Pin();
   if (!mapMgr_shared.IsValid())
@@ -29,7 +28,7 @@ bool USmithChasePlayerTracker::TrackTarget(EDirection& outDirection, ICanSetOnMa
     return false;
   }
 
-  return mapMgr_shared->ChasePlayerTarget(outDirection, chaser, chaseRadius);
+  return mapMgr_shared->ChasePlayerTarget(outDirection, Chaser, chaseRadius);
 }
 
 

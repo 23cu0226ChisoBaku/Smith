@@ -16,28 +16,13 @@ Encoding : UTF-8
 */
 
 #include "MapCoord.h"
+
 #include "Misc/Crc.h"
 
 FMapCoord::FMapCoord(uint8 _x, uint8 _y)
   : x(_x)
   , y(_y)
 { }
-
-FMapCoord::FMapCoord(const FMapCoord& other)
-  : x(other.x)
-  , y(other.y)
-{ }
-
-FMapCoord& FMapCoord::operator=(const FMapCoord& other)
-{
-  if (this != &other)
-  {
-    x = other.x;
-    y = other.y;
-  }
-
-  return *this;
-}
 
 FString FMapCoord::ToString() const
 {

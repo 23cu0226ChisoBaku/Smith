@@ -20,7 +20,6 @@ Encoding : UTF-8
 #ifndef SMITH_MAP_CONSTRUCTOR
 #define SMITH_MAP_CONSTRUCTOR
 
-#include "CoreMinimal.h"
 //---------------------------------------
 /*
                   前方宣言
@@ -44,7 +43,7 @@ namespace UE::Smith
     /// @brief マップオブジェクトを配置するクラス
     /// namespace UE::Smith::Map
     ///
-    class MAPMANAGEMENT_API FSmithMapConstructor
+    class FSmithMapConstructor
     {
       //---------------------------------------
       /*

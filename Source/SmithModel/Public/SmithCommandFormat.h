@@ -26,72 +26,46 @@ enum class ESmithFormatType : uint8;
 
 namespace UE::Smith
 {
-	namespace Battle
-	{
-		///
-		/// @brief コマンドフォーマット
-		///
-		class SMITHMODEL_API FSmithCommandFormat
-		{
-			
-			//---------------------------------------
-			/*
-								エイリアスやアサーション
-			*/
-			//---------------------------------------
-			public:
-			
-				FSmithCommandFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
-
-				FSmithCommandFormat() = default;
-				~FSmithCommandFormat() = default;
-				FSmithCommandFormat(const FSmithCommandFormat&) = default;
-				FSmithCommandFormat& operator=(const FSmithCommandFormat&) = default;
-				FSmithCommandFormat(FSmithCommandFormat&&) noexcept = default;
-				FSmithCommandFormat& operator=(FSmithCommandFormat&&) noexcept = default;
-
-			public:
-				void SetupFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
-				UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> GetFormatArray() const;
-				FMapCoord GetCNCoord() const;
-				uint64 GetRow() const;
-				uint64 GetColumn() const;
-				// TODO
-				ESmithFormatType GetFormatData(uint64 x, uint64 y) const;
-				bool IsValid() const;
-
-			private:
-
-				void setCNCoord();
-
-			private:
-
-				UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> m_formatArr;
-				FMapCoord m_cnCoord;
-		};
-
-		
-    __forceinline UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> FSmithCommandFormat::GetFormatArray() const
+  namespace Battle
+  {
+    ///
+    /// @brief コマンドフォーマット
+    ///
+    class SMITHMODEL_API FSmithCommandFormat
     {
-      return m_formatArr;
-    }
+      using ThisClass = typename FSmithCommandFormat;
+      public:
+      
+        FSmithCommandFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
 
-    __forceinline FMapCoord FSmithCommandFormat::GetCNCoord() const
-    {
-      return m_cnCoord;
-    } 
+        FSmithCommandFormat() = default;
+        ~FSmithCommandFormat() = default;
+        FSmithCommandFormat(const ThisClass&) = default;
+        ThisClass& operator=(const ThisClass&) = default;
+        FSmithCommandFormat(ThisClass&&) noexcept = default;
+        ThisClass& operator=(ThisClass&&) noexcept = default;
 
-    __forceinline uint64 FSmithCommandFormat::GetRow() const
-    {
-      return m_formatArr.Row();
-    }
+      public:
 
-    __forceinline uint64 FSmithCommandFormat::GetColumn() const
-    {
-      return m_formatArr.Column();
-    }
+        void SetupFormat(const ESmithFormatType* srcData, size_t dataCnt, uint64 row, uint64 column);
 
-	}
+        UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> GetFormatArray() const;
+        FMapCoord GetCNCoord() const;
+        uint64 GetRow() const;
+        uint64 GetColumn() const;
+        ESmithFormatType GetFormatData(uint64 x, uint64 y) const;
+        bool IsValid() const;
+
+      private:
+
+        void setCNCoord();
+
+      private:
+
+        UE::MLibrary::MDataStructure::TDimension2Array<ESmithFormatType> m_formatArr;
+        FMapCoord m_cnCoord;
+    };
+  }
 }
 
 #endif

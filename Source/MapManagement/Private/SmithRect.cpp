@@ -17,6 +17,7 @@ Encoding : UTF-8
 */
 
 #include "SmithRect.h"
+
 #include "DataStructure/Dimension2Array.h"
 #include "MLibrary.h"
 

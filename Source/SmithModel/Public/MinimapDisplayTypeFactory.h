@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+
 #include "MinimapDisplayType.h"
 #include "IMinimapDisplayable.h"
 #include "MinimapDisplayTypeFactory.generated.h"

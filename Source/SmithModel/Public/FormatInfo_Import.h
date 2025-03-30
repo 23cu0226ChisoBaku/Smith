@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+
 #include "FormatType.h"
 
 #include "FormatInfo_Import.generated.h"
 
-USTRUCT(Blueprintable, DisplayName = "FormatArrayInfo")
+USTRUCT(DisplayName = "FormatArrayInfo")
 struct SMITHMODEL_API FFormatInfo_Import : public FTableRowBase
 {
 

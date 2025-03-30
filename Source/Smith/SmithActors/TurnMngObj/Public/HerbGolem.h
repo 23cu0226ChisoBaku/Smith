@@ -2,10 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "TurnBaseActor.h"
 #include "IAttackable.h"
-#include "ICanSetOnMap.h"
 #include "IMoveDirector.h"
 
 #include "ISmithAnimator.h"
@@ -36,10 +34,10 @@ class USmithBattleLogWorldSubsystem;
  * 
  */
 UCLASS()
-class SMITH_API AHerbGolem final:  public ATurnBaseActor, public IAttackable, 
-																	  public ICanSetOnMap, public IMoveDirector, 
-																		public ISmithSimpleAIDriven, public ICanRequestEventPublishment,
-																		public ISmithBattleLogger, public ISmithAnimator
+class SMITH_API AHerbGolem final: public ATurnBaseActor, public IAttackable, 
+																	public IMoveDirector,  public ISmithAnimator,
+																	public ISmithSimpleAIDriven, public ICanRequestEventPublishment,
+																	public ISmithBattleLogger
 {
 	GENERATED_BODY()
 
@@ -69,9 +67,6 @@ public:
 		
 	}
 
-	uint8 GetOnMapSizeX() const override final;
-	uint8 GetOnMapSizeY() const override final;
-	EMapObjType GetType() const override final;
 	void TurnOnAI() override final;
 
 public:
@@ -110,8 +105,6 @@ private:
 	TSubclassOf<USmithMoveDirector> MoveDirectorSubclass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
 	uint8 ChaseRadius;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapObjectType, meta = (AllowPrivateAccess = "true"))
-	EMapObjType MapObjectType;
 	UPROPERTY()
 	TObjectPtr<USmithMoveDirector> m_moveDirector;
 

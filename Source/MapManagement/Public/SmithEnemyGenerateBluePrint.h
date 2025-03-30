@@ -16,7 +16,6 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "SmithEnemyGenerateBluePrint.generated.h"
 
 /**

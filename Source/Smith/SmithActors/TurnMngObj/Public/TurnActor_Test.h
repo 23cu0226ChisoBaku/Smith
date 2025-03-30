@@ -2,10 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "TurnBaseActor.h"
 #include "IAttackable.h"
-#include "ICanSetOnMap.h"
 #include "IMoveDirector.h"
 #include "ISmithAnimator.h"
 #include "ISmithSimpleAIDriven.h"
@@ -35,9 +33,9 @@ enum class EDirection : uint8;
  */
 UCLASS()
 class SMITH_API ATurnActor_Test final: 	public ATurnBaseActor, public IAttackable, 
-																				public ICanSetOnMap, public IMoveDirector, 
-																				public ISmithSimpleAIDriven, public ICanRequestEventPublishment,
-																				public ISmithAnimator, public ISmithBattleLogger
+																				public IMoveDirector, public ISmithSimpleAIDriven, 
+																				public ICanRequestEventPublishment, public ISmithAnimator, 
+																				public ISmithBattleLogger
 {
 	GENERATED_BODY()
 
@@ -61,9 +59,6 @@ public:
 	bool IsDefeated() const override final;
 	void OnDefeated() override final;
 
-	uint8 GetOnMapSizeX() const override final;
-	uint8 GetOnMapSizeY() const override final;
-	EMapObjType GetType() const override final;
 	void TurnOnAI() override final;
 
 public:
@@ -105,8 +100,6 @@ private:
 	TSubclassOf<USmithMoveDirector> MoveDirectorSubclass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SmithAI, meta = (AllowPrivateAccess = "true"))
 	uint8 ChaseRadius;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = MapObjectType, meta = (AllowPrivateAccess = "true"))
-	EMapObjType MapObjectType;
 	UPROPERTY()
 	TObjectPtr<USmithMoveDirector> m_moveDirector;
 private:
