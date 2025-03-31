@@ -89,12 +89,6 @@ void AHerbGolem::OnAttack(const AttackHandle& Handle)
 	{
 		EnemyParam.HP -= Handle.AttackPower;
 
-		if (m_logSystem != nullptr)
-		{
-			m_logSystem->SendAttackLog(Handle.Attacker, this);
-			m_logSystem->SendDamageLog(this, Handle.AttackPower);
-		}
-
 	}
 	else
 	{
@@ -103,10 +97,6 @@ void AHerbGolem::OnAttack(const AttackHandle& Handle)
 
 	if (EnemyParam.HP <= 0)
 	{
-		if (m_logSystem != nullptr)
-		{
-			m_logSystem->SendDefeatedLog(this);
-		}
 
 		if (m_eventMediator.IsValid())
 		{
@@ -231,16 +221,6 @@ void AHerbGolem::UpdateAnimation(float deltaTime)
 bool AHerbGolem::IsAnimationFinish() const
 {
 	return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
-}
-
-FString AHerbGolem::GetName_Log() const
-{
-	return TEXT("薬草ゴーレム");
-}
-
-EBattleLogType AHerbGolem::GetType_Log() const
-{
-	return EBattleLogType::Enemy;
 }
 
 void AHerbGolem::InitializeParameter(int32 currentLevel)

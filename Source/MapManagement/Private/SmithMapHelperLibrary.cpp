@@ -77,6 +77,11 @@ namespace UE::Smith
           m_pimpl.Reset();
         }
 
+        MapFinderOperator(const ThisClass& Other) = default;
+        ThisClass& operator=(const ThisClass& Other) = default;
+        MapFinderOperator(ThisClass&& Other) noexcept = default;
+        ThisClass& operator=(ThisClass&& Other) noexcept = default;
+
         void operator()(FSmithMap* Map, TArray<FMapCoord>& OutCoords) const
         {
           (*m_pimpl)(Map, OutCoords);

@@ -34,10 +34,7 @@ public:
 	virtual void RaiseEvent() override;
 	virtual bool IsDisposed() const override;
 
-	ISmithBattleLogger* GetEventEntityLogger() const override;
-	FString GetEventName() const override;
-	FString GetSucceedMessage() const override;
-	FString GetFailedMessage() const override;
+	UObject* GetEventEntity() const override;
 
 public:
 	void AssignPickable(IPickable*, UNiagaraSystem*);

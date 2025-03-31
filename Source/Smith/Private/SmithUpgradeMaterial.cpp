@@ -2,8 +2,11 @@
 
 
 #include "SmithUpgradeMaterial.h"
+
 #include <limits>
 #include "MLibrary.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SmithUpgradeMaterial)
 
 USmithUpgradeMaterial::USmithUpgradeMaterial(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -74,15 +77,10 @@ FColor USmithUpgradeMaterial::GetLabelColor() const
 
 FString USmithUpgradeMaterial::GetName() const
 {
-  return GetName_Log();
+  return Name;
 }
 
 FString USmithUpgradeMaterial::GetDescription() const
 {
   return Description;
-}
-
-EBattleLogType USmithUpgradeMaterial::GetType_Log() const
-{
-  return EBattleLogType::Item;
 }

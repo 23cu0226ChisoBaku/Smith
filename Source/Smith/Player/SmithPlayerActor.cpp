@@ -282,7 +282,6 @@ void ASmithPlayerActor::Attack()
     const int32 atk = attackParam.ATK;
 
     FAttackHandle paramHandle;
-    paramHandle.Attacker = this;
     paramHandle.AttackPower = attackParam.ATK;
     paramHandle.CriticalPower = attackParam.CRT;
     paramHandle.Level = Weapon->GetLevel();
@@ -631,16 +630,6 @@ void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName)
   }
 }
 
-FString ASmithPlayerActor::GetName_Log() const
-{
-  return PlayerName.IsEmpty() ? TEXT("鍛冶師") : PlayerName;
-}
-
-EBattleLogType ASmithPlayerActor::GetType_Log() const
-{
-  return EBattleLogType::Player;
-}
-
 EDirection ASmithPlayerActor::GetCameraDirection() const
 {
   return m_camDir;
@@ -649,7 +638,7 @@ EDirection ASmithPlayerActor::GetCameraDirection() const
 #if WITH_EDITOR
 void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
 {
-  OnAttack(AttackHandle{this, damage, EDirection::Invalid});
+  OnAttack(AttackHandle{damage, EDirection::Invalid});
 }
 #endif
 

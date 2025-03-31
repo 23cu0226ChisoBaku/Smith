@@ -19,18 +19,17 @@ Encoding : UTF-8
 
 #include "GameFramework/Pawn.h"
 
-#include "UObject/WeakInterfacePtr.h"
 #include "Direction.h"
-#include "ITurnManageable.h"
 #include "IAttackable.h"
+#include "IAttackCauser.h"
 #include "ICanCommandMediate.h"
-#include "IEventTriggerable.h"
 #include "ICanUseEnhanceSystem.h"
-#include "ISmithAnimator.h"
-#include "ISmithBattleLogger.h"
+#include "IEventTriggerable.h"
 #include "IItemUseable.h"
 #include "IMinimapDisplayable.h"
-#include "IAttackCauser.h"
+#include "ISmithAnimator.h"
+#include "ITurnManageable.h"
+#include "UObject/WeakInterfacePtr.h"
 
 #include "SmithPlayerActor.generated.h"
 
@@ -79,21 +78,15 @@ class SMITH_API ASmithPlayerActor final:  public APawn, public ITurnManageable,
                                           public IAttackable, public IAttackCauser,
                                           public IEventTriggerable, public ICanCommandMediate,
                                           public ICanUseEnhanceSystem, public ISmithAnimator,
-                                          public ISmithBattleLogger, public IItemUseable,
-                                          public IMinimapDisplayable
+                                          public IItemUseable, public IMinimapDisplayable
 {
   GENERATED_BODY()
 
-//---------------------------------------
-/*
-                  ctor
-*/
-//---------------------------------------
 public:
+
   ASmithPlayerActor();
 
-
-#pragma region Lifecycle
+#pragma region AActor Interfaces
 //---Begin of AActor Interfaces
 protected:
 
@@ -103,8 +96,9 @@ protected:
 public:	
 
   void Tick(float DeltaTime) override final;
+
 //---End of AActor Interfaces
-#pragma endregion Lifecycle
+#pragma endregion AActor Interfaces
 
 //---------------------------------------
 /*
@@ -117,38 +111,39 @@ public:
   // IAttackable (Smith Module)
   #pragma region IAttackable
   public:
+
     void OnAttack(const AttackHandle& Handle) override final;
     bool IsDefeated() const override final;
     void OnDefeated() override final;
+
   #pragma endregion IAttackable
   // end of IAttackable
 
   // ICanCommandMediate (Smith Module)
   #pragma region ICanCommandMediate
   public:
+
     void SetCommandMediator(ICommandMediator*) override final;
+
   #pragma endregion ICanCommandMediate
   // end of ICanCommandMediate
 
   public:
+
     void OnTriggerEvent(USmithNextLevelEvent*) override final;
     void OnTriggerEvent(USmithPickUpItemEvent*) override final;
 
   public:
+
     void SwitchAnimation(uint8 animationState) override final;
     void SwitchAnimationDelay(uint8 animationState, float delay) override final;
     void UpdateAnimation(float deltaTime) override final;
     bool IsAnimationFinish() const override final;
 
   public:
-    FString GetName_Log() const override;
-    EBattleLogType GetType_Log() const override;
 
-  public:
     void UseItem(USmithHPItem*);
-
     void SetEnhanceSystem(IEnhanceSystem*);
-
     FBattleDefenseParamHandle GetDefenseParam() const override;
 
   public:
@@ -164,6 +159,7 @@ public:
 // end of Interfaces Override
 
 public:
+
   EDirection GetCameraDirection() const;
   bool CanReceiveInputEvent() const;
 
@@ -236,9 +232,6 @@ private:
   // TODO　装備を増やすこと
   UPROPERTY(EditAnywhere, Instanced, Category = "Weapon")
   TObjectPtr<USmithWeapon> Weapon;
-
-  UPROPERTY(EditAnywhere, Category = "PlayerInfo")
-  FString PlayerName;
 
   TWeakInterfacePtr<ICommandMediator> m_commandMediator;        // コマンドを送る時に使う仲介
 

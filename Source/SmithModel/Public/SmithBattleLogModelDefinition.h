@@ -34,7 +34,7 @@ struct FBattleLogModelData
 
 
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable, Const)
 class SMITHMODEL_API USmithBattleLogModelDefinition : public UDataAsset
 {
 	GENERATED_BODY()

@@ -2,7 +2,6 @@
 
 #include "SmithAIConditionAttackStrategy.h"
 #include "ICommandMediator.h"
-#include "ISmithBattleLogger.h"
 #include "AttackHandle.h"
 #include "Direction.h"
 #include "MLibrary.h"
@@ -104,7 +103,7 @@ bool USmithAIConditionAttackStrategy::executeImpl()
     EDirection playerDirection;
     AActor* owner = GetOwner();
     // TODO 設計を見直し
-    m_mediator->GetPlayerDirection(playerDirection, EDirectionStrategy::Cardinal, GetOwner(), curtConditionAttatkHandle->SkillParameter.OffsetToLeft, curtConditionAttatkHandle->SkillParameter.OffsetToTop);
+    m_mediator->GetPlayerDirection(playerDirection, EDirectionPolicy::Cardinal, GetOwner(), curtConditionAttatkHandle->SkillParameter.OffsetToLeft, curtConditionAttatkHandle->SkillParameter.OffsetToTop);
     curtConditionAttatkHandle->SkillParameter.ActiveDirection = playerDirection;
   
     if (playerDirection != EDirection::Invalid)
@@ -160,12 +159,8 @@ bool USmithAIConditionAttackStrategy::executeImpl()
       return false;
     }
 
-    // TODO add by Mai
-    ISmithBattleLogger* logger = Cast<ISmithBattleLogger>(GetOwner());
-
     // TODO
     FAttackHandle handle;
-    handle.Attacker = logger;
     handle.AttackPower = m_atk;
     handle.CriticalPower = m_crt;
     handle.Level = m_level;

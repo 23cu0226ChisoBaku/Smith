@@ -6,11 +6,11 @@
 
 #include "ISmithMapModelRequester.h"
 
-#include "SmithMapModelSubsystem.generated.h"
+#include "SmithMapModelRepository.generated.h"
 
 
 UCLASS()
-class SMITHMODEL_API USmithMapModelSubsystem : public UWorldSubsystem , public ISmithMapModelRequester
+class SMITHMODEL_API USmithMapModelRepository : public UWorldSubsystem , public ISmithMapModelRequester
 {
 	GENERATED_BODY()
 	
@@ -25,10 +25,10 @@ public:
 	void InitializeMapModel(USmithMapModelDefinition* DefinitionAsset);
 
 	//---Begin of ISmithMapModelRequester Interface
-	FSmithMapModel GetModel(AActor* Requester) const override; 
+	const FSmithMapModel GetModel(AActor* Requester) const override; 
 	//---End of ISmithMapModelRequester Interface
 
 private:
 
-	TMap<TSubclassOf<AActor>, const FSmithMapModel> m_mapModels;
+	TMap<TSubclassOf<AActor>, const FSmithMapModel> m_models;
 };

@@ -8,7 +8,6 @@
 #include "ParamAbsorbable.h"
 
 #include "SmithBattleLogWorldSubsystem.h"
-#include "ISmithBattleLogger.h"
 
 
 bool USmithEnhanceSubsystem::ShouldCreateSubsystem(UObject* Outer) const
@@ -56,8 +55,9 @@ void USmithEnhanceSubsystem::Enhance(IEnhanceable* enhanceable, IParamAbsorbable
 
   if (m_logSystem != nullptr)
   {
-    m_logSystem->SendEnhanceLog(Cast<ISmithBattleLogger>(enhanceable));
+    m_logSystem->SendEnhanceLog(enhanceable->_getUObject());
   }
+  
   enhanceable->OnUpgraded();
   ++m_upgradeCount;
 

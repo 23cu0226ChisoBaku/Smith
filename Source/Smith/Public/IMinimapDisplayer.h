@@ -2,11 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "IMinimapDisplayer.generated.h"
 
-class UObject;
 struct FMapCoord;
 
 // This class does not need to be modified.

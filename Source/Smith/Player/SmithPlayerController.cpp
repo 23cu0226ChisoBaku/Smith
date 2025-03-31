@@ -28,10 +28,10 @@ namespace SmithPlayerController::Private
 		// (1,0,0)(※EDirection::Northを表すベクトル)から時計回りに回転しdirectionまで回転した角度を計算
 		const double angleClockwise =  cross.Z > 0.0 ? - angle : angle; 
 
-    EDirectionStrategy strategy = EDirectionStrategy::Ordinal;
+    EDirectionPolicy strategy = EDirectionPolicy::Ordinal;
     if (bOnlyDiagonal)
     {
-      strategy = EDirectionStrategy::Diagonal;
+      strategy = EDirectionPolicy::Diagonal;
     }
 
 		return FSmithModelHelperFunctionLibrary::GetDirectionOfDegree(angleClockwise, strategy);

@@ -10,7 +10,7 @@ enum class EBattleLogModelType : uint8;
 
 struct SMITHMODEL_API FSmithBattleLogModel
 {
-	friend class USmithBattleLogModelSubsystem;
+	friend class USmithBattleLogModelRepository;
 
 	private:
 

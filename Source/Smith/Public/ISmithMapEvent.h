@@ -43,5 +43,6 @@ public:
 	virtual void DiscardEvent() = 0;
 	virtual void RaiseEvent() = 0;
 	virtual bool IsDisposed() const = 0;
+	virtual void ConsumeEvent() {};
 
 };

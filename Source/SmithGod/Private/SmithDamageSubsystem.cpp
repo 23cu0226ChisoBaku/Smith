@@ -10,7 +10,6 @@
 #include "DamageCalculationStrategies.h"
 
 #include "SmithBattleLogWorldSubsystem.h"
-#include "ISmithBattleLogger.h"
 
 #include "SmithTurnBattleWorldSettings.h"
 
@@ -69,25 +68,21 @@ void USmithDamageSubsystem::ApplyDamage(AActor* DamageInstigator, AActor* Damage
     attackParam.MotionValue = Handle.MotionValue;
     
     const FBattleResult result = m_pimpl->CalculateDamage(attackParam, attackTarget->GetDefenseParam());
-    
-    attackHandle.Attacker = Handle.Attacker;
     attackHandle.AttackPower = result.Damage;
     attackHandle.AttackFrom = FromDirection;
  
     attackTarget->OnAttack(attackHandle);
 
-    // TODO
-    ISmithBattleLogger* targetLogger = Cast<ISmithBattleLogger>(attackTarget);
     if (m_logSystem != nullptr)
     {
-      m_logSystem->SendAttackLog(Handle.Attacker, targetLogger);
-      m_logSystem->SendDamageLog(targetLogger, result.Damage);
+      m_logSystem->SendAttackLog(DamageInstigator, DamageCauser);
+      m_logSystem->SendDamageLog(DamageCauser, result.Damage);
     }
     
     if (attackTarget->IsDefeated())
     {
       attackTarget->OnDefeated();
-      m_logSystem->SendDefeatedLog(targetLogger);
+      m_logSystem->SendDefeatedLog(DamageCauser);
     }
   }
 

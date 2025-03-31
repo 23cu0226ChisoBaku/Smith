@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SmithMapModelSubsystem.h"
+#include "SmithMapModelRepository.h"
 
 #include "SmithMapModelDefinition.h"
 #include "SmithTurnBattleWorldSettings.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(SmithMapModelSubsystem)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SmithMapModelRepository)
 
-bool USmithMapModelSubsystem::ShouldCreateSubsystem(UObject* Outer) const
+bool USmithMapModelRepository::ShouldCreateSubsystem(UObject* Outer) const
 {
   if (!Super::ShouldCreateSubsystem(Outer))
   {
@@ -29,26 +29,26 @@ bool USmithMapModelSubsystem::ShouldCreateSubsystem(UObject* Outer) const
   return false;
 }
 
-void USmithMapModelSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+void USmithMapModelRepository::Initialize(FSubsystemCollectionBase& Collection)
 {
   Super::Initialize(Collection);
 
-  m_mapModels.Reset();
+  m_models.Reset();
 }
 
-void USmithMapModelSubsystem::Deinitialize()
+void USmithMapModelRepository::Deinitialize()
 {
-  m_mapModels.Reset();
+  m_models.Reset();
 
   Super::Deinitialize();
 }
 
-void USmithMapModelSubsystem::InitializeMapModel(USmithMapModelDefinition* DefinitionAsset)
+void USmithMapModelRepository::InitializeMapModel(USmithMapModelDefinition* DefinitionAsset)
 {
   check(DefinitionAsset != nullptr);
   check(DefinitionAsset->MapObjectActorClass != nullptr);
 
-  if (m_mapModels.Contains(DefinitionAsset->MapObjectActorClass))
+  if (m_models.Contains(DefinitionAsset->MapObjectActorClass))
   {
     return;
   }
@@ -56,18 +56,18 @@ void USmithMapModelSubsystem::InitializeMapModel(USmithMapModelDefinition* Defin
   FSmithMapModel newModel = FSmithMapModel::CreateModel(DefinitionAsset);
   check(newModel.IsValid());
 
-  m_mapModels.Add({DefinitionAsset->MapObjectActorClass, newModel});
+  m_models.Add({DefinitionAsset->MapObjectActorClass, newModel});
 
 }
 
-FSmithMapModel USmithMapModelSubsystem::GetModel(AActor* Requester) const
+const FSmithMapModel USmithMapModelRepository::GetModel(AActor* Requester) const
 {
   check(Requester != nullptr);
 
   TSubclassOf<AActor> requesterClass = Requester->GetClass();
-  if (m_mapModels.Contains(requesterClass))
+  if (m_models.Contains(requesterClass))
   {
-    return m_mapModels[requesterClass];
+    return m_models[requesterClass];
   }
 
   // TODO

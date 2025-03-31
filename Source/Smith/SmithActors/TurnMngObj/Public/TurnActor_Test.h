@@ -10,7 +10,6 @@
 #include "MapObjType.h"
 #include "../Weapon/Params.h"
 #include "ICanRequestEventPublishment.h"
-#include "ISmithBattleLogger.h"
 
 // TODO
 #include "SmithEnemyTraits.h"
@@ -34,8 +33,7 @@ enum class EDirection : uint8;
 UCLASS()
 class SMITH_API ATurnActor_Test final: 	public ATurnBaseActor, public IAttackable, 
 																				public IMoveDirector, public ISmithSimpleAIDriven, 
-																				public ICanRequestEventPublishment, public ISmithAnimator, 
-																				public ISmithBattleLogger
+																				public ICanRequestEventPublishment, public ISmithAnimator
 {
 	GENERATED_BODY()
 
@@ -70,9 +68,6 @@ public:
 	void SwitchAnimation(uint8 animationState) override;
 	void UpdateAnimation(float deltaTime) override;
 	bool IsAnimationFinish() const override;
-
-	FString GetName_Log() const override;
-	EBattleLogType GetType_Log() const override;
 
 	FBattleDefenseParamHandle GetDefenseParam() const override;
 	

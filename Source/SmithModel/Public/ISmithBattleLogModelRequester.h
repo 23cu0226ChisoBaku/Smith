@@ -4,34 +4,23 @@
 
 #include "UObject/Interface.h"
 
-#include "ISmithBattleLogger.generated.h"
+#include "SmithBattleLogModel.h"
 
-enum class EBattleLogType : uint8
-{
-	Player = 0,
-	Enemy = 1,
-	Item = 2,
-	Enhance = 3,
-	None,
-};
+#include "ISmithBattleLogModelRequester.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class USmithBattleLogger : public UInterface
+class USmithBattleLogModelRequester : public UInterface
 {
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
-class SMITH_API ISmithBattleLogger
+class SMITHMODEL_API ISmithBattleLogModelRequester
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual FString GetName_Log() const;
-	virtual EBattleLogType GetType_Log() const;
 
+	virtual const FSmithBattleLogModel GetModel(UObject* Requester) const = 0;
 };

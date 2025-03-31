@@ -17,7 +17,3 @@ void USmithConsumeItem::Use(IItemUseable* user)
   useImpl(user);
 }
 
-EBattleLogType USmithConsumeItem::GetType_Log() const
-{
-  return EBattleLogType::Item;
-}

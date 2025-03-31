@@ -28,6 +28,8 @@ class UGameLogWidget;
 class UScreenFade;
 
 class USmithMapModelDefinition;
+class USmithBattleLogModelDefinition;
+class USmithEventModelDefinition;
 
 namespace UE::Smith
 {
@@ -143,8 +145,14 @@ private:
 	UPROPERTY()
 	TObjectPtr<UMinimapDisplayTypeFactory> m_factory;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Map|Model|Definition")
-	TArray<TObjectPtr<USmithMapModelDefinition>> MapModelDefinition;
+	UPROPERTY(EditDefaultsOnly, Category = "Model|Map")
+	TArray<TObjectPtr<USmithMapModelDefinition>> MapModelDefinitions;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Model|Log")
+	TArray<TObjectPtr<USmithBattleLogModelDefinition>> LogModelDefinitions;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Model|EventLog")
+	TArray<TObjectPtr<USmithEventModelDefinition>> EventModelDefinitions;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapManager> m_mapMgr;

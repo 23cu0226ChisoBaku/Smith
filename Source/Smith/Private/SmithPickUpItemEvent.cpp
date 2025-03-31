@@ -3,7 +3,6 @@
 
 #include "SmithPickUpItemEvent.h"
 #include "IPickable.h"
-#include "ISmithBattleLogger.h"
 #include "IEventTriggerable.h"
 #include "MLibrary.h"
 
@@ -124,24 +123,9 @@ FString USmithPickUpItemEvent::GetPickUpItemType() const
   return m_pickable.IsValid() ? m_pickable->GetPickType() : TEXT("INVALID");
 }
 
-ISmithBattleLogger* USmithPickUpItemEvent::GetEventEntityLogger() const
+UObject* USmithPickUpItemEvent::GetEventEntity() const
 {
-  return Cast<ISmithBattleLogger>(m_pickable.Get());
-}
-
-FString USmithPickUpItemEvent::GetEventName() const
-{
-  return m_pickable.IsValid() ? m_pickable->GetPickType() : TEXT("とあるアイテム");
-}
-
-FString USmithPickUpItemEvent::GetSucceedMessage() const
-{
-  return TEXT("を手に入れた");
-}
-
-FString USmithPickUpItemEvent::GetFailedMessage() const
-{
-  return TEXT("の上に乗った");
+  return m_pickable.IsValid() ? m_pickable->_getUObject() : nullptr;
 }
 
 UTexture2D* USmithPickUpItemEvent::GetMinimapDisplayTexture_Implementation()

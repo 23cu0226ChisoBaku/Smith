@@ -61,7 +61,9 @@
 
 #include "DamageCalculationStrategies.h"
 
-#include "SmithMapModelSubsystem.h"
+#include "SmithMapModelRepository.h"
+#include "SmithBattleLogModelRepository.h"
+#include "SmithEventModelRepository.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   : m_battleSystem(nullptr)
@@ -318,14 +320,16 @@ void AMapGenerateGameMode_Test::initializeGame()
     m_mapMgr->AssignEventRegister(m_eventSystem);
     m_battleSystem->AssignEventExecutor(m_eventSystem);
 
-    USmithMapModelSubsystem* modelSys = world->GetSubsystem<USmithMapModelSubsystem>();
-    if (modelSys != nullptr)
     {
-      for (const auto& definition : MapModelDefinition)
+      USmithMapModelRepository* mapModelRepository = world->GetSubsystem<USmithMapModelRepository>();
+      if (mapModelRepository != nullptr)
       {
-        modelSys->InitializeMapModel(definition);
+        for (const auto& definition : MapModelDefinitions)
+        {
+          mapModelRepository->InitializeMapModel(definition);
+        }
+        m_mapMgr->AssignMapModelRequester(mapModelRepository);
       }
-      m_mapMgr->AssignMapModelRequester(modelSys);
     }
 
     m_enhanceSystem = world->GetSubsystem<USmithEnhanceSubsystem>();
@@ -348,15 +352,36 @@ void AMapGenerateGameMode_Test::initializeGame()
 
     m_eventMediator->Initialize(m_eventPublisher, m_mapMgr);
 
-    m_logSubsystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
-    check(m_logSubsystem != nullptr);
-
-    if (LogWidgetSub != nullptr)
     {
-      UGameLogWidget* logWidget = CreateWidget<UGameLogWidget>(world, LogWidgetSub);
-      m_logSubsystem->SetLogWidget(logWidget);
-    }
+      m_logSubsystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
+      check(m_logSubsystem != nullptr);
+  
+      if (LogWidgetSub != nullptr)
+      {
+        UGameLogWidget* logWidget = CreateWidget<UGameLogWidget>(world, LogWidgetSub);
+        m_logSubsystem->SetLogWidget(logWidget);
+      }
 
+      USmithBattleLogModelRepository* logModelRepository = world->GetSubsystem<USmithBattleLogModelRepository>();
+      if (logModelRepository != nullptr)
+      {
+        for (const auto& definition : LogModelDefinitions)
+        {
+          logModelRepository->InitializeBattleLogModel(definition);
+        }
+      }
+
+      USmithEventModelRepository* eventModelRepository = world->GetSubsystem<USmithEventModelRepository>();
+      if (eventModelRepository != nullptr)
+      {
+        for (const auto& definition : EventModelDefinitions)
+        {
+          eventModelRepository->InitializeEventModel(definition);
+        }
+      }
+      m_logSubsystem->AssignLogRepository(logModelRepository, eventModelRepository);
+    }
+    
     // リザルト変数初期化
     m_curtLevel = 1;
     m_defeatedEnemyCount = 0;

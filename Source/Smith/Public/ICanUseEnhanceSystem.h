@@ -15,15 +15,17 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "ICanUseEnhanceSystem.generated.h"
+
 //---------------------------------------
 /*
                   前方宣言
 */
 //---------------------------------------
 class IEnhanceSystem;
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UCanUseEnhanceSystem : public UInterface
@@ -31,9 +33,6 @@ class UCanUseEnhanceSystem : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class SMITH_API ICanUseEnhanceSystem
 {
 	GENERATED_BODY()

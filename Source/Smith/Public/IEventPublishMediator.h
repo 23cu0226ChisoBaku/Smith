@@ -1,22 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-/*
 
-IEventPublishMediator.h
-
-Author : MAI ZHICONG(バクチソウ)
-
-Description : [ファイル説明]
-
-Update History: [20xx/xx/xx] [コメント]
-
-Version : alpha_1.0.0
-
-Encoding : UTF-8 
-*/
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "IEventPublishMediator.generated.h"
 
 class USmithPickable;

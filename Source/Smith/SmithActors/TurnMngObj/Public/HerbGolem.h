@@ -12,7 +12,6 @@
 #include "MapObjType.h"
 #include "../Weapon/Params.h"
 #include "ICanRequestEventPublishment.h"
-#include "ISmithBattleLogger.h"
 // TODO
 #include "SmithEnemyTraits.h"
 
@@ -36,8 +35,7 @@ class USmithBattleLogWorldSubsystem;
 UCLASS()
 class SMITH_API AHerbGolem final: public ATurnBaseActor, public IAttackable, 
 																	public IMoveDirector,  public ISmithAnimator,
-																	public ISmithSimpleAIDriven, public ICanRequestEventPublishment,
-																	public ISmithBattleLogger
+																	public ISmithSimpleAIDriven, public ICanRequestEventPublishment
 {
 	GENERATED_BODY()
 
@@ -78,9 +76,6 @@ public:
 	void SwitchAnimation(uint8 animationState) override;
 	void UpdateAnimation(float deltaTime) override;
 	bool IsAnimationFinish() const override;
-
-	FString GetName_Log() const override;
-	EBattleLogType GetType_Log() const override;
 
 	bool HealCondition();
 

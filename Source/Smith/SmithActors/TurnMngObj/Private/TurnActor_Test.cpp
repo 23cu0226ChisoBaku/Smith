@@ -259,16 +259,6 @@ bool ATurnActor_Test::IsAnimationFinish() const
 	return AnimComponent == nullptr ? true : AnimComponent->IsCurrentAnimationFinish();
 }
 
-FString ATurnActor_Test::GetName_Log() const
-{
-	return TEXT("小ゴーレム");
-}
-
-EBattleLogType ATurnActor_Test::GetType_Log() const
-{
-	return EBattleLogType::Enemy;
-}
-
 void ATurnActor_Test::InitializeParameter(int32 currentLevel)
 {
 	// TODO will return null when RECOMPILE!!!!!!!

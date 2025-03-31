@@ -21,18 +21,11 @@ Encoding : UTF-8
 #define SMITH_ATK_HDL
 
 #include "Direction.h"
-//---------------------------------------
-/*
-                  前方宣言
-*/
-//---------------------------------------
-class ISmithBattleLogger;
 
 struct SMITH_API FAttackHandle
 {
 	static const FAttackHandle NullHandle;
 
-	ISmithBattleLogger* Attacker;
 	int32 AttackPower;
 	int32 CriticalPower;
 	int32 Level;
@@ -40,8 +33,7 @@ struct SMITH_API FAttackHandle
 	EDirection AttackFrom;
 
 	constexpr FAttackHandle()
-		: Attacker(nullptr)
-		, AttackPower(0)
+		: AttackPower(0)
 		, CriticalPower(0)
 		, Level(0)
 		, MotionValue(0)
@@ -53,7 +45,6 @@ struct SMITH_API AttackHandle
 {
 	static const AttackHandle NullHandle;
 
-	ISmithBattleLogger* Attacker;
 	int32 AttackPower;
 	EDirection AttackFrom;
 

@@ -4,13 +4,16 @@
 
 #include "Subsystems/WorldSubsystem.h"
 
+#include "UObject/WeakInterfacePtr.h"
+
 #include "SmithBattleLogWorldSubsystem.generated.h"
 
 class UGameLogWidget;
-class ISmithBattleLogger;
 class ISmithEventLogger;
+class ISmithBattleLogModelRequester;
+class ISmithEventModelRequester;
 
-enum class EBattleLogType : uint8;
+enum class EBattleLogModelType : uint8;
 
 UCLASS()
 class SMITH_API USmithBattleLogWorldSubsystem final : public UWorldSubsystem
@@ -27,17 +30,22 @@ public:
 public:
 
 	void SetLogWidget(UGameLogWidget*);
-	void SendAttackLog(ISmithBattleLogger* attacker, ISmithBattleLogger* defender);
-	void SendDamageLog(ISmithBattleLogger* defender, int32 damage);
-	void SendDefeatedLog(ISmithBattleLogger* downed);
-	void SendInteractEventLog(ISmithBattleLogger* interacter, ISmithEventLogger* event, bool bIsInteractSuccess);
-	void SendEnhanceLog(ISmithBattleLogger* enhance);
+	void AssignLogRepository(ISmithBattleLogModelRequester* BattleLogRepository, ISmithEventModelRequester* EventLogRepository);
+	void SendAttackLog(UObject* attacker, UObject* defender);
+	void SendDamageLog(UObject* defender, int32 damage);
+	void SendDefeatedLog(UObject* downed);
+	void SendInteractEventLog(UObject* interacter, ISmithEventLogger* event, bool bIsInteractSuccess);
+	void SendEnhanceLog(UObject* enhance);
 
 private:
-	void convertLogColor(FString& outLog, EBattleLogType);
+	void convertLogColor(FString& outLog, EBattleLogModelType);
 
 private:
 
 	UPROPERTY()
 	TObjectPtr<UGameLogWidget> m_logWidget;
+
+	TWeakInterfacePtr<ISmithBattleLogModelRequester> m_battleLogModelRequester;
+
+	TWeakInterfacePtr<ISmithEventModelRequester> m_eventModelRequester;
 };

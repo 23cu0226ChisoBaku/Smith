@@ -5,7 +5,6 @@
 #include "ICommandMediator.h"
 #include "Direction.h"
 #include "AttackHandle.h"
-#include "ISmithBattleLogger.h"
 #include "SmithModelHelperFunctionLibrary.h"
 #include "MLibrary.h"
 
@@ -53,9 +52,7 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
     return false;
   }
 
-  ISmithBattleLogger* attackerLogger = Cast<ISmithBattleLogger>(GetOwner());
   FAttackHandle handle;
-  handle.Attacker = attackerLogger;
   handle.AttackPower = m_atk;
   handle.CriticalPower = m_crt;
   handle.Level = m_level;
@@ -77,7 +74,7 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
         if (OnChangeDirectionDelegate.IsBound())
         {
           
-          m_mediator->GetPlayerDirection(atkDir, EDirectionStrategy::Ordinal, GetOwner());
+          m_mediator->GetPlayerDirection(atkDir, EDirectionPolicy::Ordinal, GetOwner());
           OnChangeDirectionDelegate.Execute(atkDir);
         }
         return true;

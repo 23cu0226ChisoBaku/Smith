@@ -2,11 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "IEnhanceable.h"
 #include "Params.h"
-#include "ISmithBattleLogger.h"
 #include "SmithWeapon.generated.h"
 
 class UTexture2D;
@@ -15,8 +13,8 @@ struct FSmithWeaponInfoHandle
 {
 	FString Name;
 	FParams Param;
-	int32 Level;
-	UTexture2D* Image2D;
+	int32 Level = 1;
+	UTexture2D* Image2D = nullptr;
 
 	FSmithWeaponInfoHandle()
 		: Name{}
@@ -24,6 +22,7 @@ struct FSmithWeaponInfoHandle
 		, Level(1)
 		, Image2D(nullptr)
 	{ }
+
 	FSmithWeaponInfoHandle(FString name, FParams param, int32 level, UTexture2D* image2D)
 		: Name(name)
 		, Param(param)
@@ -31,11 +30,13 @@ struct FSmithWeaponInfoHandle
 		, Image2D(image2D)
 	{ }
 };
+
+
 /**
  * 
  */
 UCLASS(EditInlineNew)
-class SMITH_API USmithWeapon : public UObject, public IEnhanceable, public ISmithBattleLogger
+class SMITH_API USmithWeapon : public UObject, public IEnhanceable
 {
 	GENERATED_BODY()
 
@@ -58,19 +59,18 @@ public:
 		FSmithWeaponInfoHandle handle(Name, WeaponParam, m_weaponLevel, WeaponImage2D);
 		return handle;
 	}
-
-	FString GetName_Log() const override;
-	EBattleLogType GetType_Log() const override;
-
 // TODO
 public:
 	TMulticastDelegate<void(FParams)> OnParamUpdated;
 	
 private:
+
 	UPROPERTY(EditAnywhere, Category = "Smith|Weapon")
 	FParams WeaponParam;
+
 	UPROPERTY(EditAnywhere, Category = "Smith|Weapon")
 	FString Name;
+	
 	UPROPERTY(EditAnywhere, Category = "Smith|Weapon")
 	TObjectPtr<UTexture2D> WeaponImage2D;
 

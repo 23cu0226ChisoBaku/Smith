@@ -7,56 +7,99 @@
 #include "Direction.h"
 #include "MLibrary.h"
 
-class IDirectionStrategy
+//---Begin of Direction Strategy Definition
+#pragma region Direction Strategy Definition
+struct FDirectionDirector
 {
-public:
-  IDirectionStrategy() = default;
-  virtual ~IDirectionStrategy() = default;
+  using ThisClass = typename FDirectionDirector;
+  
+  struct IDirectionConcept
+  {
+    virtual ~IDirectionConcept() = 0 {};
 
-public:
-  virtual EDirection GetDirectionOfDegree(double angleDegree) = 0;
+    virtual EDirection GetDirectionOfDegree(double AngleDegree) const = 0;
+  };
+
+  template<typename StrategyType>
+  struct DirectionModel : public IDirectionConcept
+  {
+    DirectionModel(StrategyType Strategy)
+      : m_strategy(::MoveTemp(Strategy))
+    { }
+
+    ~DirectionModel() = default;
+
+    EDirection GetDirectionOfDegree(double AngleDegree) const override 
+    {
+      return m_strategy.GetDirection(AngleDegree);
+    }
+
+    private:
+    StrategyType m_strategy;
+  };
+
+  public:
+
+    template<typename StrategyType>
+    explicit FDirectionDirector(StrategyType Strategy)
+      : m_pimpl(::MakeShared<DirectionModel<StrategyType>>(::MoveTemp(Strategy)))
+    { }
+
+    ~FDirectionDirector()
+    {
+      m_pimpl.Reset();
+    }
+
+    FDirectionDirector(const ThisClass& Other) = default;
+    ThisClass& operator=(const ThisClass& Other) = default;
+    FDirectionDirector(ThisClass&& Other) noexcept = default;
+    ThisClass& operator=(ThisClass&& Other) noexcept = default;
+
+    EDirection GetDirectionOfDegree(double AngleDegree) const
+    {
+      return m_pimpl->GetDirectionOfDegree(AngleDegree);
+    }
+
+  private:
+
+    TSharedPtr<IDirectionConcept> m_pimpl;
 };
 
-class OrdinalDirectionStrategy final: public IDirectionStrategy
+struct DirectionStrategy_Ordinal
 {
-public:
-  OrdinalDirectionStrategy() = default;
-  ~OrdinalDirectionStrategy() = default;
-
-public:
-  EDirection GetDirectionOfDegree(double angleDegree) override
+  EDirection GetDirection(double AngleDegree) const
   {
-    if (-22.5 < angleDegree && angleDegree < 22.5)
+    if (-22.5 < AngleDegree && AngleDegree < 22.5)
     {
       return EDirection::North;
     }
 
-    if (22.5 <= angleDegree && angleDegree <= 67.5)
+    if (22.5 <= AngleDegree && AngleDegree <= 67.5)
     {
       return EDirection::NorthEast;
     }
 
-    if (67.5 < angleDegree && angleDegree < 112.5)
+    if (67.5 < AngleDegree && AngleDegree < 112.5)
     {
       return EDirection::East;
     }
 
-    if (112.5 <= angleDegree && angleDegree <= 157.5)
+    if (112.5 <= AngleDegree && AngleDegree <= 157.5)
     {
       return EDirection::SouthEast;
     }
 
-    if (-67.5 <= angleDegree && angleDegree <= -22.5)
+    if (-67.5 <= AngleDegree && AngleDegree <= -22.5)
     {
       return EDirection::NorthWest;
     }
 
-    if (-112.5 < angleDegree && angleDegree < -67.5)
+    if (-112.5 < AngleDegree && AngleDegree < -67.5)
     {
       return EDirection::West;
     }
 
-    if (-157.5 <= angleDegree && angleDegree <= -112.5)
+    if (-157.5 <= AngleDegree && AngleDegree <= -112.5)
     {
       return EDirection::SouthWest;
     }
@@ -65,26 +108,21 @@ public:
   }
 };
 
-class CardinalDirectionStrategy final: public IDirectionStrategy
+struct DirectionStrategy_Cardinal
 {
-public:
-  CardinalDirectionStrategy() = default;
-  ~CardinalDirectionStrategy() = default;
-
-public:
-  EDirection GetDirectionOfDegree(double angleDegree) override
+  EDirection GetDirection(double AngleDegree) const
   {
-    if (-45.0 <= angleDegree && angleDegree < 45.0)
+    if (-45.0 <= AngleDegree && AngleDegree < 45.0)
     {
       return EDirection::North;
     }
   
-    if (45.0 <= angleDegree && angleDegree < 135.0)
+    if (45.0 <= AngleDegree && AngleDegree < 135.0)
     {
       return EDirection::East;
     }
   
-    if (-135.0 <= angleDegree && angleDegree < -45.0)
+    if (-135.0 <= AngleDegree && AngleDegree < -45.0)
     {
       return EDirection::West;
     }
@@ -93,26 +131,21 @@ public:
   }
 };
 
-class DiagonalDirectionStrategy final: public IDirectionStrategy
+struct DirectionStrategy_Diagonal
 {
-  public:
-  DiagonalDirectionStrategy() = default;
-  ~DiagonalDirectionStrategy() = default;
-
-public:
-  EDirection GetDirectionOfDegree(double angleDegree) override
+  EDirection GetDirection(double AngleDegree) const
   {
-    if (0.0 <= angleDegree && angleDegree < 90.0)
+    if (0.0 <= AngleDegree && AngleDegree < 90.0)
     {
       return EDirection::NorthEast;
     }
   
-    if (90.0 <= angleDegree && angleDegree < 180.0)
+    if (90.0 <= AngleDegree && AngleDegree < 180.0)
     {
       return EDirection::SouthEast;
     }
   
-    if (-90.0 <= angleDegree && angleDegree < 0.0)
+    if (-90.0 <= AngleDegree && AngleDegree < 0.0)
     {
       return EDirection::NorthWest;
     }
@@ -120,14 +153,14 @@ public:
     return EDirection::SouthWest;
   }
 };
+#pragma endregion Direction Strategy Definition
+//---End of Direction Strategy Definition
 
-
-EDirection FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(const FMapCoord& from, const FMapCoord& to, EDirectionStrategy directionStrategyLevel)
+EDirection FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(const FMapCoord& From, const FMapCoord& To, EDirectionPolicy Policy)
 {
-  const FVector2D directionVector = FVector2D(
-                                              StaticCast<double>(to.x) - StaticCast<double>(from.x),
-                                              StaticCast<double>(to.y) - StaticCast<double>(from.y)
-                                             ).GetSafeNormal();
+  const double directionVectorX = StaticCast<double>(To.x) - StaticCast<double>(From.x);
+  const double directionVectorY = StaticCast<double>(To.y) - StaticCast<double>(From.y);
+  const FVector2D directionVector = FVector2D(directionVectorX, directionVectorY).GetSafeNormal();
 
   if (directionVector.IsZero())
   {
@@ -137,7 +170,8 @@ EDirection FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(const FMapCo
   double angleTwoPI = 0.0;
   const double crossWithNorthVec = FVector2D::CrossProduct(directionVector, FVector2D{1.0, 0.0});
   
-  if (crossWithNorthVec == 0.0)
+  const double tolerance = 0.000001; 
+  if (FMath::Abs(crossWithNorthVec) <= tolerance)
   {
     if (directionVector.X > 0.0)
     {
@@ -152,56 +186,36 @@ EDirection FSmithModelHelperFunctionLibrary::GetDirectionOfMapCoord(const FMapCo
   {
     const double angleBetweenNorthVec = FVector2D::DotProduct(directionVector, FVector2D{1.0, 0.0});
     const double angle = FMath::RadiansToDegrees(FMath::Acos(angleBetweenNorthVec));
-    angleTwoPI = crossWithNorthVec < 0.0 ? angle : -angle;
+    angleTwoPI = (crossWithNorthVec < 0.0) ? angle : -angle;
   }
 
-  // TODO
-  return GetDirectionOfDegree(angleTwoPI, directionStrategyLevel);
+  return GetDirectionOfDegree(angleTwoPI, Policy);
 }
 
-EDirection FSmithModelHelperFunctionLibrary::GetDirectionOfDegree(double angleDegree, EDirectionStrategy directionStrategyLevel)
+EDirection FSmithModelHelperFunctionLibrary::GetDirectionOfDegree(double AngleDegree, EDirectionPolicy Policy)
 {
-  adjustInputAngle(angleDegree);
+  adjustInputAngle(AngleDegree);
 
-  TSharedPtr<IDirectionStrategy> directionStrategy = nullptr;
-
-  switch (directionStrategyLevel)
+  using enum EDirectionPolicy;
+  static const TMap<EDirectionPolicy, const FDirectionDirector> DIRECTION_DIRECTOR_TABLE =
   {
-    case EDirectionStrategy::Ordinal:
-    {
-      directionStrategy = ::MakeShared<OrdinalDirectionStrategy>();
-    }
-    break;
-    case EDirectionStrategy::Cardinal:
-    {
-      directionStrategy = ::MakeShared<CardinalDirectionStrategy>();
-    }
-    break;
-    case EDirectionStrategy::Diagonal:
-    {
-      directionStrategy = ::MakeShared<DiagonalDirectionStrategy>();
-    }
-    break;
-  }
+    {Ordinal, FDirectionDirector(DirectionStrategy_Ordinal{})},
+    {Cardinal, FDirectionDirector(DirectionStrategy_Cardinal{})},
+    {Diagonal, FDirectionDirector(DirectionStrategy_Diagonal{})}
+  };
 
-  if (directionStrategy.IsValid())
-  {
-    return directionStrategy->GetDirectionOfDegree(angleDegree);
-  }
-
-  return EDirection::Invalid;
-
+  return DIRECTION_DIRECTOR_TABLE[Policy].GetDirectionOfDegree(AngleDegree);
 }
 
-void FSmithModelHelperFunctionLibrary::adjustInputAngle(double& angleDegree)
+void FSmithModelHelperFunctionLibrary::adjustInputAngle(double& AngleDegree)
 {
-  while (angleDegree < -180.0)
+  while (AngleDegree < -180.0)
   {
-    angleDegree += 180.0;
+    AngleDegree += 180.0;
   }
 
-  while(angleDegree > 180.0)
+  while(AngleDegree > 180.0)
   {
-    angleDegree -= 180.0;
+    AngleDegree -= 180.0;
   }
 }

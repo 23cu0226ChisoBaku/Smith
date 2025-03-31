@@ -26,6 +26,4 @@ public:
 private:
 	virtual void useImpl(IItemUseable*) PURE_VIRTUAL(USmithConsumeItem::useImpl);
 	
-public:
-	EBattleLogType GetType_Log() const override final;
 };

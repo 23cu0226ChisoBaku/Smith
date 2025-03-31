@@ -2,10 +2,17 @@
 
 
 #include "SmithBattleLogWorldSubsystem.h"
+
 #include "SmithTurnBattleWorldSettings.h"
 #include "GameLogWidget.h"
-#include "ISmithBattleLogger.h"
 #include "ISmithEventLogger.h"
+#include "MLibrary.h"
+
+#include "ISmithBattleLogModelRequester.h"
+#include "SmithBattleLogModelDefinition.h"
+#include "ISmithEventModelRequester.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SmithBattleLogWorldSubsystem)
 
 bool USmithBattleLogWorldSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -30,6 +37,7 @@ bool USmithBattleLogWorldSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 void USmithBattleLogWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
   m_logWidget = nullptr;
+  m_battleLogModelRequester = nullptr;
 }
 
 void USmithBattleLogWorldSubsystem::Deinitialize()
@@ -39,6 +47,8 @@ void USmithBattleLogWorldSubsystem::Deinitialize()
     m_logWidget->SetVisibility(ESlateVisibility::Hidden);
     m_logWidget = nullptr;
   }
+
+  m_battleLogModelRequester.Reset();
 }
 
 void USmithBattleLogWorldSubsystem::SetLogWidget(UGameLogWidget* logWidget)
@@ -51,21 +61,41 @@ void USmithBattleLogWorldSubsystem::SetLogWidget(UGameLogWidget* logWidget)
   }
 }
 
-void USmithBattleLogWorldSubsystem::SendAttackLog(ISmithBattleLogger* attacker, ISmithBattleLogger* defender)
+void USmithBattleLogWorldSubsystem::AssignLogRepository(ISmithBattleLogModelRequester* BattleLogRepository,
+                                                        ISmithEventModelRequester* EventLogRepository)
 {
-  if (m_logWidget == nullptr)
+  m_battleLogModelRequester = BattleLogRepository;
+  m_eventModelRequester = EventLogRepository;
+}
+
+void USmithBattleLogWorldSubsystem::SendAttackLog(UObject* attacker, UObject* defender)
+{
+  check(attacker != nullptr);
+  check(defender != nullptr);
+  if ((m_logWidget == nullptr) || !m_battleLogModelRequester.IsValid())
   {
     return;
   }
 
-  FString attackerLog = attacker != nullptr ? attacker->GetName_Log() : TEXT("とある人物");
-  const EBattleLogType attackerLogType = attacker != nullptr ? attacker->GetType_Log() : EBattleLogType::None;
-  FString defenderLog = defender != nullptr ? defender->GetName_Log() : TEXT("とある対象");
-  const EBattleLogType defenderLogType = defender != nullptr ? defender->GetType_Log() : EBattleLogType::None;
+  const FSmithBattleLogModel attackerModel = m_battleLogModelRequester->GetModel(attacker);
+  const FSmithBattleLogModel defenderModel = m_battleLogModelRequester->GetModel(defender);
+
+  if (!attackerModel.IsValid() || !defenderModel.IsValid())
+  {
+    MDebug::LogWarning("Log Model is not initialized");
+    return;
+  }
+
+  FString attackerLog = attackerModel.GetName();
+  const EBattleLogModelType attackerLogType = attackerModel.GetType();
+  
+  FString defenderLog = defenderModel.GetName();
+  const EBattleLogModelType defenderLogType = defenderModel.GetType();
 
   convertLogColor(attackerLog, attackerLogType);
   convertLogColor(defenderLog, defenderLogType);
 
+  // TODO
   attackerLog.Append(TEXT("が"));
   defenderLog.Append(TEXT("に攻撃\n"));
 
@@ -77,34 +107,51 @@ void USmithBattleLogWorldSubsystem::SendAttackLog(ISmithBattleLogger* attacker, 
 
 
 
-void USmithBattleLogWorldSubsystem::SendDamageLog(ISmithBattleLogger* defender, int32 damage)
+void USmithBattleLogWorldSubsystem::SendDamageLog(UObject* defender, int32 damage)
 {
-  if (m_logWidget == nullptr)
+  check(defender != nullptr)
+  if ((m_logWidget == nullptr) || !m_battleLogModelRequester.IsValid())
   {
     return;
   }
 
-  FString defenderLog = defender != nullptr ? defender->GetName_Log() : TEXT("とある対象");
-  const EBattleLogType defenderLogType = defender != nullptr ? defender->GetType_Log() : EBattleLogType::None;
+  const FSmithBattleLogModel defenderModel = m_battleLogModelRequester->GetModel(defender);
+  if (!defenderModel.IsValid())
+  {
+    return;
+  }
+
+  FString defenderLog = defenderModel.GetName();
+  const EBattleLogModelType defenderLogType = defenderModel.GetType();
 
   convertLogColor(defenderLog, defenderLogType);
-  const FString damageLog = TEXT("は") + FString::FromInt(damage) + TEXT("ダメージを受けた\n");
+
+  const FString damageNumLog = FString::FromInt(damage);
+  const FString damageLog = TEXT("は") + damageNumLog + TEXT("ダメージを受けた\n");
 
   const FString resultLog = defenderLog + damageLog;
+
   m_logWidget->AddLogMessage(resultLog);
   m_logWidget->OutputLog();
 
 }
 
-void USmithBattleLogWorldSubsystem::SendDefeatedLog(ISmithBattleLogger* downed)
+void USmithBattleLogWorldSubsystem::SendDefeatedLog(UObject* downed)
 {
-  if (m_logWidget == nullptr)
+  check(downed != nullptr);
+  if ((m_logWidget == nullptr) || !m_battleLogModelRequester.IsValid())
   {
     return;
   }
 
-  FString downedLog = downed != nullptr ? downed->GetName_Log() : TEXT("とある対象");
-  const EBattleLogType downedLogType = downed != nullptr ? downed->GetType_Log() : EBattleLogType::None;
+  const FSmithBattleLogModel downedModel = m_battleLogModelRequester->GetModel(downed);
+  if (!downedModel.IsValid())
+  {
+    return;
+  }
+
+  FString downedLog = downedModel.GetName();
+  const EBattleLogModelType downedLogType = downedModel.GetType();
 
   convertLogColor(downedLog, downedLogType);
 
@@ -116,46 +163,61 @@ void USmithBattleLogWorldSubsystem::SendDefeatedLog(ISmithBattleLogger* downed)
 
 }
 
-void USmithBattleLogWorldSubsystem::SendInteractEventLog(ISmithBattleLogger* interacter, ISmithEventLogger* event, bool bIsInteractSuccess)
+void USmithBattleLogWorldSubsystem::SendInteractEventLog(UObject* Instigator, ISmithEventLogger* Event, bool bIsInteractSuccess)
 {
-  if (m_logWidget == nullptr)
+  check(Instigator != nullptr);
+  check(Event != nullptr);
+
+  if ((m_logWidget == nullptr) || !m_battleLogModelRequester.IsValid() || !m_eventModelRequester.IsValid())
   {
     return;
   }
 
-  if (event == nullptr)
+  const FSmithBattleLogModel instigatorModel = m_battleLogModelRequester->GetModel(Instigator);
+  const FSmithBattleLogModel eventEntityModel = m_battleLogModelRequester->GetModel(Event->GetEventEntity());
+  if (!instigatorModel.IsValid() || !eventEntityModel.IsValid())
   {
     return;
   }
 
-  FString interacterName = interacter != nullptr ? interacter->GetName_Log() : TEXT("とある人物");
-  const EBattleLogType interacterType = interacter != nullptr ? interacter->GetType_Log() : EBattleLogType::None;
+  const FSmithEventModel eventResultModel = m_eventModelRequester->GetModel(Event->_getUObject());
+  if (!eventResultModel.IsValid())
+  {
+    return;
+  }
 
-  convertLogColor(interacterName, interacterType);
+  FString instigatorName = instigatorModel.GetName();
+  const EBattleLogModelType instigatorType = instigatorModel.GetType();
 
-  ISmithBattleLogger* eventEntityLogger = event->GetEventEntityLogger();
-  FString eventEntityName = eventEntityLogger != nullptr ? eventEntityLogger->GetName_Log() : TEXT("とあるもの");
-  const EBattleLogType eventEntityType = eventEntityLogger != nullptr ? eventEntityLogger->GetType_Log() : EBattleLogType::None;
+  convertLogColor(instigatorName, instigatorType);
+
+  FString eventEntityName = eventEntityModel.GetName();
+  const EBattleLogModelType eventEntityType = eventEntityModel.GetType();
   convertLogColor(eventEntityName, eventEntityType);
-  const FString eventResultLog = bIsInteractSuccess ? event->GetSucceedMessage() : event->GetFailedMessage();
 
-  const FString resultLog = interacterName + TEXT("は") + eventEntityName + eventResultLog + TEXT("\n"); 
+  const FString eventResultLog = bIsInteractSuccess ? eventResultModel.GetSucceededMsg() : eventResultModel.GetFailedMsg();
+  const FString resultLog = instigatorName + TEXT("は") + eventEntityName + eventResultLog + TEXT("\n"); 
 
   m_logWidget->AddLogMessage(resultLog);
   m_logWidget->OutputLog();
-
 }
 
-void USmithBattleLogWorldSubsystem::SendEnhanceLog(ISmithBattleLogger* enhance)
+void USmithBattleLogWorldSubsystem::SendEnhanceLog(UObject* EnhanceEntity)
 {
-  if (m_logWidget == nullptr)
+  check(EnhanceEntity != nullptr)
+  if ((m_logWidget == nullptr) || !m_battleLogModelRequester.IsValid())
   {
     return;
   }
 
-  FString enhanceName = enhance != nullptr ? enhance->GetName_Log() : TEXT("とある装備");
-  const EBattleLogType enhanceType = enhance != nullptr ? enhance->GetType_Log() : EBattleLogType::None;
+  const FSmithBattleLogModel enhanceModel = m_battleLogModelRequester->GetModel(EnhanceEntity);
+  if (!enhanceModel.IsValid())
+  {
+    return;
+  }
 
+  FString enhanceName = enhanceModel.GetName();
+  const EBattleLogModelType enhanceType = enhanceModel.GetType();
   convertLogColor(enhanceName, enhanceType);
 
   const FString resultLog = enhanceName + TEXT("を強化した。\n");
@@ -164,22 +226,23 @@ void USmithBattleLogWorldSubsystem::SendEnhanceLog(ISmithBattleLogger* enhance)
   m_logWidget->OutputLog();
 }
 
-void USmithBattleLogWorldSubsystem::convertLogColor(FString& outLog, EBattleLogType logType)
+void USmithBattleLogWorldSubsystem::convertLogColor(FString& outLog, EBattleLogModelType logType)
 {
+  using enum EBattleLogModelType;
   switch (logType)
   {
-    case EBattleLogType::Player:
-    case EBattleLogType::Enhance:
+    case Player:
+    case Enhance:
     {
       outLog = TEXT("<LogColorStyle.Player>") + outLog;
     }
     break;
-    case EBattleLogType::Enemy:
+    case Enemy:
     {
       outLog = TEXT("<LogColorStyle.Enemy>") + outLog;
     }
     break;
-    case EBattleLogType::Item:
+    case Item:
     {
       outLog = TEXT("<LogColorStyle.Item>") + outLog;
     }

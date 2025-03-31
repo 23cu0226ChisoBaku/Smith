@@ -16,8 +16,3 @@ FString USmithPickable::GetPickType() const
 {
   return PickableTypeName;
 }
-
-FString USmithPickable::GetName_Log() const
-{
-  return Name;
-}

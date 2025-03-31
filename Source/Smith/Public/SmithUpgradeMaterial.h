@@ -2,13 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "SmithPickable.h"
 #include "Params.h"
 #include "ParamAbsorbable.h"
 #include "ISmithItemWidgetParameterizable.h"
 #include "ISmithBattleParameterizable.h"
-#include "ISmithBattleLogger.h"
+
 #include "SmithUpgradeMaterial.generated.h"
 
 /**
@@ -36,9 +35,6 @@ public:
 	FColor GetLabelColor() const override;
 	FString GetName() const override;
 	FString GetDescription() const override;
-
-public:
-	EBattleLogType GetType_Log() const override final;
 
 public:
 	FParams GetParam_Interface() const override;

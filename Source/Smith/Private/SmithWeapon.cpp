@@ -59,13 +59,3 @@ int32 USmithWeapon::GetLevel() const
   return m_weaponLevel;
 }
 
-FString USmithWeapon::GetName_Log() const
-{
-  return Name;
-}
-
-EBattleLogType USmithWeapon::GetType_Log() const
-{
-  return EBattleLogType::Enhance;
-}
-

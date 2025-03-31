@@ -45,7 +45,7 @@ struct AttackHandle;
 struct FAttackHandle;
 struct FSmithSkillParameter;
 enum class EDirection : uint8;
-enum class EDirectionStrategy : uint8;
+enum class EDirectionPolicy : uint8;
 
 namespace UE::Smith
 {
@@ -75,5 +75,5 @@ public:
 
   // TODO 設計を見直す
   virtual int32 GetRangeLocations(TArray<FVector>& outLocations, AActor*, FSmithSkillParameter, const UE::Smith::Battle::FSmithCommandFormat&) = 0;
-  virtual void GetPlayerDirection(EDirection& outDirection, EDirectionStrategy, AActor*, uint8 offsetToLeft = 0u, uint8 offsetToTop = 0u) = 0;
+  virtual void GetPlayerDirection(EDirection& outDirection, EDirectionPolicy, AActor*, uint8 offsetToLeft = 0u, uint8 offsetToTop = 0u) = 0;
 };

@@ -8,7 +8,7 @@
 enum class EDirection : uint8;
 struct FMapCoord;
 
-enum class EDirectionStrategy : uint8
+enum class EDirectionPolicy : uint8
 {
 	// 八方位
 	Ordinal,
@@ -26,8 +26,8 @@ class SMITHMODEL_API FSmithModelHelperFunctionLibrary
 
 	public:
 
-		static EDirection GetDirectionOfMapCoord(const FMapCoord& from, const FMapCoord& to, EDirectionStrategy = EDirectionStrategy::Ordinal);
-		static EDirection GetDirectionOfDegree(double angleDegree, EDirectionStrategy = EDirectionStrategy::Ordinal);
+		static EDirection GetDirectionOfMapCoord(const FMapCoord& from, const FMapCoord& to, EDirectionPolicy = EDirectionPolicy::Ordinal);
+		static EDirection GetDirectionOfDegree(double angleDegree, EDirectionPolicy = EDirectionPolicy::Ordinal);
 
 	private:
 	

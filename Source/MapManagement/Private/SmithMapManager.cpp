@@ -491,7 +491,7 @@ namespace UE::Smith
         {
           m_mapOperator->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
         }
-        bool GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, AActor* origin, uint8 offsetLeft, uint8 offsetTop)
+        bool GetPlayerDirection(EDirection& outDirection, EDirectionPolicy directionStrategy, AActor* origin, uint8 offsetLeft, uint8 offsetTop)
         {
           // TODO
           uint8 x = 0;
@@ -631,7 +631,7 @@ namespace UE::Smith
     {
       m_pImpl->FindAttackableMapObjsFromCoord(outAttackableHandles, mapObj, format, offsetToLeft, offsetToTop);
     }
-    bool FSmithMapManager::GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, AActor* origin, uint8 offsetLeft, uint8 offsetTop)
+    bool FSmithMapManager::GetPlayerDirection(EDirection& outDirection, EDirectionPolicy directionStrategy, AActor* origin, uint8 offsetLeft, uint8 offsetTop)
     {
       return m_pImpl->GetPlayerDirection(outDirection, directionStrategy, origin, offsetLeft, offsetTop);
     }

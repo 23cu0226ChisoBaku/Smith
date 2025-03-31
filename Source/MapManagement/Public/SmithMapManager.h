@@ -40,7 +40,7 @@ namespace UE::Smith
 }
 
 enum class EDirection : uint8;
-enum class EDirectionStrategy : uint8;
+enum class EDirectionPolicy : uint8;
 enum class EMapDeployRule : uint8;
 
 struct FAttackableInfoHandle;
@@ -140,7 +140,7 @@ namespace UE::Smith
         ///
         void FindAttackableMapObjs(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor*, const UE::Smith::Battle::FSmithCommandFormat&);
         void FindAttackableMapObjsFromCoord(TArray<FAttackableInfoHandle>& outAttackableHandles, AActor*, const UE::Smith::Battle::FSmithCommandFormat&, uint8 offsetToLeft, uint8 offsetToTop);
-        bool GetPlayerDirection(EDirection& outDirection, EDirectionStrategy, AActor* origin, uint8 offsetLeft = 0, uint8 offsetTop = 0);
+        bool GetPlayerDirection(EDirection& outDirection, EDirectionPolicy, AActor* origin, uint8 offsetLeft = 0, uint8 offsetTop = 0);
         ///
         /// @brief                                マップオブジェクトを移動
         /// @param ICanSetOnMap                   マップオブジェクト

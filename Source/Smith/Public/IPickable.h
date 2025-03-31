@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "IPickable.generated.h"
 
 // This class does not need to be modified.
@@ -13,9 +13,6 @@ class UPickable : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class SMITH_API IPickable
 {
 	GENERATED_BODY()

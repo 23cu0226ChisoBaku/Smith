@@ -274,7 +274,7 @@ int32 USmithBattleMediator::GetRangeLocations(TArray<FVector>& outLocations, AAc
   return outLocations.Num();
 }
 
-void USmithBattleMediator::GetPlayerDirection(EDirection& outDirection, EDirectionStrategy directionStrategy, AActor* requester, uint8 offsetToLeft, uint8 offsetToTop)
+void USmithBattleMediator::GetPlayerDirection(EDirection& outDirection, EDirectionPolicy directionStrategy, AActor* requester, uint8 offsetToLeft, uint8 offsetToTop)
 {
   check(requester != nullptr);
 

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "SmithPickableLootHandle.generated.h"
 
 USTRUCT()
@@ -13,6 +12,7 @@ struct SMITH_API FSmithPickableLootHandle
 
 	UPROPERTY(EditAnywhere, meta=(MustImplement="Pickable"))
 	TSubclassOf<UObject> LootSubclass;
+	
 	UPROPERTY(EditAnywhere)
 	float Ratio;
 };

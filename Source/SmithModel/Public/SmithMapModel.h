@@ -11,7 +11,7 @@ enum class EMapModelType : uint8;
 struct SMITHMODEL_API FSmithMapModel
 {
 
-	friend class USmithMapModelSubsystem;
+	friend class USmithMapModelRepository;
 
 	private:
 	

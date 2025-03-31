@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "IEventTriggerable.generated.h"
 
 class USmithNextLevelEvent;

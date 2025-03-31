@@ -21,5 +21,5 @@ class SMITHMODEL_API ISmithMapModelRequester
 	GENERATED_BODY()
 
 public:
-	virtual FSmithMapModel GetModel(AActor* Requester) const = 0;
+	virtual const FSmithMapModel GetModel(AActor* Requester) const = 0;
 };

@@ -9,7 +9,6 @@
 #include "../Weapon/Params.h"
 #include "ICanRequestEventPublishment.h"
 #include "SmithAIConditionBindHandle.h"
-#include "ISmithBattleLogger.h"
 #include "SmithEnemyTraits.h"
 #include "IAttackCauser.h"
 
@@ -36,8 +35,8 @@ DECLARE_DELEGATE_RetVal(bool,FConditionDelegate);
  */
 UCLASS()
 class SMITH_API ASmithBoss final: public ASmithEnemy, public ISmithSimpleAIDriven,
-                                  public ICanRequestEventPublishment, public ISmithBattleLogger,
-                                  public ISmithAnimator, public IAttackCauser
+                                  public ICanRequestEventPublishment, public ISmithAnimator, 
+                                  public IAttackCauser
 {
   GENERATED_BODY()
 
@@ -66,10 +65,6 @@ public:
   void SwitchAnimation(uint8 animationState) override;
   void UpdateAnimation(float deltaTime) override;
   bool IsAnimationFinish() const override;
-
-public:
-  FString GetName_Log() const override;
-	EBattleLogType GetType_Log() const override;
 
   void InitializeParameter(int32 currentLevel) override final;
 
@@ -110,10 +105,9 @@ private:
   TMap<FString, FSmithAIConditionBindHandle> ConditionAttackFormatTables;
 
 private:
+
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BattleParameter, meta = (AllowPrivateAccess = "true"))
   FParams EnemyParam;
-  UPROPERTY(EditAnywhere)
-  FString Name;
 
   TWeakInterfacePtr<IEventPublishMediator> m_eventMediator;
 

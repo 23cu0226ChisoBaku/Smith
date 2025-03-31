@@ -259,16 +259,6 @@ bool ASmithBoss::NormalCondition()
   return true;
 }
 
-FString ASmithBoss::GetName_Log() const
-{
-  return Name;
-}
-
-EBattleLogType ASmithBoss::GetType_Log() const
-{
-  return EBattleLogType::Enemy;
-}
-
 void ASmithBoss::InitializeParameter(int32 currentLevel)
 {
 	EnemyParam = USmithEnemyParamInitializer::GetParams(this, currentLevel);
