@@ -59,19 +59,15 @@ void USmithDamageSubsystem::ApplyDamage(AActor* DamageInstigator, AActor* Damage
   IAttackable* attackTarget = Cast<IAttackable>(DamageCauser);
   if ((attackTarget != nullptr) && (!attackTarget->IsDefeated()))
   {
-    AttackHandle attackHandle{};
-    
     FBattleAttackParamHandle attackParam{};
     attackParam.AttackPoint = Handle.AttackPower;
-    attackParam.CriticalPoint = Handle.CriticalPower;
     attackParam.Level = Handle.Level;
     attackParam.MotionValue = Handle.MotionValue;
     
-    const FBattleResult result = m_pimpl->CalculateDamage(attackParam, attackTarget->GetDefenseParam());
-    attackHandle.AttackPower = result.Damage;
-    attackHandle.AttackFrom = FromDirection;
+    FBattleResult result = m_pimpl->CalculateDamage(attackParam, attackTarget->GetDefenseParam());
+    result.DamageFrom = FromDirection;
  
-    attackTarget->OnAttack(attackHandle);
+    attackTarget->OnAttack(result);
 
     if (m_logSystem != nullptr)
     {

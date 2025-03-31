@@ -46,7 +46,7 @@ class UCameraComponent;
 class USmithInventoryComponent;
 class USmithAnimationComponent;
 
-class USmithBattleLogWorldSubsystem;
+class ISmithLogSender;
 
 // SmithActor Module
 struct AttackHandle;
@@ -112,7 +112,7 @@ public:
   #pragma region IAttackable
   public:
 
-    void OnAttack(const AttackHandle& Handle) override final;
+    void OnAttack(const FBattleResult& Handle) override final;
     bool IsDefeated() const override final;
     void OnDefeated() override final;
 
@@ -237,8 +237,7 @@ private:
 
   TWeakInterfacePtr<IEnhanceSystem> m_enhanceSystem;          // 強化
 
-  UPROPERTY()
-  TObjectPtr<USmithBattleLogWorldSubsystem> m_logSystem;
+  TWeakInterfacePtr<ISmithLogSender> m_logSender;
 
   // TODO ミニマップの表示テクスチャをまとめて管理するように設計し直す
   UPROPERTY(EditAnywhere)

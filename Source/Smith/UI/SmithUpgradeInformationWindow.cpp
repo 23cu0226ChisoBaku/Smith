@@ -6,7 +6,7 @@
 #include "Components/TextBlock.h"
 #include "SmithUpgradeParamWidget.h"
 #include "SmithRichUpgradeParam.h"
-#include "../Weapon/Params.h"
+#include "Params.h"
 
 USmithUpgradeInformationWindow::USmithUpgradeInformationWindow(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)

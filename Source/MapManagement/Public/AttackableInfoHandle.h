@@ -5,12 +5,13 @@
 #ifndef ATTACKABLE_INFO_HANDLE
 #define ATTACKABLE_INFO_HANDLE
 
-#include "IAttackable.h"
 #include "Direction.h"
+
+class AActor;
 
 struct MAPMANAGEMENT_API FAttackableInfoHandle
 {
-	IAttackable* Attackable;
+	AActor* Attackable;
 	EDirection AttackFrom;
 
 	constexpr FAttackableInfoHandle()
@@ -18,9 +19,9 @@ struct MAPMANAGEMENT_API FAttackableInfoHandle
 		, AttackFrom(EDirection::Invalid)
 	{}
 
-	FAttackableInfoHandle(IAttackable* attackable, EDirection attackFrom)
-		: Attackable(attackable)
-		, AttackFrom(attackFrom)
+	FAttackableInfoHandle(AActor* Attackable_, EDirection From)
+		: Attackable(Attackable_)
+		, AttackFrom(From)
 	{}
 
 };

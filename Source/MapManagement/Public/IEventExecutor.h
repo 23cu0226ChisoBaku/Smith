@@ -27,9 +27,6 @@ class UEventExecutor : public UInterface
   GENERATED_BODY()
 };
 
-/**
- * 
- */
 class MAPMANAGEMENT_API IEventExecutor
 {
   GENERATED_BODY()

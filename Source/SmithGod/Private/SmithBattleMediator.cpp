@@ -111,37 +111,37 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, EDirection direc
   TArray<FAttackableInfoHandle> attackables{};
   mapMgr_shared->FindAttackableMapObjs(attackables, requester, rotatedFormat);
 
-  ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
-  if (attackables.Num() > 0)
   {
+    ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
-    for(const auto& attackableInfo : attackables)
+    if (attackables.Num() > 0)
     {
-      SmithDefaultDamageStrategy damageStrategy{};
-      damageStrategy.Instigator = requester;
-      damageStrategy.Causer = Cast<AActor>(attackableInfo.Attackable);
-      damageStrategy.DamageSubsystem = m_damageSys;
-      damageStrategy.Handle = atkHandle;
-      damageStrategy.FromDirection = attackableInfo.AttackFrom;
-
-      m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateAttackCommand(damageStrategy, animator));
+      for(const auto& attackableInfo : attackables)
+      {
+        SmithDefaultDamageStrategy damageStrategy{};
+        damageStrategy.Instigator = requester;
+        damageStrategy.Causer = attackableInfo.Attackable;
+        damageStrategy.DamageSubsystem = m_damageSys;
+        damageStrategy.Handle = atkHandle;
+        damageStrategy.FromDirection = attackableInfo.AttackFrom;
+  
+        m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateAttackCommand(damageStrategy, animator));
+      }
+      return true;
     }
-    return true;
+  
+    if (bAttackEvenNoTarget)
+    {
+      SmithDummyStrategy dummy{};
+  
+      m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateAttackCommand(dummy, animator));
+      return true;
+    }
+
   }
 
-  if (bAttackEvenNoTarget)
-  {
-    ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
-    AttackHandle attackHandle = AttackHandle::NullHandle;
-    SmithDummyStrategy dummy{};
-
-    m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateAttackCommand(dummy, animator));
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+  return false;
+  
 }
 
 bool USmithBattleMediator::SendSkillCommand(AActor* requester, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format, const FAttackHandle& atkHandle)
@@ -175,7 +175,7 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, FSmithSkillParame
       {
         SmithDefaultDamageStrategy damageStrategy{};
         damageStrategy.Instigator = requester;
-        damageStrategy.Causer = Cast<AActor>(attackableInfo.Attackable);
+        damageStrategy.Causer = attackableInfo.Attackable; 
         damageStrategy.DamageSubsystem = m_damageSys;
         damageStrategy.Handle = atkHandle;
         damageStrategy.FromDirection = attackableInfo.AttackFrom;

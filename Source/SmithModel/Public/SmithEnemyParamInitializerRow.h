@@ -4,7 +4,7 @@
 
 #include "Engine/DataTable.h"
 
-#include "../SmithActors/Weapon/Params.h"
+#include "Params.h"
 
 #include "SmithEnemyParamInitializerRow.generated.h"
 

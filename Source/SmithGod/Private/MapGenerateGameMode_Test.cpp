@@ -3,18 +3,12 @@
 
 #include "MapGenerateGameMode_Test.h"
 
-#include "SmithRect.h"
-#include "SmithMap.h"
-#include "SmithMapBuilder.h"
 #include "SmithMapBluePrint.h"
-#include "SmithMapConstructor.h"
 #include "SmithMapConstructionBluePrint.h"
 #include "SmithMapManager.h"
-
 #include "ICanCommandMediate.h"
 #include "IMoveDirector.h"
 #include "ICanUseEnhanceSystem.h"
-#include "TurnActor_Test.h"
 #include "SmithBattleMediator.h"
 #include "SmithChasePlayerTracker.h"
 #include "SmithBattleSubsystem.h"
@@ -36,34 +30,26 @@
 #include "UI_CurrentLevel.h"
 #include "SmithTowerEnemyParamInitializer.h"
 #include "SmithEnemyParamInitializer.h"
-
 #include "SmithPlayerController.h"
-
 #include "SmithMinimap.h"
 #include "MinimapDisplayTypeFactory.h"
-
-// TODO
 #include "SmithNextLevelEvent.h"
 #include "SmithPickUpItemEvent.h"
-#include "SmithPickable.h"
 #include "NiagaraSystem.h"
-
 #include "SmithBattleGameInstanceSubsystem.h"
 #include "SmithLootGameInstanceSubsystem.h"
 #include "SmithEnemyLootGenerator.h"
-
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/DateTime.h"
-#include "AudioKit.h"
 #include "ItemGenerationListRow.h"
-
-#include "MLibrary.h"
-
 #include "DamageCalculationStrategies.h"
+#include "TurnBaseActor.h"
 
 #include "SmithMapModelRepository.h"
 #include "SmithBattleLogModelRepository.h"
 #include "SmithEventModelRepository.h"
+
+#include "MLibrary.h"
 
 AMapGenerateGameMode_Test::AMapGenerateGameMode_Test()
   : m_battleSystem(nullptr)
@@ -285,7 +271,6 @@ void AMapGenerateGameMode_Test::initializeGame()
   check(world != nullptr);
 
   ASmithTurnBattleWorldSettings* worldSettings = Cast<ASmithTurnBattleWorldSettings>(world->GetWorldSettings());
-
   if (worldSettings != nullptr && worldSettings->IsBattleLevel())
   {
     m_battleSystem = world->GetSubsystem<USmithBattleSubsystem>();
@@ -452,23 +437,21 @@ void AMapGenerateGameMode_Test::initializeGame()
     // TODO DLLをロードすると、スタティック変数のコピーが生成される
     // 故に、違う値に代入してしまう
     // 解決策：ヘルパーDLLを用意して、他のDLLがそのDLLをアクセスすると値の一致性が保障される？
-    UGameInstance* gameInstance = world->GetGameInstance();
-    if (gameInstance != nullptr)
+    const UGameInstance* gameInstance = world->GetGameInstance();
+    USmithLootGameInstanceSubsystem* lootGenerator = gameInstance->GetSubsystem<USmithLootGameInstanceSubsystem>();
+    if (lootGenerator != nullptr)
     {
-      USmithLootGameInstanceSubsystem* lootGenerator = gameInstance->GetSubsystem<USmithLootGameInstanceSubsystem>();
-      if (lootGenerator != nullptr)
-      {
-        lootGenerator->AssignLootList(EnemyDropLootList);
-        USmithEnemyLootGenerator::AssignLootGenerator(lootGenerator);
-      }
-
-      USmithTowerEnemyParamInitializer* paramInitializer = gameInstance->GetSubsystem<USmithTowerEnemyParamInitializer>();
-      if (paramInitializer != nullptr)
-      {
-        paramInitializer->AssignEnemyParamList(EnemyDefaultParamList);
-        USmithEnemyParamInitializer::AssignInitializer(paramInitializer);
-      }
+      lootGenerator->AssignLootList(EnemyDropLootList);
+      USmithEnemyLootGenerator::AssignLootGenerator(lootGenerator);
     }
+
+    USmithTowerEnemyParamInitializer* paramInitializer = gameInstance->GetSubsystem<USmithTowerEnemyParamInitializer>();
+    if (paramInitializer != nullptr)
+    {
+      paramInitializer->AssignEnemyParamList(EnemyDefaultParamList);
+      USmithEnemyParamInitializer::AssignInitializer(paramInitializer);
+    }
+    
   }
 }
 
@@ -511,7 +494,7 @@ int32 AMapGenerateGameMode_Test::GetCurrentLevel() const
 
 int32 AMapGenerateGameMode_Test::GetCurrentPlayTime_Second() const
 {
-  UWorld* world = GetWorld();
+  const UWorld* world = GetWorld();
   return ::IsValid(world) ? FMath::FloorToInt32(world->GetTimeSeconds()) - m_startPlayTime : 0;
 }
 
@@ -557,7 +540,7 @@ void AMapGenerateGameMode_Test::deployPickableEvent()
       }
 
       UObject* obj = NewObject<UObject>(this, recipe->Item);
-      USmithPickable* pickable = Cast<USmithPickable>(obj);
+      IPickable* pickable = Cast<IPickable>(obj);
       if (pickable == nullptr)
       {
         break;
@@ -573,7 +556,7 @@ void AMapGenerateGameMode_Test::deployPickableEvent()
 
 void AMapGenerateGameMode_Test::processGameOver()
 {
-  UWorld* world = GetWorld();
+  const UWorld* world = GetWorld();
   if (world != nullptr)
   {
     UGameInstance* gameInstance = world->GetGameInstance();

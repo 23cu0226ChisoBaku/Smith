@@ -7,7 +7,7 @@ public class MapManagement: ModuleRules
   public MapManagement(ReadOnlyTargetRules Target) : base(Target)
   {
 
-    PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", "MLibrary", "SmithModel", "SmithGod", "Smith"});
+    PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", "MLibrary", "SmithModel", "Smith"});
 
     PrivateIncludePaths.AddRange(new string[] 
                                             {
@@ -16,6 +16,10 @@ public class MapManagement: ModuleRules
                                               "Smith/SmithActors/Interfaces",
                                               "Smith/SmithActors",
                                               "Smith",
+                                              "MapManagement/MapCore",
+                                              "MapManagement/MapDataModel",
+                                              "MapManagement/MapFacade",
+                                              "MapManagement/Utils",
                                             });
   }
 

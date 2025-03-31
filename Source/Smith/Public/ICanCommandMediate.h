@@ -15,8 +15,8 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "ICanCommandMediate.generated.h"
 
 //---------------------------------------

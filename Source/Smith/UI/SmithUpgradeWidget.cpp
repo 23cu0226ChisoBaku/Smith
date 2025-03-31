@@ -8,7 +8,7 @@
 #include "SmithUpgradeMaterialPreview.h"
 #include "ISmithItemWidgetParameterizable.h"
 #include "ISmithBattleParameterizable.h"
-#include "../Weapon/Params.h"
+#include "Params.h"
 
 void USmithUpgradeWidget::NativeConstruct()
 {

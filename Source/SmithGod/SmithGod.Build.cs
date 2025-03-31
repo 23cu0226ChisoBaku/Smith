@@ -13,11 +13,13 @@ public class SmithGod: ModuleRules
 
     PrivateIncludePaths.AddRange(
                                   new string[]{ 
-                                                "Smith/SmithActors/Interfaces",
+                                                "Smith",
                                                 "Smith/BattleCommand",
                                                 "Smith/UI",
-                                                "Smith/SmithActors/TurnMngObj/Public",
-                                                "Smith/Player"
+                                                "Smith/AI",
+                                                "Smith/TurnMngObj/",
+                                                "Smith/Player",
+                                                "Smith/Event",
                                               }
                                 );
   }

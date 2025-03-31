@@ -166,10 +166,10 @@ namespace UE::Smith
 
           m_mapConstructor->ConstructMap(world, m_map->GetMap(), constructionBP);
 
-          m_mapOperator->AssignMap(m_model);
-          m_deployDirector->AssignMap(m_model);
-          m_mapObserver->AssignMap(m_model);
-          m_eventDirector->AssignMap(m_model);
+          m_mapOperator->AssignMapDataModel(m_model);
+          m_deployDirector->AssignMapDataModel(m_model);
+          m_mapObserver->AssignMapDataModel(m_model);
+          m_eventDirector->AssignMapDataModel(m_model);
 
           discardEvents();
 

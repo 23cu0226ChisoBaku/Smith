@@ -50,7 +50,7 @@ ASmithPlayerActor::ASmithPlayerActor()
   , AnimationComponent(nullptr)
   , m_commandMediator(nullptr)
   , m_enhanceSystem(nullptr)
-  , m_logSystem(nullptr)
+  , m_logSender(nullptr)
   , m_currentHealth(0)
   , m_maxHealth(0)
   , m_turnCnt(0)
@@ -127,7 +127,7 @@ void ASmithPlayerActor::BeginPlay()
     UWorld* world = GetWorld();
     if (world != nullptr)
     {
-      m_logSystem = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
+      m_logSender = world->GetSubsystem<USmithBattleLogWorldSubsystem>();
     }
   }
 
@@ -283,7 +283,6 @@ void ASmithPlayerActor::Attack()
 
     FAttackHandle paramHandle;
     paramHandle.AttackPower = attackParam.ATK;
-    paramHandle.CriticalPower = attackParam.CRT;
     paramHandle.Level = Weapon->GetLevel();
     paramHandle.MotionValue = 1.0;
     m_commandMediator->SendAttackCommand(this, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], paramHandle);
@@ -456,23 +455,23 @@ bool ASmithPlayerActor::enhanceImpl(int32 idx)
   return true;
 }
 
-void ASmithPlayerActor::OnAttack(const AttackHandle& attack)
+void ASmithPlayerActor::OnAttack(const FBattleResult& Result)
 {
-  if (attack.AttackPower <= 0)
+  if (Result.Damage <= 0)
   {
     return;
   }
 
-  if (attack.AttackFrom != EDirection::Invalid)
+  if (Result.DamageFrom != EDirection::Invalid)
   {
-    const EDirection newDir = StaticCast<EDirection>((StaticCast<uint8>(attack.AttackFrom) + 4u) % StaticCast<uint8>(EDirection::DirectionCount));
+    const EDirection newDir = StaticCast<EDirection>((StaticCast<uint8>(Result.DamageFrom) + 4u) % StaticCast<uint8>(EDirection::DirectionCount));
     changeForwardImpl(newDir);
   }
 
   m_bIsDamaged = true;
   m_bCanReceiveInput = false;
 
-  m_currentHealth -= attack.AttackPower;
+  m_currentHealth -= Result.Damage;
 
   if (!IsDefeated())
   {
@@ -546,9 +545,9 @@ void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
   }
 
   // TODO
-  if (m_logSystem != nullptr)
+  if (m_logSender != nullptr)
   {
-    m_logSystem->SendInteractEventLog(this, event, success);
+    m_logSender->SendInteractEventLog(this, event, success);
   }
 }
 
@@ -638,7 +637,7 @@ EDirection ASmithPlayerActor::GetCameraDirection() const
 #if WITH_EDITOR
 void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
 {
-  OnAttack(AttackHandle{damage, EDirection::Invalid});
+  OnAttack(FBattleResult{damage, EDirection::Invalid});
 }
 #endif
 

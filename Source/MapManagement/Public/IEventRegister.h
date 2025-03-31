@@ -46,8 +46,8 @@ class MAPMANAGEMENT_API IEventRegister
 public:
   ///
   /// @brief 								イベントを登録する
-  /// @param AActor 	      イベントを発生発生させたマップに配置できるオブジェクト
+  /// @param Instigator 	  イベントを発生させたマップに配置できるオブジェクト
   /// @param ISmithMapEvent	マップイベント
   ///
-  virtual void RegisterMapEvent(AActor*, ISmithMapEvent*) = 0;
+  virtual void RegisterMapEvent(AActor* Instigator, ISmithMapEvent*) = 0;
 };

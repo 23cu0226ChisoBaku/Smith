@@ -29,20 +29,26 @@ struct MAPMANAGEMENT_API FSmithEnemyGenerateBluePrint
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   bool bShouldRandomGenerate;
+
   /** 敵のBPパス */
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   FString EnemyBPPath;
+
   /** 部屋ごとに敵を生成する数 */
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   uint8 InitGenerateCountPerRoom;
+
   /** 未使用 */
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   uint8 GenerateNewWhenLessThan_Test;
+
   /** 未使用 */
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   uint8 GenerateNew_TurnInterval;
+
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   uint8 GenerateRoomCoord_X;
+  
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   uint8 GenerateRoomCoord_Y;
 

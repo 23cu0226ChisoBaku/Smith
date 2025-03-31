@@ -2,9 +2,9 @@
 
 
 #include "SmithEventPublishMediator.h"
+
 #include "SmithMapManager.h"
 #include "SmithEventPublisher.h"
-#include "SmithPickable.h"
 #include "SmithPickUpItemEvent.h"
 #include "NiagaraSystem.h"
 
@@ -28,7 +28,7 @@ void USmithEventPublishMediator::Initialize(USmithEventPublisher* eventPublisher
   m_mapMgr = mapMgr;
 }
 
-void USmithEventPublishMediator::PublishPickUpEvent(AActor* mapObj, USmithPickable* pickable)
+void USmithEventPublishMediator::PublishPickUpEvent(AActor* mapObj, IPickable* pickable)
 {
   check(mapObj != nullptr);
   

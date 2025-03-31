@@ -25,7 +25,6 @@ Encoding : UTF-8
 struct FBattleAttackParamHandle
 {
   int32 AttackPoint = 0;
-  int32 CriticalPoint = 0;
   int32 DefensePoint = 0;
   int32 Level = 0;
   double MotionValue = 0.0;

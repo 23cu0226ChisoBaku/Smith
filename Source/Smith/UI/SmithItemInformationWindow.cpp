@@ -4,7 +4,7 @@
 #include "SmithItemInformationWindow.h"
 #include "SmithItemDescriptionWidget.h"
 #include "SmithUpgradeParamWidget.h"
-#include "../Weapon/Params.h"
+#include "Params.h"
 
 void USmithItemInformationWindow::NativeConstruct()
 {

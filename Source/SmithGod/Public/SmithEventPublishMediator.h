@@ -31,7 +31,7 @@ public:
 	void Initialize(USmithEventPublisher*, TSharedPtr<UE::Smith::Map::FSmithMapManager>);
 
 public:
-	virtual void PublishPickUpEvent(AActor* Requester, USmithPickable*) override;
+	virtual void PublishPickUpEvent(AActor* Requester, IPickable*) override;
 
 private:
 	TWeakObjectPtr<USmithEventPublisher> m_eventPublisher;

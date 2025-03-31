@@ -27,29 +27,17 @@ struct SMITH_API FAttackHandle
 	static const FAttackHandle NullHandle;
 
 	int32 AttackPower;
-	int32 CriticalPower;
 	int32 Level;
 	double MotionValue;
 	EDirection AttackFrom;
 
 	constexpr FAttackHandle()
 		: AttackPower(0)
-		, CriticalPower(0)
 		, Level(0)
 		, MotionValue(0)
 		, AttackFrom(EDirection::Invalid)
 	{}
 };
-
-struct SMITH_API AttackHandle
-{
-	static const AttackHandle NullHandle;
-
-	int32 AttackPower;
-	EDirection AttackFrom;
-
-};
-
 
 #endif
 

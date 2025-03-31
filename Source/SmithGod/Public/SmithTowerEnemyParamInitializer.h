@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "IParamInitializer.h"
-#include "../Weapon/Params.h"
+#include "Params.h"
 #include "SmithTowerEnemyParamInitializer.generated.h"
 
 /**

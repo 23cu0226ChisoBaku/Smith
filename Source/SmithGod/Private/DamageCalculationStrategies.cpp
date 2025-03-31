@@ -4,10 +4,11 @@
 
 #include "BattleParamHandle.h"
 #include "BattleResult.h"
+#include "Direction.h"
 
 FBattleResult FSmithDefaultDCS::operator()(FBattleAttackParamHandle ATKHandle, FBattleDefenseParamHandle DEFHandle) const
 {
-  return FBattleResult{nullptr, ATKHandle.AttackPoint};
+  return FBattleResult{ATKHandle.AttackPoint, EDirection::Invalid};
 }
 
 FBattleResult FSmithReductionRateDCS::operator()(FBattleAttackParamHandle ATKHandle, FBattleDefenseParamHandle DEFHandle) const
@@ -38,6 +39,6 @@ FBattleResult FSmithReductionRateDCS::operator()(FBattleAttackParamHandle ATKHan
   // 攻撃力　＊　定数^(攻撃者レベル　ー　攻撃を喰らう者のレベル) * 軽減率 * モーション値  ※小数点切り捨て
   const int32 damage = FMath::FloorToInt32(StaticCast<double>(ATKHandle.AttackPoint) * FMath::Pow(LevelDiffPowBase, StaticCast<double>(levelDiff)) * damageScaling * ATKHandle.MotionValue); 
 
-  return FBattleResult{nullptr, damage};
+  return FBattleResult{damage, EDirection::Invalid};
 }
 

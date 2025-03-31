@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "../Weapon/Params.h"
+#include "Params.h"
 #include "SmithUpgradeWidget.generated.h"
 
 class USmithUpgradeInformationWindow;
@@ -12,7 +12,7 @@ class USmithUIInventoryPanel;
 class USmithItemInformationWindow;
 class USmithUpgradeMaterialPreview;
 class UTexture2D;
-struct FSmithUpgradeItemHandle;
+
 /**
  * 
  */
@@ -38,12 +38,16 @@ protected:
 	virtual void NativeConstruct() override;
 
 private:
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USmithUpgradeInformationWindow> UpgradeInfoWindow;
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USmithUIInventoryPanel> InventoryPanel;
+	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USmithItemInformationWindow> ItemInfoWindow;
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USmithUpgradeMaterialPreview> UpgradeMaterialPreview;
 

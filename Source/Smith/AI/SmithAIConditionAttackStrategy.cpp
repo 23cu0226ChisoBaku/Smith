@@ -159,10 +159,8 @@ bool USmithAIConditionAttackStrategy::executeImpl()
       return false;
     }
 
-    // TODO
     FAttackHandle handle;
     handle.AttackPower = m_atk;
-    handle.CriticalPower = m_crt;
     handle.Level = m_level;
     handle.MotionValue = curtHandleInstance.SkillParameter.MotionValue;
 

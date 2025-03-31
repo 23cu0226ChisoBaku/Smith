@@ -9,13 +9,8 @@
 class USmithUpgradeWidget;
 class USmithPlayerHP;
 class UHerbWidget;
-
 class APlayerController;
-
 struct FSmithWeaponInfoHandle;
-struct FSmithUpgradeItemHandle;
-struct FSmithWeaponInfoHandle;
-
 
 UCLASS(Blueprintable, Abstract)
 class SMITH_API USmithPlayerView : public UObject

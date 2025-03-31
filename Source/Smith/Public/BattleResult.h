@@ -19,36 +19,24 @@ Encoding : UTF-8
 #ifndef SMITH_BATTLE_RESULT
 #define SMITH_BATTLE_RESULT
 
-
-//---------------------------------------
-/*
-                  前方宣言
-*/
-//---------------------------------------
-class ISmithBattleLogger;
+#include "Direction.h"
 
 ///
 /// @brief バトル結果
 ///
 struct FBattleResult
 {
-  ///
-  /// @brief 戦う相手のLog出力用ポインタ
-  ///
-  ISmithBattleLogger* ResultLogger;
-  ///
-  /// @brief ダメージ
-  ///
   int32 Damage;
+  EDirection DamageFrom;
 
   constexpr FBattleResult()
-    : ResultLogger(nullptr)
-    , Damage(0)
+    : Damage(0)
+    , DamageFrom(EDirection::Invalid)
   {}
 
-  FBattleResult(ISmithBattleLogger* ResultLogger_, int32 Damage_)
-    : ResultLogger(ResultLogger_)
-    , Damage(Damage_)
+  FBattleResult(int32 Damage_, EDirection From)
+    : Damage(Damage_)
+    , DamageFrom(From)
   {}
 };
 

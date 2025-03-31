@@ -3,7 +3,7 @@
 
 #include "SmithRichUpgradeParam.h"
 #include "Components/RichTextBlock.h"
-#include "../Weapon/Params.h"
+#include "Params.h"
 
 namespace SmithRichUpgradeParam::Private
 {

@@ -15,7 +15,6 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "ICanRequestEventPublishment.generated.h"
 

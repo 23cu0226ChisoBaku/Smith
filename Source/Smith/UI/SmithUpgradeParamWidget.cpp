@@ -3,7 +3,7 @@
 
 #include "SmithUpgradeParamWidget.h"
 #include "Components/TextBlock.h"
-#include "../Weapon/Params.h"
+#include "Params.h"
 
 namespace SmithUpgradeParamWidget::Private
 {

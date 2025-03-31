@@ -54,7 +54,6 @@ bool USmithTurnBaseAIAttackStrategy::executeImpl()
 
   FAttackHandle handle;
   handle.AttackPower = m_atk;
-  handle.CriticalPower = m_crt;
   handle.Level = m_level;
   handle.MotionValue = 1.0;
   for (auto& format : m_attackFormatTables)

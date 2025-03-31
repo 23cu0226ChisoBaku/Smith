@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Direction.h"
+
 #include "SmithSkillParameter.generated.h"
 
 /**
@@ -16,12 +16,16 @@ struct SMITH_API FSmithSkillParameter
 	
 	UPROPERTY(EditAnywhere)
 	uint8 OffsetToLeft;
+
 	UPROPERTY(EditAnywhere)
 	uint8 OffsetToTop;
+
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 1, ClampMax = 3))
 	uint8 SkillSlot;
+
 	UPROPERTY(EditAnywhere)
 	uint8 CooldownAfterUse;
+
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0.0, ClampMax = 5.0))
 	double MotionValue;
 
