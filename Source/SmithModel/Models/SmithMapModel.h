@@ -8,9 +8,9 @@
 class USmithMapModelDefinition;
 enum class EMapModelType : uint8;
 
+/// @brief ダンジョンモデル
 struct SMITHMODEL_API FSmithMapModel
 {
-
 	friend class USmithMapModelRepository;
 
 	private:

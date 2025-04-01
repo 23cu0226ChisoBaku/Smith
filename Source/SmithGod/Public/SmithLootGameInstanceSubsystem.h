@@ -2,16 +2,13 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+
 #include "DropRatioMode.h"
 #include "ILootGeneratable.h"
 #include "SmithPickableLootHandle.h"
 #include "SmithLootGameInstanceSubsystem.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SMITHGOD_API USmithLootGameInstanceSubsystem : public UGameInstanceSubsystem, public ILootGeneratable
 {

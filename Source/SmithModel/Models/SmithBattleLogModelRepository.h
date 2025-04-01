@@ -10,6 +10,7 @@
 
 class USmithBattleLogModelDefinition;
 
+/// @brief  バトルログモデルリポジトリ
 UCLASS()
 class SMITHMODEL_API USmithBattleLogModelRepository : public UWorldSubsystem , public ISmithBattleLogModelRequester
 {

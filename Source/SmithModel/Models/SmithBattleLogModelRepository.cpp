@@ -61,6 +61,7 @@ const FSmithBattleLogModel USmithBattleLogModelRepository::GetModel(UObject* Req
 {
   check(Requester != nullptr);
 
+  // モデル請求者のUClassが登録されていれば有効モデルを返す
   UClass* requesterClass = Requester->GetClass();
   if (m_models.Contains(requesterClass))
   {

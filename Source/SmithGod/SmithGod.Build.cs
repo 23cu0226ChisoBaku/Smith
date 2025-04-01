@@ -20,6 +20,8 @@ public class SmithGod: ModuleRules
                                                 "Smith/Enemies",
                                                 "Smith/Player",
                                                 "Smith/Event",
+                                                "SmithModel/DataTableTypes",
+                                                "SmithModel/Models",
                                               }
                                 );
   }

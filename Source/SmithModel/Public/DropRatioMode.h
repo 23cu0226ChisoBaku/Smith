@@ -2,7 +2,6 @@
 
 #pragma once
 
-
 UENUM()
 enum class EDropRatioMode : uint8
 {

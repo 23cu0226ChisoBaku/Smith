@@ -17,8 +17,8 @@ Encoding : UTF-8
 */
 #pragma once
 
-#ifndef SMITH_ATK_HDL
-#define SMITH_ATK_HDL
+#ifndef SMITH_ATTACK_HANDLE
+#define SMITH_ATTACK_HANDLE
 
 #include "Direction.h"
 
@@ -34,7 +34,7 @@ struct SMITH_API FAttackHandle
 	constexpr FAttackHandle()
 		: AttackPower(0)
 		, Level(0)
-		, MotionValue(0)
+		, MotionValue(1.0)
 		, AttackFrom(EDirection::Invalid)
 	{}
 };

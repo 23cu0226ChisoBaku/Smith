@@ -9,6 +9,7 @@
 #include "SmithMapModelRepository.generated.h"
 
 
+/// @brief		ダンジョンモデルリポジトリ
 UCLASS()
 class SMITHMODEL_API USmithMapModelRepository : public UWorldSubsystem , public ISmithMapModelRequester
 {

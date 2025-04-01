@@ -8,6 +8,7 @@
 class USmithBattleLogModelDefinition;
 enum class EBattleLogModelType : uint8;
 
+/// @brief バトルログモデル
 struct SMITHMODEL_API FSmithBattleLogModel
 {
 	friend class USmithBattleLogModelRepository;

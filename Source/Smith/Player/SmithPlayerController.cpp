@@ -7,64 +7,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "SmithPlayerActor.h"
 #include "SmithPlayerView.h"
-#include "SmithModelHelperFunctionLibrary.h"
 #include "Direction.h"
 
 #include "MLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SmithPlayerController)
 
-namespace SmithPlayerController::Private
-{
-  constexpr double ANGLE_PER_DIRECTION = 360.0 / (double)EDirection::DirectionCount;
-  constexpr double MOVE_DEAD_ZONE_SCALAR = 0.5;
-  constexpr uint8 DIRECTION_COUNT = (uint8)EDirection::DirectionCount;
-  // ベクトルを方向列挙に変換する(X,Yだけ,Zは無視)
-	EDirection VectorDirToEDir(const FVector& direction , bool bOnlyDiagonal = false)
-	{
-		const double dot = direction.Dot(FVector::ForwardVector);
-		const FVector cross = direction.Cross(FVector::ForwardVector);
-		const double angle = FMath::RadiansToDegrees(acos(dot));
-		// (1,0,0)(※EDirection::Northを表すベクトル)から時計回りに回転しdirectionまで回転した角度を計算
-		const double angleClockwise =  cross.Z > 0.0 ? - angle : angle; 
-
-    EDirectionPolicy strategy = EDirectionPolicy::Ordinal;
-    if (bOnlyDiagonal)
-    {
-      strategy = EDirectionPolicy::Diagonal;
-    }
-
-		return FSmithModelHelperFunctionLibrary::GetDirectionOfDegree(angleClockwise, strategy);
-	}
-
-  EDirection CalculateDirectionRelativeCamera(EDirection cameraDirection, const FVector2D& inputValue, bool bOnlyDiagonal = false)
-  {
-    const FVector2D normalizedInput = inputValue.GetSafeNormal();
-    if (normalizedInput.IsNearlyZero())
-    {
-      return EDirection::Invalid;
-    }
-
-      // カメラの角度で回転ベクトルを計算する
-    const double cameraAngle = FMath::DegreesToRadians(StaticCast<double>(cameraDirection) * ANGLE_PER_DIRECTION);
-    double directionX = normalizedInput.Y * cos(cameraAngle) - normalizedInput.X * sin(cameraAngle);
-    double directionY = normalizedInput.Y * sin(cameraAngle) + normalizedInput.X * cos(cameraAngle);
-
-    // TODO ゼロ補正
-    if (FMath::IsNearlyZero(directionX))
-    {
-      directionX = 0.0;
-    }
-
-    if (FMath::IsNearlyZero(directionY))
-    {
-      directionY = 0.0;
-    }
-
-    const EDirection newDirection = VectorDirToEDir(FVector{directionX, directionY, 0.0}, bOnlyDiagonal);
-    return newDirection;
-  }
-}
 
 ASmithPlayerController::ASmithPlayerController(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -100,6 +48,11 @@ void ASmithPlayerController::BeginPlay()
     BindModelEvents();
   }
 
+  if (m_playerModel != nullptr)
+  {
+    m_playerModel->SyncronizePlayerView();
+  }
+
 }
 
 void ASmithPlayerController::SetupInputComponent()
@@ -107,8 +60,7 @@ void ASmithPlayerController::SetupInputComponent()
   Super::SetupInputComponent();
 
   UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent>(InputComponent);
-
-	if (::IsValid(inputComp))
+	if (inputComp != nullptr)
 	{
 		inputComp->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
 		inputComp->BindAction(AttackAction, ETriggerEvent::Started, this, &ThisClass::Attack);
@@ -118,37 +70,34 @@ void ASmithPlayerController::SetupInputComponent()
     inputComp->BindAction(UseRecoveryAction, ETriggerEvent::Started, this, &ThisClass::UseRecovery);
 		inputComp->BindAction(SelectMenuAction, ETriggerEvent::Started, this, &ThisClass::InMenuSelect);
 		inputComp->BindAction(InteractMenuAction, ETriggerEvent::Started, this, &ThisClass::InMenuInteract);
-		inputComp->BindAction(DebugAction, ETriggerEvent::Started, this, &ThisClass::Debug_SelfDamage);
+    #if WITH_EDITOR
+		  inputComp->BindAction(DebugAction, ETriggerEvent::Started, this, &ThisClass::Debug_SelfDamage);
+    #endif
 
-    // Debug
-    inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ThisClass::Debug_SetOnlyDiagonalMoveState);
-    inputComp->BindAction(CameraAction, ETriggerEvent::Completed, this, &ThisClass::Debug_RemoveOnlyDiagonalMoveState);
+    inputComp->BindAction(CameraAction, ETriggerEvent::Started, this, &ThisClass::EnterOnlyDiagonalMoveState);
+    inputComp->BindAction(CameraAction, ETriggerEvent::Completed, this, &ThisClass::ExitOnlyDiagonalMoveState);
 	}
 
 }
 
 void ASmithPlayerController::Move(const FInputActionValue& inputValue)
 {
-  if ((m_playerModel == nullptr) || (!m_playerModel->CanReceiveInputEvent()))
-  {
-    return;
-  }
-  
-  using namespace SmithPlayerController::Private;
-  const FVector2D movementInput = inputValue.Get<FVector2D>();
-  if (movementInput.SquaredLength() < MOVE_DEAD_ZONE_SCALAR)
+  if (m_playerModel == nullptr)
   {
     return;
   }
 
-  const EDirection cameraDirection = m_playerModel->GetCameraDirection();
-  const EDirection newDirection = CalculateDirectionRelativeCamera(cameraDirection, movementInput, m_bIsDiagonal);
+  const FVector2D movementInput = inputValue.Get<FVector2D>();
+  if (movementInput.IsNearlyZero())
+  {
+    return;
+  }
 	
-  m_playerModel->Move(newDirection);
+  m_playerModel->Move(movementInput);
 }
 void ASmithPlayerController::Attack(const FInputActionValue& inputValue)
 {
-  if ((m_playerModel == nullptr) || (!m_playerModel->CanReceiveInputEvent()))
+  if (m_playerModel == nullptr)
   {
     return;
   }
@@ -158,23 +107,20 @@ void ASmithPlayerController::Attack(const FInputActionValue& inputValue)
 
 void ASmithPlayerController::ChangeForward(const FInputActionValue& inputValue)
 {  
-  if ((m_playerModel == nullptr) || (!m_playerModel->CanReceiveInputEvent()))
+  if (m_playerModel == nullptr)
   {
     return;
   }
 
-  using namespace SmithPlayerController::Private;
   const FVector2D changeForwardInput = inputValue.Get<FVector2D>();
-  const EDirection cameraDirection = m_playerModel->GetCameraDirection();
-  const EDirection newDirection = CalculateDirectionRelativeCamera(cameraDirection, changeForwardInput);
 
-  m_playerModel->ChangeForward(newDirection);
+  m_playerModel->ChangeForward(changeForwardInput);
 }
 
 #if WITH_EDITOR
 void ASmithPlayerController::Debug_SelfDamage(const FInputActionValue& inputValue)
 {
-  if ((m_playerModel == nullptr) || (!m_playerModel->CanReceiveInputEvent()))
+  if (m_playerModel == nullptr)
   {
     return;
   }
@@ -185,18 +131,17 @@ void ASmithPlayerController::Debug_SelfDamage(const FInputActionValue& inputValu
 
 void ASmithPlayerController::OpenMenu(const FInputActionValue& inputValue)
 {
-  if ((m_playerModel == nullptr) || (!m_playerModel->CanReceiveInputEvent()))
+  if (m_playerModel == nullptr)
   {
     return;
   }
 
   m_playerModel->OpenMenu();
-
 }
 
 void ASmithPlayerController::CloseMenu(const FInputActionValue& inputValue)
 {
-  if ((m_playerModel == nullptr) || (!m_playerModel->CanReceiveInputEvent()))
+  if (m_playerModel == nullptr)
   {
     return;
   }
@@ -206,7 +151,7 @@ void ASmithPlayerController::CloseMenu(const FInputActionValue& inputValue)
 
 void ASmithPlayerController::UseRecovery(const FInputActionValue& inputValue)
 {
-  if ((m_playerModel == nullptr) || (!m_playerModel->CanReceiveInputEvent()))
+  if (m_playerModel == nullptr)
   {
     return;
   }
@@ -215,7 +160,7 @@ void ASmithPlayerController::UseRecovery(const FInputActionValue& inputValue)
 }
 void ASmithPlayerController::InMenuSelect(const FInputActionValue& inputValue)
 {
-  if ((m_playerModel == nullptr) || (!m_playerModel->CanReceiveInputEvent()))
+  if (m_playerModel == nullptr)
   {
     return;
   }
@@ -225,7 +170,7 @@ void ASmithPlayerController::InMenuSelect(const FInputActionValue& inputValue)
 }
 void ASmithPlayerController::InMenuInteract(const FInputActionValue& inputValue)
 {
-  if ((m_playerModel == nullptr) || (!m_playerModel->CanReceiveInputEvent()))
+  if (m_playerModel == nullptr)
   {
     return;
   }
@@ -233,13 +178,23 @@ void ASmithPlayerController::InMenuInteract(const FInputActionValue& inputValue)
   m_playerModel->InteractMenu();
 }
 
-void ASmithPlayerController::Debug_SetOnlyDiagonalMoveState(const FInputActionValue& inputValue)
+void ASmithPlayerController::EnterOnlyDiagonalMoveState(const FInputActionValue& inputValue)
 {
-  m_bIsDiagonal = true;
+  if (m_playerModel == nullptr)
+  {
+    return;
+  }
+
+  m_playerModel->SetOnlyReceiveDiagonalInput(true);
 }
-void ASmithPlayerController::Debug_RemoveOnlyDiagonalMoveState(const FInputActionValue& inputValue)
+void ASmithPlayerController::ExitOnlyDiagonalMoveState(const FInputActionValue& inputValue)
 {
-  m_bIsDiagonal = false;
+  if (m_playerModel == nullptr)
+  {
+    return;
+  }
+
+  m_playerModel->SetOnlyReceiveDiagonalInput(false);
 }
 
 void ASmithPlayerController::BindModelEvents()
@@ -252,10 +207,27 @@ void ASmithPlayerController::BindModelEvents()
 
   m_playerModel->OnEnhanceMenuOpened.AddUObject(m_playerGUIView, &USmithPlayerView::ShowUpgradeMenu);
   m_playerModel->OnEnhanceMenuOpened.AddUObject(this, &ThisClass::SwitchIMC_Menu);
-  m_playerModel->OnEnhanceMenuOpened.AddUObject(this, &ThisClass::OnOpenMenuDelegate);
+  m_playerModel->OnEnhanceMenuOpened.AddLambda(
+                                                [this]()
+                                                {
+                                                  if (OnEnhanceMenuOpened.IsBound())
+                                                  {
+                                                    OnEnhanceMenuOpened.Broadcast();
+                                                  }
+                                                }
+                                              );
+
   m_playerModel->OnEnhanceMenuClosed.AddUObject(m_playerGUIView, &USmithPlayerView::HideUpgradeMenu);
   m_playerModel->OnEnhanceMenuClosed.AddUObject(this, &ThisClass::SwitchIMC_Battle);
-  m_playerModel->OnEnhanceMenuClosed.AddUObject(this, &ThisClass::OnCloseMenuDelegate);
+  m_playerModel->OnEnhanceMenuClosed.AddLambda(
+                                                [this]()
+                                                {
+                                                  if (OnEnhanceMenuClosed.IsBound())
+                                                  {
+                                                    OnEnhanceMenuClosed.Broadcast();
+                                                  }
+                                                }
+                                              );
 
   m_playerModel->OnEnhanceMenuInitialized.BindUObject(m_playerGUIView, &USmithPlayerView::InitEnhanceMenuInfo);
   m_playerModel->OnMenuItemChangeFocus.AddUObject(m_playerGUIView, &USmithPlayerView::SelectNextMenuItem);
@@ -280,21 +252,5 @@ void ASmithPlayerController::SwitchIMC_Menu()
   {
     enhancedInputSubsystem->RemoveMappingContext(MappingContext_Battle);
     enhancedInputSubsystem->AddMappingContext(MappingContext_Menu, 0);
-  }
-}
-
-void ASmithPlayerController::OnOpenMenuDelegate()
-{
-  if (OnEnhanceMenuOpened.IsBound())
-  {
-    OnEnhanceMenuOpened.Broadcast();
-  }
-}
-
-void ASmithPlayerController::OnCloseMenuDelegate()
-{
-  if (OnEnhanceMenuClosed.IsBound())
-  {
-    OnEnhanceMenuClosed.Broadcast();
   }
 }

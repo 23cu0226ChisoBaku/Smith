@@ -9,21 +9,19 @@
 class USmithNextLevelEvent;
 class USmithPickUpItemEvent;
 
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UEventTriggerable : public UInterface
 {
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
+///
+/// @brief 			イベントビジター
+///
 class SMITH_API IEventTriggerable
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual void OnTriggerEvent(USmithNextLevelEvent*) = 0;
 	virtual void OnTriggerEvent(USmithPickUpItemEvent*) = 0;

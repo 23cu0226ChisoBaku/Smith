@@ -262,7 +262,6 @@ bool ATurnActor_Test::IsAnimationFinish() const
 
 void ATurnActor_Test::InitializeParameter(int32 currentLevel)
 {
-	// TODO will return null when RECOMPILE!!!!!!!
 	EnemyParam = USmithEnemyParamInitializer::GetParams(*this, currentLevel);
 	// TODO
 	m_level = 1 + (currentLevel - 1) * 3;

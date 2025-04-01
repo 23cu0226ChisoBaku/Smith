@@ -6,7 +6,7 @@
 
 #include "SmithEventModelDefinition.generated.h"
 
-
+/// @brief  イベントモデルデータ構造体
 USTRUCT()
 struct FSmithEventModelData
 {
@@ -25,7 +25,7 @@ struct FSmithEventModelData
 
 
 
-
+/// @brief  イベントモデル定義アセット
 UCLASS(BlueprintType, Blueprintable, Const)
 class SMITHMODEL_API USmithEventModelDefinition : public UDataAsset
 {
@@ -33,9 +33,11 @@ class SMITHMODEL_API USmithEventModelDefinition : public UDataAsset
 
 public:
   
+  /// @brief  イベントのUClass（型）
   UPROPERTY(EditDefaultsOnly, Category = "Smith|EventData", meta = (MustImplement = "SmithEventLogger"))
   TSubclassOf<UObject> EventClass;
 
+  /// @brief  イベントモデルデータインスタンス
   UPROPERTY(EditDefaultsOnly, Category = "Smith|EventData")
   FSmithEventModelData EventData;
 };

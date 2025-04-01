@@ -64,6 +64,7 @@ const FSmithMapModel USmithMapModelRepository::GetModel(AActor* Requester) const
 {
   check(Requester != nullptr);
 
+  // モデル請求者のUClassが登録されていれば有効モデルを返す
   TSubclassOf<AActor> requesterClass = Requester->GetClass();
   if (m_models.Contains(requesterClass))
   {

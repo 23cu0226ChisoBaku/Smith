@@ -11,7 +11,7 @@ public class Smith : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", 
 																												"InputCore", "EnhancedInput", "MLibrary", 
 																												"TurnBattleSystem" , "MapManagement", "SmithModel",
-																												"Niagara", "SmithModelInitializer", "SmithGod"});
+																												"Niagara", "SmithModelInitializer"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
@@ -27,6 +27,8 @@ public class Smith : ModuleRules
 																							"Smith/SmithActors",
 																							"Smith",
 																							"Smith/Pickable",
+																							"SmithModel/DataTableTypes",
+																							"SmithModel/Models",
 																						});
 
 		CppStandard = CppStandardVersion.Latest;

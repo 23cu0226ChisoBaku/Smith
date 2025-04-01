@@ -6,22 +6,19 @@
 
 #include "IAttackCauser.generated.h"
 
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UAttackCauser : public UInterface
 {
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class SMITH_API IAttackCauser
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-
+	///
+	/// @brief 					攻撃を通ったら呼び出されるコールバック
+	///
 	virtual void OnAttackExecuted();
 };

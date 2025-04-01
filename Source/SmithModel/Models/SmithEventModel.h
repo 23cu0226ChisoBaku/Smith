@@ -7,6 +7,7 @@
 
 class USmithEventModelDefinition;
 
+/// @brief イベントモデル
 struct SMITHMODEL_API FSmithEventModel
 {
 	friend class USmithEventModelRepository;

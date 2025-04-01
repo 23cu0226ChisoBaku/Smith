@@ -2,11 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+
 #include "ISmithMapEvent.h"
-#include "IPickable.h"
-#include "MLibrary.h"
+
 #include "SmithEventPublisher.generated.h"
 
 /**
@@ -27,14 +26,12 @@ public:
 	{
 		if (inEventStaticClass == nullptr)
 		{
-			MDebug::Log("Null UClass");
 			return nullptr;
 		}
 
 		// TODO
 		if (!inEventStaticClass->ImplementsInterface(USmithMapEvent::StaticClass()))
 		{
-			MDebug::Log("Not child ----");
 			return nullptr;
 		}
 

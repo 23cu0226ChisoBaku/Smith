@@ -6,6 +6,8 @@
 
 #include "SmithBattleLogModelDefinition.generated.h"
 
+/// @brief  バトルログタイプ
+/// リッチテキスト変換に使う
 UENUM()
 enum class EBattleLogModelType : uint8
 {
@@ -16,6 +18,7 @@ enum class EBattleLogModelType : uint8
 	ModelTypeCount UMETA(Hidden),
 };
 
+/// @brief	バトルログモデルデータ
 USTRUCT()
 struct FBattleLogModelData
 {
@@ -33,7 +36,7 @@ struct FBattleLogModelData
 
 
 
-
+/// @brief	バトルログモデル定義アセット
 UCLASS(BlueprintType, Blueprintable, Const)
 class SMITHMODEL_API USmithBattleLogModelDefinition : public UDataAsset
 {
@@ -41,6 +44,7 @@ class SMITHMODEL_API USmithBattleLogModelDefinition : public UDataAsset
 	
 public:
 
+	/// @brief 具体オブジェクトのUClass（型）
 	UPROPERTY(EditDefaultsOnly, Category = "Smith|Log", meta = (DisplayName = "LogEntityClass"))
 	TSubclassOf<UObject> LogClass;
 

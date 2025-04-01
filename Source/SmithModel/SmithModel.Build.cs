@@ -9,6 +9,14 @@ public class SmithModel: ModuleRules
 
     PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", "MLibrary", "SmithGod", "Smith" });
 
+    PrivateIncludePaths.AddRange(
+                                  new string[]
+                                  {
+                                    "SmithModel/DataTableTypes",
+                                    "SmithModel/Models",
+                                  }
+                                );
+
   }
 
 }

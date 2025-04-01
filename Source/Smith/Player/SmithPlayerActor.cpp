@@ -4,8 +4,6 @@
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-
-// Smithゲーム用コンポネント
 #include "SmithInventoryComponent.h"
 #include "SmithAnimationComponent.h"
 
@@ -13,8 +11,6 @@
 #include "BattleParamHandle.h"
 #include "SmithCommandFormat.h"
 #include "FormatInfo_Import.h"
-#include "MapObjType.h"
-#include "MinimapDisplayType.h"
 
 // イベント
 #include "SmithNextLevelEvent.h"
@@ -33,7 +29,8 @@
 #include "ISmithBattleParameterizable.h"
 #include "ISmithItemWidgetParameterizable.h"
 
-// 自作ライブラリ
+#include "SmithModelHelperFunctionLibrary.h"
+
 #include "MLibrary.h"
 
 using namespace MLibrary::UE::Audio;
@@ -41,6 +38,53 @@ using namespace MLibrary::UE::Audio;
 namespace SmithPlayerActor::Private
 {
   constexpr double ANGLE_PER_DIRECTION = 360.0 / (double)EDirection::DirectionCount;
+  constexpr double MOVE_DEAD_ZONE_SCALAR = 0.5;
+  constexpr uint8 DIRECTION_COUNT = (uint8)EDirection::DirectionCount;
+  // ベクトルを方向列挙に変換する(X,Yだけ,Zは無視)
+	EDirection VectorDirToEDir(const FVector& direction , bool bOnlyDiagonal = false)
+	{
+		const double dot = direction.Dot(FVector::ForwardVector);
+		const FVector cross = direction.Cross(FVector::ForwardVector);
+		const double angle = FMath::RadiansToDegrees(acos(dot));
+		// (1,0,0)(※EDirection::Northを表すベクトル)から時計回りに回転しdirectionまで回転した角度を計算
+		const double angleClockwise =  cross.Z > 0.0 ? - angle : angle; 
+
+    EDirectionPolicy strategy = EDirectionPolicy::Ordinal;
+    if (bOnlyDiagonal)
+    {
+      strategy = EDirectionPolicy::Diagonal;
+    }
+
+		return FSmithModelHelperFunctionLibrary::GetDirectionOfDegree(angleClockwise, strategy);
+	}
+
+  EDirection CalculateDirectionRelativeCamera(EDirection cameraDirection, const FVector2D& inputValue, bool bOnlyDiagonal = false)
+  {
+    const FVector2D normalizedInput = inputValue.GetSafeNormal();
+    if (normalizedInput.IsNearlyZero())
+    {
+      return EDirection::Invalid;
+    }
+
+      // カメラの角度で回転ベクトルを計算する
+    const double cameraAngle = FMath::DegreesToRadians(StaticCast<double>(cameraDirection) * ANGLE_PER_DIRECTION);
+    double directionX = normalizedInput.Y * cos(cameraAngle) - normalizedInput.X * sin(cameraAngle);
+    double directionY = normalizedInput.Y * sin(cameraAngle) + normalizedInput.X * cos(cameraAngle);
+
+    // ゼロ補正
+    if (FMath::IsNearlyZero(directionX))
+    {
+      directionX = 0.0;
+    }
+
+    if (FMath::IsNearlyZero(directionY))
+    {
+      directionY = 0.0;
+    }
+
+    const EDirection newDirection = VectorDirToEDir(FVector{directionX, directionY, 0.0}, bOnlyDiagonal);
+    return newDirection;
+  }
 }
 
 ASmithPlayerActor::ASmithPlayerActor()
@@ -59,8 +103,9 @@ ASmithPlayerActor::ASmithPlayerActor()
   , m_bIsInMenu(false)
   , m_bCanReceiveInput(true)
   , m_bIsDamaged(false)
+  , m_bOnlyMoveDiagonal(false)
 {
-  // Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+
   PrimaryActorTick.bCanEverTick = true;
 
   RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultRootComponent"));
@@ -80,7 +125,7 @@ ASmithPlayerActor::ASmithPlayerActor()
   CameraBoom->SetWorldRotation(FRotator::ZeroRotator);
 
   InventoryComponent = CreateDefaultSubobject<USmithInventoryComponent>(TEXT("Smith InventoryComponent"));
-  check(::IsValid(InventoryComponent));
+  check(InventoryComponent != nullptr);
 
   AnimationComponent = CreateDefaultSubobject<USmithAnimationComponent>(TEXT("Smith AnimationComponent"));
   check(AnimationComponent != nullptr);
@@ -110,16 +155,13 @@ void ASmithPlayerActor::BeginPlay()
       Weapon->SetParam(FParams{50, 10, 10, 10});
     }
   
-    Weapon->OnParamUpdated.AddUObject(this, &ASmithPlayerActor::updateParam);
-    Weapon->Rename(nullptr, this);
+    Weapon->OnParamUpdated.AddUObject(this, &ASmithPlayerActor::onEquipmentUpgrade);
   }
 
   // HP初期化
   {
     m_maxHealth += Weapon->GetParam().HP;
     m_currentHealth = m_maxHealth;
-
-    notifyHealthChanged();
   }
 
   // ログシステム初期化
@@ -142,37 +184,41 @@ void ASmithPlayerActor::BeginPlay()
       item->SetRecoveryPercentage(0.4);
       bool insertResult = InventoryComponent->Insert(TEXT("ConsumeItem"), item);
     }
-
-    if (OnHerbValueChanged.IsBound())
-    {
-      OnHerbValueChanged.Broadcast(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
-    }
   }
 
+  // 初期状態の向き
   m_actorFaceDir = EDirection::South;
   SetActorRotation(FRotator{0.0, 180.0, 0.0});
 
   // ターン優先順位を設定
   SetTurnPriority(ETurnPriority::PlayerSelf);
   OnTurnPass.AddUObject(this, &ASmithPlayerActor::turnPassRecover);
+
+  #if WITH_EDITOR
+    // TODO パッケージした後にPlayerControllerのBeginPlayの実行順番がプレイヤーの後にくるため、
+    // PlayerController::BeginPlay()で呼び出される
+    // エディタでプレイヤーポーンのBeginPlayの実行順番がPlayerControllerの後にくる。 <- 謎 
+    SyncronizePlayerView();
+  #endif
 }
 
 void ASmithPlayerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
   Super::EndPlay(EndPlayReason);
+
   if (Weapon != nullptr)
   {
     Weapon->OnParamUpdated.Clear();
   }
 }
 
-// Called every frame
 void ASmithPlayerActor::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
   // HPがなくなったらTickを停める
   if (m_currentHealth <= 0)
   {
+    SetActorTickEnabled(false);
     return;
   }
 
@@ -191,270 +237,6 @@ void ASmithPlayerActor::Tick(float DeltaTime)
   }
 }
 
-void ASmithPlayerActor::SetCommandMediator(ICommandMediator* mediator)
-{
-  m_commandMediator = mediator;
-}
-
-void ASmithPlayerActor::SetEnhanceSystem(IEnhanceSystem* enhanceSystem)
-{
-  m_enhanceSystem = enhanceSystem;
-}
-
-void ASmithPlayerActor::SelectNextMenuItem(float SelectDirection)
-{
-  if (!IsCommandSendable() || !m_bIsInMenu)
-  {
-    return;
-  }
-
-  if (OnMenuItemChangeFocus.IsBound())
-  {
-    OnMenuItemChangeFocus.Broadcast(SelectDirection);
-  }
-}
-void ASmithPlayerActor::InteractMenu()
-{
-  if (!IsCommandSendable() || !m_bIsInMenu)
-  {
-    return;
-  }
-
-  if (OnItemSelected.IsBound())
-  {
-    const int32 selectedItemIdx = OnItemSelected.Execute();
-    if (selectedItemIdx != -1)
-    {
-      if (enhanceImpl(selectedItemIdx))
-      {
-        CloseMenu();
-      }
-    }
-  }
-}
-
-void ASmithPlayerActor::Move(EDirection newDirection)
-{
-  if (!IsCommandSendable())
-  {
-    return;
-  }
-
-  // 移動する前に向きを変える
-  ChangeForward(newDirection);
-  // 移動コマンドを出す
-  if (m_commandMediator.IsValid())
-  {
-    bool success = m_commandMediator->SendMoveCommand(this, newDirection, 1);
-    if (!success)
-    {
-      if (AnimationComponent != nullptr)
-      {
-        FName outName;
-        convertAnimState(UE::Smith::SMITH_ANIM_IDLE, outName);
-        AnimationComponent->SwitchAnimState(outName);
-      }
-    }
-  }
-}
-
-void ASmithPlayerActor::Attack()
-{
-  if (!IsCommandSendable() || !m_commandMediator.IsValid())
-  {
-    return;
-  }
-
-  FString attackKey = TEXT("");
-  // 斜めだったら
-  if (StaticCast<uint8>(m_actorFaceDir) % 2 == 1)
-  {
-    attackKey = TEXT("AttackDiagonal");
-  }
-  else
-  {
-    attackKey = TEXT("Attack");
-  }
-
-  if (m_normalAttackFormatBuffer.Contains(attackKey) && m_normalAttackFormatBuffer[attackKey].IsValid())
-  {
-    FParams attackParam = Weapon->GetParam();
-    const int32 atk = attackParam.ATK;
-
-    FAttackHandle paramHandle;
-    paramHandle.AttackPower = attackParam.ATK;
-    paramHandle.Level = Weapon->GetLevel();
-    paramHandle.MotionValue = 1.0;
-    m_commandMediator->SendAttackCommand(this, StaticCast<EDirection>(m_actorFaceDir), *m_normalAttackFormatBuffer[attackKey], paramHandle);
-  }
-
-}
-
-void ASmithPlayerActor::ChangeForward(EDirection newDirection)
-{
-  if (!IsCommandSendable())
-  {
-    return;
-  }
-
-  changeForwardImpl(newDirection);
-}
-
-void ASmithPlayerActor::changeForwardImpl(EDirection newDirection)
-{
-  using namespace SmithPlayerActor::Private;
-
-  m_actorFaceDir = newDirection;
-  const double newYaw = StaticCast<double>(m_actorFaceDir) * ANGLE_PER_DIRECTION;
-  SetActorRotation(FRotator{0.0, newYaw, 0.0});
-}
-
-void ASmithPlayerActor::OpenMenu()
-{
-  if (!IsCommandSendable() || m_bIsInMenu)
-  {
-    return;
-  }
-
-  m_bIsInMenu = true;
-
-  if ((Weapon != nullptr) && (InventoryComponent != nullptr))
-  {
-    // TODO Bad Hard Coding
-    TArray<UObject*> itemList;
-    int32 cnt = InventoryComponent->GetAll(TEXT("UpgradeMaterial"), itemList);
-
-    if (OnEnhanceMenuInitialized.IsBound())
-    {
-      OnEnhanceMenuInitialized.Execute(Weapon->GetHandle(), itemList);
-    }
-  }
-
-  if (OnEnhanceMenuOpened.IsBound())
-  {
-    OnEnhanceMenuOpened.Broadcast();
-  }
-
-}
-
-void ASmithPlayerActor::CloseMenu()
-{
-  if (!IsCommandSendable() || !m_bIsInMenu)
-  {
-    return;
-  }
-
-  m_bIsInMenu = false;
-
-  if (OnEnhanceMenuClosed.IsBound())
-  {
-    OnEnhanceMenuClosed.Broadcast();
-  }
-}
-
-void ASmithPlayerActor::RecoverHealth()
-{
-  if (!IsCommandSendable())
-  {
-    return;
-  }
-
-  if (!m_commandMediator.IsValid() || (InventoryComponent == nullptr))
-  {
-    return;
-  }
-
-  const FString consumeInventoryName = TEXT("ConsumeItem");
-  UObject* consume = InventoryComponent->Get(consumeInventoryName, 0);
-  USmithConsumeItem* consumeItem = Cast<USmithConsumeItem>(consume);
-  if (consumeItem == nullptr)
-  {
-    return;
-  }
-
-  consumeItem->Use(this);
-  InventoryComponent->Remove(consumeInventoryName, 0);
-  
-  if (OnHerbValueChanged.IsBound())
-  {
-    OnHerbValueChanged.Broadcast(InventoryComponent->GetQuantity(consumeInventoryName));
-  }
-
-  m_commandMediator->SendIdleCommand(this);
-  
-}
-
-bool ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTable* formatTable)
-{
-  check(formatTable != nullptr)
-  if (m_normalAttackFormatBuffer.Contains(name))
-  {
-    return false;
-  }
-
-  TArray<FFormatInfo_Import*> arr{};
-  formatTable->GetAllRows<FFormatInfo_Import>("", arr);
-
-  if (arr.Num() <= 1)
-  {
-    return false;
-  }
-
-  TArray<FName> names = formatTable->GetRowNames();
-  if (!names[0].IsEqual(TEXT("FormatInfo")))
-  {
-    return false;
-  }
-  
-  const uint8 formatRow = arr[0]->Row;
-  const uint8 formatColumn = arr[0]->Column;
-  const size_t dataCnt = formatRow * formatColumn;
-
-  // データの要素数チェック
-  check((arr.Num() - 1) == StaticCast<int32>(dataCnt));
-
-  TArray<ESmithFormatType> typeSrcData;
-  for (int32 i = 1; i < arr.Num(); ++i)
-  {
-    typeSrcData.Emplace(arr[i]->Type);
-  }
-
-  // TODO 生データで初期化する設計を見直し
-  TSharedPtr<UE::Smith::Battle::FSmithCommandFormat> formatPtr = ::MakeShared<UE::Smith::Battle::FSmithCommandFormat>(typeSrcData.GetData(), dataCnt, formatRow, formatColumn);
-  m_normalAttackFormatBuffer.Emplace(name, formatPtr);
-
-  return true;
-}
-
-bool ASmithPlayerActor::enhanceImpl(int32 idx)
-{
-  if ((m_enhanceSystem == nullptr) || (m_commandMediator == nullptr) || (InventoryComponent == nullptr))
-  {
-    return false;
-  }
-
-  const FString upgradeInventoryName = TEXT("UpgradeMaterial");
-  UObject* material = InventoryComponent->Get(upgradeInventoryName, idx);
-  if (material == nullptr)
-  {
-    return false;
-  }
-
-  IParamAbsorbable* absorbItem = Cast<IParamAbsorbable>(material);
-  if (absorbItem == nullptr)
-  {
-    return false;
-  }
-
-  CloseMenu();
-
-  m_enhanceSystem->Enhance(Weapon, absorbItem);
-  InventoryComponent->Remove(upgradeInventoryName, idx);
-  m_commandMediator->SendIdleCommand(this);
-
-  return true;
-}
-
 void ASmithPlayerActor::OnAttack(const FBattleResult& Result)
 {
   if (Result.Damage <= 0)
@@ -464,6 +246,7 @@ void ASmithPlayerActor::OnAttack(const FBattleResult& Result)
 
   if (Result.DamageFrom != EDirection::Invalid)
   {
+    // 攻撃をくらった方向に向く
     const EDirection newDir = StaticCast<EDirection>((StaticCast<uint8>(Result.DamageFrom) + 4u) % StaticCast<uint8>(EDirection::DirectionCount));
     changeForwardImpl(newDir);
   }
@@ -477,7 +260,9 @@ void ASmithPlayerActor::OnAttack(const FBattleResult& Result)
   {
     if (AnimationComponent != nullptr)
     {
-      AnimationComponent->SwitchAnimState(TEXT("Damaged"));
+      FName animName = NAME_None;
+      convertAnimState(UE::Smith::SMITH_ANIM_DAMAGED, animName);
+      AnimationComponent->SwitchAnimState(animName);
     }
   }
 
@@ -501,10 +286,26 @@ void ASmithPlayerActor::OnDefeated()
 
   if (AnimationComponent != nullptr)
   {
-    AnimationComponent->SwitchAnimState(TEXT("Dead"));
+    FName animName = NAME_None;
+    convertAnimState(UE::Smith::SMITH_ANIM_DEAD, animName);
+    AnimationComponent->SwitchAnimState(animName);
   }
     
   notifyHealthChanged();
+}
+
+FBattleDefenseParamHandle ASmithPlayerActor::GetDefenseParam() const
+{
+  if (Weapon == nullptr)
+  {
+    return IAttackable::GetDefenseParam();		
+  }
+
+  FBattleDefenseParamHandle handle;
+  handle.DefensePoint = Weapon->GetParam().DEF;
+  handle.Level = Weapon->GetLevel();
+
+  return handle;
 }
 
 void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
@@ -516,19 +317,17 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
   SetActorRotation(FRotator{0.0, 180.0, 0.0});
 }
 
-// TODO Refactoring
 void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 {
   check(event != nullptr);
-
   if (InventoryComponent == nullptr)
   {
     return;
   }
 
+  // 拾うアイテムをインベントリに入れる
   const FString itemType = event->GetPickUpItemType();
   const bool success = (InventoryComponent->ContainsCategory(itemType)) && (!InventoryComponent->IsReachCapacity(itemType));
-
   if (success)
   {
     IPickable* pickable = event->GetPickable();
@@ -539,16 +338,25 @@ void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
       {
         OnHerbValueChanged.Broadcast(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
       }
-
-      event->RaiseEvent();
     }
   }
+  
+  event->RaiseEvent();
 
-  // TODO
   if (m_logSender != nullptr)
   {
     m_logSender->SendInteractEventLog(this, event, success);
   }
+}
+
+void ASmithPlayerActor::SetCommandMediator(ICommandMediator* mediator)
+{
+  m_commandMediator = mediator;
+}
+
+void ASmithPlayerActor::SetEnhanceSystem(IEnhanceSystem* enhanceSystem)
+{
+  m_enhanceSystem = enhanceSystem;
 }
 
 void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
@@ -561,25 +369,6 @@ void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
   FName StateName;
   convertAnimState(animationState, StateName);
   AnimationComponent->SwitchAnimState(StateName);
-}
-
-void ASmithPlayerActor::UseItem(USmithHPItem* item)
-{
-  if (item == nullptr)
-  {
-    return;
-  }
-
-  const double recoveryPercentage = item->GetRecoveryPercentage();
-  const int32 recovery = StaticCast<int32>(StaticCast<double>(m_maxHealth) * recoveryPercentage);
-
-  m_currentHealth += recovery;
-  if (m_currentHealth > m_maxHealth)
-  {
-    m_currentHealth = m_maxHealth;
-  }
-
-  notifyHealthChanged();
 }
 
 void ASmithPlayerActor::SwitchAnimationDelay(uint8 animationState, float delay)
@@ -606,7 +395,7 @@ void ASmithPlayerActor::UpdateAnimation(float deltaTime)
 
 bool ASmithPlayerActor::IsAnimationFinish() const
 {
-  return AnimationComponent == nullptr ? true : AnimationComponent->IsCurrentAnimationFinish();
+  return (AnimationComponent != nullptr) ? AnimationComponent->IsCurrentAnimationFinish() : true;
 }
 
 void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName)
@@ -629,19 +418,344 @@ void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName)
   }
 }
 
-EDirection ASmithPlayerActor::GetCameraDirection() const
+void ASmithPlayerActor::UseItem(USmithHPItem* item)
 {
-  return m_camDir;
+  if (item == nullptr)
+  {
+    return;
+  }
+
+  // 回復割合で回復量を算出
+  const double recoveryPercentage = item->GetRecoveryPercentage();
+  const int32 recovery = StaticCast<int32>(StaticCast<double>(m_maxHealth) * recoveryPercentage);
+
+  m_currentHealth += recovery;
+  if (m_currentHealth > m_maxHealth)
+  {
+    m_currentHealth = m_maxHealth;
+  }
+
+  notifyHealthChanged();
 }
 
-#if WITH_EDITOR
-void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
+UTexture2D* ASmithPlayerActor::GetMinimapDisplayTexture_Implementation()
 {
-  OnAttack(FBattleResult{damage, EDirection::Invalid});
+  return MinimapTexture;
 }
-#endif
 
-void ASmithPlayerActor::updateParam(FParams upgradeParam)
+void ASmithPlayerActor::SyncronizePlayerView()
+{
+  notifyHealthChanged();
+  if (InventoryComponent != nullptr)
+  {
+    if (OnHerbValueChanged.IsBound())
+    {
+      OnHerbValueChanged.Broadcast(InventoryComponent->GetQuantity(TEXT("ConsumeItem")));
+    }
+  }
+}
+
+void ASmithPlayerActor::Move(const FVector2D& InputDirection)
+{
+  if (   !IsCommandSendable() 
+      || !m_bCanReceiveInput
+     )
+  {
+    return;
+  }
+
+  // 移動する前に向きを変える
+  ChangeForward(InputDirection);
+
+  // 移動コマンドを出す
+  if (m_commandMediator.IsValid())
+  {
+    using namespace SmithPlayerActor::Private;
+    const EDirection newDirection = CalculateDirectionRelativeCamera(m_camDir, InputDirection, m_bOnlyMoveDiagonal);
+
+    bool success = m_commandMediator->SendMoveCommand(this, newDirection, 1);
+    // 移動命令が失敗したとき待機アニメーションに戻る
+    if (!success)
+    {
+      if (AnimationComponent != nullptr)
+      {
+        FName outName = NAME_None;
+        convertAnimState(UE::Smith::SMITH_ANIM_IDLE, outName);
+        AnimationComponent->SwitchAnimState(outName);
+      }
+    }
+  }
+}
+
+void ASmithPlayerActor::Attack()
+{
+  if (   !IsCommandSendable() 
+      || !m_commandMediator.IsValid()
+      || !m_bCanReceiveInput 
+     )
+  {
+    return;
+  }
+
+  // プレイヤーの向きでFormatを選ぶ
+  // 斜め（NorthEast:1/SouthEast:3/SouthWest:5/NorthWest:7）
+  static const TMap<uint8, const FString> NORMAL_ATTACK_KEY_TABLE =
+  {
+    {0u, TEXT("Attack")},
+    {1u, TEXT("AttackDiagonal")}
+  };
+
+  const FString attackKey = NORMAL_ATTACK_KEY_TABLE[StaticCast<uint8>(m_actorFaceDir) % 2];
+  if (!m_normalAttackFormatBuffer.Contains(attackKey) || !m_normalAttackFormatBuffer[attackKey].IsValid())
+  {
+    return;
+  }
+
+  // 攻撃ハンドル作成
+  FAttackHandle attackHandle{};
+  attackHandle.AttackPower = Weapon->GetParam().ATK;
+  attackHandle.Level = Weapon->GetLevel();
+  attackHandle.MotionValue = 1.0;
+
+  m_commandMediator->SendAttackCommand(this, m_actorFaceDir, *m_normalAttackFormatBuffer[attackKey], attackHandle);
+
+}
+
+void ASmithPlayerActor::ChangeForward(const FVector2D& InputDirection)
+{
+  if (   !IsCommandSendable() 
+      || !m_bCanReceiveInput
+     )
+  {
+    return;
+  }
+
+  using namespace SmithPlayerActor::Private;
+  const EDirection newDirection = CalculateDirectionRelativeCamera(m_camDir, InputDirection, m_bOnlyMoveDiagonal);
+
+  changeForwardImpl(newDirection);
+}
+
+void ASmithPlayerActor::OpenMenu()
+{
+  if (   !IsCommandSendable() 
+      || m_bIsInMenu 
+      || !m_bCanReceiveInput
+     )
+  {
+    return;
+  }
+
+  m_bIsInMenu = true;
+
+  if ((Weapon != nullptr) && (InventoryComponent != nullptr))
+  {
+    // 強化素材を全部取得し、強化画面に渡す
+    TArray<UObject*> itemList{};
+    InventoryComponent->GetAll(TEXT("UpgradeMaterial"), itemList);
+    if (OnEnhanceMenuInitialized.IsBound())
+    {
+      OnEnhanceMenuInitialized.Execute(Weapon->GetHandle(), itemList);
+    }
+  }
+
+  if (OnEnhanceMenuOpened.IsBound())
+  {
+    OnEnhanceMenuOpened.Broadcast();
+  }
+}
+
+void ASmithPlayerActor::CloseMenu()
+{
+  if (   !IsCommandSendable() 
+      || !m_bIsInMenu 
+      || !m_bCanReceiveInput
+     )
+  {
+    return;
+  }
+
+  m_bIsInMenu = false;
+  if (OnEnhanceMenuClosed.IsBound())
+  {
+    OnEnhanceMenuClosed.Broadcast();
+  }
+}
+
+void ASmithPlayerActor::SelectNextMenuItem(float SelectDirection)
+{
+  if (   !IsCommandSendable() 
+      || !m_bIsInMenu 
+      || !m_bCanReceiveInput
+     )
+  {
+    return;
+  }
+
+  if (OnMenuItemChangeFocus.IsBound())
+  {
+    OnMenuItemChangeFocus.Broadcast(SelectDirection);
+  }
+}
+void ASmithPlayerActor::InteractMenu()
+{
+  if (   !IsCommandSendable() 
+      || !m_bIsInMenu 
+      || !m_bCanReceiveInput
+     )
+  {
+    return;
+  }
+
+  if (OnItemSelected.IsBound())
+  {
+    // 今選んでいるメニュー項目のIdxを取得
+    const int32 selectedItemIdx = OnItemSelected.Execute();
+    if (selectedItemIdx != -1)
+    {
+      // 強化した後にメニューを閉じる
+      bool success = enhanceImpl(selectedItemIdx);
+      if (success)
+      {
+        CloseMenu();
+      }
+    }
+  }
+}
+
+void ASmithPlayerActor::RecoverHealth()
+{
+  if (   !IsCommandSendable() 
+      || !m_bCanReceiveInput
+     )
+  {
+    return;
+  }
+
+  if (   !m_commandMediator.IsValid() 
+      || (InventoryComponent == nullptr)
+     )
+  {
+    return;
+  }
+
+  // インベントリの先頭回復アイテムを取得し、回復する
+  const FString consumeInventoryName = TEXT("ConsumeItem");
+  UObject* consume = InventoryComponent->Get(consumeInventoryName, 0);
+  USmithConsumeItem* consumeItem = Cast<USmithConsumeItem>(consume);
+  if (consumeItem == nullptr)
+  {
+    return;
+  }
+
+  consumeItem->Use(this);
+  InventoryComponent->Remove(consumeInventoryName, 0);
+  
+  if (OnHerbValueChanged.IsBound())
+  {
+    OnHerbValueChanged.Broadcast(InventoryComponent->GetQuantity(consumeInventoryName));
+  }
+
+  // 使用成功したら一ターン経過
+  m_commandMediator->SendIdleCommand(this);
+  
+}
+
+void ASmithPlayerActor::SetOnlyReceiveDiagonalInput(bool bValue)
+{
+  m_bOnlyMoveDiagonal = bValue;
+}
+
+void ASmithPlayerActor::OnGameClear()
+{
+  m_bCanReceiveInput = false;
+}
+
+void ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTable* formatTable)
+{
+  check(formatTable != nullptr)
+  if (m_normalAttackFormatBuffer.Contains(name))
+  {
+    return;
+  }
+
+  TArray<FFormatInfo_Import*> arr{};
+  formatTable->GetAllRows<FFormatInfo_Import>("", arr);
+  if (arr.Num() <= 1)
+  {
+    return;
+  }
+
+  TArray<FName> names = formatTable->GetRowNames();
+  if (!names[0].IsEqual(TEXT("FormatInfo")))
+  {
+    return;
+  }
+  
+  const uint8 formatRow = arr[0]->Row;
+  const uint8 formatColumn = arr[0]->Column;
+  const size_t dataCnt = formatRow * formatColumn;
+
+  // データの要素数が合うかどうかをチェック
+  check((arr.Num() - 1) == StaticCast<int32>(dataCnt));
+
+  TArray<ESmithFormatType> typeSrcData{};
+  for (int32 i = 1; i < arr.Num(); ++i)
+  {
+    typeSrcData.Emplace(arr[i]->Type);
+  }
+
+  // TODO 生データで初期化する設計を見直し
+  TSharedPtr<UE::Smith::Battle::FSmithCommandFormat> formatPtr = ::MakeShared<UE::Smith::Battle::FSmithCommandFormat>(typeSrcData.GetData(), dataCnt, formatRow, formatColumn);
+  m_normalAttackFormatBuffer.Emplace(name, formatPtr);
+}
+
+bool ASmithPlayerActor::enhanceImpl(int32 idx)
+{
+  if (   !m_enhanceSystem.IsValid()
+      || !m_commandMediator.IsValid() 
+      || (InventoryComponent == nullptr)
+     )
+  {
+    return false;
+  }
+
+  const FString upgradeInventoryName = TEXT("UpgradeMaterial");
+  UObject* material = InventoryComponent->Get(upgradeInventoryName, idx);
+  if (material == nullptr)
+  {
+    return false;
+  }
+
+  IParamAbsorbable* absorbItem = Cast<IParamAbsorbable>(material);
+  if (absorbItem == nullptr)
+  {
+    return false;
+  }
+
+  m_enhanceSystem->Enhance(Weapon, absorbItem);
+  InventoryComponent->Remove(upgradeInventoryName, idx);
+  
+  // 強化した後にメニューを閉じて、１ターンを待機
+  CloseMenu();
+  m_commandMediator->SendIdleCommand(this);
+
+  return true;
+}
+
+void ASmithPlayerActor::changeForwardImpl(EDirection NewDirection)
+{
+  using namespace SmithPlayerActor::Private;
+  // プレイヤー向き更新
+  if (m_actorFaceDir != NewDirection)
+  {
+    m_actorFaceDir = NewDirection;
+    const double newYaw = StaticCast<double>(m_actorFaceDir) * ANGLE_PER_DIRECTION;
+    SetActorRotation(FRotator{0.0, newYaw, 0.0});
+  }
+}
+
+void ASmithPlayerActor::onEquipmentUpgrade(FParams upgradeParam)
 {
   if (upgradeParam.HP != 0)
   {
@@ -652,31 +766,6 @@ void ASmithPlayerActor::updateParam(FParams upgradeParam)
 
     notifyHealthChanged();
   }
-}
-
-bool ASmithPlayerActor::CanReceiveInputEvent() const
-{
-  return m_bCanReceiveInput && IsCommandSendable();
-}
-
-void ASmithPlayerActor::OnGameClear()
-{
-  m_bCanReceiveInput = false;
-}
-
-FBattleDefenseParamHandle ASmithPlayerActor::GetDefenseParam() const
-{
-  if (Weapon == nullptr)
-  {
-    return IAttackable::GetDefenseParam();		
-  }
-
-  FBattleDefenseParamHandle handle;
-  FParams param = Weapon->GetParam();
-  handle.DefensePoint = param.DEF;
-  handle.Level = Weapon->GetLevel();
-
-  return handle;
 }
 
 void ASmithPlayerActor::turnPassRecover()
@@ -692,15 +781,22 @@ void ASmithPlayerActor::turnPassRecover()
   }
 }
 
-// TODO
-UTexture2D* ASmithPlayerActor::GetMinimapDisplayTexture_Implementation()
+void ASmithPlayerActor::notifyHealthChanged() const
 {
-  return MinimapTexture;
+  if (OnHealthChanged.IsBound())
+  {
+    OnHealthChanged.Broadcast(m_currentHealth, m_maxHealth);
+  }
 }
 
-void ASmithPlayerActor::OnAttackExecuted()
+
+#if WITH_EDITOR
+void ASmithPlayerActor::SelfDamage_Debug(int32 damage)
 {
-  int32 ran = FMath::RandRange(1, 2);
-  FString atkSE = TEXT("Player_Slash_") + FString::FromInt(ran);
-  AudioKit::PlaySE(atkSE);
+  OnAttack(FBattleResult{damage, EDirection::Invalid});
 }
+#endif
+
+
+
+

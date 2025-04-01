@@ -8,6 +8,8 @@
 #include "SmithPickUpItemEvent.h"
 #include "NiagaraSystem.h"
 
+#include "MLibrary.h"
+
 USmithEventPublishMediator::USmithEventPublishMediator(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
   , m_eventPublisher(nullptr)

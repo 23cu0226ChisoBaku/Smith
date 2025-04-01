@@ -3,7 +3,7 @@
 
 #include "IAttackCauser.h"
 
-// Add default functionality here for any IIAttackInstigator functions that are not pure virtual.
+// Add default functionality here for any IAttackCauser functions that are not pure virtual.
 
 void IAttackCauser::OnAttackExecuted()
 {

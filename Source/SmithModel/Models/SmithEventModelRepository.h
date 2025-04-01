@@ -10,6 +10,7 @@
 
 class USmithEventModelDefinition;
 
+/// @brief  イベントモデルリポジトリ
 UCLASS()
 class SMITHMODEL_API USmithEventModelRepository : public UWorldSubsystem , public ISmithEventModelRequester
 {
