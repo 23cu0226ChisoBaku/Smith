@@ -2,12 +2,13 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "UObject/ScriptInterface.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "IParamInitializer.h"
+
 #include <type_traits>
+#include "IParamInitializer.h"
 #include "MLibrary.h"
+#include "UObject/ScriptInterface.h"
+
 #include "SmithEnemyParamInitializer.generated.h"
 
 UCLASS()
@@ -16,10 +17,13 @@ class SMITHMODELINITIALIZER_API USmithEnemyParamInitializer : public UBlueprintF
 	GENERATED_BODY()
 
 public:
+
 	UFUNCTION(BlueprintCallable, Category = "Parameter Initializer")
 	static void AssignInitializer(TScriptInterface<IParamInitializer> initializer);
+
 	UFUNCTION(BlueprintCallable, Category = "Parameter Initializer")
 	static void DetachInitializer();
+	
 	UFUNCTION(BlueprintCallable, Category = "Parameter Initializer")
 	static bool IsParamInitializerValid();
 	

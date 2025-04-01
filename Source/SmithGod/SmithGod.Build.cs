@@ -17,7 +17,7 @@ public class SmithGod: ModuleRules
                                                 "Smith/BattleCommand",
                                                 "Smith/UI",
                                                 "Smith/AI",
-                                                "Smith/TurnMngObj/",
+                                                "Smith/Enemies",
                                                 "Smith/Player",
                                                 "Smith/Event",
                                               }

@@ -23,7 +23,7 @@ public class Smith : ModuleRules
 																							"Smith/UI",
 																							"Smith/Components",
 																							"Smith/Event",
-																							"Smith/TurnMngObj",
+																							"Smith/Enemies",
 																							"Smith/SmithActors",
 																							"Smith",
 																							"Smith/Pickable",

@@ -2,14 +2,15 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "UObject/ScriptInterface.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+
+#include <type_traits>
 #include "ILootGeneratable.h"
 #include "IPickable.h"
-#include <type_traits>
-#include "SmithEnemyTraits.h"
 #include "MLibrary.h"
+#include "SmithEnemyTraits.h"
+#include "UObject/ScriptInterface.h"
+
 #include "SmithEnemyLootGenerator.generated.h"
 
 UCLASS()
@@ -18,10 +19,13 @@ class SMITHMODELINITIALIZER_API USmithEnemyLootGenerator : public UBlueprintFunc
 	GENERATED_BODY()
 
 public:
+
 	UFUNCTION(BlueprintCallable, Category = "Loot Generator")
 	static void AssignLootGenerator(TScriptInterface<ILootGeneratable> generator);
+
 	UFUNCTION(BlueprintCallable, Category = "Loot Generator")
 	static void DetachLootGenerator();
+
 	UFUNCTION(BlueprintCallable, Category = "Loot Generator")
 	static bool IsLootGeneratorValid();
 
@@ -32,5 +36,6 @@ public:
 	}
 
 private:
+
 	static inline ILootGeneratable* gLootGenerator = nullptr;
 };

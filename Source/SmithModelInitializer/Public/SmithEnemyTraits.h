@@ -5,7 +5,6 @@
 #ifndef SMITH_ENEMY_TRAITS
 #define SMITH_ENEMY_TRAITS
 
-#include "CoreMinimal.h"
 #include <type_traits>
 
 // 小ゴーレム
@@ -26,14 +25,14 @@ struct HerbGolem
 
 template<typename EnemyType, bool bIsPtr> struct SmithEnemyTraits;
 
-// ポインタだったら
+// ポインタTraits
 template<typename EnemyType>
 struct SmithEnemyTraits<EnemyType, true>
 {
 	using Type = typename std::remove_pointer_t<EnemyType>::Type;
 };
 
-// インスタントだったら
+// インスタンスTraits
 template<typename EnemyType>
 struct SmithEnemyTraits<EnemyType, false>
 {

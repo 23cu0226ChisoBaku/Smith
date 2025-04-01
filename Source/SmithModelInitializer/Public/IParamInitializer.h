@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "SmithEnemyTraits.h"
+
 #include "IParamInitializer.generated.h"
 
 struct FParams;
@@ -15,9 +16,6 @@ class UParamInitializer : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class SMITHMODELINITIALIZER_API IParamInitializer
 {
 	GENERATED_BODY()
