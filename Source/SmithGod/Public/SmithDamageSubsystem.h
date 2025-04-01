@@ -6,19 +6,17 @@
 
 #include "BattleParamHandle.h"
 #include "BattleResult.h"
+#include "ISmithDamageApplicant.h"
 
 #include "SmithDamageSubsystem.generated.h"
 
 class USmithBattleLogWorldSubsystem;
-struct FAttackHandle;
-enum class EDirection : uint8;
-
 
 /**
  * @brief バトルを制御する
  */
 UCLASS()
-class SMITHGOD_API USmithDamageSubsystem final: public UWorldSubsystem
+class SMITHGOD_API USmithDamageSubsystem final: public UWorldSubsystem, public ISmithDamageApplicant
 {
 	GENERATED_BODY()
 
@@ -65,7 +63,7 @@ public:
 	}
 
 	// ダメージ計算を行う
-	void ApplyDamage(AActor* DamageInstigator, AActor* DamageCauser, const FAttackHandle& Handle, EDirection FromDirection) const;
+	void ApplyDamage(AActor* DamageInstigator, AActor* DamageCauser, const FAttackHandle& Handle, EDirection FromDirection) const override final;
 
 private:
 

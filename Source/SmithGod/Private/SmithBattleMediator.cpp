@@ -121,7 +121,7 @@ bool USmithBattleMediator::SendAttackCommand(AActor* requester, EDirection direc
         SmithDefaultDamageStrategy damageStrategy{};
         damageStrategy.Instigator = requester;
         damageStrategy.Causer = attackableInfo.Attackable;
-        damageStrategy.DamageSubsystem = m_damageSys;
+        damageStrategy.DamageApplicant = m_damageSys;
         damageStrategy.Handle = atkHandle;
         damageStrategy.FromDirection = attackableInfo.AttackFrom;
   
@@ -176,7 +176,7 @@ bool USmithBattleMediator::SendSkillCommand(AActor* requester, FSmithSkillParame
         SmithDefaultDamageStrategy damageStrategy{};
         damageStrategy.Instigator = requester;
         damageStrategy.Causer = attackableInfo.Attackable; 
-        damageStrategy.DamageSubsystem = m_damageSys;
+        damageStrategy.DamageApplicant = m_damageSys;
         damageStrategy.Handle = atkHandle;
         damageStrategy.FromDirection = attackableInfo.AttackFrom;
   

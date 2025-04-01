@@ -12,14 +12,13 @@ public class MapManagement: ModuleRules
     PrivateIncludePaths.AddRange(new string[] 
                                             {
                                               "Smith/BattleCommand",
-                                              "Smith/SmithActors/TurnMngObj/Public",
-                                              "Smith/SmithActors/Interfaces",
-                                              "Smith/SmithActors",
                                               "Smith",
                                               "MapManagement/MapCore",
                                               "MapManagement/MapDataModel",
                                               "MapManagement/MapFacade",
                                               "MapManagement/Utils",
+                                              "SmithModel/DataTableTypes",
+                                              "SmithModel/Models",
                                             });
   }
 

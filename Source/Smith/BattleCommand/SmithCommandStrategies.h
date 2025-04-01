@@ -9,7 +9,7 @@
 #include "Direction.h"
 
 class AActor;
-class USmithDamageSubsystem;
+class ISmithDamageApplicant;
 
 // Dummy
 struct SMITH_API SmithDummyStrategy
@@ -24,7 +24,7 @@ struct SMITH_API SmithDefaultDamageStrategy
 
 	AActor* Instigator = nullptr;
 	AActor* Causer = nullptr;
-	USmithDamageSubsystem* DamageSubsystem = nullptr;
+	ISmithDamageApplicant* DamageApplicant = nullptr;
 	FAttackHandle Handle = {};
 	EDirection FromDirection;
 
