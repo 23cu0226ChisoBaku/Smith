@@ -59,6 +59,7 @@ void ASmithPlayerController::SetupInputComponent()
 {
   Super::SetupInputComponent();
 
+  // 入力バインド
   UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent>(InputComponent);
 	if (inputComp != nullptr)
 	{
@@ -80,6 +81,9 @@ void ASmithPlayerController::SetupInputComponent()
 
 }
 
+///
+/// @brief 移動入力
+///
 void ASmithPlayerController::Move(const FInputActionValue& inputValue)
 {
   if (m_playerModel == nullptr)
@@ -95,6 +99,10 @@ void ASmithPlayerController::Move(const FInputActionValue& inputValue)
 	
   m_playerModel->Move(movementInput);
 }
+
+///
+/// @brief 攻撃入力
+///
 void ASmithPlayerController::Attack(const FInputActionValue& inputValue)
 {
   if (m_playerModel == nullptr)
@@ -129,6 +137,9 @@ void ASmithPlayerController::Debug_SelfDamage(const FInputActionValue& inputValu
 }
 #endif 
 
+///
+/// @brief メニューを開く入力
+///
 void ASmithPlayerController::OpenMenu(const FInputActionValue& inputValue)
 {
   if (m_playerModel == nullptr)
@@ -139,6 +150,9 @@ void ASmithPlayerController::OpenMenu(const FInputActionValue& inputValue)
   m_playerModel->OpenMenu();
 }
 
+///
+/// @brief メニューを閉じる入力
+///
 void ASmithPlayerController::CloseMenu(const FInputActionValue& inputValue)
 {
   if (m_playerModel == nullptr)
@@ -149,6 +163,9 @@ void ASmithPlayerController::CloseMenu(const FInputActionValue& inputValue)
   m_playerModel->CloseMenu();
 }
 
+///
+/// @brief 回復使用入力
+///
 void ASmithPlayerController::UseRecovery(const FInputActionValue& inputValue)
 {
   if (m_playerModel == nullptr)
@@ -158,6 +175,10 @@ void ASmithPlayerController::UseRecovery(const FInputActionValue& inputValue)
 
   m_playerModel->RecoverHealth();
 }
+
+///
+/// @brief メニュー画面に選択入力
+///
 void ASmithPlayerController::InMenuSelect(const FInputActionValue& inputValue)
 {
   if (m_playerModel == nullptr)
@@ -168,6 +189,10 @@ void ASmithPlayerController::InMenuSelect(const FInputActionValue& inputValue)
   float selectDirection = inputValue.Get<float>();
   m_playerModel->SelectNextMenuItem(selectDirection);
 }
+
+///
+/// @brief メニュー画面に選択した項目を決定する入力
+///
 void ASmithPlayerController::InMenuInteract(const FInputActionValue& inputValue)
 {
   if (m_playerModel == nullptr)
@@ -178,6 +203,9 @@ void ASmithPlayerController::InMenuInteract(const FInputActionValue& inputValue)
   m_playerModel->InteractMenu();
 }
 
+///
+/// @brief 斜め移動だけ移動縛り入力
+///
 void ASmithPlayerController::EnterOnlyDiagonalMoveState(const FInputActionValue& inputValue)
 {
   if (m_playerModel == nullptr)
@@ -187,6 +215,10 @@ void ASmithPlayerController::EnterOnlyDiagonalMoveState(const FInputActionValue&
 
   m_playerModel->SetOnlyReceiveDiagonalInput(true);
 }
+
+///
+/// @brief 斜め移動縛り解除入力
+///
 void ASmithPlayerController::ExitOnlyDiagonalMoveState(const FInputActionValue& inputValue)
 {
   if (m_playerModel == nullptr)
@@ -197,6 +229,9 @@ void ASmithPlayerController::ExitOnlyDiagonalMoveState(const FInputActionValue& 
   m_playerModel->SetOnlyReceiveDiagonalInput(false);
 }
 
+///
+/// @brief プレイヤーモデルイベントを登録する
+///
 void ASmithPlayerController::BindModelEvents()
 {
   check(m_playerModel != nullptr);
@@ -235,6 +270,9 @@ void ASmithPlayerController::BindModelEvents()
   
 }
 
+///
+/// @brief 探索状態入力IMCに設定する
+///
 void ASmithPlayerController::SwitchIMC_Battle()
 {
   UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
@@ -245,6 +283,9 @@ void ASmithPlayerController::SwitchIMC_Battle()
   }
 }
 
+///
+/// @briefメニュー状態入力IMCに設定する
+///
 void ASmithPlayerController::SwitchIMC_Menu()
 {
     UEnhancedInputLocalPlayerSubsystem* enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());

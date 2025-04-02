@@ -189,7 +189,7 @@ bool USmithCommandMediator::SendSkillCommand(AActor* requester, FSmithSkillParam
   TArray<FAttackableInfoHandle> attackables{};
   mapSys_shared->FindAttackableMapObjsFromCoord(/**Out */attackables, requester, rotatedFormat, skillParameter.OffsetToLeft, skillParameter.OffsetToTop);
   
-  // コマンドを送る
+  // スキルコマンドを送る
   {
     ITurnManageable* requesterTurnManageable = Cast<ITurnManageable>(requester);
     ISmithAnimator* animator = Cast<ISmithAnimator>(requester);
@@ -219,10 +219,12 @@ bool USmithCommandMediator::SendSkillCommand(AActor* requester, FSmithSkillParam
   return false;
 }
 
+///
+/// @brief  待機コマンドを送る
+///
 bool USmithCommandMediator::SendIdleCommand(AActor* requester, float idleTime)
 {
   check(requester != nullptr);
-
   if (m_battleSys == nullptr)
   {
     return false;
@@ -235,10 +237,12 @@ bool USmithCommandMediator::SendIdleCommand(AActor* requester, float idleTime)
   }
 
   m_battleSys->RegisterCommand(requesterTurnManageable, FBattleCommandFactory::CreateIdleCommand(idleTime));
-
   return true;
 }
 
+///
+/// @brief  フォーマット影響範囲のワールド座標を取得
+///
 int32 USmithCommandMediator::GetRangeLocations(TArray<FVector>& outLocations, AActor* requester, FSmithSkillParameter skillParameter, const UE::Smith::Battle::FSmithCommandFormat& format)
 { 
   using namespace UE::Smith::Battle;
@@ -252,7 +256,6 @@ int32 USmithCommandMediator::GetRangeLocations(TArray<FVector>& outLocations, AA
   }
   
   outLocations.Reset();
-
   uint8 mapObjOriginCoordX = 0u;
   uint8 mapObjOriginCoordY = 0u;
   if (!mapSys_shared->GetMapObjectCoord(requester, mapObjOriginCoordX, mapObjOriginCoordY))
@@ -260,6 +263,7 @@ int32 USmithCommandMediator::GetRangeLocations(TArray<FVector>& outLocations, AA
     return 0;
   }
 
+  // フォーマットを回転させる
   FSmithCommandFormat rotatedFormat = FFormatTransformer::GetRotatedFormat(format, skillParameter.ActiveDirection);
   auto formattedMapCoords = FFormatTransformer::FormatToMapCoord(rotatedFormat, FMapCoord(mapObjOriginCoordX + skillParameter.OffsetToLeft, mapObjOriginCoordY + skillParameter.OffsetToTop));
 
@@ -299,6 +303,9 @@ int32 USmithCommandMediator::GetRangeLocations(TArray<FVector>& outLocations, AA
   return outLocations.Num();
 }
 
+///
+/// @brief  プレイヤーが請求者のどの方向にいるかを取得する 
+///
 void USmithCommandMediator::GetPlayerDirection(EDirection& outDirection, EDirectionPolicy directionStrategy, AActor* requester, uint8 offsetToLeft, uint8 offsetToTop)
 {
   check(requester != nullptr);

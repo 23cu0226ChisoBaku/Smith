@@ -237,6 +237,9 @@ void ASmithPlayerActor::Tick(float DeltaTime)
   }
 }
 
+///
+/// @brief 攻撃を受けた時に呼び出されるコールバック
+///
 void ASmithPlayerActor::OnAttack(const FBattleResult& Result)
 {
   if (Result.Damage <= 0)
@@ -253,9 +256,9 @@ void ASmithPlayerActor::OnAttack(const FBattleResult& Result)
 
   m_bIsDamaged = true;
   m_bCanReceiveInput = false;
-
   m_currentHealth -= Result.Damage;
 
+  // ダメージをくらったアニメーション
   if (!IsDefeated())
   {
     if (AnimationComponent != nullptr)
@@ -269,11 +272,17 @@ void ASmithPlayerActor::OnAttack(const FBattleResult& Result)
   notifyHealthChanged();
 }
 
+///
+/// @brief  倒されたかを調べる
+///
 bool ASmithPlayerActor::IsDefeated() const
 {
   return m_currentHealth <= 0;
 }
 
+///
+/// @brief 倒されたら呼び出されるコールバック
+///
 void ASmithPlayerActor::OnDefeated()
 {
   m_currentHealth = 0;
@@ -284,6 +293,7 @@ void ASmithPlayerActor::OnDefeated()
     OnDead.Broadcast();
   }
 
+  // 死亡アニメーション
   if (AnimationComponent != nullptr)
   {
     FName animName = NAME_None;
@@ -308,6 +318,9 @@ FBattleDefenseParamHandle ASmithPlayerActor::GetDefenseParam() const
   return handle;
 }
 
+///
+/// @brief 次の階層へいくイベントを作動した時に呼び出されるコールバック
+///
 void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
 {
   check(event != nullptr);
@@ -317,6 +330,9 @@ void ASmithPlayerActor::OnTriggerEvent(USmithNextLevelEvent* event)
   SetActorRotation(FRotator{0.0, 180.0, 0.0});
 }
 
+///
+/// @brief 拾うイベントを作動した時に呼び出されるコールバック
+///
 void ASmithPlayerActor::OnTriggerEvent(USmithPickUpItemEvent* event)
 {
   check(event != nullptr);
@@ -359,6 +375,9 @@ void ASmithPlayerActor::SetEnhanceSystem(IEnhanceSystem* enhanceSystem)
   m_enhanceSystem = enhanceSystem;
 }
 
+///
+/// @brief  アニメーション状態を切り替える(遅延なし)
+///
 void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
 {
   if (AnimationComponent == nullptr)
@@ -371,6 +390,9 @@ void ASmithPlayerActor::SwitchAnimation(uint8 animationState)
   AnimationComponent->SwitchAnimState(StateName);
 }
 
+///
+/// @brief  アニメーション状態を切り替える(遅延あり)
+///
 void ASmithPlayerActor::SwitchAnimationDelay(uint8 animationState, float delay)
 {
   if (AnimationComponent == nullptr)
@@ -383,6 +405,9 @@ void ASmithPlayerActor::SwitchAnimationDelay(uint8 animationState, float delay)
   AnimationComponent->SwitchAnimStateDelay(StateName, delay);
 }
 
+///
+/// @brief  アニメーション状態を更新する
+///
 void ASmithPlayerActor::UpdateAnimation(float deltaTime)
 {
   if (AnimationComponent == nullptr)
@@ -393,11 +418,17 @@ void ASmithPlayerActor::UpdateAnimation(float deltaTime)
   AnimationComponent->UpdateAnim(deltaTime);
 }
 
+///
+/// @brief  設定したアニメーション再生が終了したかを調べる
+///
 bool ASmithPlayerActor::IsAnimationFinish() const
 {
   return (AnimationComponent != nullptr) ? AnimationComponent->IsCurrentAnimationFinish() : true;
 }
 
+///
+/// @brief  ステートをアニメーションセクションの名前に変換
+///
 void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName)
 {
   using namespace UE::Smith;
@@ -418,6 +449,9 @@ void ASmithPlayerActor::convertAnimState(uint8 animationState, FName& outName)
   }
 }
 
+///
+/// @brief  アイテムを使用する時に呼び出されるコールバック
+///
 void ASmithPlayerActor::UseItem(USmithHPItem* item)
 {
   if (item == nullptr)
@@ -443,6 +477,9 @@ UTexture2D* ASmithPlayerActor::GetMinimapDisplayTexture_Implementation()
   return MinimapTexture;
 }
 
+///
+/// @brief  現在のパラメーターでGUIを更新
+///
 void ASmithPlayerActor::SyncronizePlayerView()
 {
   notifyHealthChanged();
@@ -455,6 +492,9 @@ void ASmithPlayerActor::SyncronizePlayerView()
   }
 }
 
+///
+/// @brief  移動処理
+///
 void ASmithPlayerActor::Move(const FVector2D& InputDirection)
 {
   if (   !IsCommandSendable() 
@@ -487,6 +527,9 @@ void ASmithPlayerActor::Move(const FVector2D& InputDirection)
   }
 }
 
+///
+/// @brief  攻撃処理
+///
 void ASmithPlayerActor::Attack()
 {
   if (   !IsCommandSendable() 
@@ -521,6 +564,9 @@ void ASmithPlayerActor::Attack()
 
 }
 
+///
+/// @brief  方向変換処理
+///
 void ASmithPlayerActor::ChangeForward(const FVector2D& InputDirection)
 {
   if (   !IsCommandSendable() 
@@ -536,6 +582,9 @@ void ASmithPlayerActor::ChangeForward(const FVector2D& InputDirection)
   changeForwardImpl(newDirection);
 }
 
+///
+/// @brief  メニューを開く
+///
 void ASmithPlayerActor::OpenMenu()
 {
   if (   !IsCommandSendable() 
@@ -565,6 +614,9 @@ void ASmithPlayerActor::OpenMenu()
   }
 }
 
+///
+/// @brief  メニューを閉じる
+///
 void ASmithPlayerActor::CloseMenu()
 {
   if (   !IsCommandSendable() 
@@ -582,6 +634,9 @@ void ASmithPlayerActor::CloseMenu()
   }
 }
 
+///
+/// @brief  次のメニューアイテムを選択する
+///
 void ASmithPlayerActor::SelectNextMenuItem(float SelectDirection)
 {
   if (   !IsCommandSendable() 
@@ -597,6 +652,10 @@ void ASmithPlayerActor::SelectNextMenuItem(float SelectDirection)
     OnMenuItemChangeFocus.Broadcast(SelectDirection);
   }
 }
+
+///
+/// @brief  今選択しているメニューアイテムを操作する
+///
 void ASmithPlayerActor::InteractMenu()
 {
   if (   !IsCommandSendable() 
@@ -623,6 +682,9 @@ void ASmithPlayerActor::InteractMenu()
   }
 }
 
+///
+/// @brief HPを回復
+///
 void ASmithPlayerActor::RecoverHealth()
 {
   if (   !IsCommandSendable() 
@@ -661,16 +723,25 @@ void ASmithPlayerActor::RecoverHealth()
   
 }
 
+///
+/// @brief 斜め移動の状態を設定する
+///
 void ASmithPlayerActor::SetOnlyReceiveDiagonalInput(bool bValue)
 {
   m_bOnlyMoveDiagonal = bValue;
 }
 
+///
+/// @brief ゲームクリアした時に呼び出されるコールバック
+///
 void ASmithPlayerActor::OnGameClear()
 {
   m_bCanReceiveInput = false;
 }
 
+///
+/// @brief 攻撃フォーマットを登録する
+///
 void ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTable* formatTable)
 {
   check(formatTable != nullptr)
@@ -710,6 +781,9 @@ void ASmithPlayerActor::registerAttackFormat(const FString& name, const UDataTab
   m_normalAttackFormatBuffer.Emplace(name, formatPtr);
 }
 
+///
+/// @brief 強化処理実装部分
+///
 bool ASmithPlayerActor::enhanceImpl(int32 idx)
 {
   if (   !m_enhanceSystem.IsValid()
@@ -720,6 +794,7 @@ bool ASmithPlayerActor::enhanceImpl(int32 idx)
     return false;
   }
 
+  // 選択しているアイテムのインデックスを取得し、強化する
   const FString upgradeInventoryName = TEXT("UpgradeMaterial");
   UObject* material = InventoryComponent->Get(upgradeInventoryName, idx);
   if (material == nullptr)
@@ -743,6 +818,9 @@ bool ASmithPlayerActor::enhanceImpl(int32 idx)
   return true;
 }
 
+///
+/// @brief プレイヤーの向き変換実装部分
+///
 void ASmithPlayerActor::changeForwardImpl(EDirection NewDirection)
 {
   using namespace SmithPlayerActor::Private;
@@ -755,8 +833,12 @@ void ASmithPlayerActor::changeForwardImpl(EDirection NewDirection)
   }
 }
 
+///
+/// @brief 装備が強化されたら呼び出されるコールバック
+///
 void ASmithPlayerActor::onEquipmentUpgrade(FParams upgradeParam)
 {
+  // HPの変更があったら割合を維持して、現在のHPを更新する
   if (upgradeParam.HP != 0)
   {
     const float curtPercentage = StaticCast<float>(m_currentHealth) / StaticCast<float>(m_maxHealth);
@@ -768,6 +850,9 @@ void ASmithPlayerActor::onEquipmentUpgrade(FParams upgradeParam)
   }
 }
 
+///
+/// @brief ターン経過した時の処理
+///
 void ASmithPlayerActor::turnPassRecover()
 {
   ++m_turnCnt;
@@ -781,6 +866,9 @@ void ASmithPlayerActor::turnPassRecover()
   }
 }
 
+///
+/// @brief HP変更通知を送信
+///
 void ASmithPlayerActor::notifyHealthChanged() const
 {
   if (OnHealthChanged.IsBound())

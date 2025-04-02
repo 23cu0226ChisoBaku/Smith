@@ -6,7 +6,6 @@
 #include "SmithUpgradeWidget.h"
 #include "SmithPlayerHP.h"
 #include "HerbWidget.h"
-
 #include "GameFramework/PlayerController.h"
 #include "SmithWeapon.h"
 
@@ -19,9 +18,11 @@ USmithPlayerView::USmithPlayerView(const FObjectInitializer& ObjectInitializer)
   , m_upgradeWidget(nullptr)
   , m_hpWidget(nullptr)
   , m_herbWidget(nullptr)
-{
-}
+{ }
 
+///
+/// @brief  プレイヤーGUI周りを初期化
+///
 void USmithPlayerView::InitPlayerView(APlayerController* PlayerController)
 {
   check(PlayerController != nullptr);
@@ -41,6 +42,9 @@ void USmithPlayerView::InitPlayerView(APlayerController* PlayerController)
   HideUpgradeMenu();
 }
 
+///
+/// @brief  強化画面を表示
+///
 void USmithPlayerView::ShowUpgradeMenu()
 {
   if (m_hpWidget != nullptr)
@@ -59,6 +63,9 @@ void USmithPlayerView::ShowUpgradeMenu()
   }
 }
 
+///
+/// @brief  強化画面を非表示
+///
 void USmithPlayerView::HideUpgradeMenu()
 {
   if (m_hpWidget != nullptr)
@@ -78,6 +85,9 @@ void USmithPlayerView::HideUpgradeMenu()
   }
 }
 
+///
+/// @brief  強化画面の情報を初期化する
+///
 void USmithPlayerView::InitEnhanceMenuInfo(const FSmithWeaponInfoHandle& InfoHandle, const TArray<UObject*>& ItemObjects)
 {
   if (m_upgradeWidget != nullptr)
@@ -88,6 +98,9 @@ void USmithPlayerView::InitEnhanceMenuInfo(const FSmithWeaponInfoHandle& InfoHan
 	}
 }
 
+///
+/// @brief  次のアイテムを選択する
+///
 void USmithPlayerView::SelectNextMenuItem(float SelectDirection)
 {
   using namespace MLibrary::UE::Audio;
@@ -109,12 +122,17 @@ void USmithPlayerView::SelectNextMenuItem(float SelectDirection)
   }
 }
 
-
+///
+/// @brief  今選択しているアイテムのインデックスを取得
+///
 int32 USmithPlayerView::GetSelectingItemIdx() const
 {
   return (m_upgradeWidget != nullptr) ? m_upgradeWidget->GetSelectingItemIdx() : -1;
 }
 
+///
+/// @brief  HPを更新する
+///
 void USmithPlayerView::SetHP(int32 CurrentHealth, int32 MaxHealth)
 {
   if (m_hpWidget != nullptr)
@@ -123,6 +141,9 @@ void USmithPlayerView::SetHP(int32 CurrentHealth, int32 MaxHealth)
   }
 }
 
+///
+/// @brief  薬草の数を設定する
+///
 void USmithPlayerView::SetHerbValue(int32 Value)
 {
   if (m_herbWidget != nullptr)
