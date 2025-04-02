@@ -108,26 +108,41 @@ namespace UE::Smith
           ///
           FSmithRect GetMap() const;
           ///
-          /// @brief 									セクションを取得
-          /// @param rowIdx 					行インデックス
-          /// @param columnIdx 				列インデックス
-          /// @return 								見つかったらセクションへのポインタを返す 見つからなかったら　nullptr　を返す
+          /// @brief                  セクションを取得
+          /// @param rowIdx           行インデックス
+          /// @param columnIdx        列インデックス
+          /// @return                 見つかったらセクションへのポインタを返す 見つからなかったら　nullptr　を返す
           ///
           FSmithSection* GetSection(uint8 rowIdx, uint8 columnIdx) const;
+
+          ///
+          /// @brief                  座標でセクションを取得
+          /// @param x                x座標
+          /// @param y                y座標
+          /// @return                 見つかったらセクションへのポインタを返す 見つからなかったら　nullptr　を返す
+          ///
           FSmithSection* GetSectionByCoord(uint8 x, uint8 y) const;
           /// 
-          /// @brief									セクションの左座標を取得
-          /// @param									列のインデックス(均等に生成するため)
-          /// @return									セクションの左座標
+          /// @brief                  (N-1)列インデックスでN列目セクションの左座標を取得
+          /// @param                  列のインデックス(均等に生成するため)
+          /// @return                 セクションの左座標
           ///
           uint8 GetSectionLeft(uint8 columnIdx) const;
           /// 
-          /// @brief									セクションの上座標を取得
-          /// @param									行のインデックス(均等に生成するため)
-          /// @return									セクションの上座標
+          /// @brief                  (N-1)行インデックスでN行目セクションの上座標を取得
+          /// @param                  行のインデックス(均等に生成するため)
+          /// @return                 セクションの上座標
           ///
           uint8 GetSectionTop(uint8 rowIdx) const;
+          ///
+          /// @brief                  マップの横幅を取得
+          /// @return                 横幅
+          ///
           uint8 GetMapWidth() const;
+          ///
+          /// @brief                  マップの高さを取得
+          /// @return                 高さ
+          ///
           uint8 GetMapHeight() const;
       #pragma endregion FSmithMap Interface
       // end of FSmithMap Interface

@@ -90,6 +90,7 @@ namespace UE::Smith
       TMap<FMapCoord, TSharedPtr<FObstacleTileInfoContainer>> tempObstacleTable;
       TMap<FMapCoord, TSharedPtr<FStaySpaceTileInfoContainer>> tempStaySpaceTable;
 
+      using enum ETileType;
       for (uint8 y = 0; y < mapRectHeight; ++y)
       {
         for (uint8 x = 0; x < mapRectWidth; ++x)
@@ -100,7 +101,7 @@ namespace UE::Smith
           switch (tileType)
           {
             // 壁
-            case ETileType::Wall:
+            case Wall:
             {
               if (!tempObstacleTable.Contains(coord))
               {
@@ -110,8 +111,8 @@ namespace UE::Smith
             break;
 
             // 地面
-            case ETileType::Ground:
-            case ETileType::Corridor:
+            case Ground:
+            case Corridor:
             {
               if (!tempStaySpaceTable.Contains(coord))
               {
@@ -120,9 +121,9 @@ namespace UE::Smith
             }
             break;
             
-            case ETileType::Void:
+            case Void:
             {
-
+              // 何もしない
             }
             break;
           }

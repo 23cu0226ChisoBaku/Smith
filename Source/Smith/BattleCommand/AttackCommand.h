@@ -82,6 +82,7 @@ namespace UE::Smith::Command
           m_animator->SwitchAnimation(SMITH_ANIM_IDLE);
         }
 
+        // ストラテジーを実行
         m_strategy();
       }
 

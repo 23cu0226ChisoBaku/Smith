@@ -16,8 +16,6 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
-
 UENUM(BlueprintType)
 enum class ETurnPriority : uint8
 {

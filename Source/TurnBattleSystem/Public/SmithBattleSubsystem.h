@@ -16,14 +16,12 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
-#include "ITurnManageableWrapper.h"
+
+#include "UObject/WeakInterfacePtr.h"
 #include "TurnPriority.h"
+
 #include "SmithBattleSubsystem.generated.h"
-
-DECLARE_MULTICAST_DELEGATE(FOnTurnFinishEvent);
-
 
 //---------------------------------------
 /*
@@ -33,6 +31,8 @@ DECLARE_MULTICAST_DELEGATE(FOnTurnFinishEvent);
 class IBattleCommand;
 class UBattleCommandManager;
 class IEventExecutor;
+class ITurnManageable;
+class FSmithBattleCommand;
 
 ///
 /// @brief バトルサブシステム
@@ -106,8 +106,8 @@ private:
   UPROPERTY()
   TObjectPtr<UBattleCommandManager> m_battleCmdMgr;
   // ターンマネジメントオブジェクトリスト
-  UPROPERTY()
-  TMap<ETurnPriority, FITurnManageableWrapper> m_priorityManageableLists;
+
+  TMap<ETurnPriority, TArray<TWeakInterfacePtr<ITurnManageable>>> m_priorityManageableLists;
 
 private:
 

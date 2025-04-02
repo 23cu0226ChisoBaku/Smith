@@ -72,6 +72,7 @@ namespace UE::Smith::Command
 
       void Update(float DeltaTime)
       {
+        // 移動ストラテジーを実行
         m_moveStrategy(DeltaTime);
 
         if (m_animator.IsValid())
@@ -90,6 +91,7 @@ namespace UE::Smith::Command
 
       bool IsFinished() const
       {
+        // 移動ストラテジーが完了したかを調べる
         return (bool)m_moveStrategy;
       }
 

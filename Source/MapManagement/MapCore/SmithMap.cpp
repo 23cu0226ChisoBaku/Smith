@@ -21,7 +21,6 @@ Encoding : UTF-8
 
 #include "MLibrary.h"
 #include "InvalidValues.h"
-#include "MLibrary.h"
 
 #include <limits>
 
@@ -91,6 +90,10 @@ namespace UE::Smith
         }
 
       public:
+
+        ///
+        /// @brief  マップを生成する（セクションは均等で生成される）
+        ///
         void GenerateMap(uint8 row, uint8 column, uint8 widthPerSection, uint8 heightPerSection, uint8 sectionGap, uint8 defaultValue)
         {
           // 入力値チェック
@@ -144,6 +147,10 @@ namespace UE::Smith
           m_sectionWidth = widthPerSection;
           m_sectionHeight = heightPerSection;
         }
+
+        ///
+        /// @brief  マップに部屋を生成する
+        /// 
         void GenerateRoom(uint8 sectionIdx, uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue)
         { 
           // 入力値チェック   
@@ -195,6 +202,10 @@ namespace UE::Smith
             }
           }      
         }
+
+        ///
+        /// @brief  生成した部屋を接続する
+        ///
         void ConnectRooms(uint8 corridorData)
         {
           // マップ初期化される前にこの以降は実行しない
@@ -252,22 +263,42 @@ namespace UE::Smith
             m_mapRect.SetRect(StaticCast<uint8>(corridorCoord.X), StaticCast<uint8>(corridorCoord.Y), corridorData);
           }
         }
+
+        ///
+        /// @brief  セクションの数を取得
+        ///
         int32 GetSectionCount() const
         {
           return m_sections.Num();
         }
+
+        ///
+        /// @brief  セクションの行数を取得
+        ///        
         uint8 GetRow() const
         {
           return m_row;
         }
+
+        ///
+        /// @brief  セクションの列数を取得
+        ///
         uint8 GetColumn() const
         {
           return m_column;
         }
+
+        ///
+        /// @brief  マップの矩形を取得
+        ///
         FSmithRect GetMapRect() const
         {
           return m_mapRect;
         }
+
+        ///
+        /// @brief  セクションを取得
+        /// 
         FSmithSection* GetSection(uint8 rowIdx, uint8 columnIdx) const
         {
           // 入力値チェック
@@ -286,6 +317,9 @@ namespace UE::Smith
           return m_sections[sectionIdx].Get();
         }
 
+        ///
+        /// @brief  座標でセクションを取得
+        ///
         FSmithSection* GetSectionByCoord(uint8 x, uint8 y) const
         {
           // 初期化チェック
@@ -306,6 +340,9 @@ namespace UE::Smith
           return GetSection(sectionRow, sectionColumn);
         }
 
+        /// 
+        /// @brief  (N-1)列インデックスでN列目セクションの左座標を取得
+        /// 
         uint8 GetSectionLeft(uint8 columnIdx) const
         {          
           // 入力値チェック（無効値255u）
@@ -317,7 +354,9 @@ namespace UE::Smith
           const uint8 sectionLeft = (columnIdx * m_sectionWidth) + ((columnIdx + 1) * m_sectionGap); 
           return sectionLeft;
         }
-        // TODO
+        /// 
+        /// @brief  (N-1)行インデックスでN行目セクションの上座標を取得
+        ///
         uint8 GetSectionTop(uint8 rowIdx) const
         {
           // 入力値チェック（無効値255u）
@@ -329,15 +368,23 @@ namespace UE::Smith
           const uint8 sectionTop = (rowIdx * m_sectionHeight) + ((rowIdx + 1) * m_sectionGap);  
           return sectionTop;
         }
+
+        ///
+        /// @brief  マップの横幅を取得
+        ///
         uint8 GetMapWidth() const
         {
           return m_mapRect.GetWidth();
         }
+
+        ///
+        /// @brief  マップの高さを取得
+        ///
         uint8 GetMapHeight() const
         {
           return m_mapRect.GetHeight();
         }
-      // TODO プライベート関数にする意味がない
+
       private:
         ///
         /// @brief              一番近い部屋を探す
@@ -393,7 +440,6 @@ namespace UE::Smith
               const uint8 centerX = roomFrom.OriginCoord.X > roomTo.OriginCoord.X ?
                                     StaticCast<uint8>(StaticCast<int32>(toRight + roomFrom.OriginCoord.X) / 2) :
                                     StaticCast<uint8>(StaticCast<int32>(fromRight + roomTo.OriginCoord.X) / 2) ;
-
               while (fromRandX != centerX)
               {
                 if (fromRandX < toRandX)
@@ -498,58 +544,72 @@ namespace UE::Smith
     FSmithMap::FSmithMap()
       : m_pImpl(::MakeUnique<MapImpl>())
     { }
+
     FSmithMap::~FSmithMap()
     {
       m_pImpl.Reset();
     }
+
     void FSmithMap::GenerateMap(uint8 row, uint8 column, uint8 widthPerSection, uint8 heightPerSection, uint8 sectionGap, uint8 defaultValue)
     {
       m_pImpl->GenerateMap(row, column, widthPerSection, heightPerSection, sectionGap, defaultValue);
     }
+
     void FSmithMap::GenerateRoom(uint8 sectionIdx, uint8 roomMinWidth, uint8 roomMaxWidth, uint8 roomMinHeight, uint8 roomMaxHeight, uint8 defaultValue)
     {
       m_pImpl->GenerateRoom(sectionIdx, roomMinWidth, roomMaxWidth, roomMinHeight, roomMaxHeight, defaultValue);
     }
+
     void FSmithMap::ConnectRooms(uint8 corridorData)
     {
       m_pImpl->ConnectRooms(corridorData);
     }
+
     int32 FSmithMap::GetSectionCount() const
     {
       return m_pImpl->GetSectionCount();
     }
+
     uint8 FSmithMap::GetRow() const
     {
       return m_pImpl->GetRow();
     }
+
     uint8 FSmithMap::GetColumn() const
     {
       return m_pImpl->GetColumn();
     }
+
     FSmithRect FSmithMap::GetMap() const
     {
       return m_pImpl->GetMapRect();
     }
+
     FSmithSection* FSmithMap::GetSection(uint8 rowIdx, uint8 columnIdx) const
     {
       return m_pImpl->GetSection(rowIdx, columnIdx);
     }
+
     FSmithSection* FSmithMap::GetSectionByCoord(uint8 x, uint8 y) const
     {
       return m_pImpl->GetSectionByCoord(x, y);
     }
+
     uint8 FSmithMap::GetSectionLeft(uint8 columnIdx) const
     {
       return m_pImpl->GetSectionLeft(columnIdx);
     }
+
     uint8 FSmithMap::GetSectionTop(uint8 rowIdx) const
     {
       return m_pImpl->GetSectionTop(rowIdx);
     }
+
     uint8 FSmithMap::GetMapWidth() const
     {
       return m_pImpl->GetMapWidth();
     }
+
     uint8 FSmithMap::GetMapHeight() const
     {
       return m_pImpl->GetMapHeight();

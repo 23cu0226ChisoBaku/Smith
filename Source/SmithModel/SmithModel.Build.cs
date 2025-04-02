@@ -7,7 +7,7 @@ public class SmithModel: ModuleRules
   public SmithModel(ReadOnlyTargetRules Target) : base(Target)
   {
 
-    PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", "MLibrary", "SmithGod", "Smith" });
+    PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", "MLibrary", "SmithGameplay", "Smith" });
 
     PrivateIncludePaths.AddRange(
                                   new string[]

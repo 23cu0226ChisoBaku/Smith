@@ -16,10 +16,14 @@ Encoding : UTF-8
 */
 
 #include "BattleCommandManager.h"
+
 #include "IBattleCommand.h"
+#include "ITurnManageable.h"
 #include "SmithBattleSubsystem.h"
 #include "IEventExecutor.h"
 #include "MLibrary.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BattleCommandManager)
 
 UBattleCommandManager::UBattleCommandManager(const FObjectInitializer& ObjectInitializer)
   : Super(ObjectInitializer)
@@ -41,11 +45,17 @@ void UBattleCommandManager::BeginDestroy()
   Reset();
 }
 
+///
+/// @brief  イベント処理クラスを登録
+///
 void UBattleCommandManager::AssignEventExecutor(IEventExecutor* eventExecutor)
 {
   m_eventExecutor = eventExecutor;
 }
 
+///
+///	@brief  コマンド受付リスト登録
+///
 void UBattleCommandManager::RegisterWaitList(const TArray<TWeakInterfacePtr<ITurnManageable>>& waitList)
 {
   for (const auto& waitObj : waitList)
@@ -59,17 +69,16 @@ void UBattleCommandManager::RegisterWaitList(const TArray<TWeakInterfacePtr<ITur
   }
 }
 
+///
+///	@brief  コマンドを登録する
+///
 void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedPtr<IBattleCommand>&& command)
 {
+  check(requester != nullptr);
   // コマンド実行中に登録禁止
   if (m_bIsExecutingCommand || !m_bCanRegister)
   {
     MDebug::LogError("Cant register during command executing");
-    return;
-  }
-
-  if (!IS_UINTERFACE_VALID(requester))
-  {
     return;
   }
 
@@ -105,6 +114,10 @@ void UBattleCommandManager::RegisterCommand(ITurnManageable* requester, TSharedP
   }
 }
 
+
+///
+/// @brief            貯めたコマンドを実行
+///
 void UBattleCommandManager::ExecuteCommands(float deltaTime)
 {
   if (!m_bIsExecutingCommand)
@@ -112,12 +125,14 @@ void UBattleCommandManager::ExecuteCommands(float deltaTime)
     return;
   }
 
+  // 貯めたコマンドを実行
   for(int32 i = 0; i < m_commandLists.Num(); ++i)
   {
     const auto& command = m_commandLists[i];
     if (command != nullptr)
     {
       command->Execute(deltaTime);
+      // 実行終了したらリストから外す
       if (command->IsFinish())
       {
         command->End();
@@ -145,11 +160,19 @@ void UBattleCommandManager::ExecuteCommands(float deltaTime)
     }
   }
 }
+
+///
+///	@brief            コマンドマネージャー初期化
+///
 void UBattleCommandManager::Initialize()
 {
   m_bCanRegister = true;
   m_bIsReset = false;
 }
+
+///
+///	@brief            コマンドマネージャーリセット
+///
 void UBattleCommandManager::Reset()
 {
   m_bIsReset = true;
@@ -159,8 +182,12 @@ void UBattleCommandManager::Reset()
   m_commandLists.Reset();
 }
 
-void UBattleCommandManager::CheckTurnManageableValidate()
+///
+/// @brief  ターン管理オブジェクトを有効状態に調整する
+///
+void UBattleCommandManager::ForceWaitListValidation()
 {
+  // 受付リストが空になったらコマンド処理を開始する
   if (m_requestCmdWaitList.Num() == 0)
   {
     m_bIsExecutingCommand = true;
@@ -176,6 +203,8 @@ void UBattleCommandManager::CheckTurnManageableValidate()
       }
     }
   }
+
+  // 無効のリストオブジェクトを削除
   int32 idx = 0;
   while (idx < m_requestCmdWaitList.Num())
   {

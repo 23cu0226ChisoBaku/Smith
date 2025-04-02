@@ -19,13 +19,11 @@ Encoding : UTF-8
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "TurnPriority.h"
-#include "ITurnManageable.generated.h"
 
-class IBattleCommand;
-class ITurnManageable;
+#include "TurnPriority.h"
+
+#include "ITurnManageable.generated.h"
 
 UINTERFACE(MinimalAPI)
 class UTurnManageable : public UInterface

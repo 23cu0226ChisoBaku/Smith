@@ -21,6 +21,8 @@ void SmithDefaultMoveStrategy::operator()(float DeltaTime)
 	const FVector curtLocation = MoveEntity->GetActorLocation();
 	const FVector leftDistanceVec = Destination - curtLocation;
 	FVector curtMovement = leftDistanceVec.GetSafeNormal() * DeltaTime * MoveSpeed;
+
+  // 移動ベクトルが残りベクトルを超えないように
 	if (curtMovement.SquaredLength() > leftDistanceVec.SquaredLength())
 	{
 		curtMovement = leftDistanceVec;
@@ -30,6 +32,7 @@ void SmithDefaultMoveStrategy::operator()(float DeltaTime)
 	MoveEntity->SetActorLocation(nextLocation);
 }
 
+//
 SmithDefaultMoveStrategy::operator bool() const noexcept
 {
   if (MoveEntity == nullptr)

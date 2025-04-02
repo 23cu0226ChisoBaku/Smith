@@ -60,7 +60,7 @@
 			]
 		},
 		{
-			"Name": "SmithGod",
+			"Name": "SmithGameplay",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [

@@ -56,8 +56,7 @@ namespace UE::Smith::Command
     private:
 
       float m_idleTimeCnt;
-
-      float m_idleTimeInterval;
+      float m_idleTimeInterval;   // コマンド待機時間
   };
 }
 

@@ -2,6 +2,7 @@
 
 
 #include "SmithBattleSubsystem.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "ITurnManageable.h"
 #include "IBattleCommand.h"
@@ -93,7 +94,7 @@ void USmithBattleSubsystem::InitializeBattle()
         m_priorityManageableLists.Emplace(actorPriority, {});
       }
       
-      m_priorityManageableLists[actorPriority].Elements.Add(manageInterface);
+      m_priorityManageableLists[actorPriority].Add(manageInterface);
     }
 
     if (m_battleCmdMgr != nullptr)
@@ -156,9 +157,9 @@ void USmithBattleSubsystem::registerNextTurnObjs()
     {
       int32 idx = 0;
     // 次のターンのオブジェクトへコマンド送信許可を下す
-      while (idx < m_priorityManageableLists[nextTurn].Elements.Num())
+      while (idx < m_priorityManageableLists[nextTurn].Num())
       {
-        auto nextTurnObj = m_priorityManageableLists[nextTurn].Elements[idx];
+        auto nextTurnObj = m_priorityManageableLists[nextTurn][idx];
         bool invalid = false;
 
         if (nextTurnObj.IsValid())
@@ -172,16 +173,16 @@ void USmithBattleSubsystem::registerNextTurnObjs()
 
         if (invalid)
         {
-          m_priorityManageableLists[nextTurn].Elements.RemoveAt(idx);
+          m_priorityManageableLists[nextTurn].RemoveAt(idx);
           continue;
         }
         ++idx;
       }
 
       // コマンド待ちリストを設定
-      if (m_priorityManageableLists[nextTurn].Elements.Num() > 0)
+      if (m_priorityManageableLists[nextTurn].Num() > 0)
       {
-        m_battleCmdMgr->RegisterWaitList(m_priorityManageableLists[nextTurn].Elements);
+        m_battleCmdMgr->RegisterWaitList(m_priorityManageableLists[nextTurn]);
         m_curtTurn = nextTurn;
         break;
       }
@@ -219,7 +220,7 @@ void USmithBattleSubsystem::Tick(float DeltaTime)
     }
     else
     {
-      m_battleCmdMgr->CheckTurnManageableValidate();
+      m_battleCmdMgr->ForceWaitListValidation();
     }
   }
 }
