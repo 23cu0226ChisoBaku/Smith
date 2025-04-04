@@ -3,7 +3,7 @@
 
 #include "SmithMapModelRepository.h"
 
-#include "SmithMapModelDefinition.h"
+#include "IMapModelGateway.h"
 #include "SmithTurnBattleWorldSettings.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SmithMapModelRepository)
@@ -43,21 +43,23 @@ void USmithMapModelRepository::Deinitialize()
   Super::Deinitialize();
 }
 
-void USmithMapModelRepository::InitializeMapModel(USmithMapModelDefinition* DefinitionAsset)
+void USmithMapModelRepository::InitializeMapModel(IMapModelGateway* ModelMapper)
 {
-  check(DefinitionAsset != nullptr);
-  check(DefinitionAsset->MapObjectActorClass != nullptr);
+  check(ModelMapper != nullptr);
 
-  if (m_models.Contains(DefinitionAsset->MapObjectActorClass))
+  TArray<const FSmithMapModel> models;
+  ModelMapper->GetAllModelDatas(models);
+
+  for(const FSmithMapModel& model : models)
   {
-    return;
+    UClass* modelClass = model.GetModelOwnerClass();
+    if (m_models.Contains(modelClass))
+    {
+      continue;
+    }
+
+    m_models.Add({modelClass, model});
   }
-
-  FSmithMapModel newModel = FSmithMapModel::CreateModel(DefinitionAsset);
-  check(newModel.IsValid());
-
-  m_models.Add({DefinitionAsset->MapObjectActorClass, newModel});
-
 }
 
 const FSmithMapModel USmithMapModelRepository::GetModel(AActor* Requester) const
@@ -71,7 +73,6 @@ const FSmithMapModel USmithMapModelRepository::GetModel(AActor* Requester) const
     return m_models[requesterClass];
   }
 
-  // TODO
-  return FSmithMapModel::CreateModel(nullptr);
+  return FSmithMapModel{};
 
 }

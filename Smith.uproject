@@ -67,6 +67,15 @@
 				"Engine",
 				"CoreUObject"
 			]
+		},
+		{
+			"Name": "SmithDatabase",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"CoreUObject"
+			]
 		}
 	],
 	"Plugins": [

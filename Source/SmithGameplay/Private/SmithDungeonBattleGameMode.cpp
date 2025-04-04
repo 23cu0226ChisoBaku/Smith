@@ -313,7 +313,8 @@ void ASmithDungeonBattleGameMode::initializeGame()
       {
         for (const auto& definition : MapModelDefinitions)
         {
-          mapModelRepository->InitializeMapModel(definition);
+          // TODO
+          //mapModelRepository->InitializeMapModel(definition);
         }
         m_mapSys->AssignMapModelRequester(mapModelRepository);
       }

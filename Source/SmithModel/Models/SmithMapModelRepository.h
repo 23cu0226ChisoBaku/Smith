@@ -8,6 +8,8 @@
 
 #include "SmithMapModelRepository.generated.h"
 
+class IMapModelGateway;
+
 
 /// @brief		ダンジョンモデルリポジトリ
 UCLASS()
@@ -23,7 +25,7 @@ public:
 	void Deinitialize() override final;
 	//---End of USubsystem Interface
 
-	void InitializeMapModel(USmithMapModelDefinition* DefinitionAsset);
+	void InitializeMapModel(IMapModelGateway* ModelMapper);
 
 	//---Begin of ISmithMapModelRequester Interface
 	const FSmithMapModel GetModel(AActor* Requester) const override; 

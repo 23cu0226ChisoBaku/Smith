@@ -45,16 +45,16 @@ void USmithBattleLogModelRepository::Deinitialize()
 
 void USmithBattleLogModelRepository::InitializeBattleLogModel(USmithBattleLogModelDefinition* DefinitionAsset)
 {
-  check(DefinitionAsset != nullptr);
-  check(DefinitionAsset->LogClass != nullptr);
+  // check(DefinitionAsset != nullptr);
+  // check(DefinitionAsset->LogClass != nullptr);
 
-  if (m_models.Contains(DefinitionAsset->LogClass))
-  {
-    return;
-  }
+  // if (m_models.Contains(DefinitionAsset->LogClass))
+  // {
+  //   return;
+  // }
 
-  FSmithBattleLogModel model = FSmithBattleLogModel::CreateModel(DefinitionAsset);
-  m_models.Add({DefinitionAsset->LogClass, model});
+  // FSmithBattleLogModel model = FSmithBattleLogModel::CreateModel(DefinitionAsset);
+  // m_models.Add({DefinitionAsset->LogClass, model});
 }
 
 const FSmithBattleLogModel USmithBattleLogModelRepository::GetModel(UObject* Requester) const
@@ -68,5 +68,5 @@ const FSmithBattleLogModel USmithBattleLogModelRepository::GetModel(UObject* Req
     return m_models[requesterClass];
   }
 
-  return FSmithBattleLogModel::CreateModel(nullptr);
+  return FSmithBattleLogModel{};
 }

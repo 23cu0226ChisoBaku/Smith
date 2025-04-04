@@ -32,8 +32,8 @@ Encoding : UTF-8
 */
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "ICommandMediator.generated.h"
 
 //---------------------------------------
@@ -41,7 +41,6 @@ Encoding : UTF-8
                   前方宣言
 */
 //---------------------------------------
-struct AttackHandle;
 struct FAttackHandle;
 struct FSmithSkillParameter;
 enum class EDirection : uint8;
@@ -55,7 +54,6 @@ namespace UE::Smith
   }
 }
 
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UCommandMediator : public UInterface
 {
@@ -66,19 +64,21 @@ class SMITH_API ICommandMediator
 {
   GENERATED_BODY()
 
-  // Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+
   /// @brief                移動コマンドを送る
   /// @param                移動請求者
   /// @param                移動方向
   /// @param moveDistance   移動距離
   /// @return 
   virtual bool SendMoveCommand(AActor*, EDirection, uint8 moveDistance) = 0;
+
   /// @brief                待機コマンドを送る
   /// @param                待機請求者
   /// @param idleTime       待機時間
   /// @return 
   virtual bool SendIdleCommand(AActor*, float idleTime = 0.0f) = 0;
+
   /// @brief                      攻撃コマンドを送る
   /// @param                      攻撃請求者
   /// @param                      攻撃方向
@@ -87,6 +87,7 @@ public:
   /// @param bAttackEvenNoTarget  攻撃対象がなくても攻撃を実行するかを示すフラグ
   /// @return 
   virtual bool SendAttackCommand(AActor*, EDirection, const UE::Smith::Battle::FSmithCommandFormat&, const FAttackHandle&, bool bAttackEvenNoTarget = true) = 0;
+  
   /// @brief                      スキルコマンドを送る
   /// @param                      スキル請求者
   /// @param                      スキルパラメーター

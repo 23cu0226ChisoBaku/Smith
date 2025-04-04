@@ -4,15 +4,10 @@
 
 #include "Engine/DataAsset.h"
 
+#include "MapModelType.h"
+
 #include "SmithMapModelDefinition.generated.h"
 
-UENUM()
-enum class EMapModelType : uint8
-{
-  Player UMETA(DisplayName = "Player"),
-  Enemy UMETA(DisplayName = "Enemy"),
-  TypeCount UMETA(Hidden),
-};	
 
 /// @brief ダンジョンで配置するオブジェクトデータ構造体
 USTRUCT()
@@ -37,7 +32,7 @@ struct FSmithMapModelData
 
 /// @brief 			ダンジョンに配置するオブジェクトモデル定義アセット
 UCLASS(BlueprintType, Blueprintable, Const, meta = (DisplayName = "Smith Map Object Definition Asset", ShortTooltip = "Data asset to define map object data"))
-class SMITHMODEL_API USmithMapModelDefinition : public UDataAsset
+class USmithMapModelDefinition : public UDataAsset
 {
   GENERATED_BODY()
 

@@ -3,5 +3,5 @@
   #include "CoreMinimal.h"
   #include "Modules/ModuleManager.h"
  
-	IMPLEMENT_MODULE(FDefaultModuleImpl, SmithGod);
+	IMPLEMENT_MODULE(FDefaultModuleImpl, SmithGameplay);
  

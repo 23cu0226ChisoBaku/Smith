@@ -4,10 +4,9 @@
 
 #include "UObject/Interface.h"
 
-#include "SmithMapModel.h"
+#include "MapManagement/MapDataModel/SmithMapModel.h"
 
 #include "ISmithMapModelRequester.generated.h"
-
 
 UINTERFACE(MinimalAPI)
 class USmithMapModelRequester : public UInterface

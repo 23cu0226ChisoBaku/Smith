@@ -9,7 +9,7 @@ public class SmithGameplay: ModuleRules
 
     PublicDependencyModuleNames.AddRange(new string[] {"Core" , "CoreUObject" , "Engine", 
                                                        "MLibrary", "TurnBattleSystem", "MapManagement", 
-                                                       "SmithModel", "Smith", "UMG" , "Niagara", "SmithModelInitializer"});
+                                                       "SmithModel", "Smith", "UMG" , "Niagara", "SmithModelInitializer", "SmithDatabase"});
 
     PrivateIncludePaths.AddRange(
                                   new string[]{ 

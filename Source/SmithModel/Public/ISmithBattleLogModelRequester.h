@@ -4,11 +4,10 @@
 
 #include "UObject/Interface.h"
 
-#include "SmithBattleLogModel.h"
+#include "SmithGameplay/Models/SmithBattleLogModel.h"
 
 #include "ISmithBattleLogModelRequester.generated.h"
 
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class USmithBattleLogModelRequester : public UInterface
 {

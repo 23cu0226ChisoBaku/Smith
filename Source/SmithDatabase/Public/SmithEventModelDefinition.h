@@ -27,7 +27,7 @@ struct FSmithEventModelData
 
 /// @brief  イベントモデル定義アセット
 UCLASS(BlueprintType, Blueprintable, Const)
-class SMITHMODEL_API USmithEventModelDefinition : public UDataAsset
+class USmithEventModelDefinition : public UDataAsset
 {
   GENERATED_BODY()
 

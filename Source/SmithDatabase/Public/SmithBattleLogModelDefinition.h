@@ -4,19 +4,9 @@
 
 #include "Engine/DataAsset.h"
 
-#include "SmithBattleLogModelDefinition.generated.h"
+#include "SmithGameplay/Models/BattleLogType.h"
 
-/// @brief  バトルログタイプ
-/// リッチテキスト変換に使う
-UENUM()
-enum class EBattleLogModelType : uint8
-{
-	Player,
-	Enemy,
-	Item,
-	Enhance,
-	ModelTypeCount UMETA(Hidden),
-};
+#include "SmithBattleLogModelDefinition.generated.h"
 
 /// @brief	バトルログモデルデータ
 USTRUCT()
@@ -38,7 +28,7 @@ struct FBattleLogModelData
 
 /// @brief	バトルログモデル定義アセット
 UCLASS(BlueprintType, Blueprintable, Const)
-class SMITHMODEL_API USmithBattleLogModelDefinition : public UDataAsset
+class USmithBattleLogModelDefinition : public UDataAsset
 {
 	GENERATED_BODY()
 	
