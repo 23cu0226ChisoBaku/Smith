@@ -27,9 +27,9 @@ class UMinimapDisplayTypeFactory;
 class UGameLogWidget;
 class UScreenFade;
 
-class USmithMapModelDefinition;
-class USmithBattleLogModelDefinition;
-class USmithEventModelDefinition;
+class UMapModelMapper;
+class UEventModelMapper;
+class UBattleLogModelMapper;
 
 namespace UE::Smith
 {
@@ -174,14 +174,14 @@ private:
 	UPROPERTY()
 	TObjectPtr<UMinimapDisplayTypeFactory> m_factory;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Model|Map")
-	TArray<TObjectPtr<USmithMapModelDefinition>> MapModelDefinitions;
+	UPROPERTY(EditDefaultsOnly, Category = "ModelMapper", meta = (MustImplement = "MapModelGateway"))
+	TObjectPtr<UMapModelMapper> MapModelMapper;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Model|Log")
-	TArray<TObjectPtr<USmithBattleLogModelDefinition>> LogModelDefinitions;
+	UPROPERTY(EditDefaultsOnly, Category = "ModelMapper", meta = (MustImplement = "BattleLogModelGateway"))
+	TObjectPtr<UBattleLogModelMapper> LogModelMapper;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Model|EventLog")
-	TArray<TObjectPtr<USmithEventModelDefinition>> EventModelDefinitions;
+	UPROPERTY(EditDefaultsOnly, Category = "ModelMapper", meta = (MustImplement = "EventModelGateway"))
+	TObjectPtr<UEventModelMapper> EventModelMapper;
 
 private:
 	TSharedPtr<UE::Smith::Map::FSmithMapSystem> m_mapSys;

@@ -24,7 +24,7 @@ public class Smith : ModuleRules
 																							"Smith/Components",
 																							"Smith/Event",
 																							"Smith/Enemies",
-																							"Smith",
+																							"Smith/Models",
 																							"Smith/Pickable",
 																							"SmithModel/DataTableTypes",
 																							"SmithModel/Models",

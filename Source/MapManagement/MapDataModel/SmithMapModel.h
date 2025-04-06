@@ -13,18 +13,12 @@ class AActor;
 struct MAPMANAGEMENT_API FSmithMapModel
 {
   friend class USmithMapModelRepository;
-  friend class UMapModelMapper;
 
   private:
   
     FSmithMapModel();
 
     static FSmithMapModel CreateModel(UClass* ActorClass, uint8 SizeX, uint8 SizeY, EMapModelType MapModelType);
-
-    UClass* GetModelOwnerClass() const
-    {
-      return m_actorClass;
-    }
 
   public:
 

@@ -2,13 +2,12 @@
 
 
 #include "SmithTowerEnemyParamInitializer.h"
+
 #include "SmithEnemyParamInitializerRow.h"
 
 USmithTowerEnemyParamInitializer::USmithTowerEnemyParamInitializer()
   : m_paramList{}
-{
-  
-}
+{ }
 
 void USmithTowerEnemyParamInitializer::BeginDestroy()
 {
@@ -17,15 +16,12 @@ void USmithTowerEnemyParamInitializer::BeginDestroy()
   Super::BeginDestroy();
 }
 
-void USmithTowerEnemyParamInitializer::AssignEnemyParamList(UDataTable* paramList)
+void USmithTowerEnemyParamInitializer::AssignEnemyParamList(UDataTable* ParamList)
 {
-  if (paramList == nullptr)
-  {
-    return;
-  }
+  check(ParamList != nullptr);
 
-  TArray<FSmithEnemyParamInitializerRow*> tableRows;
-  paramList->GetAllRows<FSmithEnemyParamInitializerRow>(nullptr, tableRows);
+  TArray<FSmithEnemyParamInitializerRow*> tableRows{};
+  ParamList->GetAllRows<FSmithEnemyParamInitializerRow>(nullptr, tableRows);
 
   for (const auto& row : tableRows)
   {
@@ -40,7 +36,7 @@ void USmithTowerEnemyParamInitializer::AssignEnemyParamList(UDataTable* paramLis
 
 FParams USmithTowerEnemyParamInitializer::Initialize(SmallGolem, int32 currentLevel)
 {
-  const FString tag = TEXT("SmallGolem");
+  const FString tag = SmallGolem::NAME;
   if (!m_paramList.Contains(tag))
   {
     return FParams{};
@@ -56,7 +52,7 @@ FParams USmithTowerEnemyParamInitializer::Initialize(SmallGolem, int32 currentLe
 }
 FParams USmithTowerEnemyParamInitializer::Initialize(Dragon, int32 currentLevel)
 {
-  const FString tag = TEXT("Dragon");
+  const FString tag = Dragon::NAME;
   if (!m_paramList.Contains(tag))
   {
     return FParams{};
@@ -64,9 +60,9 @@ FParams USmithTowerEnemyParamInitializer::Initialize(Dragon, int32 currentLevel)
 
   return m_paramList[tag];
 }
-FParams USmithTowerEnemyParamInitializer::Initialize(HerbGolem,int32 currentLevel)
+FParams USmithTowerEnemyParamInitializer::Initialize(HerbGolem, int32 currentLevel)
 {
-  const FString tag = TEXT("HerbGolem");
+  const FString tag = HerbGolem::NAME;
   if (!m_paramList.Contains(tag))
   {
     return FParams{};

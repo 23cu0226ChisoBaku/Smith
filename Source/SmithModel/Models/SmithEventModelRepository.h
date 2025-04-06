@@ -8,7 +8,7 @@
 
 #include "SmithEventModelRepository.generated.h"
 
-class USmithEventModelDefinition;
+class IEventModelGateway;
 
 /// @brief  イベントモデルリポジトリ
 UCLASS()
@@ -23,7 +23,7 @@ class SMITHMODEL_API USmithEventModelRepository : public UWorldSubsystem , publi
   void Deinitialize() override final;
   //---End of USubsystem Interface
 
-  void InitializeEventModel(USmithEventModelDefinition* DefinitionAsset);
+  void InitializeEventModel(IEventModelGateway* ModelMapper);
 
   //---Begin of ISmithEventModelRequester Interface
   const FSmithEventModel GetModel(UObject* Requester) const override;

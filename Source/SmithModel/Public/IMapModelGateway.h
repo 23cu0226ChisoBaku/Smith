@@ -4,20 +4,31 @@
 
 #include "UObject/Interface.h"
 
+#include "MapModelType.h"
+
 #include "IMapModelGateway.generated.h"
 
-struct FSmithMapModel;
+struct SMITHMODEL_API FMapModelDTO
+{
+  TSubclassOf<AActor> ActorClass;
+  uint8 SizeX = 0u;
+  uint8 SizeY = 0u;
+  EMapModelType Type = EMapModelType::TypeCount;
+};
+
+bool SMITHMODEL_API operator==(const FMapModelDTO& Lhs, const FMapModelDTO Rhs);
 
 UINTERFACE(MinimalAPI)
 class UMapModelGateway : public UInterface
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 };
 
 class SMITHMODEL_API IMapModelGateway
 {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-	virtual int32 GetAllModelDatas(TArray<const FSmithMapModel>& Datas) const = 0;
+
+  virtual int32 ReadAll(TArray<FMapModelDTO>& ModelDTOs) const = 0;
 };

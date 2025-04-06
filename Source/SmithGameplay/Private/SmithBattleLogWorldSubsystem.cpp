@@ -3,14 +3,12 @@
 
 #include "SmithBattleLogWorldSubsystem.h"
 
-#include "SmithTurnBattleWorldSettings.h"
 #include "GameLogWidget.h"
-#include "ISmithEventLogger.h"
-#include "MLibrary.h"
-
 #include "ISmithBattleLogModelRequester.h"
-#include "SmithBattleLogModelDefinition.h"
+#include "ISmithEventLogger.h"
 #include "ISmithEventModelRequester.h"
+#include "MLibrary.h"
+#include "SmithTurnBattleWorldSettings.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SmithBattleLogWorldSubsystem)
 

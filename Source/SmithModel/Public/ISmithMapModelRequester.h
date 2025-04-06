@@ -4,7 +4,7 @@
 
 #include "UObject/Interface.h"
 
-#include "MapManagement/MapDataModel/SmithMapModel.h"
+#include "SmithMapModel.h"
 
 #include "ISmithMapModelRequester.generated.h"
 
@@ -13,7 +13,6 @@ class USmithMapModelRequester : public UInterface
 {
 	GENERATED_BODY()
 };
-
 
 class SMITHMODEL_API ISmithMapModelRequester
 {

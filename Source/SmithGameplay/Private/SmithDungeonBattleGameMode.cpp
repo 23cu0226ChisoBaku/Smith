@@ -49,6 +49,10 @@
 #include "SmithBattleLogModelRepository.h"
 #include "SmithEventModelRepository.h"
 
+#include "MapModelMapper.h"
+#include "EventModelMapper.h"
+#include "BattleLogModelMapper.h"
+
 #include "MLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SmithDungeonBattleGameMode)
@@ -311,11 +315,7 @@ void ASmithDungeonBattleGameMode::initializeGame()
       USmithMapModelRepository* mapModelRepository = world->GetSubsystem<USmithMapModelRepository>();
       if (mapModelRepository != nullptr)
       {
-        for (const auto& definition : MapModelDefinitions)
-        {
-          // TODO
-          //mapModelRepository->InitializeMapModel(definition);
-        }
+        mapModelRepository->InitializeMapModel(MapModelMapper);
         m_mapSys->AssignMapModelRequester(mapModelRepository);
       }
     }
@@ -353,21 +353,16 @@ void ASmithDungeonBattleGameMode::initializeGame()
       USmithBattleLogModelRepository* logModelRepository = world->GetSubsystem<USmithBattleLogModelRepository>();
       if (logModelRepository != nullptr)
       {
-        for (const auto& definition : LogModelDefinitions)
-        {
-          logModelRepository->InitializeBattleLogModel(definition);
-        }
+        logModelRepository->InitializeBattleLogModel(LogModelMapper);
       }
 
       USmithEventModelRepository* eventModelRepository = world->GetSubsystem<USmithEventModelRepository>();
       if (eventModelRepository != nullptr)
       {
-        for (const auto& definition : EventModelDefinitions)
-        {
-          eventModelRepository->InitializeEventModel(definition);
-        }
+        eventModelRepository->InitializeEventModel(EventModelMapper);
+        m_logSubsystem->AssignLogRepository(logModelRepository, eventModelRepository);
+
       }
-      m_logSubsystem->AssignLogRepository(logModelRepository, eventModelRepository);
     }
     
     // リザルト変数初期化

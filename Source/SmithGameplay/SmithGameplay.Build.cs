@@ -11,7 +11,7 @@ public class SmithGameplay: ModuleRules
                                                        "MLibrary", "TurnBattleSystem", "MapManagement", 
                                                        "SmithModel", "Smith", "UMG" , "Niagara", "SmithModelInitializer", "SmithDatabase"});
 
-    PrivateIncludePaths.AddRange(
+    PublicIncludePaths.AddRange(
                                   new string[]{ 
                                                 "Smith",
                                                 "Smith/BattleCommand",
@@ -20,6 +20,7 @@ public class SmithGameplay: ModuleRules
                                                 "Smith/Enemies",
                                                 "Smith/Player",
                                                 "Smith/Event",
+                                                "Smith/Models",
                                                 "SmithModel/DataTableTypes",
                                                 "SmithModel/Models",
                                               }

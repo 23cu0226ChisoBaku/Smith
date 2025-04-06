@@ -8,7 +8,7 @@
 
 #include "SmithBattleLogModelRepository.generated.h"
 
-class USmithBattleLogModelDefinition;
+class IBattleLogModelGateway;
 
 /// @brief  バトルログモデルリポジトリ
 UCLASS()
@@ -23,7 +23,7 @@ public:
   void Deinitialize() override final;
   //---End of USubsystem Interface
 
-  void InitializeBattleLogModel(USmithBattleLogModelDefinition* DefinitionAsset);
+  void InitializeBattleLogModel(IBattleLogModelGateway* ModelMapper);
 
   //---Begin of ISmithBattleLogModelRequester
   const FSmithBattleLogModel GetModel(UObject* Requester) const override;

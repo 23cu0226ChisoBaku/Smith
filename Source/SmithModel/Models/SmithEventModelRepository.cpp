@@ -3,7 +3,7 @@
 
 #include "SmithEventModelRepository.h"
 
-#include "SmithEventModelDefinition.h"
+#include "IEventModelGateway.h"
 #include "SmithTurnBattleWorldSettings.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SmithEventModelRepository)
@@ -43,21 +43,28 @@ void USmithEventModelRepository::Deinitialize()
   Super::Deinitialize();
 }
 
-void USmithEventModelRepository::InitializeEventModel(USmithEventModelDefinition* DefinitionAsset)
+void USmithEventModelRepository::InitializeEventModel(IEventModelGateway* ModelMapper)
 {
-  check(DefinitionAsset != nullptr);
-  check(DefinitionAsset->EventClass != nullptr);
+  check(ModelMapper != nullptr);
 
-  UClass* eventClass = DefinitionAsset->EventClass;
-
-  if (m_models.Contains(eventClass))
+  TArray<FEventModelDTO> modelDTOs{};
+  int32 dtoCount = ModelMapper->ReadAll(modelDTOs);
+  if (dtoCount <= 0)
   {
     return;
   }
 
-  FSmithEventModel model = FSmithEventModel::CreateModel(DefinitionAsset);
-  m_models.Add({eventClass, model});
+  for (const FEventModelDTO& dto : modelDTOs)
+  {
+    UClass* eventClass = dto.EventClass;
+    if ((eventClass == nullptr) || m_models.Contains(eventClass))
+    {
+      continue;
+    }
 
+    FSmithEventModel newModel = FSmithEventModel::CreateModel(dto.EventClass, dto.SucceededMsg, dto.FailedMsg);
+    m_models.Add({eventClass, newModel});
+  }
 }
 
 const FSmithEventModel USmithEventModelRepository::GetModel(UObject* Requester) const
@@ -71,7 +78,7 @@ const FSmithEventModel USmithEventModelRepository::GetModel(UObject* Requester) 
     return m_models[requesterClass];
   }
 
-  return FSmithEventModel::CreateModel(nullptr);
+  return FSmithEventModel{};
 }
 
 

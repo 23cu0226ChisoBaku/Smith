@@ -11,5 +11,5 @@ enum class EBattleLogModelType : uint8
 	Enemy,
 	Item,
 	Enhance,
-	ModelTypeCount UMETA(Hidden),
+	TypeCount UMETA(Hidden),
 };

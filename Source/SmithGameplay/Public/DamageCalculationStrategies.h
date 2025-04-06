@@ -8,7 +8,7 @@ struct FBattleAttackParamHandle;
 struct FBattleDefenseParamHandle;
 struct FBattleResult;
 
-UENUM(BlueprintType)
+UENUM()
 enum class DamageCalculationStrategyType : uint8
 {
 	Default UMETA(DisplayName = "Only use Attack power", ToolTip = "攻撃力だけダメージに反映する"),
@@ -16,7 +16,7 @@ enum class DamageCalculationStrategyType : uint8
 };
 
 // DCS(Damage Calculation Strategy)
-USTRUCT(BlueprintType)
+USTRUCT()
 struct FSmithDefaultDCS
 {
 	GENERATED_BODY()
@@ -24,7 +24,7 @@ struct FSmithDefaultDCS
 	FBattleResult operator()(FBattleAttackParamHandle ATKHandle, FBattleDefenseParamHandle DEFHandle) const;
 };
 
-USTRUCT(BlueprintType)
+USTRUCT()
 struct FSmithReductionRateDCS
 {
 	GENERATED_BODY()

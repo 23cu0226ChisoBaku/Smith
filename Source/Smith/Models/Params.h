@@ -5,9 +5,8 @@
 #include "Params.generated.h"
 
 USTRUCT(BlueprintType)
-struct SMITHMODEL_API FParams
+struct SMITH_API FParams
 {
-
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
@@ -22,8 +21,8 @@ struct SMITHMODEL_API FParams
 	UPROPERTY(EditAnywhere)
 	int32 CRT;
 
-	FParams& operator+=(const FParams&);
+	FParams& operator+=(const FParams& Rhs);
 };
 
-FParams operator+(const FParams& lhs, const FParams& rhs);
+FParams SMITH_API operator+(const FParams& Lhs, const FParams& Rhs);
 

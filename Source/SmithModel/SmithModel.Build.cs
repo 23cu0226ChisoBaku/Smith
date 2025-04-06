@@ -17,9 +17,16 @@ public class SmithModel: ModuleRules
                                   {
                                     "SmithModel/DataTableTypes",
                                     "SmithModel/Models",
-                                    "MapManagement/MapDataModel",
                                   }
                                 );
+
+    PublicIncludePaths.AddRange(
+                                  new string[]
+                                  {
+                                    "MapManagement/MapDataModel",
+                                    "Smith/Models",
+                                  }
+                               );
 
   }
 

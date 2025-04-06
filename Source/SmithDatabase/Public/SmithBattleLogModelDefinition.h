@@ -4,7 +4,7 @@
 
 #include "Engine/DataAsset.h"
 
-#include "SmithGameplay/Models/BattleLogType.h"
+#include "BattleLogType.h"
 
 #include "SmithBattleLogModelDefinition.generated.h"
 

@@ -19,11 +19,26 @@ public class SmithDatabase : ModuleRules
                                           }
                                         );
 
-    PrivateIncludePaths.AddRange(
+    PublicIncludePaths.AddRange(
                                   new string[]
                                   {
                                     "MapManagement/MapDataModel",
                                     "SmithGameplay/Models",
+                                    "Smith/Equipment",
+                                  }
+                                );
+
+    PrivateDependencyModuleNames.AddRange(
+                                            new string[]
+                                            {
+                                              "Smith",
+                                            }
+                                         );
+    
+    PrivateIncludePaths.AddRange(
+                                  new string[]
+                                  {
+                                    
                                   }
                                 );
 

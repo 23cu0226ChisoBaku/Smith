@@ -6,7 +6,7 @@
 FSmithBattleLogModel::FSmithBattleLogModel()
   : m_logModelClass(nullptr)
   , m_name{}
-  , m_type(EBattleLogModelType::ModelTypeCount)
+  , m_type(EBattleLogModelType::TypeCount)
 { }
 
 FSmithBattleLogModel FSmithBattleLogModel::CreateModel(UClass* LogModelClass, const FString& Name, EBattleLogModelType Type)
@@ -25,7 +25,7 @@ bool FSmithBattleLogModel::IsValid() const
 {
   if (   (m_logModelClass == nullptr)
       || (m_name.IsEmpty())
-      || (StaticCast<uint8>(m_type) >= (uint8)EBattleLogModelType::ModelTypeCount)
+      || (StaticCast<uint8>(m_type) >= (uint8)EBattleLogModelType::TypeCount)
      )
     {
       return false;

@@ -14,7 +14,6 @@ class SMITHGAMEPLAY_API USmithLootGameInstanceSubsystem : public UGameInstanceSu
 {
 	GENERATED_BODY()
 
-private:
 	struct LootListElement
 	{
 		TArray<FSmithPickableLootHandle> LootHandleList;
@@ -27,8 +26,10 @@ public:
 	void AssignLootList(UDataTable*);
 
 public:
+
 	IPickable* GetLoot(const FString& EnemyTypeName) const override final;
 
 private:
+
 	TMap<FString, LootListElement> m_lootList;
 };

@@ -3,7 +3,7 @@
 
 #include "SmithBattleLogModelRepository.h"
 
-#include "SmithBattleLogModelDefinition.h"
+#include "IBattleLogModelGateway.h"
 #include "SmithTurnBattleWorldSettings.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SmithBattleLogModelRepository)
@@ -43,18 +43,28 @@ void USmithBattleLogModelRepository::Deinitialize()
   Super::Deinitialize();
 }
 
-void USmithBattleLogModelRepository::InitializeBattleLogModel(USmithBattleLogModelDefinition* DefinitionAsset)
+void USmithBattleLogModelRepository::InitializeBattleLogModel(IBattleLogModelGateway* ModelMapper)
 {
-  // check(DefinitionAsset != nullptr);
-  // check(DefinitionAsset->LogClass != nullptr);
+  check(ModelMapper != nullptr);
 
-  // if (m_models.Contains(DefinitionAsset->LogClass))
-  // {
-  //   return;
-  // }
+  TArray<FBattleLogModelDTO> modelDTOs{};
+  int32 count = ModelMapper->ReadAll(modelDTOs);
+  if (count <= 0)
+  {
+    return;
+  }
 
-  // FSmithBattleLogModel model = FSmithBattleLogModel::CreateModel(DefinitionAsset);
-  // m_models.Add({DefinitionAsset->LogClass, model});
+  for (const FBattleLogModelDTO& dto : modelDTOs)
+  {
+    UClass* modelClass = dto.LogModelClass;
+    if ((modelClass == nullptr) || m_models.Contains(modelClass))
+    {
+      continue;
+    }
+
+    FSmithBattleLogModel model = FSmithBattleLogModel::CreateModel(dto.LogModelClass, dto.Name, dto.LogType);
+    m_models.Add({modelClass, model});
+  }
 }
 
 const FSmithBattleLogModel USmithBattleLogModelRepository::GetModel(UObject* Requester) const

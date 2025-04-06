@@ -47,18 +47,24 @@ void USmithMapModelRepository::InitializeMapModel(IMapModelGateway* ModelMapper)
 {
   check(ModelMapper != nullptr);
 
-  TArray<const FSmithMapModel> models;
-  ModelMapper->GetAllModelDatas(models);
-
-  for(const FSmithMapModel& model : models)
+  TArray<FMapModelDTO> modelDTOs{};
+  int32 dtoCount = ModelMapper->ReadAll(modelDTOs);
+  if (dtoCount <= 0)
   {
-    UClass* modelClass = model.GetModelOwnerClass();
-    if (m_models.Contains(modelClass))
+    return;
+  }
+  
+  for(const FMapModelDTO& DTO : modelDTOs)
+  {
+    UClass* modelClass = DTO.ActorClass;
+    if ((modelClass == nullptr) || m_models.Contains(modelClass))
     {
       continue;
     }
 
-    m_models.Add({modelClass, model});
+    FSmithMapModel newModel = FSmithMapModel::CreateModel(DTO.ActorClass, DTO.SizeX, DTO.SizeY, DTO.Type);
+
+    m_models.Add({modelClass, newModel});
   }
 }
 
