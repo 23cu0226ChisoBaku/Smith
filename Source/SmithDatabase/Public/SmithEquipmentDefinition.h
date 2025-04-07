@@ -6,6 +6,27 @@
 
 #include "SmithEquipmentDefinition.generated.h"
 
+USTRUCT()
+struct FEquipmentModelData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Equipment Name"))
+	FString Name;
+
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Icon Image"))
+	TObjectPtr<UTexture2D> ImageTexture;
+
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Additional Hit Points"))
+	int32 ExtraHitPoints;
+
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Additional Attack"))
+	int32 ExtraAttack;
+
+	UPROPERTY(EditDefaultsOnly, meta = (DisplayName = "Additional Defense"))
+	int32 ExtraDefense;
+};
+
 
 
 UCLASS(Blueprintable, Const, Abstract)
@@ -19,5 +40,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Smith|Equipment", meta = (DisplayName = "EquipmentType"))
 	TSubclassOf<class USmithEquipmentInstance> InstanceType;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Smith|Equipment", meta = (DisplayName = "Equipment Information"))
+	FEquipmentModelData Data;
 	
 };

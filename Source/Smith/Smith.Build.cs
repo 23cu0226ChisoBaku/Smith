@@ -17,15 +17,16 @@ public class Smith : ModuleRules
 
 		PrivateIncludePaths.AddRange(new string[] 
 																						{
-																							"Smith/BattleCommand",
-																							"Smith/Player",
 																							"Smith/AI",
-																							"Smith/UI",
+																							"Smith/BattleCommand",
 																							"Smith/Components",
-																							"Smith/Event",
 																							"Smith/Enemies",
+																							"Smith/Equipment",
+																							"Smith/Event",
 																							"Smith/Models",
 																							"Smith/Pickable",
+																							"Smith/Player",
+																							"Smith/UI",
 																							"SmithModel/DataTableTypes",
 																							"SmithModel/Models",
 																						});

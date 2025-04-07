@@ -14,7 +14,7 @@ class USmithMapModelRequester : public UInterface
 	GENERATED_BODY()
 };
 
-class SMITHMODEL_API ISmithMapModelRequester
+class MAPMANAGEMENT_API ISmithMapModelRequester
 {
 	GENERATED_BODY()
 

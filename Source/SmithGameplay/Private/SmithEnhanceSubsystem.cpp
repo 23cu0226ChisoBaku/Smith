@@ -51,14 +51,14 @@ void USmithEnhanceSubsystem::Enhance(IEnhanceable* enhanceable, IParamAbsorbable
     return;
   }
 
-  enhanceable->Upgrade(absorbItem);
+  enhanceable->Enhance(absorbItem);
 
   if (m_logSystem != nullptr)
   {
     m_logSystem->SendEnhanceLog(enhanceable->_getUObject());
   }
   
-  enhanceable->OnUpgraded();
+  enhanceable->OnEnhanced();
   ++m_upgradeCount;
 
 }

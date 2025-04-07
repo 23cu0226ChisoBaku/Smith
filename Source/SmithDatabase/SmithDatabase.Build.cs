@@ -13,6 +13,7 @@ public class SmithDatabase : ModuleRules
                                           { "Core", 
                                             "CoreUObject", 
                                             "Engine", 
+                                            "Smith",
                                             "SmithModel",
                                             "SmithGameplay",
                                             "MapManagement",

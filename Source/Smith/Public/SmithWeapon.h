@@ -47,8 +47,8 @@ public:
 
 public:
 	//---Begin of IEnhanceable Interface
-	virtual void Upgrade(IParamAbsorbable*) override;
-	virtual void OnUpgraded() override;
+	virtual void Enhance(IParamAbsorbable*) override;
+	virtual void OnEnhanced() override;
 	//---End of IEnhanceable Interface
 	
 	void SetParam(FParams);

@@ -9,4 +9,5 @@
 USmithEquipmentDefinition::USmithEquipmentDefinition()
 {
   InstanceType = USmithEquipmentInstance::StaticClass();
+  Data.ImageTexture = nullptr;
 }

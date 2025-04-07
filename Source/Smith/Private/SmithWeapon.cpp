@@ -20,7 +20,7 @@ void USmithWeapon::BeginDestroy()
   WeaponParam = FParams{};
 }
 
-void USmithWeapon::Upgrade(IParamAbsorbable* absorbItem)
+void USmithWeapon::Enhance(IParamAbsorbable* absorbItem)
 {
   if (absorbItem == nullptr)
   {
@@ -38,7 +38,7 @@ void USmithWeapon::Upgrade(IParamAbsorbable* absorbItem)
   ++m_weaponLevel;
 }
 
-void USmithWeapon::OnUpgraded()
+void USmithWeapon::OnEnhanced()
 {
   using namespace MLibrary::UE::Audio;
   AudioKit::PlaySE(TEXT("Hit_Iron_1"));
