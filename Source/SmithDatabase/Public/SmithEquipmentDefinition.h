@@ -41,7 +41,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Smith|Equipment", meta = (DisplayName = "EquipmentType"))
 	TSubclassOf<class USmithEquipmentInstance> InstanceType;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Smith|Equipment", meta = (DisplayName = "Equipment Information"))
+	UPROPERTY(EditDefaultsOnly, Category = "Smith|Equipment", meta = (DisplayName = "EquipmentInformation"))
 	FEquipmentModelData Data;
 	
 };
