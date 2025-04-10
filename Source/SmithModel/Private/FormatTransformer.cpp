@@ -76,15 +76,17 @@ namespace UE::Smith
     {
       const uint64 srcFormatRow = src.GetRow();
       const uint64 srcFormatColumn = src.GetColumn();
+      check((srcFormatRow > 0) && (srcFormatColumn > 0));
+
       uint64 rotatedFormatRow = 0;
       uint64 rotatedFormatColumn = 0;
-      check((srcFormatRow > 0) && (srcFormatColumn > 0)) 
-
       FSmithCommandFormat rotatedFormat{};
       TArray<ESmithFormatType> srcData{};
+
+      using enum EDirection;
       switch (direction)
       {
-        case EDirection::East:
+        case East:
         {
           for (int x = 0; x < srcFormatColumn; ++x)
           {
@@ -97,7 +99,7 @@ namespace UE::Smith
           rotatedFormatColumn = srcFormatRow;
         }
         break;
-        case EDirection::South:
+        case South:
         {
           for (int y = srcFormatRow - 1; y >= 0; --y)
           {
@@ -110,7 +112,7 @@ namespace UE::Smith
           rotatedFormatColumn = srcFormatColumn;
         }
         break;
-        case EDirection::West:
+        case West:
         {
           for (int x = srcFormatColumn - 1; x >=0; --x)
           {
