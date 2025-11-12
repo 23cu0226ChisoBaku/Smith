@@ -284,7 +284,6 @@ public:
   TMulticastDelegate<void()> OnDead;
   TMulticastDelegate<void(int32)> OnHerbValueChanged;
   TMulticastDelegate<void(int32, int32)> OnHealthChanged;
-  
   TMulticastDelegate<void()> OnEnhanceMenuOpened;
   TMulticastDelegate<void()> OnEnhanceMenuClosed;
   TMulticastDelegate<void(float)> OnMenuItemChangeFocus;
